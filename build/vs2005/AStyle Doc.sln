@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BBC5B7F9-497E-45CC-B05D-7DDB25DEEA55}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		..\..\doc\astyle.html = ..\..\doc\astyle.html
+		..\..\doc\index.html = ..\..\doc\index.html
+		..\..\doc\install.html = ..\..\doc\install.html
+		..\..\doc\license.html = ..\..\doc\license.html
+		..\..\doc\links.html = ..\..\doc\links.html
+		..\..\doc\news.html = ..\..\doc\news.html
+		..\..\doc\notes.html = ..\..\doc\notes.html
+		..\..\doc\scripts.html = ..\..\doc\scripts.html
+		..\..\doc\styles.css = ..\..\doc\styles.css
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
