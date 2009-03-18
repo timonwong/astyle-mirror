@@ -77,6 +77,8 @@ ofstream *traceOutF;
 
 namespace astyle
 {
+// static member variables
+int ASFormatter::formatterFileType = 9;		// initialized with an invalid type
 vector<const string*> ASFormatter::headers;
 vector<const string*> ASFormatter::nonParenHeaders;
 vector<const string*> ASFormatter::preDefinitionHeaders;
@@ -136,9 +138,32 @@ ASFormatter::ASFormatter()
  */
 ASFormatter::~ASFormatter()
 {
+	// delete ASFormatter stack vectors
 	deleteContainer(preBracketHeaderStack);
 	deleteContainer(parenStack);
 	deleteContainer(bracketTypeStack);
+
+	// delete static member vectors using swap to eliminate memory leak reporting
+	// delete ASFormatter static member vectors
+	formatterFileType = 9;		// reset to an invalid type
+	vector<const string*> headersClear;
+	headers.swap(headersClear);
+	vector<const string*> nonParenHeadersClear;
+	nonParenHeaders.swap(nonParenHeadersClear);
+	vector<const string*> preDefinitionHeadersClear;
+	preDefinitionHeaders.swap(preDefinitionHeadersClear);
+	vector<const string*> preCommandHeadersClear;
+	preCommandHeaders.swap(preCommandHeadersClear);
+	vector<const string*> operatorsClear;
+	operators.swap(operatorsClear);
+	vector<const string*> assignmentOperatorsClear;
+	assignmentOperators.swap(assignmentOperatorsClear);
+	vector<const string*> castOperatorsClear;
+	castOperators.swap(castOperatorsClear);
+
+	// delete ASBeautifier static member vectors
+	// must be done when the ASFormatter object is deleted (not ASBeautifier)
+	ASBeautifier::deleteStaticVectors();
 
 	delete enhancer;
 
@@ -153,8 +178,6 @@ ASFormatter::~ASFormatter()
  */
 void ASFormatter::buildLanguageVectors()
 {
-	static int formatterFileType = 9;        // initialized with an invalid type
-
 	if (getFileType() == formatterFileType)  // don't build unless necessary
 		return;
 
@@ -162,10 +185,10 @@ void ASFormatter::buildLanguageVectors()
 
 	headers.clear();
 	nonParenHeaders.clear();
-	assignmentOperators.clear();
-	operators.clear();
 	preDefinitionHeaders.clear();
 	preCommandHeaders.clear();
+	operators.clear();
+	assignmentOperators.clear();
 	castOperators.clear();
 
 	ASResource::buildHeaders(headers, getFileType());

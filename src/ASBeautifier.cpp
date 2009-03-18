@@ -32,6 +32,8 @@
 
 namespace astyle
 {
+// static member variables
+int ASBeautifier::beautifierFileType = 9;		// initialized with an invalid type
 vector<const string*> ASBeautifier::headers;
 vector<const string*> ASBeautifier::nonParenHeaders;
 vector<const string*> ASBeautifier::preBlockStatements;
@@ -45,8 +47,6 @@ vector<const string*> ASBeautifier::indentableHeaders;
  */
 void ASBeautifier::initStatic()
 {
-	static int beautifierFileType = 9;     // initialized with an invalid type
-
 	if (fileType == beautifierFileType)    // don't build unless necessary
 		return;
 
@@ -57,6 +57,7 @@ void ASBeautifier::initStatic()
 	assignmentOperators.clear();
 	nonAssignmentOperators.clear();
 	preBlockStatements.clear();
+	indentableHeaders.clear();
 
 	ASResource::buildHeaders(headers, fileType, true);
 	ASResource::buildNonParenHeaders(nonParenHeaders, fileType, true);
@@ -1951,13 +1952,15 @@ const string* ASBeautifier::findHeader(const string &line, int i,
 	for (size_t p = 0; p < maxHeaders; p++)
 	{
 		const string* header = possibleHeaders[p];
+		const size_t wordEnd = i + header->length();		
+		if (wordEnd > line.length())
+			continue;		
 		int result = (line.compare(i, header->length(), *header));
 		if (result > 0)
 			continue;
 		if (result < 0)
 			break;
 		// check that this is not part of a longer word
-		const size_t wordEnd = i + header->length();
 		if (wordEnd == line.length())
 			return header;
 		if (isLegalNameChar(line[wordEnd]))
@@ -1982,8 +1985,13 @@ const string* ASBeautifier::findOperator(const string &line, int i,
 	// must loop thru the entire vector
 	size_t maxOperators = possibleOperators.size();
 	for (size_t p = 0; p < maxOperators; p++)
+	{
+		const size_t wordEnd = i + (*possibleOperators[p]).length();
+		if (wordEnd > line.length())
+			continue;
 		if (line.compare(i, (*possibleOperators[p]).length(), *possibleOperators[p]) == 0)
 			return possibleOperators[p];
+	}
 	return NULL;
 }
 
@@ -2045,6 +2053,27 @@ char ASBeautifier::peekNextChar(const string &line, int i) const
 	ch = line[peekNum];
 
 	return ch;
+}
+
+/**
+ * delete a static member vector object using swap
+ * to eliminate memory leak reporting for the vector
+ */
+void ASBeautifier::deleteStaticVectors()
+{
+	beautifierFileType = 9;		// reset to an invalid type
+	vector<const string*> headersClear;
+	headers.swap(headersClear);
+	vector<const string*> nonParenHeadersClear;
+	nonParenHeaders.swap(nonParenHeadersClear);
+	vector<const string*> preBlockStatementsClear;
+	preBlockStatements.swap(preBlockStatementsClear);
+	vector<const string*> assignmentOperatorsClear;
+	assignmentOperators.swap(assignmentOperatorsClear);
+	vector<const string*> nonAssignmentOperatorsClear;
+	nonAssignmentOperators.swap(nonAssignmentOperatorsClear);
+	vector<const string*> indentableHeadersClear;
+	indentableHeaders.swap(indentableHeadersClear);
 }
 
 /**

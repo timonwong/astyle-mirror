@@ -263,6 +263,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getEmptyLineFill(void);
 
 	protected:
+		void deleteStaticVectors();
 		const string* findHeader(const string &line, int i,
 		                         const vector<const string*> &possibleHeaders) const;
 		const string* findOperator(const string &line, int i,
@@ -277,7 +278,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isNonInStatementArray;
 		bool isSharpAccessor;
 
-	private:  // functions
+	private:
 		ASBeautifier(const ASBeautifier &copy);
 		void operator=(ASBeautifier&); // not to be implemented
 
@@ -286,6 +287,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		                               int minIndent, bool updateParenStack);
 		string preLineWS(int spaceTabCount, int tabCount);
 
+		static int beautifierFileType;
 		static vector<const string*> headers;
 		static vector<const string*> nonParenHeaders;
 		static vector<const string*> preBlockStatements;
@@ -483,6 +485,7 @@ class ASFormatter : public ASBeautifier
 		string peekNextText(const string& firstLine, bool endOnEmptyLine=false) const;
 
 	private:  // variables
+		static int formatterFileType;
 		static vector<const string*> headers;
 		static vector<const string*> nonParenHeaders;
 		static vector<const string*> preDefinitionHeaders;
