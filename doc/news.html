@@ -15,11 +15,18 @@
 
 <body>
     <h1>Artistic Style News</h1>
+     
+     <p>&nbsp;</p>
+        
+    
+    <h3>Artistic Style 1.24&nbsp; (pending)</h3>
+
+    <p></p>
 
     <p>&nbsp;</p>
     
     <h3>Artistic Style 1.23&nbsp; (February 2009)</h3>
-    <p class="indent">
+    <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to
         Artistic Style. You may want to format your source before making program changes in order to bring it
         up to date.</p>
@@ -225,14 +232,14 @@
     
     <h3>Artistic Style 1.22&nbsp; (April 2008)</h3>
 
-    <p class="indent">This release contains many bug fixes. The emphasis was on formatting fixes for C# files. In the last 
+    <p>This release contains many bug fixes. The emphasis was on formatting fixes for C# files. In the last 
         two releases there have been over 80 items removed from the bug report. There have been many more 
         fixes which were not reported but were discovered while testing. The new options in this release 
         exposed many unreported formatting problems. I will try to fix the ones remaining in the next two or 
         three releases. Some of them will be difficult to fix. See the <a href="notes.html#_1.22">Release 
         Notes</a> for a complete list of changes.</p>
 
-    <p class="indent">Starting with this release, if a file is <b>not</b> changed by Artistic Style a new file and
+    <p>Starting with this release, if a file is <b>not</b> changed by Artistic Style a new file and
     a backup file are not created. A "make" will not recompile the unchanged file and it will not
     be committed to a revision control system. A console message will indicate that the file is
     unchanged. Note that this is different from using the &#8209;&#8209;preserve&#8209;date option.
@@ -240,12 +247,12 @@
     will still be recompiled and committed to revision control. (&#8209;&#8209;preserve&#8209;date
     actually changes the time by one unit).</p>
 
-    <p class="indent">In the rare case when Artistic Style aborts, the file being formatted will no longer be
+    <p>In the rare case when Artistic Style aborts, the file being formatted will no longer be
     deleted. This is done by using a temporary output file (.tmp). It should now be safe to
     manually abort Artistic Style and restart at any time. The backup of files that were previously
     formatted will not be replaced.</p>
 
-    <p class="indent">The console display has been changed. The default now displays one line per file. This will
+    <p>The console display has been changed. The default now displays one line per file. This will
     be useful if only one file is being formatted, such as when Artistic Style is called from a
     text editor or development environment. A new &#8209;&#8209;verbose (&#8209;v) option will display
     optional information, such as release number and statistical data. A new &#8209;&#8209;quiet
@@ -253,7 +260,7 @@
     &#8209;&#8209;version is now -V (old -v) and for &#8209;&#8209;convert&#8209;tabs is &#8209;c (old
     &#8209;V).</p>
 
-    <p class="indent">A new &#8209;&#8209;recursive (-r, or -R) option will process subdirectories recursively.
+    <p>A new &#8209;&#8209;recursive (-r, or -R) option will process subdirectories recursively.
     The filename should contain a wildcard (e.g. "$HOME/astyle/src/*.cpp"). Linux users should
     place the filename in double quotes so the shell will not resolve the wildcards. Windows users
     should <strong>not</strong> include wildcard object files, like setargv (Visual C) or wildargs
@@ -261,23 +268,23 @@
     "int&nbsp;_CRT_glob&nbsp;=&nbsp;0" as a global variable. (It could also be excluded by linking
     to CRT_noglob.o). Artistic Style now does the wildcard processing internally.</p>
 
-    <p class="indent">When processing directories recursively it is sometimes necessary to exclude certain files
+    <p>When processing directories recursively it is sometimes necessary to exclude certain files
     or directories. This can be done using a new exclude
     (&#8209;&#8209;exclude=file&#8209;or&#8209;directory) option. There is no short option.
     Multiple exclude statements are allowed. The <a href="astyle.html#_Other_Options">Other
     Options</a> section of the documentation contains the details.</p>
 
-    <p class="indent">It is always a good idea to create a backup for files that have been formatted. This can cause a problem
+    <p>It is always a good idea to create a backup for files that have been formatted. This can cause a problem
         in that it creates a lot of excess files in your source directories. There are now new script
     files available that will move the files to a backup directory. The original directory
     structure will be maintained the in the backup. There is a batch file for Windows and a shell
     script for everyone else. They are available in the <a href="scripts.html">Scripts</a>
     section of the home page.</p>
 
-    <p class="indent">There is a new <a href="links.html">Links</a> page that lists programs using Artistic Style.
+    <p>There is a new <a href="links.html">Links</a> page that lists programs using Artistic Style.
     In general, they seem to be good quality software.</p>
 
-    <p class="indent">If you are using a development environment to compile Artistic Style, be sure to read the
+    <p>If you are using a development environment to compile Artistic Style, be sure to read the
     <a href="install.html#_Compiler_Options">Compiler Options</a> section in the Install
     Information. In particular, you should define NDEBUG in the Release compile to remove the
     assert statements. There are quite a few of these and they will slow down processing if NDEBUG
@@ -285,13 +292,13 @@
     reporting bugs it is a good idea to log in first. Occasionally, more information is needed on a
     problem. If the poster did not log in there is no way to contact them.</p>
 
-    <p class="indent">A Java Native Interface has been added for Java developers. This will allow an Artistic
+    <p>A Java Native Interface has been added for Java developers. This will allow an Artistic
     Style shared
         library (DLL) to be called from a Java program. A shared library (Dll) using the
     Java interface can still be called from C, C++, or C# programs. There is a sample program in
     the <a href="http://astyle.sourceforge.net/develop/">Developer Information</a>.</p>
 
-    <p class="indent"><strong>Developers using Artistic Style in another project</strong> should be aware that
+    <p><strong>Developers using Artistic Style in another project</strong> should be aware that
     there are two new functions that have been added to the ASStreamIterator class (peekNextLine()
     and peekReset()). These will have to be coded into source modules which use Artistic Style
     without astyle_main. In most cases the functions can simply be copied without the template
@@ -299,25 +306,25 @@
     to the class and another may need to be modified. If the shared or static library configuration is being used
     then no changes are necessary.</p>
 
-    <p class="indent">The file globing function was obtained from
+    <p>The file globing function was obtained from
     <a href="http://www.codeproject.com/string/wildcmp.asp"
        target="astyle"
        title="open new window">The Code Project</a> and was written by Jack Handy. It was modified
        slightly to make the comparisons case insensitive for Windows.</p>
 
-    <p class="indent">The OpenVMS distribution is prepared by Jim Duff, an OpenVMS Systems Specialist living in
+    <p>The OpenVMS distribution is prepared by Jim Duff, an OpenVMS Systems Specialist living in
     Sydney, Australia. His website is <a href="http://www.eight-cubed.com/index.html"
        target="astyle"
        title="open new window">eight&#8209;cubed.com</a>.</p>
 
-    <p class="indent">Thanks to Emilio Guijarro and Jens Krinke for their contributions, and to Sam Cooler for
+    <p>Thanks to Emilio Guijarro and Jens Krinke for their contributions, and to Sam Cooler for
     testing the Mac OS X version.</p>
 
     <p>&nbsp;</p>
 
     <h3>Artistic Style 1.21&nbsp; (June 2007)</h3>
 
-    <p class="indent">This release contains many bug fixes. Array formatting and indentation has been improved.
+    <p>This release contains many bug fixes. Array formatting and indentation has been improved.
     Arrays and enums are now formatted by a different procedure than functions. Brackets will now
     attach to lines with comments. Brackets will be broken from lines with comments without
     bringing the comments with them. All comments will remain in their original column, if
@@ -325,11 +332,11 @@
     the bracket types are now correctly identified. There are several formatting fixes for Java
     files. See the <a href="notes.html#_1.21">Release Notes</a> for a complete list of changes.</p>
 
-    <p class="indent">A new option, --preserve-date (-Z), has been added. This will retain the date modified of
+    <p>A new option, --preserve-date (-Z), has been added. This will retain the date modified of
     the original file in the new formatted file. Otherwise the new file will contain the current
     date.</p>
 
-    <p class="indent">The option --errors-to-standard-output has been shortened to --errors-to-stdout. The
+    <p>The option --errors-to-standard-output has been shortened to --errors-to-stdout. The
     <b>short</b> options -c (mode=c) and -j (mode=java) have been removed. The options should
     seldom be needed since the mode is now set automatically from the file extension for <b>each
     source file</b> instead of for each program execution. A new long option --mode=cs (C#) has
@@ -337,30 +344,30 @@
     This will eliminate formatting problems caused by not being able to identify the source code
     language.</p>
 
-    <p class="indent">There has been a change to the Linux style bracket formatting for C++ header files. In the
+    <p>There has been a change to the Linux style bracket formatting for C++ header files. In the
     past brackets have been broken for function definitions within a class. With this release the
     brackets will be attached. The brackets will also be attached for arrays, structs, enums, and
     other top level objects that are not classes or functions. The Linux style formatting for Java
     and C# has not been changed.</p>
 
-    <p class="indent">This release supports only one platform in each distribution package. In the past all
+    <p>This release supports only one platform in each distribution package. In the past all
     platforms were included in every package. If you use Artistic Style on more than one platform
     you will need to download packages for each platform. The main difference in platforms is the
     build directory and the line endings. The source code and documentation are the same for all
     packages.</p>
 
-    <p class="indent">There are new instructions about optimizing compiler options in the
+    <p>There are new instructions about optimizing compiler options in the
     <a href="install.html">Install Instructions</a>. If you are compiling using a development
     environment you may want to read them.</p>
 
-    <p class="indent">If you have broken brackets with comments attached to the opening bracket instead of the
+    <p>If you have broken brackets with comments attached to the opening bracket instead of the
     previous line, do the following <b>before formatting</b> again with broken brackets. Use the
     current Artistic Style release (1.21). Format the source using attached brackets to reattach
     the brackets and the comments to the previous line. Then format the source again using broken
     brackets. This will move the brackets to the next line without the comments. The comments will
     now be on the correct line.</p>
 
-    <p class="indent">There is a new multi-platform GUI program, <b>UniversalIndent</b>, available at
+    <p>There is a new multi-platform GUI program, <b>UniversalIndent</b>, available at
     <a href="http://sourceforge.net/projects/universalindent">sourceforge.net/projects/universalindent</a>.
     It allows you to view the effects of the Artistic Style options on your source code without
     saving the file. You can review the results of the formatting options before updating the file.
@@ -369,54 +376,54 @@
     the current release. It is available at
     <a href="http://www.geocities.com/jpattee/">www.geocities.com/jpattee/</a></p>
 
-    <p class="indent">There have been a few inquiries about how to customize Artistic Style for an unsupported
+    <p>There have been a few inquiries about how to customize Artistic Style for an unsupported
     format. Changes can be made with Python or another text processing program after formatting the
     source, or you can modify the Artistic Style source code itself. The best place to modify the
     code is usually in ASEnhancer.cpp. The ASEnhancer class is called after the main formatting has
     been done so you are getting a formatted file. If you just need to change the indentation of a
     few things this is probably the best place to do it.</p>
 
-    <p class="indent">There is now a distribution package for OpenVMS thanks to Jim Duff, an OpenVMS Systems
+    <p>There is now a distribution package for OpenVMS thanks to Jim Duff, an OpenVMS Systems
     Specialist living in Sydney Australia. His website is at <a
        href="http://www.eight-cubed.com/index.html">eight-cubed.com</a>.</p>
 
-    <p class="indent">Thanks to Norbert Holzki and Siemens AG, Medical Solutions, Forchheim, Germany for testing
+    <p>Thanks to Norbert Holzki and Siemens AG, Medical Solutions, Forchheim, Germany for testing
     the array formatting.</p>
 
-    <p class="indent">Thanks to Sam Cooler for testing the Mac OS X version.</p>
+    <p>Thanks to Sam Cooler for testing the Mac OS X version.</p>
 
     <p>&nbsp;</p>
 
     <h3>Artistic Style 1.20&nbsp; (January 2007)</h3>
 
-    <p class="indent">Release 1.20.2 fixed problems with the new stream I/O procedure added in release 1.20.1.
+    <p>Release 1.20.2 fixed problems with the new stream I/O procedure added in release 1.20.1.
     Release 1.20.1 improved the processing for Mac OS X platforms. The compatibility with
     <a href="http://www.barebones.com/products/textwrangler/"
        target="_blank"
        title="open new window">TextWrangler</a> was improved. There is now a separate release for
        Mac.</p>
 
-    <p class="indent">Artistic Style will now indent message maps for Microsoft Foundation Class (MFC) and event
+    <p>Artistic Style will now indent message maps for Microsoft Foundation Class (MFC) and event
     tables for wxWidgets. The option --brackets=break-closing-headers has been shortened to
     --brackets=break-closing and a short option added (-y). There have been short options added for
     --break-elseifs (-e), --indent-preprocessor (-w), --break-blocks (-f), and --break-blocks=all
     (-F).</p>
 
-    <p class="indent">With this release the Artistic Style license changes from the GNU General Public License
+    <p>With this release the Artistic Style license changes from the GNU General Public License
     (GPL) to the GNU <em>Lesser</em> General Public License (LGPL). You can use Artistic Style for
     free or commercial software without charge. Projects that use Artistic Style do not have to
     make the their source code available. If Artistic Style itself is modified, however, the
     modified Artistic Style source code must be made available. See the <a href="license.html">GNU
     Lesser General Public License</a> for more information.</p>
 
-    <p class="indent">There is a new preprocessor option to aid developers in using Artistic Style with a
+    <p>There is a new preprocessor option to aid developers in using Artistic Style with a
     Graphical User Interface (GUI). It is no longer necessary to remove the source module
     astyle_main.cpp and write embedded code to call the formatter. It can be compiled as a static
     library or a shared library (DLL), or the entire source code can be included in the project.
     See the <a href="develop/">Artistic Style Developer Information</a> for the calling
     procedure and other details.</p>
 
-    <p class="indent">There is a sample GUI program for Windows available at
+    <p>There is a sample GUI program for Windows available at
     <a href="http://www.geocities.com/jpattee/"
        target="_blank"
        title="open new window">http://www.geocities.com/jpattee/</a>. It uses the unmodified
@@ -424,13 +431,13 @@
        for now. It should work under Linux using WINE. Future enhancements and platform support
        will depend on the response to the sample program.</p>
 
-    <p class="indent">To support the new Artistic Style preprocessor option there are new makefiles and project
+    <p>To support the new Artistic Style preprocessor option there are new makefiles and project
     files. Windows users have a project file for Microsoft Visual C++ 2003 (version 7). Linux users
     have a new makefile that has several new options. The location of both files is in the build
     directory. Be sure to read the <a href="install.html">Artistic Style Install Information</a>
     for the details.</p>
 
-    <p class="indent">Intel&reg; is now offering it's C++ and Fortran compilers free for non-commercial use.
+    <p>Intel&reg; is now offering it's C++ and Fortran compilers free for non-commercial use.
     Information is available at the
     <a href="http://www3.intel.com/cd/software/products/asmo-na/eng/"
        target="_blank"
@@ -444,27 +451,27 @@
        want to use this compiler there is now a makefile (makeintel) included with the project. See
        <a href="install.html">Artistic Style Install Information</a> for instructions.</p>
 
-    <p class="indent">&nbsp;</p>
+    <p>&nbsp;</p>
 
     <h3>Artistic Style 1.19&nbsp; (July 2006)</h3>
 
-    <p class="indent">Most changes this release were again concerned with the options pad=oper and pad=paren. The
+    <p>Most changes this release were again concerned with the options pad=oper and pad=paren. The
     formatting still worked a little different if both options were declared than if only one was
     used. The problems with distinguishing the multiplication operator from pointers, and of
     separating an object from the member access pointer (-&gt;) were fixed.</p>
 
-    <p class="indent">A new option, unpad=paren, was added. This will undo the pad=paren, pad=paren-out and
+    <p>A new option, unpad=paren, was added. This will undo the pad=paren, pad=paren-out and
     pad=paren-in options. It can be used alone or with pad=paren-out or pad=paren-in. If used alone
     it will unpad all parens that have been previously padded. If used with a paren padding option,
     the paren padding option will take precedence and only the unnecessary padding will be removed.
     This will enable the paren padding to be changed in one formatting run.</p>
 
-    <p class="indent">Padding to paren headers (e.g. "if", "for", "while") was reinstated. This was done in
+    <p>Padding to paren headers (e.g. "if", "for", "while") was reinstated. This was done in
     previous releases if pad=oper was used. Since most people used this option, the headers were
     usually padded. The general opinion was that they looked better padded, especially in the case
     of "else if" statements. Since it is a minor point, it was not made an option.</p>
 
-    <p class="indent">This is the third release of Artistic Style in the last four months. The reason for the
+    <p>This is the third release of Artistic Style in the last four months. The reason for the
     frequent releases was the number of pervasive errors in the formatting. In the future there
     will probably be two or three new releases per year, or one every four to six months. It will
     take about three years to make all the changes that are planned at this time.; The releases
@@ -473,7 +480,8 @@
     <p>&nbsp;</p>
 
     <center style="margin-left:-0.4in;">
-    <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&amp;type=2" alt="SourceForge.net Logo" /></a>
+    <a href="http://sourceforge.net/projects/astyle"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&type=16" 
+    width="150" height="40" alt="[SourceForge.net Logo]" /></a>
     </center>
 
     <p>&nbsp;</p>

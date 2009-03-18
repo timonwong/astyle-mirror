@@ -166,7 +166,8 @@
         assembler since it can vary in syntax depending on the platform.</p>
     
         <p>Embedded statements that are multiple-line and are NOT in a C type format, such as SQL or Python, are
-            usually mal-formatted. (A C type format has statements that are terminated with a semi-colon).
+            usually mal-formatted. (a C type format has blocks enclosed
+            by brackets and statements terminated by a semi-colon).
         If you have source code with these types of statements, exclude them with the <code>--exclude=</code> 
         statement described in the "Other Options" section.</p>
     
@@ -289,8 +290,7 @@
     <p>Example of a default options file:</p>
 
             <div class="code">
-                <pre>
-<span class="comment"># this line is a comment</span>
+                <pre><span class="comment"># this line is a comment</span>
 --brackets=attach   <span class="comment"># this is a line-end comment</span>
 
 <span class="comment"># long options can be written without the preceding '--'</span>
@@ -1328,12 +1328,13 @@ else
             <col width="40%" />
             <col width="30%" />
             <tr>
-                <td align="left"><a href="http://www.gnu.org/copyleft/lesser.html"><img src="http://www.gnu.org/graphics/lgplv3-88x31.png" alt="[Small LGPLv3 logo]" /></a>
-                    <a href="http://www.gnu.org/licenses/gpl.html"><img src="http://www.gnu.org/graphics/gplv3-88x31.png" alt="[Small GPLv3 logo]" /></a></td>
+                <td align="left"><a href="http://www.gnu.org/copyleft/lesser.html"><img src="http://www.gnu.org/graphics/lgplv3-88x31.png" alt="[LGPLv3 logo]" /></a>
+                    <a href="http://www.gnu.org/licenses/gpl.html"><img src="http://www.gnu.org/graphics/gplv3-88x31.png" alt="[GPLv3 logo]" /></a></td>
 
                 <td align="center"><h2 class="footer">ENJOY !!!</h2></td>
                 
-                <td align="right"><a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&amp;type=4" alt="[SourceForge.net Logo]" /></a></td>
+                <td align="right"><a href="http://sourceforge.net/projects/astyle"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&type=11" 
+                width="120" height="30" alt="[SourceForge.net Logo]" /></a></td>
             </tr>
         </table>
     </center>

@@ -214,14 +214,14 @@
 
     <p>To build Artistic Style on an OpenVMS system, you will need Hewlett-Packard's C++ compiler
     installed. To build the code, use the OpenVMS specific build file located in the
-    astyle/buildvms directory. The executables will be in the astyle/bin directory. To build the
+    astyle/build/vms directory. The executables will be in the astyle/bin directory. To build the
     standalone executable, enter the following:</p>
-    <pre> set def [.astyle.buildvms]<br /> @vmsbuild
+    <pre> set def [.astyle.build.vms]<br /> @vmsbuild
 </pre>
 
     <p>To run Artistic Style, you should move the standalone executable to an appropriate
     directory, and create a foreign symbol for it. For example:</p>
-    <pre> create/dir my_disk:[astyle.exe]<br /> set def [-.bin]<br /> copy astyle_main.exe my_disk:[astyle.exe]<br /> ast*yle :== $my_disk:[astyle.exe]astyle_main.exe
+    <pre> create/dir my_disk:[astyle.exe]<br /> set def [--.bin]<br /> copy astyle_main.exe my_disk:[astyle.exe]<br /> ast*yle :== $my_disk:[astyle.exe]astyle_main.exe
 </pre>
 
     <p>The build command procedure also includes a method to build a sharable image version of the
@@ -252,8 +252,8 @@
 
     <h4 id="_Visual_C++_Compiler">Visual C++ Compiler</h4>
 
-    <p>There is a project file for 3 versions of the Visual C compiler; buildvc7 (Visual Studio
-    2003), buildvc8 (Visual Studio 2005), and buildvc9 (Visual Studio 2008). Open the AStyle project
+    <p>There is a project file for 3 versions of the Visual C compiler; buildvs2003 (Visual Studio
+    2003), buildvs2005 (Visual Studio 2005), and buildvs2008 (Visual Studio 2008). Open the AStyle project
     file in the appropriate AStyle/build directory. Select the Release configuration to compile
     the command line version. All output files will be in the AStyle/bin directory. The project has
     the following configurations.</p>
@@ -265,8 +265,8 @@
         (AStyle.dll). This will also produce the exports library and the static library for linking
         the dll.</li>
 
-        <li><b>Release Lib</b> builds the Artistic Style program as a Static Library
-        (libAStyle.lib).</li>
+        <li><b>Release Lib</b> builds the Artistic Style program as a Static Library (AStyleLib.lib).
+        </li>
 
         <li><b>Debug</b> builds the Artistic Style command line program with debugging information
         (AStyled.exe).</li>
@@ -277,7 +277,7 @@
 
         <li>
             <b>Debug Lib</b> builds the Artistic Style program as a Static Library with debugging
-            information (libAStyled.lib). 
+            information (AStyleLibd.lib).
 
             <p>The following Java shared library builds include the Java Native Interface (JNI) and
             require that the Java Development Kit (JDK) be installed. The Project Properties must
@@ -324,7 +324,8 @@
     <p>&nbsp;</p>
 
     <center style="margin-left:-0.4in;">
-    <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&amp;type=2" alt="SourceForge.net Logo" /></a>
+    <a href="http://sourceforge.net/projects/astyle"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&type=16" 
+    width="150" height="40" alt="[SourceForge.net Logo]" /></a>
     </center>
 
     <p>&nbsp;</p>
