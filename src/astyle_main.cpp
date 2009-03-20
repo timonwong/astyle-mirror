@@ -51,6 +51,9 @@
 #endif /* __VMS */
 #endif
 
+// turn off MinGW automatic file globbing
+// this CANNOT be in the astyle namespace
+int _CRT_glob = 0;               
 
 namespace astyle
 {
@@ -75,7 +78,6 @@ stringstream* _err = NULL;
 bool g_modeManuallySet = false;
 #else
 // console build variables
-int _CRT_glob = 0;               // turn off MinGW automatic file globbing
 ostream* _err = &cerr;           // direct error messages to cerr
 bool g_modeManuallySet = false;  // file mode is set by an option
 ASConsole g_console;             // class to encapsulate console variables
@@ -88,7 +90,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* _version = "1.23";
+const char* _version = "1.24 beta";
 
 
 /**
