@@ -53,7 +53,7 @@
 
 // turn off MinGW automatic file globbing
 // this CANNOT be in the astyle namespace
-int _CRT_glob = 0;               
+int _CRT_glob = 0;
 
 namespace astyle
 {

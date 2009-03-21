@@ -506,7 +506,7 @@ bool ASBase::findKeyword(const string &line, int i, const string &keyword) const
 	const size_t keywordLength = keyword.length();
 	const size_t wordEnd = i + keywordLength;
 	if (wordEnd > line.length())
-		return false;		
+		return false;
 	if (line.compare(i, keywordLength, keyword) != 0)
 		return false;
 	// check that this is not part of a longer word

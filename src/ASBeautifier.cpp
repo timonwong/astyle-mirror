@@ -1952,9 +1952,9 @@ const string* ASBeautifier::findHeader(const string &line, int i,
 	for (size_t p = 0; p < maxHeaders; p++)
 	{
 		const string* header = possibleHeaders[p];
-		const size_t wordEnd = i + header->length();		
+		const size_t wordEnd = i + header->length();
 		if (wordEnd > line.length())
-			continue;		
+			continue;
 		int result = (line.compare(i, header->length(), *header));
 		if (result > 0)
 			continue;
