@@ -1824,9 +1824,6 @@ string ASBeautifier::beautify(const string &originalLine)
 
 	// finally, insert indentations into begining of line
 
-	prevFinalLineSpaceTabCount = spaceTabCount;
-	prevFinalLineTabCount = tabCount;
-
 	if (shouldForceTabIndentation)
 	{
 		tabCount += spaceTabCount / indentLength;
@@ -1834,6 +1831,9 @@ string ASBeautifier::beautify(const string &originalLine)
 	}
 
 	outBuffer = preLineWS(spaceTabCount, tabCount) + outBuffer;
+
+	prevFinalLineSpaceTabCount = spaceTabCount;
+	prevFinalLineTabCount = tabCount;
 
 	if (lastLineHeader != NULL)
 		previousLastLineHeader = lastLineHeader;
