@@ -801,26 +801,24 @@ class Foo
         <div class="code">
             <pre>void Foo() <span class="brace">{</span>
     while (isFoo) <span class="brace">{</span>
-        ...
         if (isFoo)
             goto error;
-<span class="brace">    }</span>
-
+        ...
 error:
         ...
+<span class="brace">    }</span>
 <span class="brace">}</span>
 </pre>
 
             <p class="code">becomes (with indented 'error'):</p>
             <pre>void Foo() <span class="brace">{</span>
     while (isFoo) <span class="brace">{</span>
-        ...
         if (isFoo)
             goto error;
-<span class="brace">    }</span>
- 
+        ... 
     error:
         ...
+<span class="brace">    }</span>        
 <span class="brace">}</span>
 </pre>
         </div>
@@ -830,7 +828,8 @@ error:
         <p id="_indent-preprocessor"><code class="title">--indent-preprocessor / -w</code><br />
          Indent multi-line preprocessor definitions ending with a backslash. Should be used with
         --convert-tabs for proper results. Does a pretty good job,
-        but can not perform miracles in obfuscated preprocessor definitions.</p>
+        but can not perform miracles in obfuscated preprocessor definitions. Without this option the preprocessor
+            statements remain unchanged.</p>
 
         <div class="code">
             <pre>#define Is_Bar(arg,a,b) \

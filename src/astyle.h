@@ -162,11 +162,12 @@ class ASResource
 class ASBase
 {
 	private:
-		int fileType;          // a value from enum FileType
+		// all variables should be set by the "init" function
+		int baseFileType;      // a value from enum FileType
 
 	protected:
-		ASBase() {};
-		~ASBase() {};
+		ASBase() { baseFileType = C_TYPE; }
+		~ASBase() {}
 
 		// functions definitions are at the end of ASResource.cpp
 		bool findKeyword(const string &line, int i, const string &keyword) const;
@@ -174,10 +175,10 @@ class ASBase
 
 	protected:
 
-		void init(int fileTypeArg) { fileType = fileTypeArg; }
-		bool isCStyle() const { return (fileType == C_TYPE); }
-		bool isJavaStyle() const { return (fileType == JAVA_TYPE); }
-		bool isSharpStyle() const { return (fileType == SHARP_TYPE); }
+		void init(int fileTypeArg) { baseFileType = fileTypeArg; }
+		bool isCStyle() const { return (baseFileType == C_TYPE); }
+		bool isJavaStyle() const { return (baseFileType == JAVA_TYPE); }
+		bool isSharpStyle() const { return (baseFileType == SHARP_TYPE); }
 
 		// check if a specific character can be used in a legal variable/method/class name
 		bool isLegalNameChar(char ch) const {
@@ -280,7 +281,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 
 	private:
 		ASBeautifier(const ASBeautifier &copy);
-		void operator=(ASBeautifier&); // not to be implemented
+		ASBeautifier& operator=(ASBeautifier&);        // not to be implemented
 
 		void initStatic();
 		void registerInStatementIndent(const string &line, int i, int spaceTabCount,
@@ -440,11 +441,10 @@ class ASFormatter : public ASBeautifier
 		void setBreakClosingHeaderBlocksMode(bool state);
 		void setBreakElseIfsMode(bool state);
 		void setDeleteEmptyLinesMode(bool state);
-		string traceFileName;
 
 	private:  // functions
 		void ASformatter(ASFormatter &copy);           // not to be imlpemented
-		void operator=(ASFormatter&);                  // not to be implemented
+		ASFormatter& operator=(ASFormatter&);          // not to be implemented
 		template<typename T> void deleteContainer(T &container);
 		template<typename T> void initContainer(T &container, T value);
 		void buildLanguageVectors();

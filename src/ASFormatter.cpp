@@ -30,50 +30,6 @@
 #include <fstream>
 #include <iostream>
 
-// can trace only if NDEBUG is not defined
-#ifndef NDEBUG
-// #define TRACEunpad
-// #define TRACEcomment
-// #define TRACEheader
-// #define TRACEbracket
-// #define TRACEarray
-#if defined(TRACEunpad) || defined(TRACEcomment) || defined(TRACEheader) \
-    || defined(TRACEbracket) || defined(TRACEarray)
-ofstream *traceOutF;
-#define TRACEF
-#endif
-#endif
-
-#ifdef TRACEunpad
-#define TRunpad(a,b,c)  if(b > 0 || c > 0) *traceOutF << traceLineNumber << " " << b << a << c << endl
-#else
-#define TRunpad(a,b,c)  ((void)0)
-#endif
-
-#ifdef TRACEcomment
-#define TRcomment(a)    *traceOutF << traceLineNumber << " " << a << endl
-#else
-#define TRcomment(a)    ((void)0)
-#endif
-
-#ifdef TRACEheader
-#define TRxtra(a)       *traceOutF << traceLineNumber << " " << a << endl
-#else
-#define TRxtra(a)    ((void)0)
-#endif
-
-#ifdef TRACEbracket
-#define TRbracket(a)       *traceOutF << traceLineNumber << " " << a << endl
-#else
-#define TRbracket(a)    ((void)0)
-#endif
-
-#ifdef TRACEarray
-#define TRarray(a)      *traceOutF << traceLineNumber << " " << a << endl
-#else
-#define TRarray(a)      ((void)0)
-#endif
-
 
 namespace astyle
 {
@@ -112,25 +68,6 @@ ASFormatter::ASFormatter()
 	shouldBreakClosingHeaderBrackets = false;
 	shouldDeleteEmptyLines = false;
 	shouldBreakElseIfs = false;
-#ifdef TRACEF
-	// create a trace text file
-	string traceFileName = "tracef.txt";
-	char* env = getenv("HOME");
-	if (env != NULL)
-		traceFileName = string(env) + string("/tracef.txt");
-	else
-	{
-		env = getenv("USERPROFILE");
-		if (env != NULL)
-			traceFileName = string(env) + string("\\My Documents\\tracef.txt");
-		else
-		{
-			cout << "\nCould not open tracef.txt\n" << endl;
-			exit(1);
-		}
-	}
-	traceOutF = new ofstream(traceFileName.c_str());
-#endif
 }
 
 /**
@@ -379,13 +316,6 @@ void ASFormatter::init(ASSourceIterator *si)
 	isInHeader = false;
 	isInCase = false;
 	isJavaStaticConstructor = false;
-#ifdef TRACEF
-	// traceFileName will be empty if ASTYLE_LIB is defined
-	if (traceFileName.empty())
-		*traceOutF << "new file" << endl;
-	else
-		*traceOutF << traceFileName << endl;
-#endif
 }
 
 /**
@@ -1816,7 +1746,8 @@ BracketType ASFormatter::getBracketType()
 	if (isOneLineBlockReached())
 		returnVal = (BracketType)(returnVal | SINGLE_LINE_TYPE);
 
-	TRbracket(returnVal);
+	// trace
+	//cout << traceLineNumber << " " << returnVal << endl;
 
 	return returnVal;
 }
@@ -2121,9 +2052,10 @@ void ASFormatter::adjustComments(void)
 		int adjust = -spacePadNum;          // make the number positive
 		if (formattedLine[len-1] != '\t')   // don't adjust if a tab
 			formattedLine.append(adjust, ' ');
-//      else                                // comment out to avoid compiler warning
-//          adjust = 0;
-//      TRcomment(adjust);                  // trace macro
+		// the following are commented out to avoid a Borland compiler warning
+		//else
+		//	adjust = 0;
+		//cout << traceLineNumber << " " << adjust << endl;	// trace
 	}
 	// if spaces were added, need to delete spaces before the comment, if possible
 	else if (spacePadNum > 0)
@@ -2135,7 +2067,7 @@ void ASFormatter::adjustComments(void)
 		// the following are commented out to avoid a Borland compiler warning
 		//else
 		//    adjust = 0;
-		TRcomment(-adjust);                 // trace macro
+		//cout << traceLineNumber << " " << -adjust << endl;	// trace
 	}
 }
 
@@ -2291,13 +2223,15 @@ void ASFormatter::padParens(void)
 				if (prevWordH != NULL)
 				{
 					prevIsParenHeader = true;
-					TRxtra(*prevWordH);         // trace macro
+					// trace
+					//cout << traceLineNumber << " " << *prevWordH << endl;
 				}
 				else if (prevWord == "return"   // don't unpad return statements
 				         || prevWord == "*")    // don't unpad multiply or pointer
 				{
 					prevIsParenHeader = true;
-					TRxtra(prevWord);           // trace macro
+					// trace
+					//cout << traceLineNumber << " " << prevWord << endl;
 				}
 				// don't unpad variables
 				else if (prevWord == "bool"
@@ -2316,7 +2250,8 @@ void ASFormatter::padParens(void)
 				        )
 				{
 					prevIsParenHeader = true;
-					TRxtra(prevWord);           // trace macro
+					// trace
+					//cout << traceLineNumber << " " << prevWord << endl;
 				}
 			}
 			// do not unpad operators, but leave them if already padded
@@ -2379,8 +2314,9 @@ void ASFormatter::padParens(void)
 		if (shouldPadParensInside)
 			if (!(currentChar == '(' && peekedCharInside == ')'))
 				appendSpaceAfter();
-
-		TRunpad('(', spacesOutsideToDelete, spacesInsideToDelete);       // trace macro
+		// trace
+		//if(spacesOutsideToDelete > 0 || spacesInsideToDelete > 0) 
+		//    cout << traceLineNumber << " " << spacesOutsideToDelete << '(' << spacesInsideToDelete << endl;
 	}
 	else if (currentChar == ')' /*|| currentChar == ']'*/)
 	{
@@ -2436,7 +2372,9 @@ void ASFormatter::padParens(void)
 			        && peekedCharOutside != '-')    // check for ->
 				appendSpaceAfter();
 
-		TRunpad(')', spacesInsideToDelete, 0 /*spacesOutsideToDelete*/);       // trace macro
+		// trace
+		//if(spacesInsideToDelete > 0)
+		//	cout << traceLineNumber << " " << spacesInsideToDelete << ')' << 0 << endl;
 	}
 	return;
 }
@@ -2720,10 +2658,11 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 		// Java "new Type [] {...}" IS an inStatement indent
 		if (isJavaStyle() && previousNonWSChar == ']')
 			isNonInStatementArray = false;
-		if (isNonInStatementArray)
-			TRarray('x');
-		else
-			TRarray(' ');
+		// trace
+		//if (isNonInStatementArray)
+		//	cout << traceLineNumber << " " << 'x' << endl;
+		//else
+		//	cout << traceLineNumber << " " << ' ' << endl
 
 	}
 	else if (currentChar == '}')

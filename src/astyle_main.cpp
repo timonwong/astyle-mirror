@@ -785,15 +785,6 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 			formatter.setCStyle();
 	}
 
-	// save the filename used by the trace macros
-	size_t fname = fileName.find_last_of(g_fileSeparator);
-	if (fname == string::npos)
-		fname = 0;
-	else
-		fname +=1;
-	// filename is used by the trace macros
-	formatter.traceFileName = fileName.substr(fname);
-
 	// format the file
 
 	ASStreamIterator<istream> streamIterator(&in);
