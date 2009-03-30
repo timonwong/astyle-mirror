@@ -24,7 +24,19 @@
     <p></p>
 
     <p>
-        Thanks to Ettl Martin (cppcheck) for his contribution.
+        With a new Artistic Style release some unchanged source files will be formatted
+        because of changes to Artistic Style. You may want to format your source before
+        making program changes in order to bring it up to date.</p>
+    <p>
+        There has been a change to the default formatting of paren headers (e.g. 'if', 
+        'for', 'while'...). They will now be left unchanged instead of inserting space 
+        padding after them. A new option, &#8209;&#8209;pad&#8209;header (-H), will insert the
+        space padding if requested. To remove any unwanted space padding, use the
+        option &#8209;&#8209;unpad&#8209;paren (-U). If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren
+        are used, the headers will be padded and padding will be removed from other parens.
+    </p>
+    <p>
+        Thanks to Mario Gleichmann (pad-header) and Ettl Martin (cppcheck) for their contributions.
     </p>
     
     <h3>Artistic Style 1.23&nbsp; (February 2009)</h3>

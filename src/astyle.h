@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2008 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -433,6 +433,7 @@ class ASFormatter : public ASBeautifier
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
+		void setParensHeaderPaddingMode(bool mode);
 		void setParensUnPaddingMode(bool state);
 		void setBreakOneLineBlocksMode(bool state);
 		void setSingleStatementsMode(bool state);
@@ -525,6 +526,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldPadOperators;
 		bool shouldPadParensOutside;
 		bool shouldPadParensInside;
+		bool shouldPadHeader;
 		bool shouldUnPadParens;
 		bool shouldConvertTabs;
 		bool isInLineComment;

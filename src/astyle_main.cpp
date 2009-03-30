@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2008 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -417,6 +417,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTIONS(arg, "D", "pad-paren-in") )
 	{
 		formatter.setParensInsidePaddingMode(true);
+	}
+	else if ( IS_OPTIONS(arg, "H", "pad-header") )
+	{
+		formatter.setParensHeaderPaddingMode(true);
 	}
 	else if ( IS_OPTIONS(arg, "U", "unpad-paren") )
 	{
@@ -1296,6 +1300,9 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --pad-paren-in  OR  -D\n";
 	(*_err) << "    Insert space padding around parenthesis on the inside only.\n";
+	(*_err) << endl;
+	(*_err) << "    --pad-header  OR  -H\n";
+	(*_err) << "    Insert space padding after paren headers (e.g. 'if', 'for'...).\n";
 	(*_err) << endl;
 	(*_err) << "    --unpad-paren  OR  -U\n";
 	(*_err) << "    Remove unnecessary space padding around parenthesis.  This\n";

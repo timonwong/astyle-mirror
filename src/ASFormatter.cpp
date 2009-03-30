@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2008 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -59,6 +59,7 @@ ASFormatter::ASFormatter()
 	shouldPadOperators = false;
 	shouldPadParensOutside = false;
 	shouldPadParensInside = false;
+	shouldPadHeader = false;
 	shouldUnPadParens = false;
 	shouldBreakOneLineBlocks = true;
 	shouldBreakOneLineStatements = true;
@@ -939,7 +940,8 @@ string ASFormatter::nextLine()
 				// if a paren-header is found add a space after it, if needed
 				// this checks currentLine, appendSpacePad() checks formattedLine
 				// in C# 'catch' can be either a paren or non-paren header
-				if ((!isNonParenHeader || (currentHeader == &AS_CATCH && peekNextChar() == '('))
+				if (shouldPadHeader
+				        && (!isNonParenHeader || (currentHeader == &AS_CATCH && peekNextChar() == '('))
 				        && charNum < (int) currentLine.length() && !isWhiteSpace(currentLine[charNum+1]))
 					appendSpacePad();
 
@@ -1319,6 +1321,18 @@ void ASFormatter::setParensOutsidePaddingMode(bool state)
 void ASFormatter::setParensInsidePaddingMode(bool state)
 {
 	shouldPadParensInside = state;
+}
+
+/**
+ * set header padding mode.
+ * options:
+ *    true     headers will be padded with spaces around them.
+ *    false    hraders will not be padded.
+ *
+ * @param state         the padding mode.
+ */void ASFormatter::setParensHeaderPaddingMode(bool state)
+{
+	shouldPadHeader = state;
 }
 
 /**
@@ -2218,7 +2232,9 @@ void ASFormatter::padParens(void)
 				// if previous word is a header, it will be a paren header
 				string prevWord = formattedLine.substr(start, end-start+1);
 				const string* prevWordH = NULL;
-				if (prevWord.length() > 0 && isCharPotentialHeader(prevWord, 0))
+				if (shouldPadHeader
+				        && prevWord.length() > 0
+				        && isCharPotentialHeader(prevWord, 0))
 					prevWordH = ASBeautifier::findHeader(formattedLine, start, headers);
 				if (prevWordH != NULL)
 				{
@@ -2315,7 +2331,7 @@ void ASFormatter::padParens(void)
 			if (!(currentChar == '(' && peekedCharInside == ')'))
 				appendSpaceAfter();
 		// trace
-		//if(spacesOutsideToDelete > 0 || spacesInsideToDelete > 0) 
+		//if(spacesOutsideToDelete > 0 || spacesInsideToDelete > 0)
 		//    cout << traceLineNumber << " " << spacesOutsideToDelete << '(' << spacesInsideToDelete << endl;
 	}
 	else if (currentChar == ')' /*|| currentChar == ']'*/)

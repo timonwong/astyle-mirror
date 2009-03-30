@@ -101,6 +101,7 @@
         <a class="contents" href="#_pad-paren">pad&#8209;paren</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-paren-out">pad&#8209;paren&#8209;out</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-paren-in">pad&#8209;paren&#8209;in</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_pad-header">pad&#8209;header</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_unpad-paren">unpad&#8209;paren</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
@@ -924,7 +925,7 @@ if (a &lt; b
     <h3 id="_Formatting_Options">Formatting Options</h3>
 
     <p id="_break-blocks"><code class="title">--break-blocks / -f</code><br />
-     Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>while</code>'...).</p>
+     Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).</p>
 
         <div class="code">
             <pre>isFoo = true;
@@ -952,7 +953,7 @@ isBar = false;
         <p>&nbsp;</p>
 
         <p id="_break-blocks=all"><code class="title">--break-blocks=all / -F</code><br />
-         Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>while</code>'...).
+         Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).
         Treat closing header blocks (e.g. '<code>else</code>', '<code>catch</code>') as stand-alone
         blocks.</p>
 
@@ -1150,13 +1151,30 @@ else
 
         <p>&nbsp;</p>
 
+        <p id="_pad-header"><code class="title">--pad-header / -H </code><br />
+         Insert space padding after paren headers only (e.g. '<code>if</code>', '<code>for</code>',
+            '<code>while</code>'...). Any end of line comments will
+            remain in the original column, if possible. This can be used with <code>unpad-paren</code> 
+            to remove unwanted spaces.</p>
+
+        <div class="code">
+            <pre>if(isFoo(a, b))
+    bar(a, b);</pre>
+
+            <p class="code">becomes:</p>
+            <pre>if (isFoo(a, b))
+    bar(a, b);
+</pre>
+        </div>
+
+        <p>&nbsp;</p>
         <p id="_unpad-paren"><code class="title">--unpad-paren / -U </code>
         <code>/ --unpad=paren (depreciated)</code><br />
          Remove extra space padding around parenthesis on the inside and outside. &nbsp;Any end of line comments
             will remain in the original column, if possible. This option can be used in
-        combination with the paren padding options <code>pad&#8209;paren&#8209;out</code> and
-        <code>pad&#8209;paren&#8209;in</code> above. Only padding that has not been requested by other options
-        will be removed.</p>
+        combination with the paren padding options <code>pad&#8209;paren</code>, <code>pad&#8209;paren&#8209;out</code>,
+        <code>pad&#8209;paren&#8209;in</code>, and <code>pad&#8209;header</code> above. 
+        Only padding that has not been requested by other options will be removed.</p>
 
         <p>For example, if a source has parens padded on both the inside and outside, and you want
         inside only. You need to use <code>unpad-paren</code> to remove the outside padding, and
