@@ -624,7 +624,8 @@ string ASBeautifier::beautify(const string &originalLine)
 	int lineOpeningBlocksNum = 0;
 	int lineClosingBlocksNum = 0;
 	int i;
-	string outBuffer; // the newly idented line is bufferd here
+	int iPrelim;
+	string outBuffer; // the newly idented line is buffered here
 	const string *lastLineHeader = NULL;
 
 	currentHeader = NULL;
@@ -894,6 +895,8 @@ string ASBeautifier::beautify(const string &originalLine)
 		}
 
 	}
+
+	iPrelim = i;
 
 	if (!lineStartsInComment
 	        && isCStyle()
@@ -1759,6 +1762,18 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && shouldIndentBrackettedLine)
 		--tabCount;
 
+	// must check one less in headerStack if more than one header on a line (allow-addins)...
+	else if (!lineStartsInComment
+	         && (int) headerStack->size() > iPrelim + 1
+	         && !blockIndent
+	         && outBuffer.length() > 0
+	         && outBuffer[0] == '{'
+	         && !(lineOpeningBlocksNum > 0 && lineOpeningBlocksNum == lineClosingBlocksNum)
+	         && !(headerStack->size() > 2 && (*headerStack)[headerStack->size()-3] == &AS_OPEN_BRACKET)
+	         && shouldIndentBrackettedLine)
+		--tabCount;
+
+	// unindent a closing bracket...
 	else if (!lineStartsInComment
 	         && outBuffer.length() > 0
 	         && outBuffer[0] == '}'
@@ -2033,26 +2048,6 @@ string ASBeautifier::trim(const string &str)
 
 	string returnStr(str, start, end + 1 - start);
 	return returnStr;
-}
-
-/**
- * peek at the next unread character.
- *
- * @return      the next unread character.
- * @param line  the line to check.
- * @param i     the current char position on the line.
- */
-char ASBeautifier::peekNextChar(const string &line, int i) const
-{
-	char ch = ' ';
-	size_t peekNum = line.find_first_not_of(" \t", i + 1);
-
-	if (peekNum == string::npos)
-		return ch;
-
-	ch = line[peekNum];
-
-	return ch;
 }
 
 /**

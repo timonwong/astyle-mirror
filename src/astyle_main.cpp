@@ -176,16 +176,6 @@ void importOptions(istream &in, vector<string> &optionsVector)
 	}
 }
 
-bool isParamOption(const string &arg, const char *option)
-{
-	bool retVal = arg.compare(0, strlen(option), option) == 0;
-	// if comparing for short option, 2nd char of arg must be numeric
-	if (retVal && strlen(option) == 1 && arg.length() > 1)
-		if (!isdigit(arg[1]))
-			retVal = false;
-	return retVal;
-}
-
 void isOptionError(const string &arg, const string &errorInfo)
 {
 #ifdef ASTYLE_LIB
@@ -200,6 +190,17 @@ void isOptionError(const string &arg, const string &errorInfo)
 	if (errorInfo.length() > 0)         // to avoid a compiler warning
 		(*_err) << "Error in param: " << arg << endl;
 #endif
+}
+
+
+bool isParamOption(const string &arg, const char *option)
+{
+	bool retVal = arg.compare(0, strlen(option), option) == 0;
+	// if comparing for short option, 2nd char of arg must be numeric
+	if (retVal && strlen(option) == 1 && arg.length() > 1)
+		if (!isdigit(arg[1]))
+			retVal = false;
+	return retVal;
 }
 
 bool isParamOption(const string &arg, const char *option1, const char *option2)
@@ -430,6 +431,14 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setOperatorPaddingMode(true);
 	}
+	else if ( IS_OPTIONS(arg, "g", "allow-runins") )
+	{
+		formatter.setAllowRunIns(true);
+	}
+	else if ( IS_OPTIONS(arg, "x", "delete-empty-lines") )
+	{
+		formatter.setDeleteEmptyLinesMode(true);
+	}
 	else if ( IS_OPTIONS(arg, "E", "fill-empty-lines") )
 	{
 		formatter.setEmptyLineFill(true);
@@ -454,10 +463,6 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTIONS(arg, "e", "break-elseifs") )
 	{
 		formatter.setBreakElseIfsMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "x", "delete-empty-lines") )
-	{
-		formatter.setDeleteEmptyLinesMode(true);
 	}
 	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
 	// depreciated in release 1.22 - may be removed at an appropriate time
@@ -1269,13 +1274,6 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "Formatting options:\n";
 	(*_err) << "-------------------\n";
-	(*_err) << "    --break-blocks  OR  -f\n";
-	(*_err) << "    Insert empty lines around unrelated blocks, labels, classes, ...\n";
-	(*_err) << endl;
-	(*_err) << "    --break-blocks=all  OR  -F\n";
-	(*_err) << "    Like --break-blocks, except also insert empty lines \n";
-	(*_err) << "    around closing headers (e.g. 'else', 'catch', ...).\n";
-	(*_err) << endl;
 	(*_err) << "    --break-closing-brackets  OR  -y\n";
 	(*_err) << "    Break brackets before closing headers (e.g. 'else', 'catch', ...).\n";
 	(*_err) << "    Use with --brackets=attach, --brackets=linux, \n";
@@ -1284,9 +1282,36 @@ void ASConsole::printHelp() const
 	(*_err) << "    --break-elseifs  OR  -e\n";
 	(*_err) << "    Break 'else if()' statements into two different lines.\n";
 	(*_err) << endl;
-	(*_err) << "    --delete-empty-lines  OR  -x\n";
-	(*_err) << "    Delete empty lines within a function or method.\n";
-	(*_err) << "    It will NOT delete lines added by the break-blocks options.\n";
+	(*_err) << "    --allow-runins  OR  -g\n";
+	(*_err) << "    Allow statements on the same line as an opening broken bracket.\n";
+	(*_err) << endl;
+	(*_err) << "    --keep-one-line-statements  OR  -o\n";
+	(*_err) << "    Don't break lines containing multiple statements into\n";
+	(*_err) << "    multiple single-statement lines.\n";
+	(*_err) << endl;
+	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
+	(*_err) << "    Don't break blocks residing completely on one line.\n";
+	(*_err) << endl;
+	(*_err) << "    --convert-tabs  OR  -c\n";
+	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
+	(*_err) << endl;
+	(*_err) << "    --mode=c\n";
+	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
+	(*_err) << endl;
+	(*_err) << "    --mode=java\n";
+	(*_err) << "    Indent a Java source file.\n";
+	(*_err) << endl;
+	(*_err) << "    --mode=cs\n";
+	(*_err) << "    Indent a C# source file.\n";
+	(*_err) << endl;
+	(*_err) << "Padding options:\n";
+	(*_err) << "--------------------\n";
+	(*_err) << "    --break-blocks  OR  -f\n";
+	(*_err) << "    Insert empty lines around unrelated blocks, labels, classes, ...\n";
+	(*_err) << endl;
+	(*_err) << "    --break-blocks=all  OR  -F\n";
+	(*_err) << "    Like --break-blocks, except also insert empty lines \n";
+	(*_err) << "    around closing headers (e.g. 'else', 'catch', ...).\n";
 	(*_err) << endl;
 	(*_err) << "    --pad-oper  OR  -p\n";
 	(*_err) << "    Insert space paddings around operators.\n";
@@ -1308,28 +1333,13 @@ void ASConsole::printHelp() const
 	(*_err) << "    Remove unnecessary space padding around parenthesis.  This\n";
 	(*_err) << "    can be used in combination with the 'pad' options above.\n";
 	(*_err) << endl;
-	(*_err) << "    --keep-one-line-statements  OR  -o\n";
-	(*_err) << "    Don't break lines containing multiple statements into\n";
-	(*_err) << "    multiple single-statement lines.\n";
-	(*_err) << endl;
-	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
-	(*_err) << "    Don't break blocks residing completely on one line.\n";
-	(*_err) << endl;
-	(*_err) << "    --convert-tabs  OR  -c\n";
-	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
+	(*_err) << "    --delete-empty-lines  OR  -x\n";
+	(*_err) << "    Delete empty lines within a function or method.\n";
+	(*_err) << "    It will NOT delete lines added by the break-blocks options.\n";
 	(*_err) << endl;
 	(*_err) << "    --fill-empty-lines  OR  -E\n";
 	(*_err) << "    Fill empty lines with the white space of their\n";
 	(*_err) << "    previous lines.\n";
-	(*_err) << endl;
-	(*_err) << "    --mode=c\n";
-	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
-	(*_err) << endl;
-	(*_err) << "    --mode=java\n";
-	(*_err) << "    Indent a Java source file.\n";
-	(*_err) << endl;
-	(*_err) << "    --mode=cs\n";
-	(*_err) << "    Indent a C# source file.\n";
 	(*_err) << endl;
 	(*_err) << "Other options:\n";
 	(*_err) << "--------------\n";

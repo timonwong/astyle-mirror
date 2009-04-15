@@ -92,26 +92,31 @@
     <p class="contents1"><a class="contents" href="#_Formatting_Options">Formatting&nbsp;Options</a></p>
 
     <p class="contents2">
-        <a class="contents" href="#_break-blocks">break&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_break-blocks=all">break&#8209;blocks=all</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp;        
         <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_delete-empty-lines">delete&#8209;empty&#8209;lines</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_allow-runins">allow&#8209;runins</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode=c">mode=c</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode=java">mode=java</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode=cs">mode=cs</a>&nbsp;&nbsp;&nbsp;
+    </p>
+
+    <p class="contents1"><a class="contents" href="#_Padding_Options">Padding&nbsp;Options</a></p>
+    <p class="contents2">
+        <a class="contents" href="#_break-blocks">break&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_break-blocks=all">break&#8209;blocks=all</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-oper">pad&#8209;oper</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-paren">pad&#8209;paren</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-paren-out">pad&#8209;paren&#8209;out</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-paren-in">pad&#8209;paren&#8209;in</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-header">pad&#8209;header</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_unpad-paren">unpad&#8209;paren</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_fill-empty-lines">fill&#8209;empty&#8209;lines</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=c">mode=c</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=java">mode=java</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=cs">mode=cs</a>&nbsp;&nbsp;&nbsp;
-    </p>
-
+        <a class="contents" href="#_delete-empty-lines">delete&#8209;empty&#8209;lines</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_fill-empty-lines">fill&#8209;empty&#8209;lines</a>&nbsp;&nbsp;&nbsp;       
+    </p>    
+    
     <p class="contents1"><a class="contents" href="#_Other_Options">Other&nbsp;Options</a></p>
 
     <p class="contents2"><a class="contents" href="#_suffix">suffix</a>&nbsp;&nbsp;&nbsp;
@@ -267,7 +272,7 @@
                 ARTISTIC_STYLE_OPTIONS (if it exists);</li>
 
                 <li>the file named .astylerc in the directory pointed to by the
-                >HOME environment variable (e.g. "$HOME/.astylerc"
+                HOME environment variable (e.g. "$HOME/.astylerc"
                 on Linux);</li>
 
                 <li>the file named astylerc in the directory pointed to by the
@@ -924,65 +929,6 @@ if (a &lt; b
 
     <h3 id="_Formatting_Options">Formatting Options</h3>
 
-    <p id="_break-blocks"><code class="title">--break-blocks / -f</code><br />
-     Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).</p>
-
-        <div class="code">
-            <pre>isFoo = true;
-if (isFoo) <span class="brace">{</span>
-    bar();
-<span class="brace">}</span> else <span class="brace">{</span>
-    anotherBar();
-<span class="brace">}</span>
-isBar = false;
-</pre>
-
-            <p class="code">becomes:</p>
-            <pre>isFoo = true;
-
-if (isFoo) <span class="brace">{</span>
-    bar();
-<span class="brace">}</span> else <span class="brace">{</span>
-    anotherBar();
-<span class="brace">}</span>
-
-isBar = false;
-</pre>
-        </div>
-
-        <p>&nbsp;</p>
-
-        <p id="_break-blocks=all"><code class="title">--break-blocks=all / -F</code><br />
-         Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).
-        Treat closing header blocks (e.g. '<code>else</code>', '<code>catch</code>') as stand-alone
-        blocks.</p>
-
-        <div class="code">
-            <pre>isFoo = true;
-if (isFoo) <span class="brace">{</span>
-    bar();
-<span class="brace">}</span> else <span class="brace">{</span>
-    anotherBar();
-<span class="brace">}</span>
-isBar = false;
-</pre>
-
-            <p class="code">becomes:</p>
-            <pre>isFoo = true;
-
-if (isFoo) <span class="brace">{</span>
-    bar();
-    
-<span class="brace">}</span> else <span class="brace">{</span>
-    anotherBar();
-<span class="brace">}</span>
-
-isBar = false;
-</pre>
-        </div>
-
-        <p>&nbsp;</p>
-
         <p id="_break-closing-brackets"><code class="title">--break-closing-brackets /
         -y </code><code>/ --brackets=break-closing (depreciated)</code><br />
          When used with --brackets=attach, --brackets=linux, or --brackets=stroustrup,
@@ -1048,32 +994,164 @@ else
         
         <p>&nbsp;</p>
         
-        <p id="_delete-empty-lines">
-        <code class="title">--delete-empty-lines / -x</code><br />
-        Delete empty lines within a function or method. Empty lines outside of functions or methods are NOT
-        deleted. If used with break-blocks or break-blocks=all it will delete all lines EXCEPT the lines added
-        by the break-blocks options.</p>
+        <p id="_allow-runins">
+        <code class="title">--allow-runins / -g</code><br />
+            Allow statements on the same line as an opening broken bracket. 
+            This is the option used for Horstmann style formatting/indenting. Run-in statements do NOT attach to
+            brackets for namespaces, classes, or arrays.
+        </p>
+    <p>
+        If this option is NOT used the statements will be broken from the opening bracket. This
+            option cannot be used with --indent-brackets.</p>
 
         <div class="code">
             <pre>void Foo()
 <span class="brace">{</span>
-	
-    foo1 = 1;
-	
-    foo2 = 2;
-	
+    if (isFoo())
+<span class="brace">    {</span>
+        bar1();
+        bar2();
+<span class="brace">    }</span>
 <span class="brace">}</span>
 </pre>
-
             <p class="code">becomes:</p>
             <pre>void Foo()
-<span class="brace">{</span>
-    foo1 = 1;
-    foo2 = 2;
+<span class="brace">{</span>   if (isFoo())
+<span class="brace">    {</span>   bar1();
+        bar2();
+<span class="brace">    }</span>
 <span class="brace">}</span>
 </pre>
         </div>
-        
+
+        <p>&nbsp;</p>
+
+        <p id="_keep-one-line-statements"><code class="title">--keep-one-line-statements /
+        -o </code><code>/ --one-line=keep-statements (depreciated)</code><br />
+         Don't break complex statements and multiple statements residing on a single line.</p>
+
+        <div class="code">
+            <pre>if (isFoo)
+<span class="brace">{</span>
+    isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl;
+<span class="brace">}</span>
+</pre>
+
+            <p class="code">remains unchanged.</p>
+            <pre>if (isFoo) DoBar();
+</pre>
+
+            <p class="code">remains unchanged.</p>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code>
+        <code>/ --one-line=keep-blocks (depreciated)</code><br />
+         Don't break one-line blocks.</p>
+
+        <div class="code">
+            <pre>if (isFoo)
+<span class="brace">{</span> isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl; <span class="brace">}</span>
+</pre>
+
+            <p class="code">remains unchanged.</p>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_convert-tabs"><code class="title">--convert-tabs / -c</code><br />
+         Converts tabs into spaces in the non-indentation part of the line. The number of spaces inserted will
+            maintain the spacing of the tab. The current setting for spaces per tab is used. It may not produce
+            the expected results if convert-tabs is used when changing spaces per tab. Tabs are not replaced in
+            quotes.</p>
+
+    <p>&nbsp;</p>
+
+        <p id="_mode=c"><code class="title">--mode=c</code><br />
+         Indent a C or C++ file. The option is usually set from the file extension for each file.
+        You can override the setting with this entry. It will be used for all files regardless of
+        the file extension. It allows the formatter to identify language specific syntax such as
+        C++ classes, templates, and keywords.</p>
+
+        <p id="_mode=java"><code class="title">--mode=java</code><br />
+         Indent a Java file. The option is usually set from the file extension for each file. You
+        can override the setting with this entry. It will be used for all files regardless of the
+        file extension. It allows the formatter to identify language specific syntax such as Java
+        class's keywords.</p>
+
+        <p id="_mode=cs"><code class="title">--mode=cs</code><br />
+         Indent a C sharp file. The option is usually set from the file extension for each file.
+        You can override the setting with this entry. It will be used for all files regardless of
+        the file extension. It allows the formatter to identify language specific syntax such as C
+        sharp classes and keywords.</p>
+
+    <p>&nbsp;</p>
+
+    <hr />
+    <!--  * * * * * * * * * * * * *   Padding Options  * * * * * * * * * * * * *  -->
+
+    <h3 id="_Padding_Options">Padding Options</h3>
+
+    <p id="_break-blocks"><code class="title">--break-blocks / -f</code><br />
+     Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).</p>
+
+        <div class="code">
+            <pre>isFoo = true;
+if (isFoo) <span class="brace">{</span>
+    bar();
+<span class="brace">}</span> else <span class="brace">{</span>
+    anotherBar();
+<span class="brace">}</span>
+isBar = false;
+</pre>
+
+            <p class="code">becomes:</p>
+            <pre>isFoo = true;
+
+if (isFoo) <span class="brace">{</span>
+    bar();
+<span class="brace">}</span> else <span class="brace">{</span>
+    anotherBar();
+<span class="brace">}</span>
+
+isBar = false;
+</pre>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_break-blocks=all"><code class="title">--break-blocks=all / -F</code><br />
+         Pad empty lines around header blocks (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).
+        Treat closing header blocks (e.g. '<code>else</code>', '<code>catch</code>') as stand-alone
+        blocks.</p>
+
+        <div class="code">
+            <pre>isFoo = true;
+if (isFoo) <span class="brace">{</span>
+    bar();
+<span class="brace">}</span> else <span class="brace">{</span>
+    anotherBar();
+<span class="brace">}</span>
+isBar = false;
+</pre>
+
+            <p class="code">becomes:</p>
+            <pre>isFoo = true;
+
+if (isFoo) <span class="brace">{</span>
+    bar();
+    
+<span class="brace">}</span> else <span class="brace">{</span>
+    anotherBar();
+<span class="brace">}</span>
+
+isBar = false;
+</pre>
+        </div>
+
+
+                
         <p>&nbsp;</p>
         
         <p id="_pad-oper"><code class="title">--pad-oper / -p </code>
@@ -1168,6 +1246,7 @@ else
         </div>
 
         <p>&nbsp;</p>
+        
         <p id="_unpad-paren"><code class="title">--unpad-paren / -U </code>
         <code>/ --unpad=paren (depreciated)</code><br />
          Remove extra space padding around parenthesis on the inside and outside. &nbsp;Any end of line comments
@@ -1192,73 +1271,40 @@ else
 </pre>
         </div>
 
-        <p>&nbsp;</p>
 
-        <p id="_keep-one-line-statements"><code class="title">--keep-one-line-statements /
-        -o </code><code>/ --one-line=keep-statements (depreciated)</code><br /><br />
-         Don't break complex statements and multiple statements residing on a single line.</p>
+        
+        <p>&nbsp;</p>
+        
+        <p id="_delete-empty-lines"><code class="title">--delete-empty-lines / -x</code><br />
+        Delete empty lines within a function or method. Empty lines outside of functions or methods are NOT
+        deleted. If used with break-blocks or break-blocks=all it will delete all lines EXCEPT the lines added
+        by the break-blocks options.</p>
 
         <div class="code">
-            <pre>if (isFoo)
+            <pre>void Foo()
 <span class="brace">{</span>
-    isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl;
+	
+    foo1 = 1;
+	
+    foo2 = 2;
+	
 <span class="brace">}</span>
 </pre>
 
-            <p class="code">remains unchanged.</p>
-            <pre>if (isFoo) DoBar();
+            <p class="code">becomes:</p>
+            <pre>void Foo()
+<span class="brace">{</span>
+    foo1 = 1;
+    foo2 = 2;
+<span class="brace">}</span>
 </pre>
-
-            <p class="code">remains unchanged.</p>
         </div>
-
-        <p>&nbsp;</p>
-
-        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code>
-        <code>/ --one-line=keep-blocks (depreciated)</code><br /><br />
-         Don't break one-line blocks.</p>
-
-        <div class="code">
-            <pre>if (isFoo)
-<span class="brace">{</span> isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl; <span class="brace">}</span>
-</pre>
-
-            <p class="code">remains unchanged.</p>
-        </div>
-
-        <p>&nbsp;</p>
-
-        <p id="_convert-tabs"><code class="title">--convert-tabs / -c</code><br />
-         Converts tabs into spaces in the non-indentation part of the line. The number of spaces inserted will
-            maintain the spacing of the tab. The current setting for spaces per tab is used. It may not produce
-            the expected results if convert-tabs is used when changing spaces per tab. Tabs are not replaced in
-            quotes.</p>
 
         <p>&nbsp;</p>
 
         <p id="_fill-empty-lines"><code class="title">--fill-empty-lines / -E</code><br />
          Fill empty lines with the white space of the previous line.</p>
-    <p>
-        &nbsp;</p>
-
-        <p id="_mode=c"><code class="title">--mode=c</code><br />
-         Indent a C or C++ file. The option is usually set from the file extension for each file.
-        You can override the setting with this entry. It will be used for all files regardless of
-        the file extension. It allows the formatter to identify language specific syntax such as
-        C++ classes, templates, and keywords.</p>
-
-        <p id="_mode=java"><code class="title">--mode=java</code><br />
-         Indent a Java file. The option is usually set from the file extension for each file. You
-        can override the setting with this entry. It will be used for all files regardless of the
-        file extension. It allows the formatter to identify language specific syntax such as Java
-        class's keywords.</p>
-
-        <p id="_mode=cs"><code class="title">--mode=cs</code><br />
-         Indent a C sharp file. The option is usually set from the file extension for each file.
-        You can override the setting with this entry. It will be used for all files regardless of
-        the file extension. It allows the formatter to identify language specific syntax such as C
-        sharp classes and keywords.</p>
-
+                     
     <p>&nbsp;</p>
     
     <hr />

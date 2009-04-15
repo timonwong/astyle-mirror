@@ -99,6 +99,10 @@ enum BracketType   { NULL_TYPE = 0,
                      SINGLE_LINE_TYPE = 64
                    };
 
+//----------------------------------------------------------------------------
+// Class ASSourceIterator
+//----------------------------------------------------------------------------
+
 class ASSourceIterator
 {
 	public:
@@ -109,6 +113,10 @@ class ASSourceIterator
 		virtual string peekNextLine() = 0;
 		virtual void peekReset() = 0;
 };
+
+//----------------------------------------------------------------------------
+// Class ASResource
+//----------------------------------------------------------------------------
 
 class ASResource
 {
@@ -156,8 +164,11 @@ class ASResource
 		static const string AS_FOREACH, AS_LOCK, AS_UNSAFE, AS_FIXED;
 		static const string AS_GET, AS_SET, AS_ADD, AS_REMOVE;
 		static const string AS_CONST_CAST, AS_DYNAMIC_CAST, AS_REINTERPRET_CAST, AS_STATIC_CAST;
-};
+};  // Class ASResource
 
+//----------------------------------------------------------------------------
+// Class ASBase
+//----------------------------------------------------------------------------
 
 class ASBase
 {
@@ -225,8 +236,11 @@ class ASBase
 			ch = line[peekNum];
 			return ch;
 		}
-};
+};  // Class ASBase
 
+//----------------------------------------------------------------------------
+// Class ASBeautifier
+//----------------------------------------------------------------------------
 
 class ASBeautifier : protected ASResource, protected ASBase
 {
@@ -257,7 +271,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  getFileType();
 		int  getIndentLength(void);
 		string getIndentString(void);
-		char peekNextChar(const string &line, int i) const;
 		bool getBracketIndent(void);
 		bool getBlockIndent(void);
 		bool getCaseIndent(void);
@@ -364,8 +377,11 @@ class ASBeautifier : protected ASResource, protected ASBase
 		char currentNonSpaceCh;
 		char currentNonLegalCh;
 		char prevNonLegalCh;
-};
+};  // Class ASBeautifier
 
+//----------------------------------------------------------------------------
+// Class ASEnhancer
+//----------------------------------------------------------------------------
 
 class ASEnhancer : protected ASBase
 {
@@ -374,7 +390,6 @@ class ASEnhancer : protected ASBase
 		~ASEnhancer();
 		void init(int, int, string, bool, bool);
 		void enhance(string &line);
-		char peekNextChar(const string &line, int i) const;
 
 	private:
 		// options from command line or options file
@@ -416,8 +431,11 @@ class ASEnhancer : protected ASBase
 	private:  // functions
 		int  indentLine(string  &line, const int indent) const;
 		int  unindentLine(string  &line, const int unindent) const;
-};
+};  // Class ASEnhancer
 
+//----------------------------------------------------------------------------
+// Class ASFormatter
+//----------------------------------------------------------------------------
 
 class ASFormatter : public ASBeautifier
 {
@@ -435,6 +453,7 @@ class ASFormatter : public ASBeautifier
 		void setParensInsidePaddingMode(bool mode);
 		void setParensHeaderPaddingMode(bool mode);
 		void setParensUnPaddingMode(bool state);
+		void setAllowRunIns(bool state);
 		void setBreakOneLineBlocksMode(bool state);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
@@ -456,11 +475,13 @@ class ASFormatter : public ASBeautifier
 		char peekNextChar() const;
 		BracketType getBracketType();
 		bool commentAndHeaderFollows() const;
+		void formatRunIn();
 		bool getNextChar();
 		bool getNextLine(bool emptyLineWasDeleted = false);
 		bool isBeforeComment() const;
 		bool isBeforeLineEndComment(int startPos) const;
 		bool isBracketType(BracketType a, BracketType b) const;
+		bool isEmptyLine(const string &line) const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
 		bool isPointerOrReference() const;
 		bool isUnaryOperator() const;
@@ -528,6 +549,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldPadParensInside;
 		bool shouldPadHeader;
 		bool shouldUnPadParens;
+		bool shouldAllowRunIns;
 		bool shouldConvertTabs;
 		bool isInLineComment;
 		bool isInComment;
@@ -626,7 +648,8 @@ class ASFormatter : public ASBeautifier
 		const string *findOperator(const vector<const string*> &headers) {
 			return ASBeautifier::findOperator(currentLine, charNum, headers);
 		}
-};
+};  // Class ASFormatter
+
 
 //----------------------------------------------------------------------------
 // astyle namespace global declarations
