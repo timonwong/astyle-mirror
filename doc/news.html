@@ -28,17 +28,21 @@
         because of changes to Artistic Style. You may want to format your source before
         making program changes in order to bring it up to date.</p>
     <p>
+        A new bracket type &#8209;&#8209;brackets=horstmann (-g) option will allow run-in
+        statements
+        on the same line as an opening broken bracket. The "Tab and Bracket Options" section in the
+        documentation contains the details. If a bracket type is not requested
+        the formatting will now allow run-in statements to accomodate the new bracket type.</p>
+    <p>
+        NONE_MODE brackets will now allow run-in statements to accomodate Horstmann type
+        brackets.</p>
+    <p>
         There has been a change to the default formatting of paren headers (e.g. 'if', 
         'for', 'while'...). They will now be left unchanged instead of inserting space 
         padding after them. A new option, &#8209;&#8209;pad&#8209;header (-H), will insert the
         space padding if requested. To remove any unwanted space padding, use the
         option &#8209;&#8209;unpad&#8209;paren (-U). If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren
-        are used, the headers will be padded and padding will be removed from other parens.
-    </p>
-    <p>
-        A new &#8209;&#8209;allow&#8209;runins (-g) option will allow statements
-        on the same line as an opening broken bracket. The "Formatting Options" section in the
-        documentation contains the details.</p>
+        are used, the headers will be padded and padding will be removed from other parens.</p>
     <p>
         The documentation has been changed to split the "Formatting Options" section into
         "Formatting Options" and "Padding Options". This was done to allow for the new formatting

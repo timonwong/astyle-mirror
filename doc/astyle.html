@@ -71,6 +71,7 @@
         <a class="contents" href="#_brackets=attach">brackets=attach</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_brackets=linux">brackets=linux</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_brackets=stroustrup">brackets=stroustrup</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_brackets=horstmann">brackets=horstmann</a>&nbsp;&nbsp;&nbsp;
     
     </p>
 
@@ -94,7 +95,6 @@
     <p class="contents2">
         <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp;        
         <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_allow-runins">allow&#8209;runins</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
@@ -516,15 +516,17 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         spaces per indent.</p>
 
         <p id="_indent=tab"><code class="title">--indent=tab /
-        --indent=tab=<span class="option">#</span> / -t<span class="option">#</span></code><br />
-         Indent using tab characters. Treat each tab as #
+        --indent=tab=<span class="option">#</span> / -t / 
+        -t<span class="option">#</span></code><br />
+        Indent using tab characters. Treat each tab as #
         spaces (e.g. <code>-t<span class="option">6</span></code> /
         <code>--indent=tab=<span class="option">6</span></code>). # must be between 1 and 20. 
         If no # is set, treats tabs as 4 spaces.</p>
 
         <p id="_indent=force-tab">
         <code class="title">--indent=force-tab / --indent=force-tab=<span class="option">#</span> /
-        -T<span class="option"># </span></code><code>/ --force-indent=tab=<span class="option">#</span>
+        -T / -T<span class="option">#</span>
+        </code><code>/ --force-indent=tab=<span class="option">#</span>
         (depreciated)</code><br />
         Indent using tab characters. Treat each tab as #
         spaces (e.g. <code>-T<span class="option">6</span></code> /
@@ -611,7 +613,28 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 <span class="brace">}</span>
 </pre>
         </div>
+
+        <p>&nbsp;</p>
         
+        <p id="_brackets=horstmann">
+        <code class="title">--brackets=horstmann / -g</code><br />
+            Break brackets from their pre-block statements but allow run-in statements on the
+            same line as an opening bracket. Cannot use --indent-brackets withthis option. Run-in statements do NOT attach to
+            brackets for namespaces, classes, or interfaces. &nbsp;</p>
+
+        <div class="code">
+            <pre>void Foo(bool isFoo)
+<span class="brace">{</span>   if (isFoo())
+<span class="brace">    {</span>   bar1();
+        bar2();
+<span class="brace">    }</span>
+    else
+<span class="brace">    {</span>   anotherBar();
+<span class="brace">    }</span>
+<span class="brace">}</span>
+</pre>
+        </div> 
+               
     <p>&nbsp;</p>
     
     <hr />
@@ -934,7 +957,8 @@ if (a &lt; b
          When used with --brackets=attach, --brackets=linux, or --brackets=stroustrup,
         this breaks closing headers (e.g. 
             'else', 'catch', ...) from their immediately preceding closing brackets. Closing header brackets are always
-            broken with broken brackets, indented blocks, and indented brackets.</p>
+            broken with broken brackets,
+            horstmann brackets, indented blocks, and indented brackets.</p>
 
         <div class="code">
             <pre>void Foo(bool isFoo) <span class="brace">{</span>
@@ -989,38 +1013,6 @@ else
         if (isFoo2()) <span class="brace">{</span>
             bar2();
 <span class="brace">        }</span>
-</pre>
-        </div>
-        
-        <p>&nbsp;</p>
-        
-        <p id="_allow-runins">
-        <code class="title">--allow-runins / -g</code><br />
-            Allow statements on the same line as an opening broken bracket. 
-            This is the option used for Horstmann style formatting/indenting. Run-in statements do NOT attach to
-            brackets for namespaces, classes, or arrays.
-        </p>
-    <p>
-        If this option is NOT used the statements will be broken from the opening bracket. This
-            option cannot be used with --indent-brackets.</p>
-
-        <div class="code">
-            <pre>void Foo()
-<span class="brace">{</span>
-    if (isFoo())
-<span class="brace">    {</span>
-        bar1();
-        bar2();
-<span class="brace">    }</span>
-<span class="brace">}</span>
-</pre>
-            <p class="code">becomes:</p>
-            <pre>void Foo()
-<span class="brace">{</span>   if (isFoo())
-<span class="brace">    {</span>   bar1();
-        bar2();
-<span class="brace">    }</span>
-<span class="brace">}</span>
 </pre>
         </div>
 
