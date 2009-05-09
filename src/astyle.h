@@ -86,6 +86,7 @@ enum BracketMode   { NONE_MODE,
                      BREAK_MODE,
                      LINUX_MODE,
                      STROUSTRUP_MODE,
+                     HORSTMANN_MODE,
                      BDAC_MODE = LINUX_MODE
                    };
 
@@ -298,7 +299,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 
 		void initStatic();
 		void registerInStatementIndent(const string &line, int i, int spaceTabCount,
-		                               int minIndent, bool updateParenStack);
+		                               int tabIncrementIn, int minIndent, bool updateParenStack);
 		string preLineWS(int spaceTabCount, int tabCount);
 
 		static int beautifierFileType;
@@ -323,6 +324,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		vector<int> *inStatementIndentStack;
 		vector<int> *inStatementIndentStackSizeStack;
 		vector<int> *parenIndentStack;
+		int convertTabToSpaces(int i, int tabIncrementIn) const;
 		template<typename T> void deleteContainer(T &container);
 		void deleteContainer(vector<vector<const string*>*>* &container);
 		template<typename T> void initContainer(T &container, T value);
@@ -453,7 +455,6 @@ class ASFormatter : public ASBeautifier
 		void setParensInsidePaddingMode(bool mode);
 		void setParensHeaderPaddingMode(bool mode);
 		void setParensUnPaddingMode(bool state);
-		void setAllowRunIns(bool state);
 		void setBreakOneLineBlocksMode(bool state);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
@@ -471,15 +472,16 @@ class ASFormatter : public ASBeautifier
 		void checkForFollowingHeader(const string& firstLine);
 		void convertTabToSpaces();
 		void goForward(int i);
-		void trimNewLine();
+		void initializeNewLine();
 		char peekNextChar() const;
 		BracketType getBracketType();
 		bool commentAndHeaderFollows() const;
-		void formatRunIn();
+		void formatRunInStatement();
 		bool getNextChar();
 		bool getNextLine(bool emptyLineWasDeleted = false);
 		bool isBeforeComment() const;
-		bool isBeforeLineEndComment(int startPos) const;
+		bool isBeforeAnyComment() const;
+		bool isBeforeAnyLineEndComment(int startPos) const;
 		bool isBracketType(BracketType a, BracketType b) const;
 		bool isEmptyLine(const string &line) const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
@@ -488,7 +490,7 @@ class ASFormatter : public ASBeautifier
 		bool isInExponent() const;
 		bool isOneLineBlockReached() const;
 		bool isNextCharOpeningBracket(int startChar) const;
-		bool lineBeginsWith(char charToCheck) const;
+//		bool lineBeginsWith(char charToCheck) const;
 		void appendCharInsideComments();
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
@@ -536,9 +538,11 @@ class ASFormatter : public ASBeautifier
 		int  preprocBracketTypeStackSize;
 		int  tabIncrementIn;
 		int  spacePadNum;
+		int  commentLineAdjust;
 		int  templateDepth;
 		int  traceLineNumber;
 		size_t formattedLineCommentNum;     // comment location on formattedLine
+		size_t currentLineBracketNum;		// first bracket location on currentLine
 		size_t previousReadyFormattedLineLength;
 		FormatStyle formattingStyle;
 		BracketMode bracketFormatMode;
@@ -549,7 +553,6 @@ class ASFormatter : public ASBeautifier
 		bool shouldPadParensInside;
 		bool shouldPadHeader;
 		bool shouldUnPadParens;
-		bool shouldAllowRunIns;
 		bool shouldConvertTabs;
 		bool isInLineComment;
 		bool isInComment;
@@ -589,6 +592,8 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostTemplate;
 		bool isCharImmediatelyPostReturn;
 		bool isCharImmediatelyPostOperator;
+		bool previousBracketIsBroken;
+		bool currentLineBeginsWithBracket;
 		bool shouldBreakOneLineBlocks;
 		bool shouldReparseCurrentChar;
 		bool shouldBreakOneLineStatements;
@@ -596,6 +601,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakElseIfs;
 		bool shouldDeleteEmptyLines;
 		bool needHeaderOpeningBracket;
+		bool shouldBreakLineAtNextChar;
 		bool passedSemicolon;
 		bool passedColon;
 		bool isImmediatelyPostComment;

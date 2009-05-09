@@ -623,6 +623,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	int spaceTabCount = 0;
 	int lineOpeningBlocksNum = 0;
 	int lineClosingBlocksNum = 0;
+	int tabIncrementIn = 0;
 	int i;
 	int iPrelim;
 	string outBuffer; // the newly idented line is buffered here
@@ -649,10 +650,12 @@ string ASBeautifier::beautify(const string &originalLine)
 		int strlen = originalLine.length();
 		leadingWhiteSpaces = 0;
 
-		for (int j = 0; j < strlen && isWhiteSpace(originalLine[j]); j++)
+		for (int j = 0; j < strlen && (isWhiteSpace(originalLine[j]) || originalLine[j] == '{'); j++)
 		{
 			if (originalLine[j] == '\t')
 				leadingWhiteSpaces += indentLength;
+			//else if (originalLine[j] == '{')
+			//	leadingWhiteSpaces++;
 			else
 				leadingWhiteSpaces++;
 		}
@@ -940,7 +943,11 @@ string ASBeautifier::beautify(const string &originalLine)
 		ch = tempCh;
 
 		if (isWhiteSpace(ch))
+		{
+			if (ch == '\t')
+				tabIncrementIn += convertTabToSpaces(i, tabIncrementIn);
 			continue;
+		}
 
 		// handle special characters (i.e. backslash+character such as \n, \t, ...)
 
@@ -1016,7 +1023,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			isInComment = true;
 			outBuffer.append(1, '*');
 			i++;
-			size_t j = line.find_first_not_of(" \t");
+			size_t j = line.find_first_not_of(" \t{");
 			if (!line.compare(j, 2, "/*") == 0)     // does line start with comment?
 				blockCommentNoIndent = true;        // if no, cannot indent continuation lines
 			continue;
@@ -1143,9 +1150,9 @@ string ASBeautifier::beautify(const string &originalLine)
 				inStatementIndentStackSizeStack->push_back(inStatementIndentStack->size());
 
 				if (currentHeader != NULL)
-					registerInStatementIndent(line, i, spaceTabCount, minConditionalIndent/*indentLength*2*/, true);
+					registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, minConditionalIndent/*indentLength*2*/, true);
 				else
-					registerInStatementIndent(line, i, spaceTabCount, 0, true);
+					registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, 0, true);
 			}
 			else if (ch == ')' || ch == ']')
 			{
@@ -1220,7 +1227,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			if (!isBlockOpener)
 			{
 				inStatementIndentStackSizeStack->push_back(inStatementIndentStack->size());
-				registerInStatementIndent(line, i, spaceTabCount, 0, true);
+				registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, 0, true);
 				parenDepth++;
 				if (i == 0)
 					shouldIndentBrackettedLine = false;
@@ -1674,7 +1681,7 @@ string ASBeautifier::beautify(const string &originalLine)
 				i += foundIndentableHeader->length() - 1;
 				if (!isInOperator && !isInTemplate && !isNonInStatementArray)
 				{
-					registerInStatementIndent(line, i, spaceTabCount, 0, false);
+					registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, 0, false);
 					isInStatement = true;
 				}
 				continue;
@@ -1738,7 +1745,7 @@ string ASBeautifier::beautify(const string &originalLine)
 
 				if (!isInOperator && !isInTemplate && !isNonInStatementArray)
 				{
-					registerInStatementIndent(line, i, spaceTabCount, 0, false);
+					registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, 0, false);
 					isInStatement = true;
 				}
 			}
@@ -1875,7 +1882,7 @@ string ASBeautifier::preLineWS(int spaceTabCount, int tabCount)
  * register an in-statement indent.
  */
 void ASBeautifier::registerInStatementIndent(const string &line, int i, int spaceTabCount,
-        int minIndent, bool updateParenStack)
+        int tabIncrementIn, int minIndent, bool updateParenStack)
 {
 	int inStatementIndent;
 	int remainingCharNum = line.length() - i;
@@ -1897,7 +1904,20 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	if (updateParenStack)
 		parenIndentStack->push_back(i + spaceTabCount);
 
-	inStatementIndent = i + nextNonWSChar + spaceTabCount;
+	int tabIncrement = tabIncrementIn;
+
+	// check for following tabs
+	for (int j = i; j <= i + nextNonWSChar; ++j)
+	{
+		if (line[j] == '\t')
+			tabIncrement += convertTabToSpaces(j, tabIncrement);
+	}
+
+	inStatementIndent = i + nextNonWSChar + spaceTabCount + tabIncrement;
+
+	// check for run-in statement
+	if (i > 0 && line[0] == '{')
+		inStatementIndent -= indentLength;
 
 	if (i + nextNonWSChar < minIndent)
 		inStatementIndent = minIndent + spaceTabCount;
@@ -2026,6 +2046,18 @@ int ASBeautifier::indexOf(vector<const string*> &container, const string *elemen
 		return -1;
 	else
 		return (int) (where - container.begin());
+}
+
+/**
+ * convert tabs to spaces.
+ * i is the position of the character to convert to spaces.
+ * tabIncrementIn is the increment that must be added for tab indent characters
+ *     to get the correct column for the current tab.
+ */
+int ASBeautifier::convertTabToSpaces(int i, int tabIncrementIn) const
+{
+	int tabToSpacesAdjustment = indentLength - 1 - ((tabIncrementIn + i) % indentLength);
+	return tabToSpacesAdjustment;
 }
 
 /**

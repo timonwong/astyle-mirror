@@ -398,6 +398,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setBracketFormatMode(STROUSTRUP_MODE);
 	}
+	else if ( IS_OPTIONS(arg, "g", "brackets=horstmann") )
+	{
+		formatter.setBracketFormatMode(HORSTMANN_MODE);
+	}
 	else if ( IS_OPTIONS(arg, "O", "keep-one-line-blocks") )
 	{
 		formatter.setBreakOneLineBlocksMode(false);
@@ -430,10 +434,6 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTIONS(arg, "p", "pad-oper") )
 	{
 		formatter.setOperatorPaddingMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "g", "allow-runins") )
-	{
-		formatter.setAllowRunIns(true);
 	}
 	else if ( IS_OPTIONS(arg, "x", "delete-empty-lines") )
 	{
@@ -1232,6 +1232,10 @@ void ASConsole::printHelp() const
 	(*_err) << "    --brackets=stroustrup  OR  -u\n";
 	(*_err) << "    Attach all brackets except function definition brackets.\n";
 	(*_err) << endl;
+	(*_err) << "    --brackets=horstmann  OR  -g\n";
+	(*_err) << "    Break brackets from pre-block code, but allow following\n";
+	(*_err) << "    run-in statements on the same line as an opening bracket.\n";
+	(*_err) << endl;
 	(*_err) << "Indentation options:\n";
 	(*_err) << "--------------------\n";
 	(*_err) << "    --indent-classes  OR  -C\n";
@@ -1281,9 +1285,6 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --break-elseifs  OR  -e\n";
 	(*_err) << "    Break 'else if()' statements into two different lines.\n";
-	(*_err) << endl;
-	(*_err) << "    --allow-runins  OR  -g\n";
-	(*_err) << "    Allow statements on the same line as an opening broken bracket.\n";
 	(*_err) << endl;
 	(*_err) << "    --keep-one-line-statements  OR  -o\n";
 	(*_err) << "    Don't break lines containing multiple statements into\n";
