@@ -551,6 +551,28 @@ bool ASBeautifier::getBracketIndent(void)
 }
 
 /**
+ * get the state of the class indentation option. If true, blocks of
+ * the 'class' statement will be indented one additional indent.
+ *
+ * @return   state of classIndent option.
+ */
+bool ASBeautifier::getClassIndent(void)
+{
+	return classIndent;
+}
+
+/**
+ * get the state of the switch indentation option. If true, blocks of
+ * the 'switch' statement will be indented one additional indent.
+ *
+ * @return   state of switchIndent option.
+ */
+bool ASBeautifier::getSwitchIndent(void)
+{
+	return switchIndent;
+}
+
+/**
  * get the state of the case indentation option. If true, lines of 'case'
  * statements will be indented one additional indent.
  *
@@ -612,6 +634,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	bool isInOperator = false;
 	bool isSpecialChar = false;
 	bool haveCaseIndent = false;
+	bool lineBeginsWithBracket = false;
 	bool closingBracketReached = false;
 	bool shouldIndentBrackettedLine = true;
 	bool previousLineProbation = (probationHeader != NULL);
@@ -660,6 +683,8 @@ string ASBeautifier::beautify(const string &originalLine)
 				leadingWhiteSpaces++;
 		}
 		line = trim(originalLine);
+		if (line[0] == '{')
+			lineBeginsWithBracket = true;
 	}
 	else
 	{
@@ -1405,7 +1430,8 @@ string ASBeautifier::beautify(const string &originalLine)
 					if (!haveCaseIndent)
 					{
 						haveCaseIndent = true;
-						--tabCount;
+						if (!lineBeginsWithBracket)
+							--tabCount;
 					}
 				}
 				else if (newHeader == &AS_DEFAULT)
@@ -1494,9 +1520,8 @@ string ASBeautifier::beautify(const string &originalLine)
 
 			else if (isCStyle() && isInClass && prevNonSpaceCh != ')')
 			{
-				--tabCount;
 				// found a 'private:' or 'public:' inside a class definition
-				// so do nothing special
+				--tabCount;
 			}
 
 			else if (isJavaStyle() && lastLineHeader == &AS_FOR)
@@ -1523,7 +1548,7 @@ string ASBeautifier::beautify(const string &originalLine)
 				{
 					if (labelIndent)
 						--tabCount; // unindent label by one indent
-					else
+					else if (!lineBeginsWithBracket)
 						tabCount = 0; // completely flush indent to left
 				}
 			}

@@ -274,6 +274,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		string getIndentString(void);
 		bool getBracketIndent(void);
 		bool getBlockIndent(void);
+		bool getClassIndent(void);
+		bool getSwitchIndent(void);
 		bool getCaseIndent(void);
 		bool getEmptyLineFill(void);
 

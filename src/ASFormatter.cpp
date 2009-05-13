@@ -368,8 +368,8 @@ string ASFormatter::nextLine()
 			isCharImmediatelyPostCloseBlock = false;
 		}
 
-//		if (inLineNumber >= 4)
-//			int x = 1;
+		if (inLineNumber >= 7)
+			int x = 1;
 
 		if (shouldBreakLineAtNextChar)
 		{
@@ -515,14 +515,15 @@ string ASFormatter::nextLine()
 					if (currentLineBeginsWithBracket)
 						formatRunInStatement();
 				}
+				else if (bracketFormatMode == HORSTMANN_MODE)
+				{
+					formatRunInStatement();
+				}
 				else
 				{
 					// add a line break if the bracket is broken
 					if (currentLineBeginsWithBracket)
 						isInLineBreak = true;
-
-					if (bracketFormatMode == HORSTMANN_MODE)
-						formatRunInStatement();
 				}
 			}
 
@@ -583,17 +584,25 @@ string ASFormatter::nextLine()
 						commentLineAdjust = formattedLine.length() - charNum;
 					}
 				}
-				//else if (bracketFormatMode == ATTACH_MODE)
-				//{
-				//	// is a run-in statement being broken?
-				//	if (currentLineBeginsWithBracket)
-				//		commentLineAdjust = (0 - currentLineBracketNum);
-				//}
 				else if (bracketFormatMode == BREAK_MODE)
 				{
 					// is a run-in statement being broken?
 					if (currentLineBeginsWithBracket)
 						commentLineAdjust = 0 - (currentLineBracketNum + 1);
+				}
+				else if (bracketFormatMode == ATTACH_MODE)
+				{
+					// if the bracket was not attached?
+					if (previousBracketIsBroken)
+					{
+						if (currentLineBeginsWithBracket)
+						{
+							isInLineBreak = true;
+							commentLineAdjust = 0 - charNum;
+						}
+						else
+							commentLineAdjust = 0 - (currentLineBracketNum + 1);
+					}
 				}
 				else if (bracketFormatMode == LINUX_MODE
 				         || bracketFormatMode == STROUSTRUP_MODE)
@@ -1786,6 +1795,7 @@ void ASFormatter::initializeNewLine()
 	if (isInPreprocessor || isInQuoteContinuation)
 		return;
 
+	// adjust comment lines
 	if (isInComment)
 	{
 		if (commentLineAdjust > 0)
@@ -1818,6 +1828,7 @@ void ASFormatter::initializeNewLine()
 	currentLineBeginsWithBracket = false;
 	currentLineBracketNum = string::npos;
 	lineIsEmpty = false;
+
 	if (isSequenceReached("/*"))
 	{
 		charNum = 0;
@@ -2335,6 +2346,12 @@ void ASFormatter::appendCharInsideComments(void)
 	if (formattedLine[beg] == '\t')         // don't pad with a tab
 		formattedLine.insert(beg, 1, ' ');
 	formattedLine[beg+1] = currentChar;
+
+	if (isBeforeComment())
+	{
+		commentLineAdjust = 0 - (currentLineBracketNum + 1);
+		breakLine();
+	}
 }
 
 /**
@@ -2749,17 +2766,26 @@ void ASFormatter::formatBrackets(BracketType bracketType)
 			if (isCharImmediatelyPostComment || isCharImmediatelyPostLineComment)
 			{
 				if ((shouldBreakOneLineBlocks || !isBracketType(bracketType, SINGLE_LINE_TYPE))
-				        && peekNextChar() != '}'
+				        && !(isCharImmediatelyPostComment && isCharImmediatelyPostLineComment)	// don't attach if two comments on the line
+				        && peekNextChar() != '}'        // don't attach { }
 				        && previousCommandChar != '{'   // don't attach { {
 				        && previousCommandChar != '}'   // don't attach } {
 				        && previousCommandChar != ';')  // don't attach ; {
 				{
 					appendCharInsideComments();
-					if (isBeforeComment())
-						breakLine();
+					//if (isBeforeComment())
+					//{
+					//	commentLineAdjust = 0 - (currentLineBracketNum + 1);
+					//	breakLine();
+					//}
 				}
 				else
+				{
 					appendCurrentChar();            // don't attach
+					previousBracketIsBroken = true;
+					if (isCharImmediatelyPostComment)
+						commentLineAdjust = 0 - currentLineBracketNum;
+				}
 			}
 			else if (previousCommandChar == '{'
 			         || previousCommandChar == '}'
@@ -2963,20 +2989,57 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 void ASFormatter::formatRunInStatement()
 {
 	assert(bracketFormatMode == HORSTMANN_MODE || bracketFormatMode == NONE_MODE);
+
+	bool extraIndent = false;
 	isInLineBreak = true;
 	size_t firstText = formattedLine.find_first_not_of(" \t");
 	if ((firstText != string::npos && formattedLine[firstText] == '{')
-	        && isBracketType(bracketTypeStack->back(), COMMAND_TYPE))
+	        && (isBracketType(bracketTypeStack->back(), COMMAND_TYPE)
+	            || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)))
 	{
+		if (isBracketType(bracketTypeStack->back(), NAMESPACE_TYPE))
+			return;
+
+		// cannot attach a class modifier without indent-classes
+		if (isCStyle()
+		        && isBracketType(bracketTypeStack->back(), CLASS_TYPE)
+		        && isCharPotentialHeader(currentLine, charNum))
+		{
+			if (findKeyword(currentLine, charNum, AS_PUBLIC)
+			        || findKeyword(currentLine, charNum, AS_PRIVATE)
+			        || findKeyword(currentLine, charNum, AS_PROTECTED))
+			{
+				if (!getClassIndent())
+					return;
+			}
+			else if (getClassIndent())
+				extraIndent = true;
+		}
+
+		// cannot attach a 'case' statement without indent-switches
+		if (!getSwitchIndent()
+		        && isCharPotentialHeader(currentLine, charNum)
+		        && (findKeyword(currentLine, charNum, AS_CASE)
+		            || findKeyword(currentLine, charNum, AS_DEFAULT)))
+			return;
+
 		isInLineBreak = false;
 		// check for extra indents
 		if (formattedLine.length() > firstText+1
 		        && formattedLine.find_first_not_of(" \t", firstText+1) == string::npos)
 			formattedLine.erase(firstText+1);
 		if (getIndentString() == "\t")
+		{
 			appendChar('\t', false);
+			if (extraIndent)
+				appendChar('\t', false);
+		}
 		else
+		{
 			formattedLine.append(getIndentLength()-1, ' ');
+			if (extraIndent)
+				formattedLine.append(getIndentLength(), ' ');
+		}
 	}
 }
 
