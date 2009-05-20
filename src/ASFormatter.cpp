@@ -104,10 +104,6 @@ ASFormatter::~ASFormatter()
 	ASBeautifier::deleteStaticVectors();
 
 	delete enhancer;
-
-#ifdef TRACEF
-	delete traceOutF;
-#endif
 }
 
 /**
@@ -264,6 +260,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	previousReadyFormattedLineLength = string::npos;
 	templateDepth = 0;
 	traceLineNumber = 0;
+	horstmannIndentChars = 0;
 	previousBracketType = NULL_TYPE;
 	previousOperator = NULL;
 
@@ -580,8 +577,8 @@ string ASFormatter::nextLine()
 					// should a run-in statement be attached?
 					if (currentLineBeginsWithBracket)
 					{
-						formatRunInStatement();
-						commentLineAdjust = formattedLine.length() - charNum;
+						if (formatRunInStatement())
+							commentLineAdjust = formattedLine.length() - charNum;
 					}
 				}
 				else if (bracketFormatMode == BREAK_MODE)
@@ -617,8 +614,8 @@ string ASFormatter::nextLine()
 					if (previousBracketIsBroken
 					        && formattedLine[0] == '{')
 					{
-						formatRunInStatement();
-						commentLineAdjust = formattedLine.length() - charNum;
+						if (formatRunInStatement())
+							commentLineAdjust = formattedLine.length() - charNum;
 					}
 				}
 			}
@@ -1081,7 +1078,10 @@ string ASFormatter::nextLine()
 							spacePadNum = 0;                 // don't count as padding
 
 							// if a blank line does not preceed this
-							if (!isEmptyLine(formattedLine))
+							// or last line is not a one line block, attach header
+							unsigned firstText = formattedLine.find_first_not_of(" \t");
+							if (firstText != string::npos
+								&& formattedLine[firstText] != '{')
 							{
 								isInLineBreak = false;
 								appendSpacePad();
@@ -1233,6 +1233,9 @@ string ASFormatter::nextLine()
 			isInPotentialCalculation = false;
 			isNonInStatementArray = false;
 			isSharpAccessor = false;
+			isInExtern = false;
+			isInEnum = false;
+			nonInStatementBracket = 0;
 		}
 
 		if (currentChar == ':' && shouldBreakOneLineStatements)
@@ -1273,6 +1276,12 @@ string ASFormatter::nextLine()
 
 			if (findKeyword(currentLine, charNum, AS_OPERATOR))
 				isImmediatelyPostOperator = true;
+
+			if (isCStyle() && findKeyword(currentLine, charNum, AS_EXTERN))
+				isInExtern = true;
+
+			if (isCStyle() && findKeyword(currentLine, charNum, AS_ENUM))
+				isInEnum = true;
 
 			if (isJavaStyle()
 			        && (findKeyword(currentLine, charNum, AS_STATIC)
@@ -1372,8 +1381,10 @@ string ASFormatter::nextLine()
 	else                                // format the current formatted line
 	{
 		isLineReady = false;
+		horstmannIndentInStatement = horstmannIndentChars;
 		beautifiedLine = beautify(readyFormattedLine);
 		previousReadyFormattedLineLength = readyFormattedLineLength;
+		horstmannIndentChars = 0;
 		lineCommentNoBeautify = lineCommentNoIndent;
 		lineCommentNoIndent = false;
 	}
@@ -1687,6 +1698,7 @@ bool ASFormatter::getNextChar()
 		if (!isInComment && !isInLineComment && !isInQuote
 		        && !isImmediatelyPostComment
 		        && !isImmediatelyPostLineComment
+				&& !isInPreprocessor
 		        && !isSequenceReached("/*")
 		        && !isSequenceReached("//"))
 			previousCommandChar = currentChar;
@@ -1943,7 +1955,7 @@ BracketType ASFormatter::getBracketType()
 
 	BracketType returnVal;
 
-	if (previousNonWSChar == '=')
+	if (previousNonWSChar == '=' || isBracketType(bracketTypeStack->back(),  ARRAY_TYPE))
 		returnVal = ARRAY_TYPE;
 	else if (foundPreDefinitionHeader)
 	{
@@ -1973,7 +1985,10 @@ BracketType ASFormatter::getBracketType()
 			isSharpAccessor = true;
 		}
 
-		returnVal = (isCommandType ? COMMAND_TYPE : ARRAY_TYPE);
+		if (!isCommandType && isInExtern) 
+			returnVal = EXTERN_TYPE;
+		else
+			returnVal = (isCommandType ? COMMAND_TYPE : ARRAY_TYPE);
 	}
 
 	if (isOneLineBlockReached())
@@ -2666,7 +2681,7 @@ void ASFormatter::formatBrackets(BracketType bracketType)
 	{
 		// break or attach the bracket
 		bool breakBracket = false;
-		if (bracketFormatMode == NONE_MODE)
+		if (bracketFormatMode == NONE_MODE || isBracketType(bracketType, EXTERN_TYPE))
 		{
 			if (currentLineBeginsWithBracket)		// lineBeginsWith('{')
 				breakBracket = true;
@@ -2701,8 +2716,9 @@ void ASFormatter::formatBrackets(BracketType bracketType)
 			}
 			else if (bracketTypeStackEnd > 1)
 			{
-				// break the first bracket after a namespace if a function
-				if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], NAMESPACE_TYPE))
+				// break the first bracket after a namespace or extern if a function
+				if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], NAMESPACE_TYPE)
+					|| isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], EXTERN_TYPE))
 				{
 					if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd], COMMAND_TYPE))
 						breakBracket = true;
@@ -2747,6 +2763,7 @@ void ASFormatter::formatBrackets(BracketType bracketType)
 			// and adjust following comment lines
 			if (isBeforeComment()
 			        && formattedLine[0] == '{'
+					&& (shouldBreakOneLineBlocks || !isBracketType(bracketType, SINGLE_LINE_TYPE))
 			        && (bracketFormatMode == BREAK_MODE
 			            || bracketFormatMode == LINUX_MODE
 			            || bracketFormatMode == STROUSTRUP_MODE))
@@ -2756,7 +2773,7 @@ void ASFormatter::formatBrackets(BracketType bracketType)
 				if (currentLineBeginsWithBracket)	// lineBeginsWith('{')
 					commentLineAdjust = charNum + 1;
 				else
-					commentLineAdjust = (charNum + 1) * -1;
+					commentLineAdjust = 0 - (charNum + 1);
 			}
 
 		}
@@ -2799,21 +2816,27 @@ void ASFormatter::formatBrackets(BracketType bracketType)
 				if (isEmptyLine(formattedLine))
 					appendCurrentChar();            // don't attach
 				else if ((shouldBreakOneLineBlocks
-				          || !isBracketType(bracketType,  SINGLE_LINE_TYPE)
-				          || peekNextChar() == '}')
+				          || !isBracketType(bracketType,  SINGLE_LINE_TYPE))
 				         && !(isImmediatelyPostPreprocessor
 				              && currentLineBeginsWithBracket))		// lineBeginsWith('{')
 				{
-					appendSpacePad();
-					appendCurrentChar(false);       // OK to attach
-//					spacePadNum = 0;                // don't adjust comments
-					// should a following comment attach with the bracket?
-					// insert spaces to reposition the comment
-					if (isBeforeComment()
-					        && (!isBeforeAnyLineEndComment(charNum)	|| currentLineBeginsWithBracket))	// lineBeginsWith('{')
+					if (peekNextChar() != '}')
 					{
-						breakLine();
-						currentLine.insert(charNum+1, charNum+1, ' ');
+						appendSpacePad();
+						appendCurrentChar(false);       // OK to attach
+						// should a following comment attach with the bracket?
+						// insert spaces to reposition the comment
+						if (isBeforeComment()
+							&& (!isBeforeAnyLineEndComment(charNum)	|| currentLineBeginsWithBracket))	// lineBeginsWith('{')
+						{
+							breakLine();
+							currentLine.insert(charNum+1, charNum+1, ' ');
+						}
+					}
+					else
+					{
+						appendSpacePad();
+						appendCurrentChar();
 					}
 				}
 				else
@@ -2841,10 +2864,10 @@ void ASFormatter::formatBrackets(BracketType bracketType)
 		}
 		else
 		{
-			if (!isCharImmediatelyPostComment
-//                  && !bracketFormatMode == NONE_MODE
-			        && !isImmediatelyPostEmptyBlock)
-				isInLineBreak = false;
+//			if (!isCharImmediatelyPostComment
+////                  && !bracketFormatMode == NONE_MODE
+//			        && !isImmediatelyPostEmptyBlock)
+//				isInLineBreak = false;
 
 			appendCurrentChar();
 		}
@@ -2908,13 +2931,22 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 					else
 					{
 						// if bracket is broken or not an assignment
-						if (currentLineBeginsWithBracket || previousNonWSChar != '=')	// lineBeginsWith('{')
+						if ((currentLineBeginsWithBracket && isWhiteSpace(peekNextChar()))
+								|| previousNonWSChar != '=')	// lineBeginsWith('{')
+						{
 							appendSpacePad();
-						appendCurrentChar(false);       // OK to attach
+							appendCurrentChar(false);       // OK to attach
+						}
+						else
+						{
+							if (previousNonWSChar != '=')
+								appendSpacePad();
+							appendCurrentChar();
+						}
 					}
 				}
 			}
-			else if (bracketFormatMode == BREAK_MODE || bracketFormatMode == HORSTMANN_MODE)
+			else if (bracketFormatMode == BREAK_MODE)
 			{
 				if (isWhiteSpace(peekNextChar()))
 					breakLine();
@@ -2928,6 +2960,12 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 					}
 				}
 				if (!isInLineBreak && previousNonWSChar != '=')
+					appendSpacePad();
+				appendCurrentChar();
+			}
+			else if (bracketFormatMode == HORSTMANN_MODE)
+			{
+				if (previousNonWSChar != '=')
 					appendSpacePad();
 				appendCurrentChar();
 			}
@@ -2949,15 +2987,23 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 		else
 			appendCurrentChar();     // not the first opening bracket - don't change
 
+		// if this opening bracket begins the line there will be no inStatement indent
+		if (currentLineBeginsWithBracket && charNum == (int) currentLineBracketNum)
+			isNonInStatementArray = true;
 		// if an opening bracket ends the line there will be no inStatement indent
 		char nextChar = peekNextChar();
 		if (isWhiteSpace(nextChar)
-		        || isBeforeAnyLineEndComment(charNum)
-		        || nextChar == '{')
+			|| isBeforeAnyLineEndComment(charNum)
+			|| nextChar == '{')
 			isNonInStatementArray = true;
+
 		// Java "new Type [] {...}" IS an inStatement indent
 		if (isJavaStyle() && previousNonWSChar == ']')
 			isNonInStatementArray = false;
+
+		if (isNonInStatementArray)
+			nonInStatementBracket = formattedLine.length() - 1;
+
 		// trace
 		//if (isNonInStatementArray)
 		//	cout << traceLineNumber << " " << 'x' << endl;
@@ -2977,7 +3023,9 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 			appendCurrentChar();
 
 		// if a declaration follows an enum definition, space pad
-		if (isLegalNameChar(peekNextChar()))
+		char peekedChar = peekNextChar();
+		if (isLegalNameChar(peekedChar)
+				|| peekedChar == '[')
 			appendSpaceAfter();
 	}
 }
@@ -2985,10 +3033,15 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 /**
  * determine if a run-in can be attached.
  * if it can insert the indents in formattedLine and reset the current line break.
+ * returns true if run-in is attached, false if not attached.
  */
-void ASFormatter::formatRunInStatement()
+bool ASFormatter::formatRunInStatement()
 {
 	assert(bracketFormatMode == HORSTMANN_MODE || bracketFormatMode == NONE_MODE);
+
+	// keep one line blocks returns true without indenting the run-in
+	if (isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE) && !shouldBreakOneLineBlocks)
+		return true;
 
 	bool extraIndent = false;
 	isInLineBreak = true;
@@ -2998,7 +3051,7 @@ void ASFormatter::formatRunInStatement()
 	            || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)))
 	{
 		if (isBracketType(bracketTypeStack->back(), NAMESPACE_TYPE))
-			return;
+			return false;
 
 		// cannot attach a class modifier without indent-classes
 		if (isCStyle()
@@ -3010,7 +3063,7 @@ void ASFormatter::formatRunInStatement()
 			        || findKeyword(currentLine, charNum, AS_PROTECTED))
 			{
 				if (!getClassIndent())
-					return;
+					return false;
 			}
 			else if (getClassIndent())
 				extraIndent = true;
@@ -3021,7 +3074,7 @@ void ASFormatter::formatRunInStatement()
 		        && isCharPotentialHeader(currentLine, charNum)
 		        && (findKeyword(currentLine, charNum, AS_CASE)
 		            || findKeyword(currentLine, charNum, AS_DEFAULT)))
-			return;
+			return false;
 
 		isInLineBreak = false;
 		// check for extra indents
@@ -3031,16 +3084,27 @@ void ASFormatter::formatRunInStatement()
 		if (getIndentString() == "\t")
 		{
 			appendChar('\t', false);
+			horstmannIndentChars = 2;	// one for { and one for tab
 			if (extraIndent)
+			{
 				appendChar('\t', false);
+				horstmannIndentChars++;
+			}
 		}
 		else
 		{
-			formattedLine.append(getIndentLength()-1, ' ');
+			int indent = getIndentLength();
+			formattedLine.append(indent-1, ' ');
+			horstmannIndentChars = indent;
 			if (extraIndent)
-				formattedLine.append(getIndentLength(), ' ');
+			{
+				formattedLine.append(indent, ' ');
+				horstmannIndentChars += indent;
+			}
 		}
+		return true;
 	}
+	return false;
 }
 
 /**

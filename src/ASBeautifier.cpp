@@ -160,9 +160,13 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	// variables set by ASFormatter
 	// must also be updated in activeBeautifierStack
 	inLineNumber = other.inLineNumber;
+	horstmannIndentInStatement = other.horstmannIndentInStatement;
+	nonInStatementBracket = other.nonInStatementBracket;
 	lineCommentNoBeautify = other.lineCommentNoBeautify;
 	isNonInStatementArray = other.isNonInStatementArray;
 	isSharpAccessor = other.isSharpAccessor;
+	isInExtern = other.isInExtern;
+	isInEnum = other.isInEnum;
 
 	// private variables
 	indentString = other.indentString;
@@ -322,7 +326,11 @@ void ASBeautifier::init()
 	previousLineProbationTab = false;
 	isNonInStatementArray = false;
 	isSharpAccessor = false;
+	isInExtern = false;
+	isInEnum = false;
 	inLineNumber = 0;
+	horstmannIndentInStatement = 0;
+	nonInStatementBracket = 0;
 }
 
 /**
@@ -865,6 +873,8 @@ string ASBeautifier::beautify(const string &originalLine)
 	if (!isInDefine && activeBeautifierStack != NULL && !activeBeautifierStack->empty())
 	{
 		activeBeautifierStack->back()->inLineNumber = inLineNumber;
+		activeBeautifierStack->back()->horstmannIndentInStatement = horstmannIndentInStatement;
+		activeBeautifierStack->back()->nonInStatementBracket = nonInStatementBracket;
 		activeBeautifierStack->back()->lineCommentNoBeautify = lineCommentNoBeautify;
 		activeBeautifierStack->back()->isNonInStatementArray = isNonInStatementArray;
 		activeBeautifierStack->back()->isSharpAccessor = isSharpAccessor;
@@ -875,7 +885,6 @@ string ASBeautifier::beautify(const string &originalLine)
 	// calculate preliminary indentation based on data from past lines
 	if (!inStatementIndentStack->empty())
 		spaceTabCount = inStatementIndentStack->back();
-
 
 	for (i = 0; i < (int) headerStack->size(); i++)
 	{
@@ -1223,12 +1232,16 @@ string ASBeautifier::beautify(const string &originalLine)
 			                      || prevNonSpaceCh == ')'
 			                      || prevNonSpaceCh == ';'
 			                      || peekNextChar(line, i) == '{'
+			                      || isInClassHeader
 			                      || isNonInStatementArray
 			                      || isSharpAccessor
-			                      || isInClassHeader
+								  || isInExtern
 			                      || (isInDefine &&
 			                          (prevNonSpaceCh == '('
 			                           || isLegalNameChar(prevNonSpaceCh))));
+
+			if (isNonInStatementArray && !isInEnum && prevNonSpaceCh != '=' && i == nonInStatementBracket)
+				isBlockOpener = false;
 
 			isInClassHeader = false;
 
@@ -1927,7 +1940,7 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	}
 
 	if (updateParenStack)
-		parenIndentStack->push_back(i + spaceTabCount);
+		parenIndentStack->push_back(i + spaceTabCount - horstmannIndentInStatement);
 
 	int tabIncrement = tabIncrementIn;
 
@@ -1954,7 +1967,8 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	        inStatementIndent < inStatementIndentStack->back())
 		inStatementIndent = inStatementIndentStack->back();
 
-	if (isNonInStatementArray)
+	// the block opener is not indented for a NonInStatementArray
+	if (isNonInStatementArray && !bracketBlockStateStack->empty() && bracketBlockStateStack->back())
 		inStatementIndent = 0;
 
 	inStatementIndentStack->push_back(inStatementIndent);

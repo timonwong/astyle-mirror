@@ -97,7 +97,8 @@ enum BracketType   { NULL_TYPE = 0,
                      DEFINITION_TYPE = 8,
                      COMMAND_TYPE = 16,
                      ARRAY_TYPE  = 32,          // arrays and enums
-                     SINGLE_LINE_TYPE = 64
+					 EXTERN_TYPE  = 64,			// extern "C". not a command type extern
+                     SINGLE_LINE_TYPE = 128
                    };
 
 //----------------------------------------------------------------------------
@@ -140,7 +141,8 @@ class ASResource
 		static const string AS_SWITCH, AS_CASE, AS_DEFAULT;
 		static const string AS_TRY, AS_CATCH, AS_THROWS, AS_FINALLY;
 		static const string AS_PUBLIC, AS_PROTECTED, AS_PRIVATE;
-		static const string AS_CLASS, AS_STRUCT, AS_UNION, AS_INTERFACE, AS_NAMESPACE, AS_EXTERN;
+		static const string AS_CLASS, AS_STRUCT, AS_UNION, AS_INTERFACE, AS_NAMESPACE;
+		static const string AS_EXTERN, AS_ENUM;
 		static const string AS_STATIC, AS_CONST, AS_WHERE, AS_NEW;
 		static const string AS_SYNCHRONIZED;
 		static const string AS_OPERATOR, AS_TEMPLATE;
@@ -291,9 +293,13 @@ class ASBeautifier : protected ASResource, protected ASBase
 
 		// variables set by ASFormatter - must be updated in activeBeautifierStack
 		int  inLineNumber;
+		int  horstmannIndentInStatement;
+		int  nonInStatementBracket;
 		bool lineCommentNoBeautify;
 		bool isNonInStatementArray;
 		bool isSharpAccessor;
+		bool isInExtern;
+		bool isInEnum;
 
 	private:
 		ASBeautifier(const ASBeautifier &copy);
@@ -478,7 +484,7 @@ class ASFormatter : public ASBeautifier
 		char peekNextChar() const;
 		BracketType getBracketType();
 		bool commentAndHeaderFollows() const;
-		void formatRunInStatement();
+		bool formatRunInStatement();
 		bool getNextChar();
 		bool getNextLine(bool emptyLineWasDeleted = false);
 		bool isBeforeComment() const;
@@ -543,6 +549,7 @@ class ASFormatter : public ASBeautifier
 		int  commentLineAdjust;
 		int  templateDepth;
 		int  traceLineNumber;
+		int  horstmannIndentChars;
 		size_t formattedLineCommentNum;     // comment location on formattedLine
 		size_t currentLineBracketNum;		// first bracket location on currentLine
 		size_t previousReadyFormattedLineLength;

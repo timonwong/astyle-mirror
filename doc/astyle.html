@@ -174,7 +174,9 @@
     
         <p>Embedded statements that are multiple-line and are NOT in a C type format, such as SQL or Python, are
             usually mal-formatted. (a C type format has blocks enclosed
-            by brackets and statements terminated by a semi-colon).
+            by brackets and statements terminated by a semi-colon). Macros defining functions
+            may cause the following code to be mal-formatted because the macro is missing the
+            brackets and semi-colons from the definition.
         If you have source code with these types of statements, exclude them with the <code>--exclude=</code> 
         statement described in the "Other Options" section.</p>
     
@@ -619,8 +621,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         <p id="_brackets=horstmann">
         <code class="title">--brackets=horstmann / -g</code><br />
             Break brackets from their pre-block statements but allow run-in statements on the
-            same line as an opening bracket. Cannot use --indent-brackets withthis option. Run-in statements do NOT attach to
-            brackets for namespaces, classes, or interfaces. &nbsp;</p>
+            same line as an opening bracket. Cannot use --indent-brackets with this option.
+            &nbsp;</p>
 
         <div class="code">
             <pre>void Foo(bool isFoo)

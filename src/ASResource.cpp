@@ -44,6 +44,7 @@ const string ASResource::AS_UNION = string("union");
 const string ASResource::AS_INTERFACE = string("interface");
 const string ASResource::AS_NAMESPACE = string("namespace");
 const string ASResource::AS_EXTERN = string("extern");
+const string ASResource::AS_ENUM = string("enum");
 const string ASResource::AS_PUBLIC = string("public");
 const string ASResource::AS_PROTECTED = string("protected");
 const string ASResource::AS_PRIVATE = string("private");
