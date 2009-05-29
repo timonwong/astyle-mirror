@@ -198,6 +198,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isMinimalConditinalIndentSet = other.isMinimalConditinalIndentSet;
 	shouldForceTabIndentation = other.shouldForceTabIndentation;
 	emptyLineFill = other.emptyLineFill;
+	lineOpensComment = other.lineOpensComment;
 	backslashEndsPrevLine = other.backslashEndsPrevLine;
 	blockCommentNoIndent = other.blockCommentNoIndent;
 	blockCommentNoBeautify = other.blockCommentNoBeautify;
@@ -207,7 +208,6 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	parenDepth = other.parenDepth;
 	indentLength = other.indentLength;
 	blockTabCount = other.blockTabCount;
-	leadingWhiteSpaces = other.leadingWhiteSpaces;
 	maxInStatementIndent = other.maxInStatementIndent;
 	templateDepth = other.templateDepth;
 	prevFinalLineSpaceTabCount = other.prevFinalLineSpaceTabCount;
@@ -307,7 +307,6 @@ void ASBeautifier::init()
 	templateDepth = 0;
 	parenDepth = 0;
 	blockTabCount = 0;
-	leadingWhiteSpaces = 0;
 	prevNonSpaceCh = '{';
 	currentNonSpaceCh = '{';
 	prevNonLegalCh = '{';
@@ -317,6 +316,7 @@ void ASBeautifier::init()
 	prevFinalLineTabCount = 0;
 	probationHeader = NULL;
 	backslashEndsPrevLine = false;
+	lineOpensComment = false;
 	isInDefine = false;
 	isInDefineDefinition = false;
 	defineTabCount = 0;
@@ -663,6 +663,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	currentHeader = NULL;
 	lineStartsInComment = isInComment;
 	blockCommentNoBeautify = blockCommentNoIndent;
+	lineOpensComment = false;
 	previousLineProbationTab = false;
 	haveLineContinuationChar = false;
 
@@ -678,62 +679,26 @@ string ASBeautifier::beautify(const string &originalLine)
 	}
 	else if (!isInComment)
 	{
-		int strlen = originalLine.length();
-		leadingWhiteSpaces = 0;
-
-		for (int j = 0; j < strlen && (isWhiteSpace(originalLine[j]) || originalLine[j] == '{'); j++)
-		{
-			if (originalLine[j] == '\t')
-				leadingWhiteSpaces += indentLength;
-			//else if (originalLine[j] == '{')
-			//	leadingWhiteSpaces++;
-			else
-				leadingWhiteSpaces++;
-		}
 		line = trim(originalLine);
-		if (line[0] == '{')
+		if (line.length() > 0 && line[0] == '{')
 			lineBeginsWithBracket = true;
+
+		size_t j = line.find_first_not_of(" \t{");
+		if (j != string::npos && line.compare(j, 2, "/*") == 0)
+			lineOpensComment = true;
 	}
 	else
 	{
-		// convert leading tabs to spaces
-		string spaceTabs(indentLength, ' ');
-		string newLine = originalLine;
-		int strlen = newLine.length();
-
-		for (int j=0; j < leadingWhiteSpaces && j < strlen; j++)
-		{
-			if (newLine[j] == '\t')
-			{
-				newLine.replace(j, 1, spaceTabs);
-				strlen = newLine.length();
-			}
-		}
-
-		// trim the comment leaving the new leading whitespace
-		int trimSize = 0;
-		strlen = newLine.length();
-
-		while (trimSize < strlen
-		        && trimSize < leadingWhiteSpaces
-		        && isWhiteSpace(newLine[trimSize]))
-			trimSize++;
-
-
-		while (trimSize < strlen && isWhiteSpace(newLine[strlen-1]))
-			strlen--;
-
-		line = newLine.substr(trimSize, strlen);
-		int spacesToDelete;
+		// trim the end of comment lines
+		line = originalLine;
 		size_t trimEnd = line.find_last_not_of(" \t");
 		if (trimEnd == string::npos)
-			spacesToDelete = line.length();
+			trimEnd = 0;
 		else
-			spacesToDelete = line.length() - 1 - trimEnd;
-		if (spacesToDelete > 0)
-			line.erase(trimEnd + 1, spacesToDelete);
+			trimEnd++;
+		if (trimEnd < line.length())
+			line.erase(trimEnd);
 	}
-
 
 	if (line.length() == 0)
 	{
@@ -922,10 +887,9 @@ string ASBeautifier::beautify(const string &originalLine)
 		}
 
 		// is the switchIndent option is on, indent switch statements an additional indent.
-		else if (switchIndent && i > 1 &&
-		         (*headerStack)[i-1] == &AS_SWITCH &&
-		         (*headerStack)[i] == &AS_OPEN_BRACKET
-		        )
+		else if (switchIndent && i > 1
+		         && (*headerStack)[i-1] == &AS_SWITCH
+		         && (*headerStack)[i] == &AS_OPEN_BRACKET)
 		{
 			++tabCount;
 			isInSwitch = true;
@@ -942,7 +906,8 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && headerStack->size() >= 2
 	        && (*headerStack)[headerStack->size()-2] == &AS_CLASS
 	        && (*headerStack)[headerStack->size()-1] == &AS_OPEN_BRACKET
-	        && line[0] == '}')
+	        && line[0] == '}'
+	        && bracketBlockStateStack->back() == true)
 		--tabCount;
 
 	else if (!lineStartsInComment
@@ -956,8 +921,16 @@ string ASBeautifier::beautify(const string &originalLine)
 
 	if (isInClassHeader)
 	{
-		isInClassHeaderTab = true;
-		tabCount += 2;
+		if (lineStartsInComment || lineOpensComment)
+		{
+			if (!lineBeginsWithBracket)
+				tabCount--;
+		}
+		else
+		{
+			isInClassHeaderTab = true;
+			tabCount += 2;
+		}
 	}
 
 	if (isInConditional)
@@ -1057,8 +1030,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			isInComment = true;
 			outBuffer.append(1, '*');
 			i++;
-			size_t j = line.find_first_not_of(" \t{");
-			if (!line.compare(j, 2, "/*") == 0)     // does line start with comment?
+			if (!lineOpensComment)					// does line start with comment?
 				blockCommentNoIndent = true;        // if no, cannot indent continuation lines
 			continue;
 		}
@@ -1235,12 +1207,16 @@ string ASBeautifier::beautify(const string &originalLine)
 			                      || isInClassHeader
 			                      || isNonInStatementArray
 			                      || isSharpAccessor
-								  || isInExtern
+			                      || isInExtern
 			                      || (isInDefine &&
 			                          (prevNonSpaceCh == '('
 			                           || isLegalNameChar(prevNonSpaceCh))));
 
-			if (isNonInStatementArray && !isInEnum && prevNonSpaceCh != '=' && i == nonInStatementBracket)
+			if (isNonInStatementArray
+			        && prevNonSpaceCh != ')'
+			        && prevNonSpaceCh != '='
+			        && !isInEnum
+			        && i == nonInStatementBracket)
 				isBlockOpener = false;
 
 			isInClassHeader = false;
@@ -1835,6 +1811,7 @@ string ASBeautifier::beautify(const string &originalLine)
 
 	// correctly indent class continuation lines...
 	else if (!lineStartsInComment
+	         && !lineOpensComment
 	         && isInClassHeaderTab
 	         && !blockIndent
 	         && outBuffer.length() > 0

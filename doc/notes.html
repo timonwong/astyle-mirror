@@ -39,7 +39,12 @@
         <li>Fix attached brackets attaching a cosing header to a single line block.</li>
         <li>Fix broken brackets breaking a single line block before a comment.</li>
         <li>Fix 'extern' keyword using in-statement inents instead of tab indents. </li>
+        <li>Fix deleting a space before a line end comment when attaching 'else' to a closing
+            bracket. </li>
+        <li>Fix adding a space before a line end comment when the comment is preceded by a tab.</li>
         <li>Changes from Ettl Martin for cppcheck compilance. </li>
+        <li>Change space padding of line end comments to one space when the proper alignment
+            cannot be maintained.</li>
         <li>Remove trace file from ASFormatter and use 'cout' instead. </li>
         <li>Split the help display "Formatting Options" into "Formatting Options" and "Padding
             Options".</li>
@@ -49,6 +54,13 @@
             characters.</li>
         <li>Remove peekNextChar() function from ASBeautifier and use the function in ASBase.</li>
         <li>Fix memory leak reporting of static class member vectors. </li>
+        <li>Refactor:
+        <ul>
+            <li>Move multi-line comment alignment from ASBeautifier to ASFormatter.</li>
+            <li>New functions formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
+            <li>New functions formatCommentOpener and formatLineCommentOpener.</li>
+        </ul>
+    </li>
     </ul>
     
     <h3 id="_1.23">Artistic Style 1.23&nbsp; (February 2009)</h3>

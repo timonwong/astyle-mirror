@@ -97,7 +97,7 @@ enum BracketType   { NULL_TYPE = 0,
                      DEFINITION_TYPE = 8,
                      COMMAND_TYPE = 16,
                      ARRAY_TYPE  = 32,          // arrays and enums
-					 EXTERN_TYPE  = 64,			// extern "C". not a command type extern
+                     EXTERN_TYPE  = 64,			// extern "C". not a command type extern
                      SINGLE_LINE_TYPE = 128
                    };
 
@@ -368,6 +368,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool shouldForceTabIndentation;
 		bool emptyLineFill;
 		bool backslashEndsPrevLine;
+		bool lineOpensComment;
 		bool blockCommentNoIndent;
 		bool blockCommentNoBeautify;
 		bool previousLineProbationTab;
@@ -376,7 +377,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  parenDepth;
 		int  indentLength;
 		int  blockTabCount;
-		int  leadingWhiteSpaces;
 		int  maxInStatementIndent;
 		int  templateDepth;
 		int  prevFinalLineSpaceTabCount;
@@ -483,6 +483,7 @@ class ASFormatter : public ASBeautifier
 		void initializeNewLine();
 		char peekNextChar() const;
 		BracketType getBracketType();
+		bool appendCharInsideComments();
 		bool commentAndHeaderFollows() const;
 		bool formatRunInStatement();
 		bool getNextChar();
@@ -491,6 +492,7 @@ class ASFormatter : public ASBeautifier
 		bool isBeforeAnyComment() const;
 		bool isBeforeAnyLineEndComment(int startPos) const;
 		bool isBracketType(BracketType a, BracketType b) const;
+		bool isCurrentBracketBroken() const;
 		bool isEmptyLine(const string &line) const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
 		bool isPointerOrReference() const;
@@ -499,7 +501,6 @@ class ASFormatter : public ASBeautifier
 		bool isOneLineBlockReached() const;
 		bool isNextCharOpeningBracket(int startChar) const;
 //		bool lineBeginsWith(char charToCheck) const;
-		void appendCharInsideComments();
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
 		void appendSpaceAfter();
@@ -508,7 +509,10 @@ class ASFormatter : public ASBeautifier
 		void initContainer(vector<BracketType>* &container, vector<BracketType>* value);
 		void padOperators(const string *newOperator);
 		void padParens();
-		void formatBrackets(BracketType bracketType);
+		void formatClosingBracket(BracketType bracketType);
+		void formatCommentOpener();
+		void formatLineCommentOpener();
+		void formatOpeningBracket(BracketType bracketType);
 		void formatArrayBrackets(BracketType bracketType, bool isOpeningArrayBracket);
 		void adjustComments();
 		void setBreakBlocksVariables();
@@ -546,10 +550,10 @@ class ASFormatter : public ASBeautifier
 		int  preprocBracketTypeStackSize;
 		int  tabIncrementIn;
 		int  spacePadNum;
-		int  commentLineAdjust;
 		int  templateDepth;
 		int  traceLineNumber;
 		int  horstmannIndentChars;
+		size_t leadingSpaces;
 		size_t formattedLineCommentNum;     // comment location on formattedLine
 		size_t currentLineBracketNum;		// first bracket location on currentLine
 		size_t previousReadyFormattedLineLength;
@@ -565,6 +569,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldConvertTabs;
 		bool isInLineComment;
 		bool isInComment;
+		bool noTrimCommentContinuation;
 		bool isInPreprocessor;
 		bool isInTemplate;   // true both in template definitions (e.g. template<class A>) and template usage (e.g. F<int>).
 		bool doesLineStartComment;
