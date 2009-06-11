@@ -283,6 +283,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	isNonParenHeader = true;
 	foundNamespaceHeader = false;
 	foundClassHeader = false;
+	foundStructHeader = false;
 	foundInterfaceHeader = false;
 	foundPreDefinitionHeader = false;
 	foundPreCommandHeader = false;
@@ -309,6 +310,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	isCharImmediatelyPostReturn = false;
 	isCharImmediatelyPostOperator = false;
 	previousBracketIsBroken = false;
+	isInHorstmannRunIn = false;
 	currentLineBeginsWithBracket = false;
 
 	isPrependPostBlockEmptyLineRequested = false;
@@ -357,6 +359,10 @@ string ASFormatter::nextLine()
 			// make sure that a virgin '{' at the begining of the file will be treated as a block...
 			if (isInVirginLine && currentChar == '{' && currentLineBeginsWithBracket)	// lineBeginsWith('{')
 				previousCommandChar = '{';
+			if (isInHorstmannRunIn)
+				isInLineBreak = false;
+			if (!isWhiteSpace(currentChar))
+				isInHorstmannRunIn = false;
 			isPreviousCharPostComment = isCharImmediatelyPostComment;
 			isCharImmediatelyPostComment = false;
 			isCharImmediatelyPostTemplate = false;
@@ -369,9 +375,9 @@ string ASFormatter::nextLine()
 		if (inLineNumber >= 7)
 			int x = 1;
 
-		if (shouldBreakLineAtNextChar)
+		if (shouldBreakLineAtNextChar && !isWhiteSpace(currentChar))
 		{
-			breakLine();
+			isInLineBreak = true;
 			shouldBreakLineAtNextChar = false;
 		}
 
@@ -468,6 +474,7 @@ string ASFormatter::nextLine()
 			}
 
 			appendCurrentChar();
+
 			// append the text to the ending quoteChar or an escape sequence
 			// tabs in quotes are NOT changed by convert-tabs
 			if (isInQuote && currentChar != '\\')
@@ -510,6 +517,12 @@ string ASFormatter::nextLine()
 			        || isSequenceReached("#error")
 			        || isSequenceReached("#warning"))
 			{
+				// check for horstmann run-in
+				if (formattedLine[0] == '{')
+				{
+					isInLineBreak = true;
+					isInHorstmannRunIn = false;
+				}
 				isInLineComment = true;
 				appendCurrentChar();
 				continue;
@@ -525,16 +538,7 @@ string ASFormatter::nextLine()
 		// handle white space - needed to simplify the rest.
 		if (isWhiteSpace(currentChar))
 		{
-			if (bracketFormatMode == HORSTMANN_MODE
-			        && doesLineStartComment
-			        && previousCommandChar == '{'
-			        && formattedLine[0] == '{'
-			        && isBracketType(bracketTypeStack->back(), COMMAND_TYPE)
-			        && !isImmediatelyPostComment
-			        && !isImmediatelyPostLineComment)
-				appendCurrentChar(false);	// don't break line
-			else
-				appendCurrentChar();
+			appendCurrentChar();
 			continue;
 		}
 
@@ -546,6 +550,12 @@ string ASFormatter::nextLine()
 		if (currentChar == '#')
 		{
 			isInPreprocessor = true;
+			// check for horstmann run-in
+			if (formattedLine[0] == '{')
+			{
+				isInLineBreak = true;
+				isInHorstmannRunIn = false;
+			}
 			processPreprocessor();
 			//  need to fall thru here to reset the variables
 		}
@@ -733,6 +743,7 @@ string ASFormatter::nextLine()
 				BracketType newBracketType = getBracketType();
 				foundNamespaceHeader = false;
 				foundClassHeader = false;
+				foundStructHeader = false;
 				foundInterfaceHeader = false;
 				foundPreDefinitionHeader = false;
 				foundPreCommandHeader = false;
@@ -1023,6 +1034,8 @@ string ASFormatter::nextLine()
 					foundNamespaceHeader = true;
 				if (newHeader == &AS_CLASS)
 					foundClassHeader = true;
+				if (newHeader == &AS_STRUCT)
+					foundStructHeader = true;
 				if (newHeader == &AS_INTERFACE)
 					foundInterfaceHeader = true;
 				foundPreDefinitionHeader = true;
@@ -1076,6 +1089,7 @@ string ASFormatter::nextLine()
 			foundQuestionMark = false;
 			foundNamespaceHeader = false;
 			foundClassHeader = false;
+			foundStructHeader = false;
 			foundInterfaceHeader = false;
 			foundPreDefinitionHeader = false;
 			foundPreCommandHeader = false;
@@ -1612,6 +1626,9 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 
 		initializeNewLine();
 		currentChar = currentLine[charNum];
+		if (isInHorstmannRunIn && previousNonWSChar == '{')
+			isInLineBreak = false;
+		isInHorstmannRunIn = false;
 
 		if (shouldConvertTabs && currentChar == '\t')
 			convertTabToSpaces();
@@ -1851,6 +1868,8 @@ BracketType ASFormatter::getBracketType()
 			returnVal = (BracketType)(returnVal | NAMESPACE_TYPE);
 		else if (foundClassHeader)
 			returnVal = (BracketType)(returnVal | CLASS_TYPE);
+		else if (foundStructHeader)
+			returnVal = (BracketType)(returnVal | STRUCT_TYPE);
 		else if (foundInterfaceHeader)
 			returnVal = (BracketType)(returnVal | INTERFACE_TYPE);
 	}
@@ -2078,7 +2097,11 @@ bool ASFormatter::isNextWordSharpNonParenHeader(int startChar) const
 {
 	// look ahead to find the next non-comment text
 	string nextText = peekNextText(currentLine.substr(startChar));
-	if (nextText.length() == 0 || !isCharPotentialHeader(nextText, 0))
+	if (nextText.length() == 0)
+		return false;
+	if (nextText[0] == '[')
+		return true;
+	if (!isCharPotentialHeader(nextText, 0))
 		return false;
 	if (findKeyword(nextText, 0, AS_GET) || findKeyword(nextText, 0, AS_SET)
 	        || findKeyword(nextText, 0, AS_ADD) || findKeyword(nextText, 0, AS_REMOVE))
@@ -2786,7 +2809,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				else if (isBeforeAnyComment())
 				{
 					// do not break unless comment is at line end
-					if (isBeforeAnyLineEndComment(charNum))
+					if (isBeforeAnyLineEndComment(charNum) && !currentLineBeginsWithBracket)
 					{
 						currentChar = ' ';              // remove bracket from current line
 						appendOpeningBracket = true;    // append bracket to following line
@@ -2799,8 +2822,6 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				if (currentLineBeginsWithBracket && (int)currentLineBracketNum == charNum)
 					shouldBreakLineAtNextChar = true;
 			}
-			// currently horstmann does NOT attach run-ins
-			// but will leave them if there already
 			else if (bracketFormatMode == HORSTMANN_MODE)
 			{
 				if (isWhiteSpace(peekNextChar()))
@@ -2808,7 +2829,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				else if (isBeforeAnyComment())
 				{
 					// do not break unless comment is at line end
-					if (isBeforeAnyLineEndComment(charNum))
+					if (isBeforeAnyLineEndComment(charNum) && !currentLineBeginsWithBracket)	// lineBeginsWith('{')
 					{
 						currentChar = ' ';              // remove bracket from current line
 						appendOpeningBracket = true;    // append bracket to following line
@@ -2817,6 +2838,8 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				if (!isInLineBreak)
 					appendSpacePad();
 				appendCurrentChar();
+				if (isWhiteSpace(peekNextChar()))
+					formatRunInStatement();
 			}
 			else if (bracketFormatMode == NONE_MODE)
 			{
@@ -2893,9 +2916,9 @@ bool ASFormatter::formatRunInStatement()
 	bool extraIndent = false;
 	isInLineBreak = true;
 	size_t firstText = formattedLine.find_first_not_of(" \t");
-	if ((firstText != string::npos && formattedLine[firstText] == '{')
-	        && (isBracketType(bracketTypeStack->back(), COMMAND_TYPE)
-	            || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)))
+	if (firstText != string::npos && formattedLine[firstText] == '{')
+		//&& (isBracketType(bracketTypeStack->back(), COMMAND_TYPE)
+		//    || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)))
 	{
 		if (isBracketType(bracketTypeStack->back(), NAMESPACE_TYPE))
 			return false;
@@ -2959,6 +2982,7 @@ bool ASFormatter::formatRunInStatement()
 				horstmannIndentChars += indent;
 			}
 		}
+		isInHorstmannRunIn = true;
 		return true;
 	}
 	return false;
@@ -3098,9 +3122,9 @@ void ASFormatter::processPreprocessor()
 	{
 		// delete stack entries added in #if
 		// should be replaced by #else
-		int addedPreproc = bracketTypeStack->size() - preprocBracketTypeStackSize;
-		if (addedPreproc > 0)
+		if (preprocBracketTypeStackSize > 0)
 		{
+			int addedPreproc = bracketTypeStack->size() - preprocBracketTypeStackSize;
 			for (int i=0; i < addedPreproc; i++)
 				bracketTypeStack->pop_back();
 		}
@@ -3201,7 +3225,8 @@ bool ASFormatter::isCurrentBracketBroken() const
 			// if not C style then break the first bracket after a class if a function
 			else if (!isCStyle())
 			{
-				if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], CLASS_TYPE)
+				if ((isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], CLASS_TYPE)
+				        || isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], STRUCT_TYPE))
 				        && isBracketType((*bracketTypeStack)[bracketTypeStackEnd], COMMAND_TYPE))
 					breakBracket = true;
 			}
@@ -3239,8 +3264,7 @@ void ASFormatter::formatLineCommentOpener()
 	// check for run-in statement
 	if (previousCommandChar == '{'
 	        && !isImmediatelyPostComment
-	        && !isImmediatelyPostLineComment
-	        && !lineCommentNoIndent)
+	        && !isImmediatelyPostLineComment)
 	{
 		if (bracketFormatMode == NONE_MODE)
 		{
@@ -3249,11 +3273,18 @@ void ASFormatter::formatLineCommentOpener()
 		}
 		else if (bracketFormatMode == HORSTMANN_MODE)
 		{
-			formatRunInStatement();
+			if (!lineCommentNoIndent)
+				formatRunInStatement();
+			else
+				isInLineBreak = true;
+		}
+		else if (bracketFormatMode == BREAK_MODE)
+		{
+			if (formattedLine[0] == '{')
+				isInLineBreak = true;
 		}
 		else
 		{
-			// add a line break if the bracket is broken
 			if (currentLineBeginsWithBracket)
 				isInLineBreak = true;
 		}

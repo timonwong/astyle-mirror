@@ -93,12 +93,13 @@ enum BracketMode   { NONE_MODE,
 enum BracketType   { NULL_TYPE = 0,
                      NAMESPACE_TYPE = 1,        // also a DEFINITION_TYPE
                      CLASS_TYPE = 2,            // also a DEFINITION_TYPE
-                     INTERFACE_TYPE = 4,        // also a DEFINITION_TYPE
-                     DEFINITION_TYPE = 8,
-                     COMMAND_TYPE = 16,
-                     ARRAY_TYPE  = 32,          // arrays and enums
-                     EXTERN_TYPE  = 64,			// extern "C". not a command type extern
-                     SINGLE_LINE_TYPE = 128
+                     STRUCT_TYPE = 4,           // also a DEFINITION_TYPE
+                     INTERFACE_TYPE = 8,        // also a DEFINITION_TYPE
+                     DEFINITION_TYPE = 16,
+                     COMMAND_TYPE = 32,
+                     ARRAY_TYPE = 64,			// arrays and enums
+                     EXTERN_TYPE = 128,			// extern "C". not a command type extern
+                     SINGLE_LINE_TYPE = 256
                    };
 
 //----------------------------------------------------------------------------
@@ -166,6 +167,7 @@ class ASResource
 		static const string AS_ASM;
 		static const string AS_FOREACH, AS_LOCK, AS_UNSAFE, AS_FIXED;
 		static const string AS_GET, AS_SET, AS_ADD, AS_REMOVE;
+		static const string AS_DELEGATE, AS_UNCHECKED;
 		static const string AS_CONST_CAST, AS_DYNAMIC_CAST, AS_REINTERPRET_CAST, AS_STATIC_CAST;
 };  // Class ASResource
 
@@ -589,6 +591,7 @@ class ASFormatter : public ASBeautifier
 		bool foundPreDefinitionHeader;
 		bool foundNamespaceHeader;
 		bool foundClassHeader;
+		bool foundStructHeader;
 		bool foundInterfaceHeader;
 		bool foundPreCommandHeader;
 		bool foundCastOperator;
@@ -607,6 +610,7 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostReturn;
 		bool isCharImmediatelyPostOperator;
 		bool previousBracketIsBroken;
+		bool isInHorstmannRunIn;
 		bool currentLineBeginsWithBracket;
 		bool shouldBreakOneLineBlocks;
 		bool shouldReparseCurrentChar;

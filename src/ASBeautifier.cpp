@@ -1233,8 +1233,8 @@ string ASBeautifier::beautify(const string &originalLine)
 
 			// TODO: TEMPORARY??? fix to give C# }) statements a full indent
 			// check for anonymous method
-			if (isBlockOpener && isSharpStyle() && !parenIndentStack->empty())
-				isBlockOpener = false;
+			//if (isBlockOpener && isSharpStyle() && !parenIndentStack->empty())
+			//	isBlockOpener = false;
 
 			bracketBlockStateStack->push_back(isBlockOpener);
 
@@ -1258,9 +1258,20 @@ string ASBeautifier::beautify(const string &originalLine)
 				isInClassHeaderTab = false;
 				// decrease tab count if bracket is broken
 				size_t firstChar = line.find_first_not_of(" \t");
-				if (firstChar != string::npos)
-					if (line[firstChar] == '{' && (int) firstChar == i)
-						tabCount -= 2;
+				if (firstChar != string::npos
+				        && line[firstChar] == '{'
+				        && (int) firstChar == i)
+				{
+					tabCount -= 2;
+					// decrease one more if an empty class
+					if (headerStack->size() > 0
+					        && (*headerStack).back() == &AS_CLASS)
+					{
+						int nextChar = getNextProgramCharDistance(line, i);
+						if (line[nextChar] == '}')
+							tabCount--;
+					}
+				}
 			}
 
 			if (bracketIndent && !namespaceIndent && headerStack->size() > 0
@@ -1271,18 +1282,21 @@ string ASBeautifier::beautify(const string &originalLine)
 			}
 
 			// do not allow inStatementIndent - should occur for Java files only
-			if (inStatementIndentStack->size() > 0)
-			{
-				spaceTabCount = 0;
-				inStatementIndentStack->back() = 0;
-			}
+			//if (inStatementIndentStack->size() > 0)
+			//{
+			//	spaceTabCount = 0;
+			//	inStatementIndentStack->back() = 0;
+			//}
 
 			blockParenDepthStack->push_back(parenDepth);
 			blockStatementStack->push_back(isInStatement);
 
 			inStatementIndentStackSizeStack->push_back(inStatementIndentStack->size());
 			if (inStatementIndentStack->size() > 0)
+			{
+				spaceTabCount = 0;
 				inStatementIndentStack->back() = 0;
+			}
 
 			blockTabCount += isInStatement ? 1 : 0;
 			parenDepth = 0;

@@ -139,6 +139,8 @@ const string ASResource::AS_GET = string("get");
 const string ASResource::AS_SET = string("set");
 const string ASResource::AS_ADD = string("add");
 const string ASResource::AS_REMOVE = string("remove");
+const string ASResource::AS_DELEGATE = string("delegate");
+const string ASResource::AS_UNCHECKED = string("unchecked");
 
 const string ASResource::AS_CONST_CAST = string("const_cast");
 const string ASResource::AS_DYNAMIC_CAST = string("dynamic_cast");
@@ -246,6 +248,8 @@ void ASResource::buildHeaders(vector<const string*> &headers, int fileType, bool
 		headers.push_back(&AS_SET);
 		headers.push_back(&AS_ADD);
 		headers.push_back(&AS_REMOVE);
+		headers.push_back(&AS_DELEGATE);
+		headers.push_back(&AS_UNCHECKED);
 	}
 
 	if (beautifier)
@@ -334,6 +338,8 @@ void ASResource::buildNonParenHeaders(vector<const string*> &nonParenHeaders, in
 		nonParenHeaders.push_back(&AS_SET);
 		nonParenHeaders.push_back(&AS_ADD);
 		nonParenHeaders.push_back(&AS_REMOVE);
+		nonParenHeaders.push_back(&AS_DELEGATE);
+		nonParenHeaders.push_back(&AS_UNCHECKED);
 	}
 
 	if (beautifier)
@@ -436,6 +442,7 @@ void ASResource::buildPreBlockStatements(vector<const string*> &preBlockStatemen
 		preBlockStatements.push_back(&AS_INTERFACE);
 		preBlockStatements.push_back(&AS_NAMESPACE);
 		preBlockStatements.push_back(&AS_WHERE);
+		preBlockStatements.push_back(&AS_STRUCT);
 	}
 	sort(preBlockStatements.begin(), preBlockStatements.end(), sortOnName);
 }
@@ -489,6 +496,7 @@ void ASResource::buildPreDefinitionHeaders(vector<const string*> &preDefinitionH
 	}
 	if (fileType == SHARP_TYPE)
 	{
+		preDefinitionHeaders.push_back(&AS_STRUCT);
 		preDefinitionHeaders.push_back(&AS_INTERFACE);
 		preDefinitionHeaders.push_back(&AS_NAMESPACE);
 	}
