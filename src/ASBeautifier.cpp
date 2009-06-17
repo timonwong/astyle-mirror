@@ -539,6 +539,16 @@ string ASBeautifier::getIndentString(void)
 }
 
 /**
+ * get the state of the force tab indentation option.
+ *
+ * @return   state of force tab indentation.
+ */
+bool ASBeautifier::getForceTabIndentation(void)
+{
+	return shouldForceTabIndentation;
+}
+
+/**
  * get the state of the block indentation option.
  *
  * @return   state of blockIndent option.
@@ -1212,12 +1222,12 @@ string ASBeautifier::beautify(const string &originalLine)
 			                          (prevNonSpaceCh == '('
 			                           || isLegalNameChar(prevNonSpaceCh))));
 
-			if (isNonInStatementArray
-			        && prevNonSpaceCh != ')'
-			        && prevNonSpaceCh != '='
-			        && !isInEnum
-			        && i == nonInStatementBracket)
-				isBlockOpener = false;
+			//if (isNonInStatementArray
+			//        && prevNonSpaceCh != ')'
+			//        && prevNonSpaceCh != '='
+			//        && !isInEnum
+			//        && i == nonInStatementBracket)
+			//	isBlockOpener = false;
 
 			isInClassHeader = false;
 
@@ -1917,14 +1927,16 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	int remainingCharNum = line.length() - i;
 	int nextNonWSChar = getNextProgramCharDistance(line, i);
 
-	// if indent is around the last char in the line, indent instead 2 spaces from the previous indent
+	// if indent is around the last char in the line, indent instead one indent from the previous indent
 	if (nextNonWSChar == remainingCharNum)
 	{
 		int previousIndent = spaceTabCount;
 		if (!inStatementIndentStack->empty())
 			previousIndent = inStatementIndentStack->back();
-
-		inStatementIndentStack->push_back(/*2*/ indentLength + previousIndent);
+		int currIndent = /*2*/ indentLength + previousIndent;
+		if (currIndent > maxInStatementIndent)
+			currIndent = indentLength * 2 + spaceTabCount;
+		inStatementIndentStack->push_back(currIndent);
 		if (updateParenStack)
 			parenIndentStack->push_back(previousIndent);
 		return;
@@ -1936,7 +1948,7 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	int tabIncrement = tabIncrementIn;
 
 	// check for following tabs
-	for (int j = i; j <= i + nextNonWSChar; ++j)
+	for (int j = i + 1; j < (i + nextNonWSChar); j++)
 	{
 		if (line[j] == '\t')
 			tabIncrement += convertTabToSpaces(j, tabIncrement);
@@ -1948,11 +1960,17 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	if (i > 0 && line[0] == '{')
 		inStatementIndent -= indentLength;
 
-	if (i + nextNonWSChar < minIndent)
+//	if (i + nextNonWSChar < minIndent)
+//		inStatementIndent = minIndent + spaceTabCount;
+
+	if (inStatementIndent < minIndent)
 		inStatementIndent = minIndent + spaceTabCount;
 
-	if (i + nextNonWSChar > maxInStatementIndent)
-		inStatementIndent =  indentLength * 2 + spaceTabCount;
+//	if (i + nextNonWSChar > maxInStatementIndent)
+//		inStatementIndent =  indentLength * 2 + spaceTabCount;
+
+	if (inStatementIndent > maxInStatementIndent)
+		inStatementIndent = indentLength * 2 + spaceTabCount;
 
 	if (!inStatementIndentStack->empty() &&
 	        inStatementIndent < inStatementIndentStack->back())

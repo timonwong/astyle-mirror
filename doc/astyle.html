@@ -53,8 +53,8 @@
         <a class="contents" href="#_style=whitesmith">style=whitesmith</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=banner">style=banner</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=gnu">style=gnu</a>&nbsp;&nbsp;&nbsp;
-    
-    <a class="contents" href="#_style=linux">style=linux</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_style=linux">style=linux</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_style=horstmann">style=horstmann</a>&nbsp;&nbsp;&nbsp;
 
     </p>
 
@@ -90,19 +90,6 @@
         <a class="contents" href="#_min-conditional-indent">min&#8209;conditional&#8209;indent</a>&nbsp;&nbsp;&nbsp;
     </p>
 
-    <p class="contents1"><a class="contents" href="#_Formatting_Options">Formatting&nbsp;Options</a></p>
-
-    <p class="contents2">
-        <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp;        
-        <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=c">mode=c</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=java">mode=java</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=cs">mode=cs</a>&nbsp;&nbsp;&nbsp;
-    </p>
-
     <p class="contents1"><a class="contents" href="#_Padding_Options">Padding&nbsp;Options</a></p>
     <p class="contents2">
         <a class="contents" href="#_break-blocks">break&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
@@ -116,6 +103,19 @@
         <a class="contents" href="#_delete-empty-lines">delete&#8209;empty&#8209;lines</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_fill-empty-lines">fill&#8209;empty&#8209;lines</a>&nbsp;&nbsp;&nbsp;       
     </p>    
+
+    <p class="contents1"><a class="contents" href="#_Formatting_Options">Formatting&nbsp;Options</a></p>
+
+    <p class="contents2">
+        <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp;        
+        <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode=c">mode=c</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode=java">mode=java</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode=cs">mode=cs</a>&nbsp;&nbsp;&nbsp;
+    </p>
     
     <p class="contents1"><a class="contents" href="#_Other_Options">Other&nbsp;Options</a></p>
 
@@ -327,7 +327,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         The style options always set the options brackets=###, indent&#8209;blocks, and indent&#8209;brackets. These options can NOT be changed with the individual option settings.</p>
     <p>
-        Some styles also set the number of spaces per indent. With these styles you may use the indent options
+        Some styles set the number of spaces per indent. With these styles you may use the indent options
         indent=spaces, indent=tab, and indent=force&#8209;tab. You may also use the indent options that set the spaces per
         indent (indent=spaces=#, indent=tab=#, or indent=force&#8209;tab=#), but the spaces per indent will be ignored
         and the style setting used instead. If a style does not set the spaces per indent,
@@ -397,16 +397,17 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 
         <p id="_style=stroustrup"><code class="title">--style=stroustrup / -A4</code><br />
          Stroustrup style formatting/indenting uses stroustrup brackets. Brackets are broken from function definitions
-            only. Brackets are attached to namespaces, classes, and statements within a function.</p>
+            only. Brackets are attached to namespaces, classes, and statements within a function. <strong>Indentation</strong> is 5 spaces.
+        </p>
 
         <div class="code">
             <pre>int Foo(bool isBar) 
 <span class="brace">{</span>
-    if (isBar) <span class="brace">{</span>
-        bar();
-        return 1;
-<span class="brace">    }</span> else
-        return 0;
+     if (isBar) <span class="brace">{</span>
+          bar();
+          return 1;
+<span class="brace">     }</span> else
+          return 0;
 <span class="brace">}</span>
 </pre>
         </div>
@@ -496,6 +497,26 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 </pre>
         </div>
 
+       <p>&nbsp;</p>
+
+        <p id="_style=horstmann"><code class="title">--style=horstmann / -A9</code><br />
+            Horstmann style formatting/indenting uses horstmann style brackets. Brackets are
+            broken with run-in statements. Switches are indented. <strong>Indentation</strong> is 3 spaces.
+            </p>
+
+        <div class="code">
+            <pre>int Foo(bool isBar)
+<span class="brace">{</span>  if (isBar)
+   <span class="brace">{</span>  bar();
+      return 1;
+<span class="brace">   }
+   </span>else
+      return 0;
+<span class="brace">}</span>
+</pre>
+        </div>
+
+
     <p>&nbsp;</p>
     
     <hr />
@@ -513,7 +534,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         --indent=spaces=<span class="option">#</span> / -s<span class="option">#</span></code><br />
          Indent using # spaces per indent (e.g.
         <code>-s<span class="option">6</span></code>
-        <code>--indent=spaces=<span class="option">6</span></code>). # must be between 1 and 20. Not specifying
+        <code>--indent=spaces=<span class="option">6</span></code>). # must be between 2 and 20. Not specifying
         # will result in a default of 4
         spaces per indent.</p>
 
@@ -522,7 +543,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         -t<span class="option">#</span></code><br />
         Indent using tab characters. Treat each tab as #
         spaces (e.g. <code>-t<span class="option">6</span></code> /
-        <code>--indent=tab=<span class="option">6</span></code>). # must be between 1 and 20. 
+        <code>--indent=tab=<span class="option">6</span></code>). # must be between 2 and 20. 
         If no # is set, treats tabs as 4 spaces.</p>
 
         <p id="_indent=force-tab">
@@ -535,7 +556,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         <code>--indent=<span lang="en-us">force-</span>tab=<span class="option">6</span></code>). 
         Uses tabs as indents where
         <code>&#8209;&#8209;indent=tab</code> prefers to use spaces, such as inside multi-line statements.
-        # must be between 1 and 20. If no # is set, treats tabs as 4 spaces.</p>
+        # must be between 2 and 20. If no # is set, treats tabs as 4 spaces.</p>
 
         <p id="_default_brackets"><code class="title">default brackets option</code><br />
          If no brackets option is set, the brackets will not be changed.</p>
@@ -636,6 +657,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 <span class="brace">}</span>
 </pre>
         </div> 
+
                
     <p>&nbsp;</p>
     
@@ -884,7 +906,7 @@ error:
         &#8209;&#8209;max&#8209;instatement&#8209;indent=40).
         <span class="option">#</span> must be less than <strong>80</strong>. If no
         <span class="option">#</span> is set, the default value of <strong>40</strong>
-        will be used.</p>
+        will be used. A maximum of less than two indent lengths will be ignored.</p>
 
         <div class="code">
             <pre>fooArray[] = <span class="brace">{</span> red,
@@ -947,138 +969,6 @@ if (a &lt; b
 </pre>
         </div>
 
-    <p>&nbsp;</p>
-    
-    <hr />
-    <!--  * * * * * * * * * * * * *   Formatting Options  * * * * * * * * * * * * *  -->
-
-    <h3 id="_Formatting_Options">Formatting Options</h3>
-
-        <p id="_break-closing-brackets"><code class="title">--break-closing-brackets /
-        -y </code><code>/ --brackets=break-closing (depreciated)</code><br />
-         When used with --brackets=attach, --brackets=linux, or --brackets=stroustrup,
-        this breaks closing headers (e.g. 
-            'else', 'catch', ...) from their immediately preceding closing brackets. Closing header brackets are always
-            broken with broken brackets,
-            horstmann brackets, indented blocks, and indented brackets.</p>
-
-        <div class="code">
-            <pre>void Foo(bool isFoo) <span class="brace">{</span>
-    if (isFoo) <span class="brace">{</span>
-        bar();
-<span class="brace">    }</span> else <span class="brace">{</span>
-        anotherBar();
-<span class="brace">    }</span>
-<span class="brace">}</span>
-</pre>
-
-            <p class="code">becomes (with a broken 'else'):</p>
-            <pre>void Foo(bool isFoo) <span class="brace">{</span>
-    if (isFoo) <span class="brace">{</span>
-        bar();
-<span class="brace">    }</span>
-    else <span class="brace">{</span>
-        anotherBar();
-<span class="brace">    }</span>
-<span class="brace">}</span>
-</pre>
-        </div>
-
-    <p>&nbsp;</p>
-    <p id="_break-elseifs"><code class="title">--break-elseifs / -e</code><br />
-         Break "else if" header combinations into separate lines. This option has no
-        effect if keep-one-line-statements is used, the "else if" statements will remain as they are.</p>
-    <p>
-        If this option is NOT used, "else if" header combinations will be placed on a single line.</p>
-
-        <div class="code">
-            <pre>if (isFoo) <span class="brace">{</span>
-    bar();
-<span class="brace">}</span>
-else if (isFoo1()) <span class="brace">{</span>
-    bar1();
-<span class="brace">}</span>
-else if (isFoo2()) <span class="brace">}</span>
-    bar2;
-<span class="brace">}</span>
-</pre>
-
-            <p class="code">becomes:</p>
-            <pre>if (isFoo) <span class="brace">{</span>
-    bar();
-<span class="brace">}</span>
-else
-    if (isFoo1()) <span class="brace">{</span>
-        bar1();
-<span class="brace">    }</span>
-<span class="brace">   </span> else
-        if (isFoo2()) <span class="brace">{</span>
-            bar2();
-<span class="brace">        }</span>
-</pre>
-        </div>
-
-        <p>&nbsp;</p>
-
-        <p id="_keep-one-line-statements"><code class="title">--keep-one-line-statements /
-        -o </code><code>/ --one-line=keep-statements (depreciated)</code><br />
-         Don't break complex statements and multiple statements residing on a single line.</p>
-
-        <div class="code">
-            <pre>if (isFoo)
-<span class="brace">{</span>
-    isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl;
-<span class="brace">}</span>
-</pre>
-
-            <p class="code">remains unchanged.</p>
-            <pre>if (isFoo) DoBar();
-</pre>
-
-            <p class="code">remains unchanged.</p>
-        </div>
-
-        <p>&nbsp;</p>
-
-        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code>
-        <code>/ --one-line=keep-blocks (depreciated)</code><br />
-         Don't break one-line blocks.</p>
-
-        <div class="code">
-            <pre>if (isFoo)
-<span class="brace">{</span> isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl; <span class="brace">}</span>
-</pre>
-
-            <p class="code">remains unchanged.</p>
-        </div>
-
-        <p>&nbsp;</p>
-
-        <p id="_convert-tabs"><code class="title">--convert-tabs / -c</code><br />
-         Converts tabs into spaces in the non-indentation part of the line. The number of spaces inserted will
-            maintain the spacing of the tab. The current setting for spaces per tab is used. It may not produce
-            the expected results if convert-tabs is used when changing spaces per tab. Tabs are not replaced in
-            quotes.</p>
-
-    <p>&nbsp;</p>
-
-        <p id="_mode=c"><code class="title">--mode=c</code><br />
-         Indent a C or C++ file. The option is usually set from the file extension for each file.
-        You can override the setting with this entry. It will be used for all files regardless of
-        the file extension. It allows the formatter to identify language specific syntax such as
-        C++ classes, templates, and keywords.</p>
-
-        <p id="_mode=java"><code class="title">--mode=java</code><br />
-         Indent a Java file. The option is usually set from the file extension for each file. You
-        can override the setting with this entry. It will be used for all files regardless of the
-        file extension. It allows the formatter to identify language specific syntax such as Java
-        class's keywords.</p>
-
-        <p id="_mode=cs"><code class="title">--mode=cs</code><br />
-         Indent a C sharp file. The option is usually set from the file extension for each file.
-        You can override the setting with this entry. It will be used for all files regardless of
-        the file extension. It allows the formatter to identify language specific syntax such as C
-        sharp classes and keywords.</p>
 
     <p>&nbsp;</p>
 
@@ -1294,10 +1184,144 @@ isBar = false;
 </pre>
         </div>
 
+
         <p>&nbsp;</p>
 
         <p id="_fill-empty-lines"><code class="title">--fill-empty-lines / -E</code><br />
          Fill empty lines with the white space of the previous line.</p>
+    <p>&nbsp;</p>
+    
+    <hr />
+    <!--  * * * * * * * * * * * * *   Formatting Options  * * * * * * * * * * * * *  -->
+
+    <h3 id="_Formatting_Options">Formatting Options</h3>
+
+        <p id="_break-closing-brackets"><code class="title">--break-closing-brackets /
+        -y </code><code>/ --brackets=break-closing (depreciated)</code><br />
+         When used with --brackets=attach, --brackets=linux, or --brackets=stroustrup,
+        this breaks closing headers (e.g. 
+            'else', 'catch', ...) from their immediately preceding closing brackets. Closing header brackets are always
+            broken with broken brackets,
+            horstmann brackets, indented blocks, and indented brackets.</p>
+
+        <div class="code">
+            <pre>void Foo(bool isFoo) <span class="brace">{</span>
+    if (isFoo) <span class="brace">{</span>
+        bar();
+<span class="brace">    }</span> else <span class="brace">{</span>
+        anotherBar();
+<span class="brace">    }</span>
+<span class="brace">}</span>
+</pre>
+
+            <p class="code">becomes (with a broken 'else'):</p>
+            <pre>void Foo(bool isFoo) <span class="brace">{</span>
+    if (isFoo) <span class="brace">{</span>
+        bar();
+<span class="brace">    }</span>
+    else <span class="brace">{</span>
+        anotherBar();
+<span class="brace">    }</span>
+<span class="brace">}</span>
+</pre>
+        </div>
+
+    <p>&nbsp;</p>
+    <p id="_break-elseifs"><code class="title">--break-elseifs / -e</code><br />
+         Break "else if" header combinations into separate lines. This option has no
+        effect if keep-one-line-statements is used, the "else if" statements will remain as they are.</p>
+    <p>
+        If this option is NOT used, "else if" header combinations will be placed on a single line.</p>
+
+        <div class="code">
+            <pre>if (isFoo) <span class="brace">{</span>
+    bar();
+<span class="brace">}</span>
+else if (isFoo1()) <span class="brace">{</span>
+    bar1();
+<span class="brace">}</span>
+else if (isFoo2()) <span class="brace">}</span>
+    bar2;
+<span class="brace">}</span>
+</pre>
+
+            <p class="code">becomes:</p>
+            <pre>if (isFoo) <span class="brace">{</span>
+    bar();
+<span class="brace">}</span>
+else
+    if (isFoo1()) <span class="brace">{</span>
+        bar1();
+<span class="brace">    }</span>
+<span class="brace">   </span> else
+        if (isFoo2()) <span class="brace">{</span>
+            bar2();
+<span class="brace">        }</span>
+</pre>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_keep-one-line-statements"><code class="title">--keep-one-line-statements /
+        -o </code><code>/ --one-line=keep-statements (depreciated)</code><br />
+         Don't break complex statements and multiple statements residing on a single line.</p>
+
+        <div class="code">
+            <pre>if (isFoo)
+<span class="brace">{</span>
+    isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl;
+<span class="brace">}</span>
+</pre>
+
+            <p class="code">remains unchanged.</p>
+            <pre>if (isFoo) DoBar();
+</pre>
+
+            <p class="code">remains unchanged.</p>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code>
+        <code>/ --one-line=keep-blocks (depreciated)</code><br />
+         Don't break one-line blocks.</p>
+
+        <div class="code">
+            <pre>if (isFoo)
+<span class="brace">{</span> isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl; <span class="brace">}</span>
+</pre>
+
+            <p class="code">remains unchanged.</p>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_convert-tabs"><code class="title">--convert-tabs / -c</code><br />
+         Converts tabs into spaces in the non-indentation part of the line. The number of spaces inserted will
+            maintain the spacing of the tab. The current setting for spaces per tab is used. It may not produce
+            the expected results if convert-tabs is used when changing spaces per tab. Tabs are not replaced in
+            quotes.</p>
+
+    <p>&nbsp;</p>
+
+        <p id="_mode=c"><code class="title">--mode=c</code><br />
+         Indent a C or C++ file. The option is usually set from the file extension for each file.
+        You can override the setting with this entry. It will be used for all files regardless of
+        the file extension. It allows the formatter to identify language specific syntax such as
+        C++ classes, templates, and keywords.</p>
+
+        <p id="_mode=java"><code class="title">--mode=java</code><br />
+         Indent a Java file. The option is usually set from the file extension for each file. You
+        can override the setting with this entry. It will be used for all files regardless of the
+        file extension. It allows the formatter to identify language specific syntax such as Java
+        class's keywords.</p>
+
+        <p id="_mode=cs"><code class="title">--mode=cs</code><br />
+         Indent a C sharp file. The option is usually set from the file extension for each file.
+        You can override the setting with this entry. It will be used for all files regardless of
+        the file extension. It allows the formatter to identify language specific syntax such as C
+        sharp classes and keywords.</p>
+
                      
     <p>&nbsp;</p>
     

@@ -78,7 +78,8 @@ enum FormatStyle   { STYLE_NONE,
                      STYLE_WHITESMITH,
                      STYLE_BANNER,
                      STYLE_GNU,
-                     STYLE_LINUX
+                     STYLE_LINUX,
+					 STYLE_HORSTMANN
                    };
 
 enum BracketMode   { NONE_MODE,
@@ -278,10 +279,11 @@ class ASBeautifier : protected ASResource, protected ASBase
 		string getIndentString(void);
 		bool getBracketIndent(void);
 		bool getBlockIndent(void);
-		bool getClassIndent(void);
-		bool getSwitchIndent(void);
 		bool getCaseIndent(void);
+		bool getClassIndent(void);
 		bool getEmptyLineFill(void);
+		bool getForceTabIndentation(void);
+		bool getSwitchIndent(void);
 
 	protected:
 		void deleteStaticVectors();
@@ -478,16 +480,9 @@ class ASFormatter : public ASBeautifier
 		ASFormatter& operator=(ASFormatter&);          // not to be implemented
 		template<typename T> void deleteContainer(T &container);
 		template<typename T> void initContainer(T &container, T value);
-		void buildLanguageVectors();
-		void checkForFollowingHeader(const string& firstLine);
-		void convertTabToSpaces();
-		void goForward(int i);
-		void initializeNewLine();
 		char peekNextChar() const;
 		BracketType getBracketType();
-		bool appendCharInsideComments();
 		bool commentAndHeaderFollows() const;
-		bool formatRunInStatement();
 		bool getNextChar();
 		bool getNextLine(bool emptyLineWasDeleted = false);
 		bool isBeforeComment() const;
@@ -503,19 +498,31 @@ class ASFormatter : public ASBeautifier
 		bool isOneLineBlockReached() const;
 		bool isNextCharOpeningBracket(int startChar) const;
 //		bool lineBeginsWith(char charToCheck) const;
+		void appendCharInsideComments();
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
 		void appendSpaceAfter();
 		void breakLine();
+		void buildLanguageVectors();
+		void checkForFollowingHeader(const string& firstLine);
+		void convertTabToSpaces();
 		void deleteContainer(vector<BracketType>* &container);
+		void formatArrayRunIn();
+		void formatRunIn();
+		void goForward(int i);
 		void initContainer(vector<BracketType>* &container, vector<BracketType>* value);
+		void initNewLine();
 		void padOperators(const string *newOperator);
 		void padParens();
+		void formatArrayBrackets(BracketType bracketType, bool isOpeningArrayBracket);
 		void formatClosingBracket(BracketType bracketType);
+		void formatCommentBody();
 		void formatCommentOpener();
+		void formatLineCommentBody();
 		void formatLineCommentOpener();
 		void formatOpeningBracket(BracketType bracketType);
-		void formatArrayBrackets(BracketType bracketType, bool isOpeningArrayBracket);
+		void formatQuoteBody();
+		void formatQuoteOpener();
 		void adjustComments();
 		void setBreakBlocksVariables();
 		void fixOptionVariableConflicts();
@@ -609,7 +616,7 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostTemplate;
 		bool isCharImmediatelyPostReturn;
 		bool isCharImmediatelyPostOperator;
-		bool previousBracketIsBroken;
+//		bool previousBracketIsBroken;
 		bool isInHorstmannRunIn;
 		bool currentLineBeginsWithBracket;
 		bool shouldBreakOneLineBlocks;

@@ -242,13 +242,17 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setFormattingStyle(STYLE_LINUX);
 	}
+	else if ( IS_OPTION(arg, "style=horstmann") )
+	{
+		formatter.setFormattingStyle(STYLE_HORSTMANN);
+	}
 	else if ( isParamOption(arg, "A") )
 	{
 		int style = 0;
 		string styleParam = GET_PARAM(arg, "A");
 		if (styleParam.length() > 0)
 			style = atoi(styleParam.c_str());
-		if (style < 1 || style > 8)
+		if (style < 1 || style > 9)
 			isOptionError(arg, errorInfo);
 		else if (style == 1)
 			formatter.setFormattingStyle(STYLE_ALLMAN);
@@ -266,6 +270,8 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 			formatter.setFormattingStyle(STYLE_GNU);
 		else if (style == 8)
 			formatter.setFormattingStyle(STYLE_LINUX);
+		else if (style == 9)
+			formatter.setFormattingStyle(STYLE_HORSTMANN);
 	}
 	// must check for mode=cs before mode=c !!!
 	else if ( IS_OPTION(arg, "mode=cs") )
@@ -289,7 +295,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		string spaceNumParam = GET_PARAMS(arg, "t", "indent=tab=");
 		if (spaceNumParam.length() > 0)
 			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 1 || spaceNum > 20)
+		if (spaceNum < 2 || spaceNum > 20)
 			isOptionError(arg, errorInfo);
 		else
 			formatter.setTabIndentation(spaceNum, false);
@@ -304,7 +310,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		string spaceNumParam = GET_PARAMS(arg, "T", "indent=force-tab=");
 		if (spaceNumParam.length() > 0)
 			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 1 || spaceNum > 20)
+		if (spaceNum < 2 || spaceNum > 20)
 			isOptionError(arg, errorInfo);
 		else
 			formatter.setTabIndentation(spaceNum, true);
@@ -319,7 +325,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		string spaceNumParam = GET_PARAMS(arg, "s", "indent=spaces=");
 		if (spaceNumParam.length() > 0)
 			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 1 || spaceNum > 20)
+		if (spaceNum < 2 || spaceNum > 20)
 			isOptionError(arg, errorInfo);
 		else
 			formatter.setSpaceIndentation(spaceNum);
@@ -1194,6 +1200,10 @@ void ASConsole::printHelp() const
 	(*_err) << "    --style=linux  OR  -A8\n";
 	(*_err) << "    GNU style formatting/indenting.\n";
 	(*_err) << "    Linux brackets, indent is 8 spaces.\n";
+	(*_err) << endl;
+	(*_err) << "    --style=horstmann  OR  -A9\n";
+	(*_err) << "    Horstmann style formatting/indenting.\n";
+	(*_err) << "    Horstmann brackets, indented switches, indent is 3 spaces.\n";
 	(*_err) << endl;
 	(*_err) << "Tab and Bracket Options:\n";
 	(*_err) << "------------------------\n";

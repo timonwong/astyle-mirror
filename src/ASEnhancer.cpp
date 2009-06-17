@@ -60,7 +60,7 @@ void ASEnhancer::init(int fileType,
 	// formatting variables from ASFormatter and ASBeautifier
 	ASBase::init(fileType);
 	indentLength = _indentLength;
-	if (_indentString.compare(0, 1, "\t") == 0)
+	if (_indentString == "\t")
 		useTabs = true;
 	else
 		useTabs = false;

@@ -17,14 +17,23 @@
     <h3 id="_1.24">Artistic Style 1.24&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new bracket type &#8209;&#8209;brackets=horstmann (-g) to place run&#8209;in statements on the
+        <li>Add &#8209;&#8209;brackets=horstmann (-g) to place run&#8209;in statements on the
             same line as an opening bracket. </li>
+        <li>Add --style=horstmann (-A9) using horstmann brackets to predefined styles. </li>
         <li>Add new option &#8209;&#8209;pad&#8209;header (&#8209;H) from Mario Gleichmann to insert space padding after paren headers. </li>
         <li>Change default formatting to leave paren headers unchanged instead of always inserting
             space padding after them. </li>
         <li>Change &#8209;&#8209;unpad&#8209;paren to unpad headers unless padding is requested.
         </li>
         <li>Change NONE_MODE brackets to allow run-in statements from horstmann type brackets.</li>
+        <li>Change array brackets to allow run-in statements from horstmann type brackets.</li>
+        <li>Change style=stroustroup to 5 spaces per indent.</li>
+        <li>Change spaces per tab minimum value from 1 to 2.</li>
+        <li>Fix to check for max-instatement-indent when the previous line ends with an opening
+            paren.</li>
+        <li>Fix --min-conditional-indent for spaces per tab less that 4.</li>
+        <li>Fix predefined style options to allow the use of --indent=tab (-t) and --indent=force-tab
+            (-T) options.</li>
         <li>Fix in-statement indent to allow for non-indentation tabs in the line.</li>
         <li>Fix formatting problems with non in-statement arrays. </li>
         <li>Fix infinite loop when #else with missing #if.</li>
@@ -58,8 +67,10 @@
         <li>Refactor:
         <ul>
             <li>Move multi-line comment alignment from ASBeautifier to ASFormatter.</li>
-            <li>New functions formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
-            <li>New functions formatCommentOpener and formatLineCommentOpener.</li>
+            <li>Extract functions formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
+            <li>Extract functions formatCommentOpener and formatCommentBody.</li>
+            <li>Extract functions formatLineCommentOpener and formatLineCommentBody.</li>
+            <li>Extract functions formatQuoteOpener and formatQuoteBody. </li>
         </ul>
     </li>
     </ul>
