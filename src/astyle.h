@@ -79,7 +79,7 @@ enum FormatStyle   { STYLE_NONE,
                      STYLE_BANNER,
                      STYLE_GNU,
                      STYLE_LINUX,
-					 STYLE_HORSTMANN
+                     STYLE_HORSTMANN
                    };
 
 enum BracketMode   { NONE_MODE,
@@ -98,9 +98,10 @@ enum BracketType   { NULL_TYPE = 0,
                      INTERFACE_TYPE = 8,        // also a DEFINITION_TYPE
                      DEFINITION_TYPE = 16,
                      COMMAND_TYPE = 32,
-                     ARRAY_TYPE = 64,			// arrays and enums
-                     EXTERN_TYPE = 128,			// extern "C". not a command type extern
-                     SINGLE_LINE_TYPE = 256
+                     ARRAY_NIS_TYPE = 64,       // also an ARRAY_TYPE
+                     ARRAY_TYPE = 128,			// arrays and enums
+                     EXTERN_TYPE = 256,			// extern "C". not a command type extern
+                     SINGLE_LINE_TYPE = 512
                    };
 
 //----------------------------------------------------------------------------
@@ -302,6 +303,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool lineCommentNoBeautify;
 		bool isNonInStatementArray;
 		bool isSharpAccessor;
+		bool isSharpDelegate;
 		bool isInExtern;
 		bool isInEnum;
 
@@ -488,10 +490,12 @@ class ASFormatter : public ASBeautifier
 		bool isBeforeComment() const;
 		bool isBeforeAnyComment() const;
 		bool isBeforeAnyLineEndComment(int startPos) const;
+		bool isBeforeMultipleLineEndComments(int startPos) const;
 		bool isBracketType(BracketType a, BracketType b) const;
 		bool isCurrentBracketBroken() const;
 		bool isEmptyLine(const string &line) const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
+		bool isNonInStatementArrayBracket() const;
 		bool isPointerOrReference() const;
 		bool isUnaryOperator() const;
 		bool isInExponent() const;
@@ -629,6 +633,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakLineAtNextChar;
 		bool passedSemicolon;
 		bool passedColon;
+		bool clearNonInStatement;
 		bool isImmediatelyPostComment;
 		bool isImmediatelyPostLineComment;
 		bool isImmediatelyPostEmptyBlock;

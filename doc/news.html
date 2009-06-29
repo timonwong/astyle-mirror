@@ -30,16 +30,19 @@
     <p>
         A new bracket type &#8209;&#8209;brackets=horstmann (-g) option will allow run-in
         statements
-        on the same line as an opening broken bracket. The "Tab and Bracket Options" section in the
-        documentation contains the details. If a bracket type is not requested
-        the formatting will now allow run-in statements to accomodate the new bracket type.</p>
+        on the same line as an opening broken bracket. This bracket type has
+        about the same vertical compression as attached brackets and provides bracket alignment.
+        The "Tab and Bracket Options" section in the
+        documentation contains the details.&nbsp;</p>
     <p>
-        NONE_MODE brackets will now allow run-in statements to accomodate Horstmann type
-        brackets. Array formatting has been changed to format run-in statements. There has
+        To accomodate Hostmann brackets the "none mode" brackets will now allow run-in statements.
+        Array formatting has been changed to format run-in statements when required. There has
         been some general improvements to array formatting. The minimum value for spaces
-        per tab was chanbed from 1 to 2.</p>
+        per tab was changed from 1 to 2.</p>
     <p>
-        Stroustroup style has been shanged to use 5 spaces per indent.</p>
+        The above options allow two new predefined styles. Horstmann style uses Horstmann
+        brackets and three spaces per indent. (Pending 1TBS). The "Predefinde Style Options"
+        section in the documentation contains the details.&nbsp;</p>
     <p>
         There has been a change to the default formatting of paren headers (e.g. 'if', 
         'for', 'while'...). They will now be left unchanged instead of inserting space 
@@ -51,6 +54,13 @@
         The documentation has been changed to split the "Formatting Options" section into
         "Formatting Options" and "Padding Options". This was done to allow for the new formatting
         options.</p>
+    <p>
+        The
+        Stroustroup predefined style has been changed to use 5 spaces per indent.</p>
+    <p>
+        Checks for the maximum in-statement indent has been fixed. The indent for some long
+        contiuation lines may be decreased. If you want the previous indentation, increase
+        the &#8209;&#8209;max&#8209;in&#8209;statement=# option.</p>
     <p>
         Thanks to Mario Gleichmann (pad-header) and Ettl Martin (cppcheck) for their contributions.
     </p>

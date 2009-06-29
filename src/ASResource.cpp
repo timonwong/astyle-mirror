@@ -248,8 +248,6 @@ void ASResource::buildHeaders(vector<const string*> &headers, int fileType, bool
 		headers.push_back(&AS_SET);
 		headers.push_back(&AS_ADD);
 		headers.push_back(&AS_REMOVE);
-		headers.push_back(&AS_DELEGATE);
-		headers.push_back(&AS_UNCHECKED);
 	}
 
 	if (beautifier)
@@ -338,8 +336,6 @@ void ASResource::buildNonParenHeaders(vector<const string*> &nonParenHeaders, in
 		nonParenHeaders.push_back(&AS_SET);
 		nonParenHeaders.push_back(&AS_ADD);
 		nonParenHeaders.push_back(&AS_REMOVE);
-		nonParenHeaders.push_back(&AS_DELEGATE);
-		nonParenHeaders.push_back(&AS_UNCHECKED);
 	}
 
 	if (beautifier)

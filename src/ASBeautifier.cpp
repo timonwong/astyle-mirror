@@ -165,6 +165,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	lineCommentNoBeautify = other.lineCommentNoBeautify;
 	isNonInStatementArray = other.isNonInStatementArray;
 	isSharpAccessor = other.isSharpAccessor;
+	isSharpDelegate = other.isSharpDelegate;
 	isInExtern = other.isInExtern;
 	isInEnum = other.isInEnum;
 
@@ -326,6 +327,7 @@ void ASBeautifier::init()
 	previousLineProbationTab = false;
 	isNonInStatementArray = false;
 	isSharpAccessor = false;
+	isSharpDelegate = false;
 	isInExtern = false;
 	isInEnum = false;
 	inLineNumber = 0;
@@ -853,6 +855,7 @@ string ASBeautifier::beautify(const string &originalLine)
 		activeBeautifierStack->back()->lineCommentNoBeautify = lineCommentNoBeautify;
 		activeBeautifierStack->back()->isNonInStatementArray = isNonInStatementArray;
 		activeBeautifierStack->back()->isSharpAccessor = isSharpAccessor;
+		activeBeautifierStack->back()->isSharpDelegate = isSharpDelegate;
 		// must return originalLine not the trimmed line
 		return activeBeautifierStack->back()->beautify(originalLine);
 	}
@@ -1217,6 +1220,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			                      || isInClassHeader
 			                      || isNonInStatementArray
 			                      || isSharpAccessor
+			                      || isSharpDelegate
 			                      || isInExtern
 			                      || (isInDefine &&
 			                          (prevNonSpaceCh == '('
@@ -1934,7 +1938,8 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 		if (!inStatementIndentStack->empty())
 			previousIndent = inStatementIndentStack->back();
 		int currIndent = /*2*/ indentLength + previousIndent;
-		if (currIndent > maxInStatementIndent)
+		if (currIndent > maxInStatementIndent
+		        && line[i] != '{')
 			currIndent = indentLength * 2 + spaceTabCount;
 		inStatementIndentStack->push_back(currIndent);
 		if (updateParenStack)

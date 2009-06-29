@@ -260,6 +260,10 @@
 
     <ul>
         <li><b>Release</b> builds the Artistic Style command line program (AStyle.exe).</li>
+        <li><strong>Release Static</strong> builds the Artistic Style command line program (AStyle.exe).
+            This is the same as the Release build except that it links wth the static run-time
+            library instead of the dll. This build must be used if the program is to execute
+            on a machine that does not have Visual Studio installed.</li>
 
         <li><b>Release Dll</b> builds the Artistic Style program as a Dynamic Link Library
         (AStyle.dll). This will also produce the exports library and the static library for linking

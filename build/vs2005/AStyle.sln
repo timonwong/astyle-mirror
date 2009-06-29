@@ -12,6 +12,7 @@ Global
 		Release Dll|Win32 = Release Dll|Win32
 		Release Java|Win32 = Release Java|Win32
 		Release Lib|Win32 = Release Lib|Win32
+		Release Static|Win32 = Release Static|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -29,6 +30,8 @@ Global
 		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Java|Win32.Build.0 = Release Java|Win32
 		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Lib|Win32.ActiveCfg = Release Lib|Win32
 		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Lib|Win32.Build.0 = Release Lib|Win32
+		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Static|Win32.Build.0 = Release Static|Win32
 		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release|Win32.ActiveCfg = Release|Win32
 		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
