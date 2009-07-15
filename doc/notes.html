@@ -20,7 +20,10 @@
         <li>Add &#8209;&#8209;brackets=horstmann (-g) to place run&#8209;in statements on the
             same line as an opening bracket. </li>
         <li>Add --style=horstmann (-A9) using horstmann brackets to predefined styles. </li>
-        <li>Add new option &#8209;&#8209;pad&#8209;header (&#8209;H) from Mario Gleichmann to insert space padding after paren headers. </li>
+        <li>Add new option &#8209;&#8209;pad&#8209;header (&#8209;H) from Mario Gleichmann to insert 
+            space padding after paren headers. </li>
+        <li>Add new options &#8209;&#8209;align&#8209;pointer=type (-k1) and &#8209;&#8209;align&#8209;pointer=name
+            (-k2) from J P Nurmi to align a pointer or reference operator. </li>
         <li>Change default formatting to leave paren headers unchanged instead of always inserting
             space padding after them. </li>
         <li>Change &#8209;&#8209;unpad&#8209;paren to unpad headers unless padding is requested.
@@ -31,6 +34,9 @@
         <li>Change spaces per tab minimum value from 1 to 2.</li>
         <li>Change --min-conditional-indent to allow for statements preceded by a bracket (horstmann
             brackets). </li>
+        <li>Change predefined styles to allow changes to spaces per indent.</li>
+        <li>Fix console error procedure to terminate on an error.</li>
+        <li>Fix 'return' statement for padding or not pading arithmetic operators.</li>
         <li>Fix C# 'delegate' and 'unchecked' not being identified as keywords.</li>
         <li>Fix to check for max-instatement-indent when the previous line ends with an opening
             paren.</li>

@@ -155,12 +155,13 @@ class ASConsole
 			filesUnchanged = 0;
 			linesOut = 0;
 		}
+		// functions
+		void error(const char *why, const char* what) const;
 		void processFilePath(string &filePath, ASFormatter &formatter);
 		void processOptions(int argc, char *argv[], ASFormatter &formatter);
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
 
 	private:
-		void error(const char *why, const char* what) const;
 		bool formatFile(const string &fileName, astyle::ASFormatter &formatter) const;
 		string getCurrentDirectory(const string &fileName) const;
 		void getFileNames(const string &directory, const string &wildcard, vector<string> &fileName);

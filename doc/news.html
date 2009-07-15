@@ -28,13 +28,13 @@
         because of changes to Artistic Style. You may want to format your source before
         making program changes in order to bring it up to date.</p>
     <p>
-        A new bracket type &#8209;&#8209;brackets=horstmann (-g) option will allow run-in
+        A new bracket type option, &#8209;&#8209;brackets=horstmann (-g), will allow run-in
         statements
         on the same line as an opening broken bracket. This bracket type has
-        about the same vertical compression as attached brackets and provides bracket alignment.
+        about the same vertical compression as attached brackets and in addition provides
+        aligned brackets. It is the only style that combines the advantages of saving space and aligning braces.
         The "Tab and Bracket Options" section in the
-        documentation contains the details.&nbsp;</p>
-    <p>
+        documentation contains the details.
         To accomodate Hostmann brackets the "none mode" brackets will now allow run-in statements.
         Array formatting has been changed to format run-in statements when required. There has
         been some general improvements to array formatting. The minimum value for spaces
@@ -42,29 +42,67 @@
     <p>
         The above options allow two new predefined styles. Horstmann style uses Horstmann
         brackets and three spaces per indent. (Pending 1TBS). The "Predefinde Style Options"
-        section in the documentation contains the details.&nbsp;</p>
+        section in the documentation contains the details. The basic criteria for all predefined
+        styles was obtained from
+        the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent Style</a> discussion at Wikipedia.</p>
     <p>
-        There has been a change to the default formatting of paren headers (e.g. 'if', 
-        'for', 'while'...). They will now be left unchanged instead of inserting space 
-        padding after them. A new option, &#8209;&#8209;pad&#8209;header (-H), will insert the
-        space padding if requested. To remove any unwanted space padding, use the
-        option &#8209;&#8209;unpad&#8209;paren (-U). If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren
-        are used, the headers will be padded and padding will be removed from other parens.</p>
+        New options --align-pointer=type (-k1) and 
+            --align-pointer=name (-k2) will attach a pointer or reference operator (* or &amp;) to either the operator type
+        (left) or operator name (right). The spacing between the type and name will be preserved,
+        if possible.</p>
+   <p>
+        A new option, &#8209;&#8209;pad&#8209;header (&#8209;H), will insert the
+        space padding after headers ('if',
+        'for', 'while'...). To remove any unwanted current space padding, use the
+        option &#8209;&#8209;unpad&#8209;paren (&#8209;U). If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren
+        are used, the headers will be padded and padding will be removed from other parens. This has required a change to the default formatting
+       of paren headers. They will now be left unchanged instead of automatically inserting space 
+        padding after them, unless the new option is requested. </p>
     <p>
-        The documentation has been changed to split the "Formatting Options" section into
-        "Formatting Options" and "Padding Options". This was done to allow for the new formatting
-        options.</p>
+        The spaces per indent can now be changed for any of the predefined styles. In prevoius
+        releases the change would be ignored. This will allow any of the &#8209;&#8209;indent
+        options
+        to be used with a predefined style.</p>
     <p>
         The
-        Stroustroup predefined style has been changed to use 5 spaces per indent.</p>
+        Stroustroup predefined style has been changed to use 5 spaces per indent. This
+        is the indentation used in the book "The C++ Programming Language".</p>
     <p>
-        Checks for the maximum in-statement indent has been fixed. The indent for some long
+        Checks for the maximum in-statement indent have been fixed. The indent for some long
         contiuation lines may be decreased. If you want the previous indentation, increase
-        the &#8209;&#8209;max&#8209;in&#8209;statement=# option.</p>
+        the &#8209;&#8209;max&#8209;in&#8209;statement option.</p>
     <p>
-        Thanks to Mario Gleichmann (pad-header) and Ettl Martin (cppcheck) for their contributions.
+        The documentation has been changed to include a new "Padding Options"section.
+        The padding options were previously in the "Formatting Options" section. This was done to allow for the new formatting
+        options.</p>
+    <p>
+        Thanks to J P Nurmi (align-pointer),
+        Mario Gleichmann (pad-header), Colin D Bennett
+        (64-bit code), and Ettl Martin (cppcheck) for their contributions.
     </p>
+    <h4>
+        Developers</h4>
+
+   <p>
+       There is a new function setPointerAlignment that is set for the --align-pointer=#
+       option.</p>
+    <p>
+        There is a new function setParensHeaderPaddingMode is set for the &#8209;&#8209;pad&#8209;header
+        option.</p>
+    <p>
+        There is a new value for &#8209;&#8209;brackets=horstmann that is sent to the function
+        setBracketFormatMode.</p>
+    <p>
+        The Stroustroup predefined style has been changed to use 5 spaces per indent.</p>
+    <p>
+        The documentation has been changed to include a new "Padding Options"section. Some
+        of the old "formatting Options" have been moved to the new section.</p>
+    <p>
+        The Artistic Style for Windows program has been updated to support the current release
+        and can be used for an example GUI. It will run on Linux under WINE. It is available
+        at <a href="http://www.geocities.com/jpattee/">www.geocities.com/jpattee/</a></p>
     
+        
     <h3>Artistic Style 1.23&nbsp; (February 2009)</h3>
     <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to

@@ -104,6 +104,11 @@ enum BracketType   { NULL_TYPE = 0,
                      SINGLE_LINE_TYPE = 512
                    };
 
+enum PointerAlign { ALIGN_NONE,
+                    ALIGN_TYPE,
+                    ALIGN_NAME
+                  };
+
 //----------------------------------------------------------------------------
 // Class ASSourceIterator
 //----------------------------------------------------------------------------
@@ -455,7 +460,7 @@ class ASEnhancer : protected ASBase
 
 class ASFormatter : public ASBeautifier
 {
-	public:
+	public:	// functions
 		ASFormatter();
 		virtual ~ASFormatter();
 		virtual void init(ASSourceIterator* iter);
@@ -464,18 +469,25 @@ class ASFormatter : public ASBeautifier
 		void setFormattingStyle(FormatStyle style);
 		void setBracketFormatMode(BracketMode mode);
 		void setBreakClosingHeaderBracketsMode(bool state);
+		void setBreakBlocksMode(bool state);
+		void setBreakClosingHeaderBlocksMode(bool state);
+		void setBreakElseIfsMode(bool state);
+		void setBreakOneLineBlocksMode(bool state);
+		void setDeleteEmptyLinesMode(bool state);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
 		void setParensHeaderPaddingMode(bool mode);
 		void setParensUnPaddingMode(bool state);
-		void setBreakOneLineBlocksMode(bool state);
+		void setPointerAlignment(PointerAlign alignment);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
-		void setBreakBlocksMode(bool state);
-		void setBreakClosingHeaderBlocksMode(bool state);
-		void setBreakElseIfsMode(bool state);
-		void setDeleteEmptyLinesMode(bool state);
+
+
+	public:	// variables
+		// public variables are set by non-member functions
+		bool isModeManuallySet;
+		bool isIndentManuallySet;
 
 	private:  // functions
 		void ASformatter(ASFormatter &copy);           // not to be imlpemented
@@ -517,6 +529,7 @@ class ASFormatter : public ASBeautifier
 		void initContainer(vector<BracketType>* &container, vector<BracketType>* value);
 		void initNewLine();
 		void padOperators(const string *newOperator);
+		void alignPointerOrReference();
 		void padParens();
 		void formatArrayBrackets(BracketType bracketType, bool isOpeningArrayBracket);
 		void formatClosingBracket(BracketType bracketType);
@@ -573,6 +586,7 @@ class ASFormatter : public ASBeautifier
 		FormatStyle formattingStyle;
 		BracketMode bracketFormatMode;
 		BracketType previousBracketType;
+		PointerAlign pointerAlignment;
 		bool isVirgin;
 		bool shouldPadOperators;
 		bool shouldPadParensOutside;

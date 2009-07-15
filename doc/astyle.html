@@ -111,6 +111,7 @@
         <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_align-pointer">align&#8209;pointer</a>&nbsp;&nbsp;&nbsp;       
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_mode=c">mode=c</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_mode=java">mode=java</a>&nbsp;&nbsp;&nbsp;
@@ -325,13 +326,15 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         options.</p>
 
     <p>
-        The style options always set the options brackets=###, indent&#8209;blocks, and indent&#8209;brackets. These options can NOT be changed with the individual option settings.</p>
+        The predefined style options always set the options brackets=###, indent&#8209;blocks, and indent&#8209;brackets. These options can NOT be changed with the individual option settings.</p>
     <p>
-        Some styles set the number of spaces per indent. With these styles you may use the indent options
-        indent=spaces, indent=tab, and indent=force&#8209;tab. You may also use the indent options that set the spaces per
-        indent (indent=spaces=#, indent=tab=#, or indent=force&#8209;tab=#), but the spaces per indent will be ignored
-        and the style setting used instead. If a style does not set the spaces per indent,
-        any of the indent options may be used. For the options that set the spaces per indent see the following
+        Some styles use the default setting for spaces per indent and some use a different
+        setting. You may use any of the indent= options with any style. The indent options
+        that do not set the spaces per indent (indent=spaces, indent=tab, or indent=force&#8209;tab)
+        will use the default spaces per tab setting for the style. The indent options that set the spaces per
+        indent (indent=spaces=#, indent=tab=#, or indent=force&#8209;tab=#)
+        will use the specified spaces per tab setting instead of the default for the style.
+        For the options that set the spaces per indent see the following
         style descriptions.</p>
     <p>
         All other options are available to customize the style. By default, none of the styles indent namespaces.
@@ -378,7 +381,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
          Kernighan &amp; Ritchie style formatting/indenting uses linux brackets. Brackets are broken from namespaces,
             classes, and function definitions. Brackets are attached to statements within a function.</p>
     <p>
-        Using k&amp;r may cause problems because of the &amp;. This can be resolved by
+        Using the k&amp;r option may cause problems because of the &amp;. This can be resolved by
         enclosing the k&amp;r in quotes (e.g. &#8209;&#8209;style="k&amp;r") or by using the alternate &#8209;&#8209;style=k/r.</p>
 
         <div class="code">
@@ -602,7 +605,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         With C++ files brackets are attached for function definitions within a class (inline class functions).
         The brackets are also attached for arrays, structs, enums, and other top level objects that are not
-        classes or functions. This does not apply to Java and C#.</p>
+        classes or functions. This option is effective
+        for C/C++ files only.</p>
 
         <div class="code">
             <pre>void Foo(bool isFoo)
@@ -623,7 +627,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         With C++ files brackets are attached for function definitions within a class (inline class functions).
         The brackets are also attached for arrays, structs, enums, and other top level objects that are not
-        classes or functions. This does not apply to Java and C#.</p>
+        classes or functions. This option is effective
+        for C/C++ files only.</p>
 
         <div class="code">
             <pre>void Foo(bool isFoo)
@@ -669,7 +674,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_indent-classes"><code class="title">--indent-classes / -C</code><br />
      Indent '<code>class</code>' and '<code>struct</code>' blocks so that the blocks
     '<code>public:</code>', '<code>protected:</code>' and '<code>private:</code>' are indented.
-    The entire block is indented. This option has no effect on Java and C# files.</p>
+    The entire block is indented. This option is effective for C++ files only.</p>
 
         <div class="code">
             <pre>class Foo
@@ -1294,14 +1299,33 @@ else
             <p class="code">remains unchanged.</p>
         </div>
 
-        <p>&nbsp;</p>
-
+    <p>&nbsp;</p>
+    
         <p id="_convert-tabs"><code class="title">--convert-tabs / -c</code><br />
-         Converts tabs into spaces in the non-indentation part of the line. The number of spaces inserted will
-            maintain the spacing of the tab. The current setting for spaces per tab is used. It may not produce
-            the expected results if convert-tabs is used when changing spaces per tab. Tabs are not replaced in
-            quotes.</p>
+        Converts tabs into spaces in the non-indentation part of the line. The number of
+        spaces inserted will maintain the spacing of the tab. The current setting for spaces
+        per tab is used. It may not produce the expected results if convert-tabs is used
+        when changing spaces per tab. Tabs are not replaced in quotes.</p>
 
+    <p>&nbsp;</p>
+
+        <p id="_align-pointer"><code class="title">--align-pointer=type / -k1<br />
+        --align-pointer=name / -k2</code><br />
+            Attach a pointer or reference operator (* or &amp;) to either the variable type
+            (left) or variable name (right). The spacing between the type and name will be preserved,
+            if possible. This option is effective for C/C++ files only.</p>
+
+        <div class="code">
+            <pre>char *foo1;</pre>
+            <p class="code">becomes (with align-pointer=type):</p>
+            <pre>char* foo1;</pre>
+        </div>
+        <div class="code">
+            <pre>char& foo2;</pre>
+            <p class="code">becomes (with align-pointer=name):</p>
+            <pre>char &amp;foo2;</pre>
+        </div>
+        
     <p>&nbsp;</p>
 
         <p id="_mode=c"><code class="title">--mode=c</code><br />

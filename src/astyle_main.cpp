@@ -75,11 +75,9 @@ bool g_isCaseSensitive = true;
 #ifdef ASTYLE_LIB
 // library build variables
 stringstream* _err = NULL;
-bool g_modeManuallySet = false;
 #else
 // console build variables
 ostream* _err = &cerr;           // direct error messages to cerr
-bool g_modeManuallySet = false;  // file mode is set by an option
 ASConsole g_console;             // class to encapsulate console variables
 #endif
 
@@ -188,7 +186,7 @@ void isOptionError(const string &arg, const string &errorInfo)
 		(*_err) << endl << arg;         // put endl after previous option
 #else
 	if (errorInfo.length() > 0)         // to avoid a compiler warning
-		(*_err) << "Error in param: " << arg << endl;
+		g_console.error("Error in param: ", arg.c_str());
 #endif
 }
 
@@ -277,17 +275,17 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTION(arg, "mode=cs") )
 	{
 		formatter.setSharpStyle();
-		g_modeManuallySet = true;
+		formatter.isModeManuallySet = true;
 	}
 	else if ( IS_OPTION(arg, "mode=c") )
 	{
 		formatter.setCStyle();
-		g_modeManuallySet = true;
+		formatter.isModeManuallySet = true;
 	}
 	else if ( IS_OPTION(arg, "mode=java") )
 	{
 		formatter.setJavaStyle();
-		g_modeManuallySet = true;
+		formatter.isModeManuallySet = true;
 	}
 	else if ( isParamOption(arg, "t", "indent=tab=") )
 	{
@@ -298,7 +296,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		if (spaceNum < 2 || spaceNum > 20)
 			isOptionError(arg, errorInfo);
 		else
+		{
 			formatter.setTabIndentation(spaceNum, false);
+			formatter.isIndentManuallySet = true;
+		}
 	}
 	else if ( IS_OPTION(arg, "indent=tab") )
 	{
@@ -328,7 +329,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		if (spaceNum < 2 || spaceNum > 20)
 			isOptionError(arg, errorInfo);
 		else
+		{
 			formatter.setSpaceIndentation(spaceNum);
+			formatter.isIndentManuallySet = true;
+		}
 	}
 	else if ( IS_OPTION(arg, "indent=spaces") )
 	{
@@ -469,6 +473,27 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTIONS(arg, "e", "break-elseifs") )
 	{
 		formatter.setBreakElseIfsMode(true);
+	}
+	else if ( IS_OPTION(arg, "align-pointer=type") )
+	{
+		formatter.setPointerAlignment(ALIGN_TYPE);
+	}
+	else if ( IS_OPTION(arg, "align-pointer=name") )
+	{
+		formatter.setPointerAlignment(ALIGN_NAME);
+	}
+	else if ( isParamOption(arg, "k") )
+	{
+		int align = 0;
+		string styleParam = GET_PARAM(arg, "k");
+		if (styleParam.length() > 0)
+			align = atoi(styleParam.c_str());
+		if (align < 1 || align > 2)
+			isOptionError(arg, errorInfo);
+		else if (align == 1)
+			formatter.setPointerAlignment(ALIGN_TYPE);
+		else if (align == 2)
+			formatter.setPointerAlignment(ALIGN_NAME);
 	}
 	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
 	// depreciated in release 1.22 - may be removed at an appropriate time
@@ -790,7 +815,7 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 
 	// Unless a specific language mode has been set, set the language mode
 	// according to the file's suffix.
-	if (!g_modeManuallySet)
+	if (!formatter.isModeManuallySet)
 	{
 		if (stringEndsWith(fileName, string(".java")))
 			formatter.setJavaStyle();
@@ -1155,9 +1180,10 @@ void ASConsole::printHelp() const
 	(*_err) << "Wildcards (* and ?) may be used in the filename.\n";
 	(*_err) << "A \'recursive\' option can process directories recursively.\n";
 	(*_err) << endl;
-	(*_err) << "By default, astyle is set up to indent C/C++/C#/Java files, with 4 spaces\n";
-	(*_err) << "per indent, a maximal indentation of 40 spaces inside continuous statements,\n";
-	(*_err) << "and NO formatting.\n";
+	(*_err) << "By default, astyle is set up to indent C/C++/C#/Java files, with four\n";
+	(*_err) << "spaces per indent, a maximal indentation of 40 spaces inside continuous\n";
+	(*_err) << "statements, a minimum indentation of eight spaces inside conditional\n";
+	(*_err) << "statements, and NO formatting options.\n";
 	(*_err) << endl;
 	(*_err) << "Option's Format:\n";
 	(*_err) << "----------------\n";
@@ -1261,11 +1287,11 @@ void ASConsole::printHelp() const
 	(*_err) << "    Indent case blocks from the 'case XXX:' headers.\n";
 	(*_err) << "    Case statements not enclosed in blocks are NOT indented.\n";
 	(*_err) << endl;
-	(*_err) << "    --indent-blocks  OR  -G\n";
-	(*_err) << "    Add extra indentation entire blocks (including brackets).\n";
-	(*_err) << endl;
 	(*_err) << "    --indent-brackets  OR  -B\n";
 	(*_err) << "    Add extra indentation to '{' and '}' block brackets.\n";
+	(*_err) << endl;
+	(*_err) << "    --indent-blocks  OR  -G\n";
+	(*_err) << "    Add extra indentation entire blocks (including brackets).\n";
 	(*_err) << endl;
 	(*_err) << "    --indent-namespaces  OR  -N\n";
 	(*_err) << "    Indent the contents of namespace blocks.\n";
@@ -1285,35 +1311,6 @@ void ASConsole::printHelp() const
 	(*_err) << "    --min-conditional-indent=#  OR  -m#\n";
 	(*_err) << "    Indent a minimal # spaces in a continuous conditional\n";
 	(*_err) << "    belonging to a conditional header.\n";
-	(*_err) << endl;
-	(*_err) << "Formatting options:\n";
-	(*_err) << "-------------------\n";
-	(*_err) << "    --break-closing-brackets  OR  -y\n";
-	(*_err) << "    Break brackets before closing headers (e.g. 'else', 'catch', ...).\n";
-	(*_err) << "    Use with --brackets=attach, --brackets=linux, \n";
-	(*_err) << "    or --brackets=stroustrup.\n";
-	(*_err) << endl;
-	(*_err) << "    --break-elseifs  OR  -e\n";
-	(*_err) << "    Break 'else if()' statements into two different lines.\n";
-	(*_err) << endl;
-	(*_err) << "    --keep-one-line-statements  OR  -o\n";
-	(*_err) << "    Don't break lines containing multiple statements into\n";
-	(*_err) << "    multiple single-statement lines.\n";
-	(*_err) << endl;
-	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
-	(*_err) << "    Don't break blocks residing completely on one line.\n";
-	(*_err) << endl;
-	(*_err) << "    --convert-tabs  OR  -c\n";
-	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
-	(*_err) << endl;
-	(*_err) << "    --mode=c\n";
-	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
-	(*_err) << endl;
-	(*_err) << "    --mode=java\n";
-	(*_err) << "    Indent a Java source file.\n";
-	(*_err) << endl;
-	(*_err) << "    --mode=cs\n";
-	(*_err) << "    Indent a C# source file.\n";
 	(*_err) << endl;
 	(*_err) << "Padding options:\n";
 	(*_err) << "--------------------\n";
@@ -1351,6 +1348,40 @@ void ASConsole::printHelp() const
 	(*_err) << "    --fill-empty-lines  OR  -E\n";
 	(*_err) << "    Fill empty lines with the white space of their\n";
 	(*_err) << "    previous lines.\n";
+	(*_err) << endl;
+	(*_err) << "Formatting options:\n";
+	(*_err) << "-------------------\n";
+	(*_err) << "    --break-closing-brackets  OR  -y\n";
+	(*_err) << "    Break brackets before closing headers (e.g. 'else', 'catch', ...).\n";
+	(*_err) << "    Use with --brackets=attach, --brackets=linux, \n";
+	(*_err) << "    or --brackets=stroustrup.\n";
+	(*_err) << endl;
+	(*_err) << "    --break-elseifs  OR  -e\n";
+	(*_err) << "    Break 'else if()' statements into two different lines.\n";
+	(*_err) << endl;
+	(*_err) << "    --keep-one-line-statements  OR  -o\n";
+	(*_err) << "    Don't break lines containing multiple statements into\n";
+	(*_err) << "    multiple single-statement lines.\n";
+	(*_err) << endl;
+	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
+	(*_err) << "    Don't break blocks residing completely on one line.\n";
+	(*_err) << endl;
+	(*_err) << "    --align-pointer=type  OR  -Y1\n";
+	(*_err) << "    --align-pointer=name  OR  -Y2\n";
+	(*_err) << "    Attach a pointer or reference operator (* or &) to either\n";
+	(*_err) << "    the operator type (left) or operator name (right).\n";
+	(*_err) << endl;
+	(*_err) << "    --convert-tabs  OR  -c\n";
+	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
+	(*_err) << endl;
+	(*_err) << "    --mode=c\n";
+	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
+	(*_err) << endl;
+	(*_err) << "    --mode=java\n";
+	(*_err) << "    Indent a Java source file.\n";
+	(*_err) << endl;
+	(*_err) << "    --mode=cs\n";
+	(*_err) << "    Indent a C# source file.\n";
 	(*_err) << endl;
 	(*_err) << "Other options:\n";
 	(*_err) << "--------------\n";
@@ -1518,8 +1549,6 @@ void ASConsole::processOptions(int argc, char *argv[], ASFormatter &formatter)
 	string arg;
 	bool ok = true;
 	bool shouldParseOptionsFile = true;
-
-	g_modeManuallySet = false;
 
 	// get command line options
 	for (int i = 1; i < argc; i++)
@@ -1934,7 +1963,6 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	vector<string> optionsVector;
 	istringstream opt(pOptions);
 	_err = new stringstream;
-	g_modeManuallySet = false;
 
 	importOptions(opt, optionsVector);
 

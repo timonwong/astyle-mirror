@@ -56,6 +56,9 @@ ASFormatter::ASFormatter()
 	lineCommentNoIndent = false;
 	formattingStyle = STYLE_NONE;
 	bracketFormatMode = NONE_MODE;
+	pointerAlignment = ALIGN_NONE;
+	isModeManuallySet = false;
+	isIndentManuallySet = false;
 	shouldPadOperators = false;
 	shouldPadParensOutside = false;
 	shouldPadParensInside = false;
@@ -143,86 +146,92 @@ void ASFormatter::buildLanguageVectors()
  */
 void ASFormatter::fixOptionVariableConflicts()
 {
-	switch (formattingStyle)
+	if (formattingStyle == STYLE_ALLMAN)
 	{
-	case STYLE_NONE:
-		// do nothing, accept the current settings
-		break;
-
-	case STYLE_ALLMAN:
 		setBracketFormatMode(BREAK_MODE);
 		setBlockIndent(false);
 		setBracketIndent(false);
-		break;
-
-	case STYLE_JAVA:
+	}
+	else if (formattingStyle == STYLE_JAVA)
+	{
 		setBracketFormatMode(ATTACH_MODE);
 		setBlockIndent(false);
 		setBracketIndent(false);
-		break;
-
-	case STYLE_KandR:
+	}
+	else if (formattingStyle == STYLE_KandR)
+	{
 		setBracketFormatMode(LINUX_MODE);
 		setBlockIndent(false);
 		setBracketIndent(false);
-		break;
-
-	case STYLE_STROUSTRUP:
+	}
+	else if (formattingStyle == STYLE_STROUSTRUP)
+	{
 		setBracketFormatMode(STROUSTRUP_MODE);
 		setBlockIndent(false);
 		setBracketIndent(false);
-		if (getIndentString() == "\t")
-			setTabIndentation(5, getForceTabIndentation());
-		else
-			setSpaceIndentation(5);
-		break;
-
-	case STYLE_WHITESMITH:
+		if (!isIndentManuallySet)
+		{
+			if (getIndentString() == "\t")
+				setTabIndentation(5, getForceTabIndentation());
+			else
+				setSpaceIndentation(5);
+		}
+	}
+	else if (formattingStyle == STYLE_WHITESMITH)
+	{
 		setBracketFormatMode(BREAK_MODE);
 		setBlockIndent(false);
 		setBracketIndent(true);
 		setClassIndent(true);
 		setSwitchIndent(true);
-		break;
-
-	case STYLE_BANNER:
+	}
+	else if (formattingStyle == STYLE_BANNER)
+	{
 		setBracketFormatMode(ATTACH_MODE);
 		setBlockIndent(false);
 		setBracketIndent(true);
 		setClassIndent(true);
 		setSwitchIndent(true);
-		break;
-
-	case STYLE_GNU:
+	}
+	else if (formattingStyle == STYLE_GNU)
+	{
 		setBracketFormatMode(BREAK_MODE);
 		setBlockIndent(true);
 		setBracketIndent(false);
-		if (getIndentString() == "\t")
-			setTabIndentation(2, getForceTabIndentation());
-		else
-			setSpaceIndentation(2);
-		break;
-
-	case STYLE_LINUX:
+		if (!isIndentManuallySet)
+		{
+			if (getIndentString() == "\t")
+				setTabIndentation(2, getForceTabIndentation());
+			else
+				setSpaceIndentation(2);
+		}
+	}
+	else if (formattingStyle == STYLE_LINUX)
+	{
 		setBracketFormatMode(LINUX_MODE);
 		setBlockIndent(false);
 		setBracketIndent(false);
-		if (getIndentString() == "\t")
-			setTabIndentation(8, getForceTabIndentation());
-		else
-			setSpaceIndentation(8);
-		break;
-
-	case STYLE_HORSTMANN:
+		if (!isIndentManuallySet)
+		{
+			if (getIndentString() == "\t")
+				setTabIndentation(8, getForceTabIndentation());
+			else
+				setSpaceIndentation(8);
+		}
+	}
+	else if (formattingStyle == STYLE_HORSTMANN)
+	{
 		setBracketFormatMode(HORSTMANN_MODE);
 		setBlockIndent(false);
 		setBracketIndent(false);
 		setSwitchIndent(true);
-		if (getIndentString() == "\t")
-			setTabIndentation(3, getForceTabIndentation());
-		else
-			setSpaceIndentation(3);
-		break;
+		if (!isIndentManuallySet)
+		{
+			if (getIndentString() == "\t")
+				setTabIndentation(3, getForceTabIndentation());
+			else
+				setSpaceIndentation(3);
+		}
 	}
 
 	// cannot have both block indent and bracket indent, default to block indent
@@ -1074,7 +1083,10 @@ string ASFormatter::nextLine()
 				isInPotentialCalculation = false;
 
 			if (findKeyword(currentLine, charNum, AS_RETURN))
+			{
+				isInPotentialCalculation = true;	// return is the same as an = sign
 				isImmediatelyPostReturn = true;
+			}
 
 			if (findKeyword(currentLine, charNum, AS_OPERATOR))
 				isImmediatelyPostOperator = true;
@@ -1132,6 +1144,17 @@ string ASFormatter::nextLine()
 					}
 				}
 			}
+		}
+
+		if (isCStyle()
+		        && (currentChar == '*' || currentChar == '&')
+		        && isPointerOrReference()
+		        && (isLegalNameChar(previousNonWSChar) || previousNonWSChar == '>')
+		        && (isLegalNameChar(peekNextChar()) || isSequenceReached("**"))
+		        && !isCharImmediatelyPostReturn)
+		{
+			alignPointerOrReference();
+			continue;
 		}
 
 		if (shouldPadOperators && newHeader != NULL)
@@ -1397,6 +1420,17 @@ void ASFormatter::setBreakClosingHeaderBlocksMode(bool state)
 void ASFormatter::setDeleteEmptyLinesMode(bool state)
 {
 	shouldDeleteEmptyLines = state;
+}
+
+/**
+* set the pointer alignment.
+* options:
+*
+* @param alignment    the pointer alignment.
+*/
+void ASFormatter::setPointerAlignment(PointerAlign alignment)
+{
+	pointerAlignment = alignment;
 }
 
 /**
@@ -1904,28 +1938,40 @@ bool ASFormatter::isEmptyLine(const string &line) const
 }
 
 /**
- * check if the currently reached  '*' or '&' character is
+ * Check if the currently reached  '*' or '&' character is
  * a pointer-or-reference symbol, or another operator.
- * this method takes for granted that the current character
- * is either a '*' or '&'.
+ * A pointer dereference (*) or an "address of" character (&)
+ * counts as a pointer or reference because it is not an
+ * arithmetic operator.
  *
  * @return        whether current character is a reference-or-pointer
  */
 bool ASFormatter::isPointerOrReference() const
 {
 	assert(currentChar == '*' || currentChar == '&');
+	assert(isCStyle());
 
-	bool isPR;
-	isPR = (!isInPotentialCalculation
-	        || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)
-	        || (!isLegalNameChar(previousNonWSChar)
-	            && previousNonWSChar != ')'
-	            && previousNonWSChar != ']')
-	       );
+	if (!isCStyle())
+		return false;
+
+	if (isSequenceReached("&&")
+	        || (charNum > 0 && currentLine[charNum-1] == '&'))
+		return false;
+
+	if (previousNonWSChar == '=' || isCharImmediatelyPostReturn)
+		return true;
+
+	char nextChar = peekNextChar();
+
+	bool isPR = (!isInPotentialCalculation
+	             || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)
+	             || (!isLegalNameChar(previousNonWSChar)
+	                 && previousNonWSChar != ')'
+	                 && previousNonWSChar != ']')
+	            );
 
 	if (!isPR)
 	{
-		char nextChar = peekNextChar();
 		isPR |= (!isWhiteSpace(nextChar)
 		         && nextChar != '-'
 		         && nextChar != '('
@@ -2370,6 +2416,69 @@ void ASFormatter::padOperators(const string *newOperator)
 		appendSpaceAfter();
 
 	previousOperator = newOperator;
+	return;
+}
+
+/**
+* align pointer or reference
+* currentChar contains the pointer or reference
+* the sign and necessary padding will be appended to formattedLine
+* the calling function should have a continue statement after calling this method
+*/
+void ASFormatter::alignPointerOrReference(void)
+{
+	assert (currentChar == '*' || currentChar == '&');
+	assert(isCStyle());
+
+	if (pointerAlignment == ALIGN_TYPE)
+	{
+		size_t prevCh = formattedLine.find_last_not_of(" \t");
+		if (prevCh == string::npos)
+			prevCh = 0;
+		if (formattedLine.length() == 0 || prevCh == formattedLine.length() - 1)
+			appendCurrentChar();
+		else
+		{
+			// exchange * or & with character following the type
+			// this may not work every time with a tab character
+			string charSave = formattedLine.substr(prevCh+1, 1);
+			formattedLine[prevCh+1] = currentChar;
+			formattedLine.append(charSave);
+			if (isSequenceReached("**"))
+			{
+				formattedLine.insert(prevCh+2, "*");
+				goForward(1);
+			}
+		}
+	}
+	else if (pointerAlignment == ALIGN_NAME)
+	{
+		string sequenceToInsert = currentChar == '*' ? "*" : "&";
+		if (isSequenceReached("**"))
+		{
+			sequenceToInsert = "**";
+			goForward(1);
+		}
+		size_t nextCh = currentLine.find_first_not_of(" \t", charNum+1);
+		if (nextCh == string::npos)
+			nextCh = currentLine.length();
+		int charsToInsert = nextCh - charNum - 1;
+		if (charsToInsert > 0)
+		{
+			// exchange preceding characters with the following characters
+			// this may not work every time with tab characters
+			string charSave = currentLine.substr(charNum+1, charsToInsert);
+			formattedLine.append(charSave);
+			appendSequence(sequenceToInsert, false);
+			goForward(charsToInsert);
+		}
+		else
+			appendSequence(sequenceToInsert, false);
+	}
+	else	// pointerAlignment == ALIGN_NONE
+	{
+		appendCurrentChar();
+	}
 	return;
 }
 
