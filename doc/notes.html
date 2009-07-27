@@ -35,6 +35,7 @@
         <li>Change --min-conditional-indent to allow for statements preceded by a bracket (horstmann
             brackets). </li>
         <li>Change predefined styles to allow changes to spaces per indent.</li>
+        <li>Fix from Colin D Bennett to fix 64-bit comparison. </li>
         <li>Fix console error procedure to terminate on an error.</li>
         <li>Fix 'return' statement for padding or not pading arithmetic operators.</li>
         <li>Fix C# 'delegate' and 'unchecked' not being identified as keywords.</li>
@@ -71,10 +72,14 @@
         <li>Change quote formatting in ASFormatter to output the entire string instead of single
             characters.</li>
         <li>Remove peekNextChar() function from ASBeautifier and use the function in ASBase.</li>
-        <li>Fix memory leak reporting of static class member vectors. </li>
-        <li>Refactor:
+        <li>Fix memory leak reporting of global and static class member vectors. </li>
+        <li>Refactor to implement unit testing and improve decomposition:
         <ul>
-            <li>Move multi-line comment alignment from ASBeautifier to ASFormatter.</li>
+            <li>Change standardizePath to be called when the vector entry is built.</li>
+            <li>Move formatFile call from getFilePaths to main.</li>
+            <li>Change g_console from an object to an object pointer to allow rebuilding the object.</li>
+            <li>Change processOptions function to return to main instead of exiting.</li>
+            <li>Move multi-line comment alignment from ASBeautifier to ASFormatter. </li>
             <li>Extract functions formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
             <li>Extract functions formatCommentOpener and formatCommentBody.</li>
             <li>Extract functions formatLineCommentOpener and formatLineCommentBody.</li>

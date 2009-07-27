@@ -63,6 +63,9 @@
 namespace astyle
 {
 
+// return values for ASConsole
+enum processReturn { CONTINUE, END_SUCCESS, END_FAILURE };
+
 //----------------------------------------------------------------------------
 // ASStreamIterator class
 // typename will be istringstream for GUI and istream otherwise
@@ -128,8 +131,12 @@ class ASConsole
 		vector<bool>   excludeHitsVector;   // exclude flags for eror reporting
 		vector<string> fileNameVector;      // file paths and names from the command line
 		vector<string> optionsVector;       // options from the command line
-		vector<string> fileOptionsVector;   // options from the options vector
-		string         optionsFileName;     // file path and name of the options file to use
+		vector<string> fileOptionsVector;   // options from the options file
+		vector<string> fileName;            // files to be processed including path
+		string optionsFileName;             // file path and name of the options file to use
+		string targetDirectory;             // path to the directory being processed
+		string targetFilename;              // file name being processed
+
 
 	public:
 		ASConsole() {
@@ -155,16 +162,17 @@ class ASConsole
 			filesUnchanged = 0;
 			linesOut = 0;
 		}
+
 		// functions
 		void error(const char *why, const char* what) const;
-		void processFilePath(string &filePath, ASFormatter &formatter);
-		void processOptions(int argc, char *argv[], ASFormatter &formatter);
+		bool formatFile(const string &fileName, astyle::ASFormatter &formatter) const;
+		void getFilePaths(string &filePath);
+		processReturn processOptions(int argc, char** argv, ASFormatter &formatter);
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
 
 	private:
-		bool formatFile(const string &fileName, astyle::ASFormatter &formatter) const;
 		string getCurrentDirectory(const string &fileName) const;
-		void getFileNames(const string &directory, const string &wildcard, vector<string> &fileName);
+		void getFileNames(const string &directory, const string &wildcard);
 		bool isPathExclued(const string &subPath);
 		void preserveFileDate(const char *oldFileName, const char *newFileName) const;
 		void printHelp() const;

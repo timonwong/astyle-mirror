@@ -37,6 +37,9 @@ namespace astyle
  */
 ASEnhancer::ASEnhancer()
 {
+	// the following prevents warning messages with cppcheck
+	// it will NOT compile if activated
+//	init();
 }
 
 /**
@@ -67,6 +70,7 @@ void ASEnhancer::init(int fileType,
 
 	caseIndent    = _caseIndent;
 	emptyLineFill = _emptyLineFill;
+	quoteChar = '\'';
 
 	// unindent variables
 	lineNumber = 0;

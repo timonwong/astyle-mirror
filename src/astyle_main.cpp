@@ -39,7 +39,6 @@
 #include <windows.h>
 #else
 #include <dirent.h>
-#include <errno.h>
 #include <sys/stat.h>
 #ifdef __VMS
 #include <unixlib.h>
@@ -78,7 +77,7 @@ stringstream* _err = NULL;
 #else
 // console build variables
 ostream* _err = &cerr;           // direct error messages to cerr
-ASConsole g_console;             // class to encapsulate console variables
+ASConsole* g_console = NULL;     // class to encapsulate console variables
 #endif
 
 #ifdef ASTYLE_JNI
@@ -186,7 +185,7 @@ void isOptionError(const string &arg, const string &errorInfo)
 		(*_err) << endl << arg;         // put endl after previous option
 #else
 	if (errorInfo.length() > 0)         // to avoid a compiler warning
-		g_console.error("Error in param: ", arg.c_str());
+		g_console->error("Error in param: ", arg.c_str());
 #endif
 }
 
@@ -556,14 +555,14 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	// Options used by only console
 	else if ( IS_OPTIONS(arg, "n", "suffix=none") )
 	{
-		g_console.noBackup = true;
+		g_console->noBackup = true;
 	}
 	else if ( isParamOption(arg, "suffix=") )
 	{
 		string suffixParam = GET_PARAM(arg, "suffix=");
 		if (suffixParam.length() > 0)
 		{
-			g_console.origSuffix = suffixParam;
+			g_console->origSuffix = suffixParam;
 		}
 	}
 	else if ( isParamOption(arg, "exclude=") )
@@ -571,29 +570,30 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		string suffixParam = GET_PARAM(arg, "exclude=");
 		if (suffixParam.length() > 0)
 		{
-			g_console.excludeVector.push_back(suffixParam);
-			g_console.excludeHitsVector.push_back(false);
+			g_console->standardizePath(suffixParam, true);
+			g_console->excludeVector.push_back(suffixParam);
+			g_console->excludeHitsVector.push_back(false);
 		}
 	}
 	else if ( IS_OPTIONS(arg, "r", "R") || IS_OPTION(arg, "recursive") )
 	{
-		g_console.isRecursive = true;
+		g_console->isRecursive = true;
 	}
 	else if ( IS_OPTIONS(arg, "Z", "preserve-date") )
 	{
-		g_console.preserveDate = true;
+		g_console->preserveDate = true;
 	}
 	else if ( IS_OPTIONS(arg, "v", "verbose") )
 	{
-		g_console.isVerbose = true;
+		g_console->isVerbose = true;
 	}
 	else if ( IS_OPTIONS(arg, "Q", "formatted") )
 	{
-		g_console.isFormattedOnly = true;
+		g_console->isFormattedOnly = true;
 	}
 	else if ( IS_OPTIONS(arg, "q", "quiet") )
 	{
-		g_console.isQuiet = true;
+		g_console->isQuiet = true;
 	}
 	else if ( IS_OPTIONS(arg, "X", "errors-to-stdout") )
 	{
@@ -608,8 +608,6 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 // End of parseOption function
 	return true; //o.k.
 }
-
-
 
 //--------------------------------------------------------------------------------------
 // ASStreamIterator class
@@ -836,7 +834,7 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 	{
 		nextLine = formatter.nextLine();
 		out << nextLine;
-		g_console.linesOut++;
+		g_console->linesOut++;
 		if (formatter.hasMoreLines())
 			out << streamIterator.getOutputEOL();
 		else
@@ -895,7 +893,7 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 /**
  * WINDOWS function to get the current directory.
  * NOTE: getenv("CD") does not work for Windows Vista.
- *        The Wndows function GetCurrentDirectory is used instead.
+ *        The Windows function GetCurrentDirectory is used instead.
  *
  * @return              The path of the current directory
  */
@@ -938,7 +936,7 @@ string ASConsole::getCurrentDirectory(const string &fileName) const
  * @param wildcard      The wildcard to be processed (e.g. *.cpp).
  * @param fileName      An empty vector which will be filled with the path and names of files to process.
  */
-void ASConsole::getFileNames(const string &directory, const string &wildcard, vector<string> &fileName)
+void ASConsole::getFileNames(const string &directory, const string &wildcard)
 {
 	vector<string> subDirectory;    // sub directories of directory
 	WIN32_FIND_DATA FindFileData;   // for FindFirstFile and FindNextFile
@@ -998,7 +996,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard, ve
 	// if not doing recursive subDirectory is empty
 	for (unsigned i = 0; i < subDirectory.size(); i++)
 	{
-		getFileNames(subDirectory[i], wildcard, fileName);
+		getFileNames(subDirectory[i], wildcard);
 	}
 
 	return;
@@ -1014,7 +1012,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard, ve
  * @param wildcard      The wildcard to be processed (e.g. *.cpp).
  * @param fileName      An empty vector which will be filled with the path and names of files to process.
  */
-void ASConsole::getFileNames(const string &directory, const string &wildcard, vector<string> &fileName)
+void ASConsole::getFileNames(const string &directory, const string &wildcard)
 {
 	struct dirent *entry;           // entry from readdir()
 	struct stat statbuf;            // entry from stat()
@@ -1092,7 +1090,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard, ve
 		sort(subDirectory.begin(), subDirectory.end());
 	for (unsigned i = 0; i < subDirectory.size(); i++)
 	{
-		getFileNames(subDirectory[i], wildcard, fileName);
+		getFileNames(subDirectory[i], wildcard);
 	}
 
 	return;
@@ -1443,15 +1441,19 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 }
 
-// process a command-line file path, including wildcards
-void ASConsole::processFilePath(string &filePath, ASFormatter &formatter)
+// get individual file names from the command-line file path
+void ASConsole::getFilePaths(string &filePath)
 {
-	vector<string> fileName;        // files to be processed including path
-	string targetDirectory;         // path to the directory being processed
-	string targetFilename;          // file name being processed
+//	vector<string> fileName;        // files to be processed including path
+//	string targetDirectory;         // path to the directory being processed
+//	string targetFilename;          // file name being processed
 
 	// standardize the file separators
-	standardizePath(filePath);
+//	standardizePath(filePath);
+
+	fileName.clear();
+	targetDirectory = string();
+	targetFilename = string();
 
 	// separate directory and file name
 	size_t separator = filePath.find_last_of(g_fileSeparator);
@@ -1490,9 +1492,9 @@ void ASConsole::processFilePath(string &filePath, ASFormatter &formatter)
 
 	// create a vector of paths and file names to process
 	if (hasWildcard || isRecursive)
-		getFileNames(targetDirectory, targetFilename, fileName);
+		getFileNames(targetDirectory, targetFilename);
 	else
-		fileName.push_back(filePath);
+		fileName.push_back(targetDirectory + g_fileSeparator + targetFilename);
 
 	if (hasWildcard && ! isQuiet)
 		cout << "--------------------------------------------------" << endl;
@@ -1513,38 +1515,11 @@ void ASConsole::processFilePath(string &filePath, ASFormatter &formatter)
 	// check if files were found (probably an input error if not)
 	if (fileName.size() == 0)
 		(*_err) << "No file to process " << filePath.c_str() << endl;
-
-	// loop thru fileName vector to format the files
-	for (size_t j = 0; j < fileName.size(); j++)
-	{
-		// format the file
-		bool isFormatted = formatFile(fileName[j], formatter);
-
-		// remove targetDirectory from filename if required
-		string displayName;
-		if (hasWildcard)
-			displayName = fileName[j].substr(targetDirectory.length() + 1);
-		else
-			displayName = fileName[j];
-
-		if (isFormatted)
-		{
-			filesFormatted++;
-			if (!isQuiet)
-				cout << "formatted  " << displayName.c_str() << endl;
-		}
-		else
-		{
-			filesUnchanged++;
-			if (!isQuiet && !isFormattedOnly)
-				cout << "unchanged* " << displayName.c_str() << endl;
-		}
-	}
 }
 
 // process options from the command line and options file
-// build the vectors fileNameVector, optionsVector, and fileOptionsVector
-void ASConsole::processOptions(int argc, char *argv[], ASFormatter &formatter)
+// build the vectors fileNameVector, excludeVector, optionsVector, and fileOptionsVector
+processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &formatter)
 {
 	string arg;
 	bool ok = true;
@@ -1571,21 +1546,21 @@ void ASConsole::processOptions(int argc, char *argv[], ASFormatter &formatter)
 		          || IS_OPTION(arg, "-?") )
 		{
 			printHelp();
-			exit(EXIT_SUCCESS);
+			return(END_SUCCESS);
 		}
 		else if ( IS_OPTION(arg, "-V" )
 		          || IS_OPTION(arg, "--version") )
 		{
 			(*_err) << "Artistic Style Version " << _version << endl;
-			exit(EXIT_SUCCESS);
+			return(END_SUCCESS);
 		}
-
 		else if (arg[0] == '-')
 		{
 			optionsVector.push_back(arg);
 		}
 		else // file-name
 		{
+			g_console->standardizePath(arg);
 			fileNameVector.push_back(arg);
 		}
 	}
@@ -1630,7 +1605,10 @@ void ASConsole::processOptions(int argc, char *argv[], ASFormatter &formatter)
 		else
 		{
 			if (optionsFileRequired)
-				error("Could not open options file", optionsFileName.c_str());
+			{
+				(*_err) << "Could not open options file: " << optionsFileName.c_str() << endl;
+				return (END_FAILURE);
+			}
 			optionsFileName.clear();
 		}
 		optionsIn.close();
@@ -1638,7 +1616,7 @@ void ASConsole::processOptions(int argc, char *argv[], ASFormatter &formatter)
 	if (!ok)
 	{
 		(*_err) << "For help on options, type 'astyle -h' " << endl;
-		exit(EXIT_FAILURE);
+		return(END_FAILURE);
 	}
 
 	// parse the command line options vector for errors
@@ -1649,8 +1627,9 @@ void ASConsole::processOptions(int argc, char *argv[], ASFormatter &formatter)
 	if (!ok)
 	{
 		(*_err) << "For help on options, type 'astyle -h' \n" << endl;
-		exit(EXIT_FAILURE);
+		return(END_FAILURE);
 	}
+	return(CONTINUE);
 }
 
 // remove a file and check for an error
@@ -2009,21 +1988,31 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 	return _version;
 }
 
-#else
+// ASTYLE_NO_MAIN is defined to exclude "main" from the test programs
+#elif !defined(ASTYLE_NO_MAIN)
+
 // **************************   main function   ***************************************************
 
-int main(int argc, char *argv[])
+int main(int argc, char** argv)
 {
 	ASFormatter formatter;
+	g_console = new ASConsole;
 
 	// process command line and options file
 	// build the vectors fileNameVector, optionsVector, and fileOptionsVector
-	g_console.processOptions(argc, argv, formatter);
+	processReturn returnValue = g_console->processOptions(argc, argv, formatter);
+	if (returnValue == END_SUCCESS)
+		return EXIT_SUCCESS;
+	if (returnValue == END_FAILURE)
+	{
+		(*_err) << "Artistic Style has terminated!" << endl;
+		return EXIT_FAILURE;
+	}
 
 	// if no files have been given, use cin for input and cout for output
 	// this is used to format text for text editors like TextWrangler
 	// do NOT display any console messages when this branch is used
-	if (g_console.fileNameVector.empty())
+	if (g_console->fileNameVector.empty())
 	{
 		ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
 		formatter.init(&streamIterator);
@@ -2040,32 +2029,55 @@ int main(int argc, char *argv[])
 
 	// indent the given files
 
-	// standarize the exclude names
-	for (size_t ix = 0; ix < g_console.excludeVector.size(); ix++)
-		g_console.standardizePath(g_console.excludeVector[ix], true);
-
-	if (g_console.isVerbose)
+	if (g_console->isVerbose)
 	{
 		cout << "Artistic Style " << _version << endl;
-		if (g_console.optionsFileName.compare("") != 0)
-			cout << "Using default options file " << g_console.optionsFileName << endl;
+		if (g_console->optionsFileName.compare("") != 0)
+			cout << "Using default options file " << g_console->optionsFileName << endl;
 	}
 
-	// loop thru input fileNameVector formatting the files
 	clock_t startTime = clock();     // start time of file formatting
 
-	for (size_t i = 0; i < g_console.fileNameVector.size(); i++)
+	// loop thru input fileNameVector and process the files
+	for (size_t i = 0; i < g_console->fileNameVector.size(); i++)
 	{
-		g_console.processFilePath(g_console.fileNameVector[i], formatter);
+		g_console->getFilePaths(g_console->fileNameVector[i]);
+
+		// loop thru fileName vector formatting the files
+		for (size_t j = 0; j < g_console->fileName.size(); j++)
+		{
+			// format the file
+			bool isFormatted = g_console->formatFile(g_console->fileName[j], formatter);
+
+			// remove targetDirectory from filename if required
+			string displayName;
+			if (g_console->hasWildcard)
+				displayName = g_console->fileName[j].substr(g_console->targetDirectory.length() + 1);
+			else
+				displayName = g_console->fileName[j];
+
+			if (isFormatted)
+			{
+				g_console->filesFormatted++;
+				if (!g_console->isQuiet)
+					cout << "formatted  " << displayName.c_str() << endl;
+			}
+			else
+			{
+				g_console->filesUnchanged++;
+				if (!g_console->isQuiet && !g_console->isFormattedOnly)
+					cout << "unchanged* " << displayName.c_str() << endl;
+			}
+		}
 	}
 
 	// files are processed, display stats
-	if (g_console.isVerbose)
+	if (g_console->isVerbose)
 	{
-		if (g_console.hasWildcard)
+		if (g_console->hasWildcard)
 			cout << "--------------------------------------------------" << endl;
-		cout << g_console.filesFormatted << " formatted, ";
-		cout << g_console.filesUnchanged << " unchanged, ";
+		cout << g_console->filesFormatted << " formatted, ";
+		cout << g_console->filesUnchanged << " unchanged, ";
 
 		// show processing time
 		clock_t stopTime = clock();
@@ -2088,9 +2100,10 @@ int main(int argc, char *argv[])
 			cout << min << " min " << minsec << " sec, ";
 		}
 
-		cout << g_console.linesOut << " lines" << endl;
+		cout << g_console->linesOut << " lines" << endl;
 	}
 
+	delete g_console;
 	return EXIT_SUCCESS;
 }
 

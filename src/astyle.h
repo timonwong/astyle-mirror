@@ -446,9 +446,6 @@ class ASEnhancer : protected ASBase
 		bool nextLineIsEventTable;              // begin event table is reached
 		bool isInEventTable;                    // need to indent an event table
 
-		// stringstream for trace
-		stringstream *traceOut;
-
 	private:  // functions
 		int  indentLine(string  &line, const int indent) const;
 		int  unindentLine(string  &line, const int unindent) const;
@@ -482,7 +479,6 @@ class ASFormatter : public ASBeautifier
 		void setPointerAlignment(PointerAlign alignment);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
-
 
 	public:	// variables
 		// public variables are set by non-member functions
@@ -668,7 +664,6 @@ class ASFormatter : public ASBeautifier
 		bool isImmediatelyPostHeader;
 		bool isInCase;
 		bool isJavaStaticConstructor;
-		bool isInSharpGenericDefinition;
 
 	private:  // inline functions
 		// append a character to the current formatted line.

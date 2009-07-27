@@ -72,6 +72,9 @@ ASFormatter::ASFormatter()
 	shouldBreakClosingHeaderBrackets = false;
 	shouldDeleteEmptyLines = false;
 	shouldBreakElseIfs = false;
+	// the following prevents warning messages with cppcheck
+	// it will NOT compile if activated
+//	init();
 }
 
 /**
@@ -291,6 +294,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	templateDepth = 0;
 	traceLineNumber = 0;
 	horstmannIndentChars = 0;
+	tabIncrementIn = 0;
 	previousBracketType = NULL_TYPE;
 	previousOperator = NULL;
 
@@ -322,7 +326,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	isInLineBreak = false;
 	endOfCodeReached = false;
 	isLineReady = false;
-	isPreviousBracketBlockRelated = true;
+	isPreviousBracketBlockRelated = false;
 	isInPotentialCalculation = false;
 	shouldReparseCurrentChar = false;
 	needHeaderOpeningBracket = false;
@@ -340,18 +344,20 @@ void ASFormatter::init(ASSourceIterator *si)
 	isImmediatelyPostOperator = false;
 	isCharImmediatelyPostReturn = false;
 	isCharImmediatelyPostOperator = false;
+	isCharImmediatelyPostComment = false;
+	isPreviousCharPostComment = false;
+	isCharImmediatelyPostLineComment = false;
+	isCharImmediatelyPostOpenBlock = false;
+	isCharImmediatelyPostCloseBlock = false;
+	isCharImmediatelyPostTemplate = false;
 //	previousBracketIsBroken = false;
 	isInHorstmannRunIn = false;
 	currentLineBeginsWithBracket = false;
-
 	isPrependPostBlockEmptyLineRequested = false;
 	isAppendPostBlockEmptyLineRequested = false;
 	prependEmptyLine = false;
 	appendOpeningBracket = false;
-
 	foundClosingHeader = false;
-	previousReadyFormattedLineLength = 0;
-
 	isImmediatelyPostHeader = false;
 	isInHeader = false;
 	isInCase = false;
@@ -885,7 +891,7 @@ string ASFormatter::nextLine()
 						{
 							// if a blank line does not preceed this
 							// or last line is not a one line block, attach header
-							unsigned firstText = formattedLine.find_first_not_of(" \t");
+							size_t firstText = formattedLine.find_first_not_of(" \t");
 							if (firstText != string::npos
 							        && formattedLine[firstText] != '{')
 							{
