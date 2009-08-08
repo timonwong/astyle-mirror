@@ -301,7 +301,7 @@ void ASEnhancer::enhance(string &line)
 						continue;                           // must close quote before continuing
 					}
 				}
-				if (line[i] == '\'' || line[i] == '\"') // check opening quote
+				if (line[i] == '\'' || line[i] == '\"')		// check opening quote
 				{
 					isInQuote = true;
 					quoteChar = line[i];
@@ -321,12 +321,12 @@ void ASEnhancer::enhance(string &line)
 				if (!(isWhiteSpace(line[i])))
 					break;
 			}
-			if (i < lineLength)                             // check for bracket
+			if (i < lineLength)
 			{
-				if (line[i] == '{')                         // if bracket found
+				if (line[i] == '{')
 				{
 					sw.switchBracketCount++;
-					unindentNextLine = true;                // start unindenting on next line
+					unindentNextLine = true;
 					continue;
 				}
 			}
@@ -344,10 +344,13 @@ void ASEnhancer::enhance(string &line)
 	}   // end of for loop
 
 	if (isInEventTable)                                     // if need to indent
-		indentLine(line, 1);                                //    do it
+	{
+		if (line[0] != '#')
+			indentLine(line, 1);
+	}
 
 	if (sw.unindentDepth > 0)                               // if need to unindent
-		unindentLine(line, sw.unindentDepth);               //    do it
+		unindentLine(line, sw.unindentDepth);
 }
 
 /**

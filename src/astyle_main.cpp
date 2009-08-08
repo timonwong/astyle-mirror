@@ -274,17 +274,17 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTION(arg, "mode=cs") )
 	{
 		formatter.setSharpStyle();
-		formatter.isModeManuallySet = true;
+		formatter.setModeManuallySet(true);
 	}
 	else if ( IS_OPTION(arg, "mode=c") )
 	{
 		formatter.setCStyle();
-		formatter.isModeManuallySet = true;
+		formatter.setModeManuallySet(true);
 	}
 	else if ( IS_OPTION(arg, "mode=java") )
 	{
 		formatter.setJavaStyle();
-		formatter.isModeManuallySet = true;
+		formatter.setModeManuallySet(true);
 	}
 	else if ( isParamOption(arg, "t", "indent=tab=") )
 	{
@@ -297,7 +297,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		else
 		{
 			formatter.setTabIndentation(spaceNum, false);
-			formatter.isIndentManuallySet = true;
+			formatter.setIndentManuallySet(true);
 		}
 	}
 	else if ( IS_OPTION(arg, "indent=tab") )
@@ -330,7 +330,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		else
 		{
 			formatter.setSpaceIndentation(spaceNum);
-			formatter.isIndentManuallySet = true;
+			formatter.setIndentManuallySet(true);
 		}
 	}
 	else if ( IS_OPTION(arg, "indent=spaces") )
@@ -477,6 +477,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setPointerAlignment(ALIGN_TYPE);
 	}
+	else if ( IS_OPTION(arg, "align-pointer=center") )
+	{
+		formatter.setPointerAlignment(ALIGN_CENTER);
+	}
 	else if ( IS_OPTION(arg, "align-pointer=name") )
 	{
 		formatter.setPointerAlignment(ALIGN_NAME);
@@ -487,11 +491,13 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		string styleParam = GET_PARAM(arg, "k");
 		if (styleParam.length() > 0)
 			align = atoi(styleParam.c_str());
-		if (align < 1 || align > 2)
+		if (align < 1 || align > 3)
 			isOptionError(arg, errorInfo);
 		else if (align == 1)
 			formatter.setPointerAlignment(ALIGN_TYPE);
 		else if (align == 2)
+			formatter.setPointerAlignment(ALIGN_CENTER);
+		else if (align == 3)
 			formatter.setPointerAlignment(ALIGN_NAME);
 	}
 	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
@@ -813,7 +819,7 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 
 	// Unless a specific language mode has been set, set the language mode
 	// according to the file's suffix.
-	if (!formatter.isModeManuallySet)
+	if (!formatter.getModeManuallySet())
 	{
 		if (stringEndsWith(fileName, string(".java")))
 			formatter.setJavaStyle();
@@ -1364,10 +1370,11 @@ void ASConsole::printHelp() const
 	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
 	(*_err) << "    Don't break blocks residing completely on one line.\n";
 	(*_err) << endl;
-	(*_err) << "    --align-pointer=type  OR  -Y1\n";
-	(*_err) << "    --align-pointer=name  OR  -Y2\n";
+	(*_err) << "    --align-pointer=type    OR  -k1\n";
+	(*_err) << "    --align-pointer=center  OR  -k2\n";
+	(*_err) << "    --align-pointer=name    OR  -k3\n";
 	(*_err) << "    Attach a pointer or reference operator (* or &) to either\n";
-	(*_err) << "    the operator type (left) or operator name (right).\n";
+	(*_err) << "    the operator type (left), center, or operator name (right).\n";
 	(*_err) << endl;
 	(*_err) << "    --convert-tabs  OR  -c\n";
 	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
@@ -2001,6 +2008,7 @@ int main(int argc, char** argv)
 	// process command line and options file
 	// build the vectors fileNameVector, optionsVector, and fileOptionsVector
 	processReturn returnValue = g_console->processOptions(argc, argv, formatter);
+
 	if (returnValue == END_SUCCESS)
 		return EXIT_SUCCESS;
 	if (returnValue == END_FAILURE)

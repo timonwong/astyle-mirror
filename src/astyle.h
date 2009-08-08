@@ -106,6 +106,7 @@ enum BracketType   { NULL_TYPE = 0,
 
 enum PointerAlign { ALIGN_NONE,
                     ALIGN_TYPE,
+                    ALIGN_CENTER,
                     ALIGN_NAME
                   };
 
@@ -463,6 +464,8 @@ class ASFormatter : public ASBeautifier
 		virtual void init(ASSourceIterator* iter);
 		virtual bool hasMoreLines() const;
 		virtual string nextLine();
+		bool getIndentManuallySet();
+		bool getModeManuallySet();
 		void setFormattingStyle(FormatStyle style);
 		void setBracketFormatMode(BracketMode mode);
 		void setBreakClosingHeaderBracketsMode(bool state);
@@ -471,6 +474,8 @@ class ASFormatter : public ASBeautifier
 		void setBreakElseIfsMode(bool state);
 		void setBreakOneLineBlocksMode(bool state);
 		void setDeleteEmptyLinesMode(bool state);
+		void setIndentManuallySet(bool state);
+		void setModeManuallySet(bool state);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
@@ -479,11 +484,6 @@ class ASFormatter : public ASBeautifier
 		void setPointerAlignment(PointerAlign alignment);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
-
-	public:	// variables
-		// public variables are set by non-member functions
-		bool isModeManuallySet;
-		bool isIndentManuallySet;
 
 	private:  // functions
 		void ASformatter(ASFormatter &copy);           // not to be imlpemented
@@ -501,15 +501,21 @@ class ASFormatter : public ASBeautifier
 		bool isBeforeMultipleLineEndComments(int startPos) const;
 		bool isBracketType(BracketType a, BracketType b) const;
 		bool isCurrentBracketBroken() const;
+		bool isDereferenceOrAddressOf() const;
 		bool isEmptyLine(const string &line) const;
+		bool isIndentManuallySet;
+		bool isModeManuallySet;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
 		bool isNonInStatementArrayBracket() const;
 		bool isPointerOrReference() const;
+		bool isPointerOrReferenceCentered() const;
 		bool isUnaryOperator() const;
 		bool isInExponent() const;
 		bool isOneLineBlockReached() const;
 		bool isNextCharOpeningBracket(int startChar) const;
 //		bool lineBeginsWith(char charToCheck) const;
+		int  getCurrentLineCommentAdjustment();
+		int  getNextLineCommentAdjustment();
 		void appendCharInsideComments();
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
@@ -525,7 +531,6 @@ class ASFormatter : public ASBeautifier
 		void initContainer(vector<BracketType>* &container, vector<BracketType>* value);
 		void initNewLine();
 		void padOperators(const string *newOperator);
-		void alignPointerOrReference();
 		void padParens();
 		void formatArrayBrackets(BracketType bracketType, bool isOpeningArrayBracket);
 		void formatClosingBracket(BracketType bracketType);
@@ -536,10 +541,13 @@ class ASFormatter : public ASBeautifier
 		void formatOpeningBracket(BracketType bracketType);
 		void formatQuoteBody();
 		void formatQuoteOpener();
+		void formatPointerOrReference();
 		void adjustComments();
+		void isLineBreakBeforeClosingHeader();
 		void setBreakBlocksVariables();
 		void fixOptionVariableConflicts();
 		void processPreprocessor();
+		string getPreviousWord(const string& line, int currPos) const;
 		string peekNextText(const string& firstLine, bool endOnEmptyLine=false) const;
 
 	private:  // variables
@@ -572,6 +580,7 @@ class ASFormatter : public ASBeautifier
 		int  preprocBracketTypeStackSize;
 		int  tabIncrementIn;
 		int  spacePadNum;
+		int  nextLineSpacePadNum;
 		int  templateDepth;
 		int  traceLineNumber;
 		int  horstmannIndentChars;

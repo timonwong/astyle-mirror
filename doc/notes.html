@@ -22,8 +22,8 @@
         <li>Add --style=horstmann (-A9) using horstmann brackets to predefined styles. </li>
         <li>Add new option &#8209;&#8209;pad&#8209;header (&#8209;H) from Mario Gleichmann to insert 
             space padding after paren headers. </li>
-        <li>Add new options &#8209;&#8209;align&#8209;pointer=type (-k1) and &#8209;&#8209;align&#8209;pointer=name
-            (-k2) from J P Nurmi to align a pointer or reference operator. </li>
+        <li>Add new options &#8209;&#8209;align&#8209;pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=center
+            (-k2) and &#8209;&#8209;align&#8209;pointer=name (-k3) from J P Nurmi. </li>
         <li>Change default formatting to leave paren headers unchanged instead of always inserting
             space padding after them. </li>
         <li>Change &#8209;&#8209;unpad&#8209;paren to unpad headers unless padding is requested.
@@ -35,6 +35,8 @@
         <li>Change --min-conditional-indent to allow for statements preceded by a bracket (horstmann
             brackets). </li>
         <li>Change predefined styles to allow changes to spaces per indent.</li>
+        <li>Improve recognition of pointers and references vs. arithmetic operators.</li>
+        <li>Improve recognition of arithmetic operators for --pad-oper (-p) option. </li>
         <li>Fix from Colin D Bennett to fix 64-bit comparison. </li>
         <li>Fix console error procedure to terminate on an error.</li>
         <li>Fix 'return' statement for padding or not pading arithmetic operators.</li>
@@ -61,6 +63,9 @@
         <li>Fix deleting a space before a line end comment when attaching 'else' to a closing
             bracket. </li>
         <li>Fix adding a space before a line end comment when the comment is preceded by a tab.</li>
+        <li>Fix to leave tab indentation on no-indent line comments.</li>
+        <li>Fix comments when a bracket is added or removed from a line.</li>
+        <li>Fix indenting preprocessor statements in a wxWidgets or MFC macro.</li>
         <li>Changes from Ettl Martin for cppcheck compilance. </li>
         <li>Change space padding of line end comments to one space when the proper alignment
             cannot be maintained.</li>
@@ -75,7 +80,9 @@
         <li>Fix memory leak reporting of global and static class member vectors. </li>
         <li>Refactor to implement unit testing and improve decomposition:
         <ul>
-            <li>Change standardizePath to be called when the vector entry is built.</li>
+            <li>Encapsulate global variables isModeManuallySet.</li>
+            <li>Extract function isLineBreakBeforeClosingHeader. </li>
+            <li>Change standardizePath to be called when the vector entry is built. </li>
             <li>Move formatFile call from getFilePaths to main.</li>
             <li>Change g_console from an object to an object pointer to allow rebuilding the object.</li>
             <li>Change processOptions function to return to main instead of exiting.</li>

@@ -46,10 +46,11 @@
         styles was obtained from
         the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent Style</a> discussion at Wikipedia.</p>
     <p>
-        New options --align-pointer=type (-k1) and 
-            --align-pointer=name (-k2) will attach a pointer or reference operator (* or &amp;) to either the operator type
+        New options --align-pointer=type (-k1), --align-pointer=center (-k2), and 
+            --align-pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type
         (left) or operator name (right). The spacing between the type and name will be preserved,
-        if possible.</p>
+        if possible. The recognition of pointers and references has been improved.
+        This resulted in an improvement of the --pad-oper (-p) option.</p>
    <p>
         A new option, &#8209;&#8209;pad&#8209;header (&#8209;H), will insert the
         space padding after headers ('if',
@@ -82,16 +83,6 @@
     </p>
     <h4>
         Developers</h4>
-
-   <p>
-       There is a new function setPointerAlignment that is set for the --align-pointer=#
-       option.</p>
-    <p>
-        There is a new function setParensHeaderPaddingMode is set for the &#8209;&#8209;pad&#8209;header
-        option.</p>
-    <p>
-        There is a new value for &#8209;&#8209;brackets=horstmann that is sent to the function
-        setBracketFormatMode.</p>
     <p>
         The Stroustroup predefined style has been changed to use 5 spaces per indent.</p>
     <p>
