@@ -114,7 +114,6 @@ class ASConsole
 		bool isRecursive;                   // recursive option
 		string origSuffix;                  // suffix= option
 		bool noBackup;                      // suffix=none option
-		bool preserveDate;                  // preserve-date option
 		bool isVerbose;                     // verbose option
 		bool isQuiet;                       // quiet option
 		bool isFormattedOnly;               // formatted lines only option
@@ -122,7 +121,6 @@ class ASConsole
 		// other variables
 		bool hasWildcard;                   // file name includes a wildcard
 		size_t mainDirectoryLength;         // directory length to be excluded in displays
-		string tempSuffix;                  // temporary file suffix
 		int  filesFormatted;                // number of files formatted
 		int  filesUnchanged;                // number of files unchanged
 		int  linesOut;                      // number of output lines
@@ -144,7 +142,6 @@ class ASConsole
 			isRecursive = false;
 			origSuffix = ".orig";
 			noBackup = false;
-			preserveDate = false;
 			isVerbose = false;
 			isQuiet = false;
 			isFormattedOnly = false;
@@ -152,11 +149,6 @@ class ASConsole
 			// other variables
 			hasWildcard = false;
 			mainDirectoryLength = 0;
-#ifdef __VMS
-			tempSuffix = "_tmp";
-#else
-			tempSuffix = ".tmp";
-#endif /* __VMS */
 			optionsFileName = "";
 			filesFormatted = 0;
 			filesUnchanged = 0;
@@ -165,6 +157,7 @@ class ASConsole
 
 		// functions
 		void error(const char *why, const char* what) const;
+		void formatCinToCout(ASFormatter& formatter) const;
 		bool formatFile(const string &fileName, astyle::ASFormatter &formatter) const;
 		void getFilePaths(string &filePath);
 		processReturn processOptions(int argc, char** argv, ASFormatter &formatter);
@@ -174,7 +167,6 @@ class ASConsole
 		string getCurrentDirectory(const string &fileName) const;
 		void getFileNames(const string &directory, const string &wildcard);
 		bool isPathExclued(const string &subPath);
-		void preserveFileDate(const char *oldFileName, const char *newFileName) const;
 		void printHelp() const;
 		void removeFile(const char* fileName, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;

@@ -46,7 +46,7 @@
         styles was obtained from
         the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent Style</a> discussion at Wikipedia.</p>
     <p>
-        New options --align-pointer=type (-k1), --align-pointer=center (-k2), and 
+        New options --align-pointer=type (-k1), --align-pointer=middle (-k2), and 
             --align-pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type
         (left) or operator name (right). The spacing between the type and name will be preserved,
         if possible. The recognition of pointers and references has been improved.
@@ -68,6 +68,12 @@
         The
         Stroustroup predefined style has been changed to use 5 spaces per indent. This
         is the indentation used in the book "The C++ Programming Language".</p>
+    <p>
+        The intermediate file .tmp has been eliminated and memory is used instead.</p>
+    <p>
+        The option preserve-date (-Z) has been removed. This was added before Artistic Syle
+        had the capabibilty to identify unchanged files. It does not seem to be a useful
+        option &nbsp;now.</p>
     <p>
         Checks for the maximum in-statement indent have been fixed. The indent for some long
         contiuation lines may be decreased. If you want the previous indentation, increase

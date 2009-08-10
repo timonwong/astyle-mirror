@@ -477,9 +477,9 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setPointerAlignment(ALIGN_TYPE);
 	}
-	else if ( IS_OPTION(arg, "align-pointer=center") )
+	else if ( IS_OPTION(arg, "align-pointer=middle") )
 	{
-		formatter.setPointerAlignment(ALIGN_CENTER);
+		formatter.setPointerAlignment(ALIGN_MIDDLE);
 	}
 	else if ( IS_OPTION(arg, "align-pointer=name") )
 	{
@@ -496,7 +496,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		else if (align == 1)
 			formatter.setPointerAlignment(ALIGN_TYPE);
 		else if (align == 2)
-			formatter.setPointerAlignment(ALIGN_CENTER);
+			formatter.setPointerAlignment(ALIGN_MIDDLE);
 		else if (align == 3)
 			formatter.setPointerAlignment(ALIGN_NAME);
 	}
@@ -584,10 +584,6 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTIONS(arg, "r", "R") || IS_OPTION(arg, "recursive") )
 	{
 		g_console->isRecursive = true;
-	}
-	else if ( IS_OPTIONS(arg, "Z", "preserve-date") )
-	{
-		g_console->preserveDate = true;
 	}
 	else if ( IS_OPTIONS(arg, "v", "verbose") )
 	{
@@ -794,6 +790,26 @@ void ASConsole::error(const char *why, const char* what) const
 }
 
 /**
+ * If no files have been given, use cin for input and cout for output.
+ *
+ * This is used to format text for text editors like TextWrangler (Mac).
+ * Do NOT display any console messages when this function is used.
+ */
+void ASConsole::formatCinToCout(ASFormatter& formatter) const
+{
+	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
+	formatter.init(&streamIterator);
+
+	while (formatter.hasMoreLines())
+	{
+		cout << formatter.nextLine();
+		if (formatter.hasMoreLines())
+			cout << streamIterator.getOutputEOL();
+	}
+	cout.flush();
+}
+
+/**
  * Open input file, format it, and close the output.
  *
  * @param fileName      The path and name of the file to be processed.
@@ -809,13 +825,7 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 	if (!in)
 		error("Could not open input file", fileName.c_str());
 
-	// open tmp file
-	string tmpFileName = fileName + tempSuffix;
-	// remove the pre-existing temp file, if present
-	removeFile(tmpFileName.c_str(), "Could not remove pre-existing temp file");
-	ofstream out(tmpFileName.c_str(), ios::binary);
-	if (!out)
-		error("Could not open output file", tmpFileName.c_str());
+	ostringstream out;
 
 	// Unless a specific language mode has been set, set the language mode
 	// according to the file's suffix.
@@ -858,23 +868,13 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 			streamIterator.checkForEmptyLine = false;
 		}
 	}
-	out.flush();
-	out.close();
 	in.close();
 
 	// create output files
 
-	// if input and output are identical, don't change anything
-	if (filesAreIdentical)
+	// if file has changed, write the new file
+	if (!filesAreIdentical)
 	{
-		removeFile(tmpFileName.c_str(), "Could not remove current temp file");
-	}
-	else
-	{
-		// change date modified to original file date
-		if (preserveDate)
-			preserveFileDate(fileName.c_str(), tmpFileName.c_str());
-
 		// create a backup
 		if (!noBackup)
 		{
@@ -882,11 +882,13 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 			removeFile(origFileName.c_str(), "Could not remove pre-existing backup file");
 			renameFile(fileName.c_str(), origFileName.c_str(), "Could not create backup file");
 		}
-		else
-			removeFile(fileName.c_str(), "Could not remove previous file");
 
-		// change tmp name to current (reformatted)
-		renameFile(tmpFileName.c_str(), fileName.c_str(), "Could not rename tmp file");
+		// write the output file
+		ofstream fout(fileName.c_str(), ios::binary | ios::trunc);
+		if (!fout)
+			error("Could not open output file", fileName.c_str());
+		fout << out.str();
+		fout.close();
 
 		isFormatted = true;
 	}
@@ -1147,26 +1149,6 @@ bool ASConsole::isPathExclued(const string &subPath)
 	return retVal;
 }
 
-void ASConsole::preserveFileDate(const char *oldFileName, const char *newFileName) const
-{
-	struct stat stBuf;
-	bool statErr = false;
-	if (stat (oldFileName, &stBuf) == -1)
-		statErr = true;
-	else
-	{
-		struct utimbuf outBuf;
-		outBuf.actime = stBuf.st_atime;
-		// add 2 so 'make' will recoginze a change
-		// Visual Studio 2008 needs 2
-		outBuf.modtime = stBuf.st_mtime + 2;
-		if (utime (newFileName, &outBuf) == -1)
-			statErr = true;
-	}
-	if (statErr)
-		(*_err) << "    Could not preserve file date" << endl;
-}
-
 void ASConsole::printHelp() const
 {
 	(*_err) << endl;
@@ -1371,10 +1353,10 @@ void ASConsole::printHelp() const
 	(*_err) << "    Don't break blocks residing completely on one line.\n";
 	(*_err) << endl;
 	(*_err) << "    --align-pointer=type    OR  -k1\n";
-	(*_err) << "    --align-pointer=center  OR  -k2\n";
+	(*_err) << "    --align-pointer=middle  OR  -k2\n";
 	(*_err) << "    --align-pointer=name    OR  -k3\n";
 	(*_err) << "    Attach a pointer or reference operator (* or &) to either\n";
-	(*_err) << "    the operator type (left), center, or operator name (right).\n";
+	(*_err) << "    the operator type (left), middle, or operator name (right).\n";
 	(*_err) << endl;
 	(*_err) << "    --convert-tabs  OR  -c\n";
 	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
@@ -1412,9 +1394,6 @@ void ASConsole::printHelp() const
 	(*_err) << "    --errors-to-stdout  OR  -X\n";
 	(*_err) << "    Print errors and help information to standard-output rather than\n";
 	(*_err) << "    to standard-error.\n";
-	(*_err) << endl;
-	(*_err) << "    --preserve-date  OR  -Z\n";
-	(*_err) << "    The date and time modified will not be changed in the formatted file.\n";
 	(*_err) << endl;
 	(*_err) << "    --verbose  OR  -v\n";
 	(*_err) << "    Verbose mode. Extra informational messages will be displayed.\n";
@@ -2018,20 +1997,9 @@ int main(int argc, char** argv)
 	}
 
 	// if no files have been given, use cin for input and cout for output
-	// this is used to format text for text editors like TextWrangler
-	// do NOT display any console messages when this branch is used
 	if (g_console->fileNameVector.empty())
 	{
-		ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
-		formatter.init(&streamIterator);
-
-		while (formatter.hasMoreLines())
-		{
-			cout << formatter.nextLine();
-			if (formatter.hasMoreLines())
-				cout << streamIterator.getOutputEOL();
-		}
-		cout.flush();
+		g_console->formatCinToCout(formatter);
 		return EXIT_SUCCESS;
 	}
 

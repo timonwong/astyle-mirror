@@ -127,7 +127,6 @@
         <a class="contents" href="#_recursive">recursive</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_exclude">exclude</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_errors-to-stdout">errors&#8209;to&#8209;stdout</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_preserve-date">preserve&#8209;date</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_verbose">verbose</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_formatted">formatted</a>&nbsp;&nbsp;&nbsp;         
         <a class="contents" href="#_quiet">quiet</a>&nbsp;&nbsp;&nbsp;
@@ -218,13 +217,14 @@
 </pre>
             </div>
         
-    <p>Or to save the file with a different name:</p>
+    <p>Or to format the file with a different name:</p>
     <pre>astyle [options] &lt; <em>OriginalSourceFile</em> &gt; <em>BeautifiedSourceFile</em>
 </pre>
 
     <p>The <span style="color:#0000a0">&lt;</span> and <span style="color:#0000a0">&gt;</span>
-    characters are used to redirect the files into standard input and out of standard output -
-    don't forget them! With this option a copy is not created.</p>
+    characters are used to redirect the files into standard input (cin) and out of standard output (cout) -
+    don't forget them! With this option only one file at a time can be formatted.
+        Wildcards are not recoginzed, there are no console messages, and a backup is not created.</p>
 
     <p>&nbsp;</p>
     
@@ -1309,10 +1309,11 @@ else
 
     <p>&nbsp;</p>
 
-        <p id="_align-pointer"><code class="title">--align-pointer=type / -k1<br />
-        --align-pointer=name / -k2</code><br />
+        <p id="_align-pointer"><code class="title">--align-pointer=type&nbsp;&nbsp; / -k1<br />
+            --align-pointer=middle / -k2<br />
+        --align-pointer=name&nbsp;&nbsp; / -k3</code><br />
             Attach a pointer or reference operator (* or &amp;) to either the variable type
-            (left) or variable name (right). The spacing between the type and name will be preserved,
+            (left) or variable name (right), or place it between the type and name. The spacing between the type and name will be preserved,
             if possible. This option is effective for C/C++ files only.</p>
 
         <div class="code">
@@ -1321,11 +1322,16 @@ else
             <pre>char* foo1;</pre>
         </div>
         <div class="code">
-            <pre>char& foo2;</pre>
-            <p class="code">becomes (with align-pointer=name):</p>
-            <pre>char &amp;foo2;</pre>
+            <pre>char* foo2;</pre>
+            <p class="code">becomes (with align-pointer=middle):</p>
+            <pre>char * foo2;</pre>
         </div>
-        
+        <div class="code">
+            <pre>char& foo3;</pre>
+            <p class="code">becomes (with align-pointer=name):</p>
+            <pre>char &amp;foo3;</pre>
+        </div>
+               
     <p>&nbsp;</p>
 
         <p id="_mode=c"><code class="title">--mode=c</code><br />
@@ -1400,10 +1406,6 @@ else
      Print errors to standard-output rather than to standard-error.<br />
      This option should be helpful for systems/shells that do not have this option, such as in
     Windows95.</p>
-
-    <p id="_preserve-date"><code class="title">--preserve-date / -Z</code><br />
-     Preserve the original file's date and time modified. The date and time modified will not
-    be changed in the formatted file. This option is not effective if redirection is used.</p>
 
     <p id="_verbose"><code class="title">--verbose / -v</code><br />
      Verbose display mode. Display optional information, such as release number and statistical

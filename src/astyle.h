@@ -106,7 +106,7 @@ enum BracketType   { NULL_TYPE = 0,
 
 enum PointerAlign { ALIGN_NONE,
                     ALIGN_TYPE,
-                    ALIGN_CENTER,
+                    ALIGN_MIDDLE,
                     ALIGN_NAME
                   };
 

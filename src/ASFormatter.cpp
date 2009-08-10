@@ -640,7 +640,9 @@ string ASFormatter::nextLine()
 				         || currentChar == '*'    // pointer,   e.g. A<int*>
 				         || currentChar == ':'    // ::,        e.g. std::string
 				         || currentChar == '['    // []         e.g. string[]
-				         || currentChar == ']')   // []         e.g. string[]
+				         || currentChar == ']'    // []         e.g. string[]
+				         || currentChar == '('    // (...)      e.g. function definition
+				         || currentChar == ')')   // (...)      e.g. function definition
 				{
 					continue;
 				}
@@ -2598,7 +2600,7 @@ void ASFormatter::formatPointerOrReference(void)
 			spacePadNum--;
 		}
 	}
-	else if (pointerAlignment == ALIGN_CENTER)
+	else if (pointerAlignment == ALIGN_MIDDLE)
 	{
 		// compute current whitespace before
 		size_t wsBefore = currentLine.find_last_not_of(" \t", charNum - 1);
