@@ -774,7 +774,8 @@ case 2:
         <p id="_indent-brackets"><code class="title">--indent-brackets / -B</code><br />
          Add extra indentation to brackets. This is the option used for Whitesmith and Banner style 
             formatting/indenting. If both &#8209;&#8209;indent&#8209;brackets and &#8209;&#8209;indent&#8209;blocks are used the result
-            will be &#8209;&#8209;indent&#8209;blocks.</p>
+            will be &#8209;&#8209;indent&#8209;blocks. This option will
+            be ignored if used with a predefined style.</p>
 
         <div class="code">
             <pre>if (isFoo)
@@ -799,7 +800,8 @@ else
 
         <p id="_indent-blocks"><code class="title">--indent-blocks / -G</code><br />
          Add extra indentation to blocks <strong>within a function</strong>. The opening bracket for namespaces, classes, and 
-            functions is not indented. This is the option used for GNU style formatting/indenting.</p>
+            functions is not indented. This is the option used for GNU style formatting/indenting. This option will be ignored if used with a predefined
+            style.</p>
 
         <div class="code">
             <pre>if (isFoo)

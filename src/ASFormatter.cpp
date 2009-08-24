@@ -72,6 +72,7 @@ ASFormatter::ASFormatter()
 	shouldBreakClosingHeaderBrackets = false;
 	shouldDeleteEmptyLines = false;
 	shouldBreakElseIfs = false;
+	shouldAddBrackets = false;
 	// the following prevents warning messages with cppcheck
 	// it will NOT compile if activated
 //	init();
@@ -533,6 +534,9 @@ string ASFormatter::nextLine()
 		// reset isImmediatelyPostHeader information
 		if (isImmediatelyPostHeader)
 		{
+			if (currentChar != '{' && shouldAddBrackets)
+				addBracketsToStatement();
+
 			isImmediatelyPostHeader = false;
 
 			// Make sure headers are broken from their succeeding blocks
@@ -1248,6 +1252,19 @@ bool ASFormatter::getModeManuallySet()
 void ASFormatter::setFormattingStyle(FormatStyle style)
 {
 	formattingStyle = style;
+}
+
+/**
+ * set the add brackets mode.
+ * options:
+ *    true     brackets added to headers for single line statements.
+ *    false    brackets NOT added to headers for single line statements.
+ *
+ * @param mode         the bracket formatting mode.
+ */
+void ASFormatter::setAddBracketsMode(bool state)
+{
+	shouldAddBrackets = state;
 }
 
 /**
@@ -2474,6 +2491,8 @@ void ASFormatter::appendCharInsideComments(void)
 
 	if (isBeforeComment())
 		breakLine();
+	if (isCharImmediatelyPostLineComment)
+		shouldBreakLineAtNextChar = true;
 	return; // true;
 }
 
@@ -3544,8 +3563,13 @@ bool ASFormatter::isCurrentBracketBroken() const
 	bool breakBracket = false;
 	size_t bracketTypeStackEnd = bracketTypeStack->size()-1;
 
-	if (bracketFormatMode == NONE_MODE
-	        || isBracketType((*bracketTypeStack)[bracketTypeStackEnd], EXTERN_TYPE))
+	if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd], EXTERN_TYPE))
+	{
+		if (currentLineBeginsWithBracket
+		        || bracketFormatMode == HORSTMANN_MODE)
+			breakBracket = true;
+	}
+	else if (bracketFormatMode == NONE_MODE)
 	{
 		if (currentLineBeginsWithBracket)		// lineBeginsWith('{')
 			breakBracket = true;
@@ -4058,6 +4082,62 @@ void ASFormatter::isLineBreakBeforeClosingHeader()
 				isAppendPostBlockEmptyLineRequested = false;
 		}
 	}
+}
+
+/**
+* add brackets to a single line statement following a header.
+*/
+void ASFormatter::addBracketsToStatement()
+{
+	assert(isImmediatelyPostHeader);
+
+	if (currentHeader != &AS_IF
+			&& currentHeader != &AS_ELSE
+			&& currentHeader != &AS_FOR
+			&& currentHeader != &AS_WHILE
+			&& currentHeader != &AS_DO
+			&& currentHeader != &AS_FOREACH)
+		return;
+
+	// do not add if a header follows
+	if (findHeader(headers) != NULL)
+		return; 
+
+	size_t i;
+	for (i = charNum + 1; i < currentLine.length(); i++)
+	{
+		if (currentLine.compare(i, 2, "//") == 0)
+			return;
+		if (currentLine.compare(i, 2, "/*") == 0)
+		{
+			size_t endComment = currentLine.find("*/", i+2);
+			if (endComment == string::npos)
+				return;
+			i = endComment + 2;
+		}
+		if (currentLine[i] == '\'' || currentLine[i] == '\"')
+		{
+			size_t endQuote = currentLine.find(currentLine[i], i+1);
+			if (endQuote == string::npos)
+				return;
+			if (currentLine[endQuote-1] == '\\')
+				return;
+			i = endQuote;
+		}
+		if (currentLine[i] == ';')
+			break;
+	}
+	if (i >= currentLine.length())	// didn't find semi-colon
+		return;
+
+	// add closing bracket before changing the line length
+	if (i == currentLine.length() - 1)
+		currentLine.append(" }");
+	else
+		currentLine.insert(i+1, " }");
+	// add opening bracket
+	currentLine.insert(charNum, "{ ");
+	currentChar = '{';
 }
 
 }   // end namespace astyle

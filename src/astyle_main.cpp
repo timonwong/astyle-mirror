@@ -473,6 +473,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setBreakElseIfsMode(true);
 	}
+	else if ( IS_OPTIONS(arg, "{", "add-brackets") )
+	{
+		formatter.setAddBracketsMode(true);
+	}
 	else if ( IS_OPTION(arg, "align-pointer=type") )
 	{
 		formatter.setPointerAlignment(ALIGN_TYPE);

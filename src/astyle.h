@@ -345,6 +345,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		vector<int> *inStatementIndentStackSizeStack;
 		vector<int> *parenIndentStack;
 		int convertTabToSpaces(int i, int tabIncrementIn) const;
+		bool isClassAccessModifier(string& line) const;
 		template<typename T> void deleteContainer(T &container);
 		void deleteContainer(vector<vector<const string*>*>* &container);
 		template<typename T> void initContainer(T &container, T value);
@@ -390,6 +391,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  indentLength;
 		int  blockTabCount;
 		int  maxInStatementIndent;
+		int  classInitializerTabs;
 		int  templateDepth;
 		int  prevFinalLineSpaceTabCount;
 		int  prevFinalLineTabCount;
@@ -467,6 +469,7 @@ class ASFormatter : public ASBeautifier
 		bool getIndentManuallySet();
 		bool getModeManuallySet();
 		void setFormattingStyle(FormatStyle style);
+		void setAddBracketsMode(bool state);
 		void setBracketFormatMode(BracketMode mode);
 		void setBreakClosingHeaderBracketsMode(bool state);
 		void setBreakBlocksMode(bool state);
@@ -516,6 +519,7 @@ class ASFormatter : public ASBeautifier
 //		bool lineBeginsWith(char charToCheck) const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
+		void addBracketsToStatement();;
 		void appendCharInsideComments();
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
@@ -647,6 +651,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakOneLineStatements;
 		bool shouldBreakClosingHeaderBrackets;
 		bool shouldBreakElseIfs;
+		bool shouldAddBrackets;
 		bool shouldDeleteEmptyLines;
 		bool needHeaderOpeningBracket;
 		bool shouldBreakLineAtNextChar;

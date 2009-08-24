@@ -26,6 +26,7 @@
             (-k2) and &#8209;&#8209;align&#8209;pointer=name (-k3) from J P Nurmi. </li>
         <li>Remove .tmp file by using ostringstream insteadof ofstream.</li>
         <li>Remove option preserve-date (-Z).</li>
+        <li>Change "class" statement continuation lines to one indent.</li>
         <li>Change default formatting to leave paren headers unchanged instead of always inserting
             space padding after them. </li>
         <li>Change &#8209;&#8209;unpad&#8209;paren to unpad headers unless padding is requested.
@@ -37,9 +38,11 @@
         <li>Change --min-conditional-indent to allow for statements preceded by a bracket (horstmann
             brackets). </li>
         <li>Change predefined styles to allow changes to spaces per indent.</li>
+        <li>Change ASBeautifier to output the entire comment line instead of characters. </li>
         <li>Improve recognition of pointers and references vs. arithmetic operators.</li>
         <li>Improve recognition of arithmetic operators for --pad-oper (-p) option. </li>
         <li>Fix to recognize parens in template definitions.</li>
+        <li>Fix recognition of class initializer when class description contains multiple lines.</li>
         <li>Fix identification of pointer dereferences and address-of indicators.</li>
         <li>Fix from Colin D Bennett to fix 64-bit comparison. </li>
         <li>Fix console error procedure to terminate on an error.</li>

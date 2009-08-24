@@ -93,6 +93,7 @@ ASBeautifier::ASBeautifier()
 
 	setSpaceIndentation(4);
 	setMaxInStatementIndentLength(40);
+	classInitializerTabs = 1;
 	setClassIndent(false);
 	setSwitchIndent(false);
 	setCaseIndent(false);
@@ -210,6 +211,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	indentLength = other.indentLength;
 	blockTabCount = other.blockTabCount;
 	maxInStatementIndent = other.maxInStatementIndent;
+	classInitializerTabs = other.classInitializerTabs;
 	templateDepth = other.templateDepth;
 	prevFinalLineSpaceTabCount = other.prevFinalLineSpaceTabCount;
 	prevFinalLineTabCount = other.prevFinalLineTabCount;
@@ -939,10 +941,15 @@ string ASBeautifier::beautify(const string &originalLine)
 			if (!lineBeginsWithBracket)
 				tabCount--;
 		}
-		else
+		else if (isCStyle() && !isClassAccessModifier(line))
 		{
 			isInClassHeaderTab = true;
-			tabCount += 2;
+			tabCount += classInitializerTabs;
+		}
+		else if (blockIndent)
+		{
+			if (!lineBeginsWithBracket)
+				tabCount++;
 		}
 	}
 
@@ -1060,11 +1067,17 @@ string ASBeautifier::beautify(const string &originalLine)
 		         (line.compare(i, 7, "#region") == 0 || line.compare(i, 10, "#endregion") == 0))
 		{
 			isInLineComment = true;
-			continue;
+//			continue;
 		}
 
 		if (isInComment || isInLineComment)
+		{
+			// append rest of the comment up to the comment end
+			while (i+1 < (int) line.length()
+			        && line.compare(i+1, 2, "*/") != 0)
+				outBuffer.append(1, line[++i]);
 			continue;
+		}
 
 		// if we have reached this far then we are NOT in a comment or string of special character...
 
@@ -1152,7 +1165,7 @@ string ASBeautifier::beautify(const string &originalLine)
 					// -1 for isInClassHeader, -2 for isInClassHeaderTab
 					if (isInClassHeaderTab)
 					{
-						tabCount -= 3;
+						tabCount -= (1 + classInitializerTabs);
 						isInClassHeaderTab = false;
 					}
 					if (tabCount < 0)
@@ -1276,7 +1289,7 @@ string ASBeautifier::beautify(const string &originalLine)
 				        && line[firstChar] == '{'
 				        && (int) firstChar == i)
 				{
-					tabCount -= 2;
+					tabCount -= classInitializerTabs;
 					// decrease one more if an empty class
 					if (headerStack->size() > 0
 					        && (*headerStack).back() == &AS_CLASS)
@@ -1551,7 +1564,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			{
 				isInClassHeader = true;
 				if (i == 0)
-					tabCount += 2;
+					tabCount += classInitializerTabs;
 			}
 			else
 			{
@@ -1919,6 +1932,25 @@ string ASBeautifier::preLineWS(int spaceTabCount, int tabCount)
 
 	return ws;
 
+}
+
+bool ASBeautifier::isClassAccessModifier(string& line) const
+{
+	size_t firstChar = line.find_first_not_of(" \t");
+	if (firstChar == string::npos)
+		return false;
+	// bypass a colon
+	if (line[firstChar] == ':')
+	{
+		firstChar = line.find_first_not_of(" \t");
+		if (firstChar == string::npos)
+			return false;
+	}
+	if (line.compare(firstChar, 7, "public ") == 0
+	        || line.compare(firstChar, 8, "private ") == 0
+	        || line.compare(firstChar, 10, "protected ") == 0)
+		return true;
+	return false;
 }
 
 /**
