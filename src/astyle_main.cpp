@@ -243,13 +243,17 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setFormattingStyle(STYLE_HORSTMANN);
 	}
+	else if ( IS_OPTION(arg, "style=1tbs") || IS_OPTION(arg, "style=otbs") )
+	{
+		formatter.setFormattingStyle(STYLE_1TBS);
+	}
 	else if ( isParamOption(arg, "A") )
 	{
 		int style = 0;
 		string styleParam = GET_PARAM(arg, "A");
 		if (styleParam.length() > 0)
 			style = atoi(styleParam.c_str());
-		if (style < 1 || style > 9)
+		if (style < 1 || style > 10)
 			isOptionError(arg, errorInfo);
 		else if (style == 1)
 			formatter.setFormattingStyle(STYLE_ALLMAN);
@@ -269,6 +273,8 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 			formatter.setFormattingStyle(STYLE_LINUX);
 		else if (style == 9)
 			formatter.setFormattingStyle(STYLE_HORSTMANN);
+		else if (style == 10)
+			formatter.setFormattingStyle(STYLE_1TBS);
 	}
 	// must check for mode=cs before mode=c !!!
 	else if ( IS_OPTION(arg, "mode=cs") )
@@ -476,6 +482,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTIONS(arg, "{", "add-brackets") )
 	{
 		formatter.setAddBracketsMode(true);
+	}
+	else if ( IS_OPTIONS(arg, "!", "add-one-line-brackets") )
+	{
+		formatter.setAddOneLineBracketsMode(true);
 	}
 	else if ( IS_OPTION(arg, "align-pointer=type") )
 	{
@@ -1183,7 +1193,7 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "Predefined Style Options:\n";
 	(*_err) << "-------------------------\n";
-	(*_err) << "    --style=allman  OR  --style=bsd  OR  -A1\n";
+	(*_err) << "    --style=allman  OR  --style=ansi  OR  --style=bsd  OR  -A1\n";
 	(*_err) << "    Allman style formatting/indenting.\n";
 	(*_err) << "    Broken brackets.\n";
 	(*_err) << endl;
@@ -1220,6 +1230,10 @@ void ASConsole::printHelp() const
 	(*_err) << "    --style=horstmann  OR  -A9\n";
 	(*_err) << "    Horstmann style formatting/indenting.\n";
 	(*_err) << "    Horstmann brackets, indented switches, indent is 3 spaces.\n";
+	(*_err) << endl;
+	(*_err) << "    --style=1tbs  OR  --style=otbs  OR  -A10\n";
+	(*_err) << "    One True Brace Style formatting/indenting.\n";
+	(*_err) << "    Linux brackets, add brackets to all conditionals.\n";
 	(*_err) << endl;
 	(*_err) << "Tab and Bracket Options:\n";
 	(*_err) << "------------------------\n";
@@ -1349,12 +1363,12 @@ void ASConsole::printHelp() const
 	(*_err) << "    --break-elseifs  OR  -e\n";
 	(*_err) << "    Break 'else if()' statements into two different lines.\n";
 	(*_err) << endl;
+	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
+	(*_err) << "    Don't break blocks residing completely on one line.\n";
+	(*_err) << endl;
 	(*_err) << "    --keep-one-line-statements  OR  -o\n";
 	(*_err) << "    Don't break lines containing multiple statements into\n";
 	(*_err) << "    multiple single-statement lines.\n";
-	(*_err) << endl;
-	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
-	(*_err) << "    Don't break blocks residing completely on one line.\n";
 	(*_err) << endl;
 	(*_err) << "    --align-pointer=type    OR  -k1\n";
 	(*_err) << "    --align-pointer=middle  OR  -k2\n";

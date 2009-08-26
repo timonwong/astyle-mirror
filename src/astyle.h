@@ -79,7 +79,8 @@ enum FormatStyle   { STYLE_NONE,
                      STYLE_BANNER,
                      STYLE_GNU,
                      STYLE_LINUX,
-                     STYLE_HORSTMANN
+                     STYLE_HORSTMANN,
+                     STYLE_1TBS
                    };
 
 enum BracketMode   { NONE_MODE,
@@ -470,6 +471,7 @@ class ASFormatter : public ASBeautifier
 		bool getModeManuallySet();
 		void setFormattingStyle(FormatStyle style);
 		void setAddBracketsMode(bool state);
+		void setAddOneLineBracketsMode(bool state);
 		void setBracketFormatMode(BracketMode mode);
 		void setBreakClosingHeaderBracketsMode(bool state);
 		void setBreakBlocksMode(bool state);
@@ -516,6 +518,7 @@ class ASFormatter : public ASBeautifier
 		bool isInExponent() const;
 		bool isOneLineBlockReached() const;
 		bool isNextCharOpeningBracket(int startChar) const;
+		bool isOkToBreakBlock(BracketType bracketType) const;
 //		bool lineBeginsWith(char charToCheck) const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
@@ -644,6 +647,7 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostReturn;
 		bool isCharImmediatelyPostOperator;
 //		bool previousBracketIsBroken;
+		bool breakCurrentOneLineBlock;
 		bool isInHorstmannRunIn;
 		bool currentLineBeginsWithBracket;
 		bool shouldBreakOneLineBlocks;
@@ -652,6 +656,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakClosingHeaderBrackets;
 		bool shouldBreakElseIfs;
 		bool shouldAddBrackets;
+		bool shouldAddOneLineBrackets;
 		bool shouldDeleteEmptyLines;
 		bool needHeaderOpeningBracket;
 		bool shouldBreakLineAtNextChar;

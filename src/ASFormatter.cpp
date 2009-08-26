@@ -73,6 +73,7 @@ ASFormatter::ASFormatter()
 	shouldDeleteEmptyLines = false;
 	shouldBreakElseIfs = false;
 	shouldAddBrackets = false;
+	shouldAddOneLineBrackets = false;
 	// the following prevents warning messages with cppcheck
 	// it will NOT compile if activated
 //	init();
@@ -237,11 +238,21 @@ void ASFormatter::fixOptionVariableConflicts()
 				setSpaceIndentation(3);
 		}
 	}
+	else if (formattingStyle == STYLE_1TBS)
+	{
+		setBracketFormatMode(LINUX_MODE);
+		setBlockIndent(false);
+		setBracketIndent(false);
+		setAddBracketsMode(true);
+	}
 
-	// cannot have both block indent and bracket indent, default to block indent
+	// add-one-line-brackets implies keep-one-line-blocks
+	if (shouldAddOneLineBrackets)
+		setBreakOneLineBlocksMode(false);
+	// cannot have both indent-blocks and indent-brackets, default to indent-blocks
 	if (getBlockIndent())
 		setBracketIndent(false);
-	// cannot have bracket indent with horstmann brackets
+	// cannot have indent-brackets with horstmann brackets
 	if (bracketFormatMode == HORSTMANN_MODE)
 		setBracketIndent(false);
 }
@@ -353,6 +364,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	isCharImmediatelyPostCloseBlock = false;
 	isCharImmediatelyPostTemplate = false;
 //	previousBracketIsBroken = false;
+	breakCurrentOneLineBlock = false;
 	isInHorstmannRunIn = false;
 	currentLineBeginsWithBracket = false;
 	isPrependPostBlockEmptyLineRequested = false;
@@ -535,7 +547,11 @@ string ASFormatter::nextLine()
 		if (isImmediatelyPostHeader)
 		{
 			if (currentChar != '{' && shouldAddBrackets)
+			{
 				addBracketsToStatement();
+				if (!shouldAddOneLineBrackets)
+					breakCurrentOneLineBlock = true;
+			}
 
 			isImmediatelyPostHeader = false;
 
@@ -548,7 +564,7 @@ string ASFormatter::nextLine()
 			// )
 			// But treat else if() as a special case which should not be broken!
 			if (shouldBreakOneLineStatements
-			        && (shouldBreakOneLineBlocks || !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE)))
+			        && isOkToBreakBlock(bracketTypeStack->back()))
 			{
 				// if may break 'else if()'s, then simply break the line
 				if (shouldBreakElseIfs)
@@ -778,8 +794,7 @@ string ASFormatter::nextLine()
 		             && peekNextChar() != ' '
 		             && !isBracketType(previousBracketType,  DEFINITION_TYPE))
 		            && !isBracketType(bracketTypeStack->back(),  DEFINITION_TYPE)))
-		        && (shouldBreakOneLineBlocks
-		            || !isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE)))
+		        && isOkToBreakBlock(bracketTypeStack->back()))
 		        // check for array
 		        || (isBracketType(bracketTypeStack->back(), ARRAY_TYPE)
 		            && !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE)
@@ -816,6 +831,7 @@ string ASFormatter::nextLine()
 			         && !isCharImmediatelyPostComment)
 			{
 				previousCommandChar = ' ';
+				breakCurrentOneLineBlock = false;
 				isInLineBreak = true;
 			}
 		}
@@ -869,7 +885,7 @@ string ASFormatter::nextLine()
 
 				if (foundClosingHeader && previousNonWSChar == '}')
 				{
-					if (shouldBreakOneLineBlocks || !isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE))
+					if (isOkToBreakBlock(bracketTypeStack->back()))
 						isLineBreakBeforeClosingHeader();
 
 					// get the adjustment for a comment following the closing header
@@ -923,7 +939,7 @@ string ASFormatter::nextLine()
 				}
 
 				if (shouldBreakBlocks
-				        && (shouldBreakOneLineBlocks || !isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE)))
+				        && isOkToBreakBlock(bracketTypeStack->back()))
 				{
 					if (previousHeader == NULL
 					        && !foundClosingHeader
@@ -994,7 +1010,7 @@ string ASFormatter::nextLine()
 		if (previousNonWSChar == '}' || currentChar == ';')
 		{
 			if (shouldBreakOneLineStatements && currentChar == ';'
-			        && (shouldBreakOneLineBlocks || !isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE))
+			        && (isOkToBreakBlock(bracketTypeStack->back()))
 			   )
 			{
 				passedSemicolon = true;
@@ -1265,6 +1281,20 @@ void ASFormatter::setFormattingStyle(FormatStyle style)
 void ASFormatter::setAddBracketsMode(bool state)
 {
 	shouldAddBrackets = state;
+}
+
+/**
+ * set the add one line brackets mode.
+ * options:
+ *    true     one line brackets added to headers for single line statements.
+ *    false    one line brackets NOT added to headers for single line statements.
+ *
+ * @param mode         the bracket formatting mode.
+ */
+void ASFormatter::setAddOneLineBracketsMode(bool state)
+{
+	shouldAddBrackets = state;
+	shouldAddOneLineBrackets = state;
 }
 
 /**
@@ -2923,12 +2953,10 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 
 	bool breakBracket = isCurrentBracketBroken();
 //	previousBracketIsBroken = breakBracket;
-	bool isOneLineBlock = isBracketType(bracketType, SINGLE_LINE_TYPE);
 
 	if (breakBracket)
 	{
-		if (isBeforeAnyComment()
-		        && (shouldBreakOneLineBlocks || !isOneLineBlock))
+		if (isBeforeAnyComment() && isOkToBreakBlock(bracketType))
 		{
 			// if comment is at line end leave the comment on this line
 			if (isBeforeAnyLineEndComment(charNum) && !currentLineBeginsWithBracket)	// lineBeginsWith('{')
@@ -2945,7 +2973,7 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 			else if (!isBeforeMultipleLineEndComments(charNum))
 				breakLine();
 		}
-		else if (!isOneLineBlock)
+		else if (!isBracketType(bracketType, SINGLE_LINE_TYPE))
 			breakLine();
 		else if (shouldBreakOneLineBlocks && peekNextChar() != '}')
 			breakLine();
@@ -2958,7 +2986,7 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 		// must break the line AFTER the bracket
 		if (isBeforeComment()
 		        && formattedLine[0] == '{'
-		        && (shouldBreakOneLineBlocks || !isOneLineBlock)
+		        && isOkToBreakBlock(bracketType)
 		        && (bracketFormatMode == BREAK_MODE
 		            || bracketFormatMode == LINUX_MODE
 		            || bracketFormatMode == STROUSTRUP_MODE))
@@ -2972,7 +3000,7 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 		// are there comments before the bracket?
 		if (isCharImmediatelyPostComment || isCharImmediatelyPostLineComment)
 		{
-			if ((shouldBreakOneLineBlocks || !isOneLineBlock)
+			if (isOkToBreakBlock(bracketType)
 			        && !(isCharImmediatelyPostComment && isCharImmediatelyPostLineComment)	// don't attach if two comments on the line
 			        && peekNextChar() != '}'        // don't attach { }
 			        && previousCommandChar != '{'   // don't attach { {
@@ -3004,8 +3032,7 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 			// if a blank line preceeds this don't attach
 			if (isEmptyLine(formattedLine))
 				appendCurrentChar();            // don't attach
-			else if ((shouldBreakOneLineBlocks
-			          || !isOneLineBlock)
+			else if (isOkToBreakBlock(bracketType)
 			         && !(isImmediatelyPostPreprocessor
 			              && currentLineBeginsWithBracket))		// lineBeginsWith('{')
 			{
@@ -3051,8 +3078,6 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 	assert(!isBracketType(bracketType, ARRAY_TYPE));
 	assert(currentChar == '}');
 
-	bool isOneLineBlock = isBracketType(bracketType, SINGLE_LINE_TYPE);
-
 	// parenStack must contain one entry
 	if (parenStack->size() > 1)
 		parenStack->pop_back();
@@ -3062,9 +3087,9 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 	if (previousCommandChar == '{')
 		isImmediatelyPostEmptyBlock = true;
 
-	if ((!(previousCommandChar == '{' && isPreviousBracketBlockRelated))	// this '{' does not close an empty block
-	        && (shouldBreakOneLineBlocks || !isOneLineBlock)				// astyle is allowed to break on line blocks
-	        && !isImmediatelyPostEmptyBlock)								// this '}' does not immediately follow an empty block
+	if ((!(previousCommandChar == '{' && isPreviousBracketBlockRelated))    // this '{' does not close an empty block
+	        && isOkToBreakBlock(bracketType)                                // astyle is allowed to break on line blocks
+	        && !isImmediatelyPostEmptyBlock)                                // this '}' does not immediately follow an empty block
 	{
 		breakLine();
 		appendCurrentChar();
@@ -3253,7 +3278,7 @@ void ASFormatter::formatRunIn()
 	assert(bracketFormatMode == HORSTMANN_MODE || bracketFormatMode == NONE_MODE);
 
 	// keep one line blocks returns true without indenting the run-in
-	if (isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE) && !shouldBreakOneLineBlocks)
+	if (!isOkToBreakBlock(bracketTypeStack->back()))
 		return; // true;
 
 	size_t lastText = formattedLine.find_last_not_of(" \t");
@@ -3643,8 +3668,7 @@ void ASFormatter::formatCommentBody()
 		if (peekNextChar() == '}'
 		        && previousCommandChar != ';'
 		        && !isBracketType(bracketTypeStack->back(),  ARRAY_TYPE)
-		        && (shouldBreakOneLineBlocks
-		            || !isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE)))
+		        && isOkToBreakBlock(bracketTypeStack->back()))
 			breakLine();
 	}
 	else
@@ -4092,17 +4116,19 @@ void ASFormatter::addBracketsToStatement()
 	assert(isImmediatelyPostHeader);
 
 	if (currentHeader != &AS_IF
-			&& currentHeader != &AS_ELSE
-			&& currentHeader != &AS_FOR
-			&& currentHeader != &AS_WHILE
-			&& currentHeader != &AS_DO
-			&& currentHeader != &AS_FOREACH)
+	        && currentHeader != &AS_ELSE
+	        && currentHeader != &AS_FOR
+	        && currentHeader != &AS_WHILE
+	        && currentHeader != &AS_DO
+	        && currentHeader != &AS_FOREACH)
 		return;
 
-	// do not add if a header follows
-	if (findHeader(headers) != NULL)
-		return; 
+	// do not add if a header follows (i.e. else if)
+	if (isCharPotentialHeader(currentLine, charNum))
+		if (findHeader(headers) != NULL)
+			return;
 
+	// find the next semi-colon
 	size_t i;
 	for (i = charNum + 1; i < currentLine.length(); i++)
 	{
@@ -4138,6 +4164,18 @@ void ASFormatter::addBracketsToStatement()
 	// add opening bracket
 	currentLine.insert(charNum, "{ ");
 	currentChar = '{';
+}
+
+/**
+* is it ok to break this block?
+*/
+bool ASFormatter::isOkToBreakBlock(BracketType bracketType) const
+{
+	if (!isBracketType(bracketType,  SINGLE_LINE_TYPE)
+	        || shouldBreakOneLineBlocks
+	        || breakCurrentOneLineBlock)
+		return true;
+	return false;
 }
 
 }   // end namespace astyle

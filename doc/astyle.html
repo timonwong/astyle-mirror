@@ -109,8 +109,8 @@
     <p class="contents2">
         <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp;        
         <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_align-pointer">align&#8209;pointer</a>&nbsp;&nbsp;&nbsp;       
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_mode=c">mode=c</a>&nbsp;&nbsp;&nbsp;
@@ -1269,6 +1269,20 @@ else
 
         <p>&nbsp;</p>
 
+        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code>
+        <code>/ --one-line=keep-blocks (depreciated)</code><br />
+         Don't break one-line blocks.</p>
+
+        <div class="code">
+            <pre>if (isFoo)
+<span class="brace">{</span> isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl; <span class="brace">}</span>
+</pre>
+
+            <p class="code">remains unchanged.</p>
+        </div>
+
+        <p>&nbsp;</p>
+
         <p id="_keep-one-line-statements"><code class="title">--keep-one-line-statements /
         -o </code><code>/ --one-line=keep-statements (depreciated)</code><br />
          Don't break complex statements and multiple statements residing on a single line.</p>
@@ -1282,20 +1296,6 @@ else
 
             <p class="code">remains unchanged.</p>
             <pre>if (isFoo) DoBar();
-</pre>
-
-            <p class="code">remains unchanged.</p>
-        </div>
-
-        <p>&nbsp;</p>
-
-        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code>
-        <code>/ --one-line=keep-blocks (depreciated)</code><br />
-         Don't break one-line blocks.</p>
-
-        <div class="code">
-            <pre>if (isFoo)
-<span class="brace">{</span> isFoo = false; cout &lt;&lt; isFoo &lt;&lt; endl; <span class="brace">}</span>
 </pre>
 
             <p class="code">remains unchanged.</p>
