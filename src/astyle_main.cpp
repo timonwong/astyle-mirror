@@ -309,6 +309,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTION(arg, "indent=tab") )
 	{
 		formatter.setTabIndentation(4);
+		// do NOT call setIndentManuallySet(true);
 	}
 	else if ( isParamOption(arg, "T", "indent=force-tab=") )
 	{
@@ -319,11 +320,15 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		if (spaceNum < 2 || spaceNum > 20)
 			isOptionError(arg, errorInfo);
 		else
+		{
 			formatter.setTabIndentation(spaceNum, true);
+			formatter.setIndentManuallySet(true);
+		}
 	}
 	else if ( IS_OPTION(arg, "indent=force-tab") )
 	{
 		formatter.setTabIndentation(4, true);
+		// do NOT call setIndentManuallySet(true);
 	}
 	else if ( isParamOption(arg, "s", "indent=spaces=") )
 	{
@@ -342,6 +347,7 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	else if ( IS_OPTION(arg, "indent=spaces") )
 	{
 		formatter.setSpaceIndentation(4);
+		// do NOT call setIndentManuallySet(true);
 	}
 	else if ( isParamOption(arg, "m", "min-conditional-indent=") )
 	{
@@ -352,7 +358,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		if (minIndent > 40)
 			isOptionError(arg, errorInfo);
 		else
+		{
 			formatter.setMinConditionalIndentLength(minIndent);
+			formatter.setMinConditionalManuallySet(true);
+		}
 	}
 	else if ( isParamOption(arg, "M", "max-instatement-indent=") )
 	{
@@ -479,11 +488,11 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setBreakElseIfsMode(true);
 	}
-	else if ( IS_OPTIONS(arg, "{", "add-brackets") )
+	else if ( IS_OPTIONS(arg, "j", "add-brackets") )
 	{
 		formatter.setAddBracketsMode(true);
 	}
-	else if ( IS_OPTIONS(arg, "!", "add-one-line-brackets") )
+	else if ( IS_OPTIONS(arg, "J", "add-one-line-brackets") )
 	{
 		formatter.setAddOneLineBracketsMode(true);
 	}
@@ -515,11 +524,12 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 			formatter.setPointerAlignment(ALIGN_NAME);
 	}
 	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
-	// depreciated in release 1.22 - may be removed at an appropriate time
-	else if ( IS_OPTION(arg, "style=kr") )
-	{
-		formatter.setFormattingStyle(STYLE_JAVA);
-	}
+	// depreciated in release 1.22
+	// removed from documentation in release 1.24 - may be removed at an appropriate time
+//	else if ( IS_OPTION(arg, "style=kr") )
+//	{
+//		formatter.setFormattingStyle(STYLE_JAVA);
+//	}
 	else if ( isParamOption(arg, "T", "force-indent=tab=") )
 	{
 		// the 'T' option will already have been processed
@@ -1362,6 +1372,13 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --break-elseifs  OR  -e\n";
 	(*_err) << "    Break 'else if()' statements into two different lines.\n";
+	(*_err) << endl;
+	(*_err) << "    --add-brackets  OR  -j\n";
+	(*_err) << "    Add brackets to unbracketed one line conditional statements.\n";
+	(*_err) << endl;
+	(*_err) << "    --add-one-line-brackets  OR  -J\n";
+	(*_err) << "    Add one line brackets to unbracketed one line conditional\n";
+	(*_err) << "    statements.\n";
 	(*_err) << endl;
 	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
 	(*_err) << "    Don't break blocks residing completely on one line.\n";

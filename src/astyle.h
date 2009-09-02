@@ -270,6 +270,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setSpaceIndentation(int length = 4);
 		void setMaxInStatementIndentLength(int max);
 		void setMinConditionalIndentLength(int min);
+		void setIndentManuallySet(bool state);
+		void setMinConditionalManuallySet(bool state);
+		void setModeManuallySet(bool state);
 		void setClassIndent(bool state);
 		void setSwitchIndent(bool state);
 		void setCaseIndent(bool state);
@@ -291,6 +294,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getClassIndent(void);
 		bool getEmptyLineFill(void);
 		bool getForceTabIndentation(void);
+		bool getIndentManuallySet(void);
+		bool getMinConditionalManuallySet(void);
+		bool getModeManuallySet(void);
 		bool getSwitchIndent(void);
 
 	protected:
@@ -378,7 +384,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool labelIndent;
 		bool preprocessorIndent;
 		bool isInConditional;
-		bool isMinimalConditinalIndentSet;
+		bool isIndentManuallySet;
+		bool isMinConditionalManuallySet;
+		bool isModeManuallySet;
 		bool shouldForceTabIndentation;
 		bool emptyLineFill;
 		bool backslashEndsPrevLine;
@@ -467,8 +475,6 @@ class ASFormatter : public ASBeautifier
 		virtual void init(ASSourceIterator* iter);
 		virtual bool hasMoreLines() const;
 		virtual string nextLine();
-		bool getIndentManuallySet();
-		bool getModeManuallySet();
 		void setFormattingStyle(FormatStyle style);
 		void setAddBracketsMode(bool state);
 		void setAddOneLineBracketsMode(bool state);
@@ -479,8 +485,6 @@ class ASFormatter : public ASBeautifier
 		void setBreakElseIfsMode(bool state);
 		void setBreakOneLineBlocksMode(bool state);
 		void setDeleteEmptyLinesMode(bool state);
-		void setIndentManuallySet(bool state);
-		void setModeManuallySet(bool state);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
@@ -508,15 +512,14 @@ class ASFormatter : public ASBeautifier
 		bool isCurrentBracketBroken() const;
 		bool isDereferenceOrAddressOf() const;
 		bool isEmptyLine(const string &line) const;
-		bool isIndentManuallySet;
-		bool isModeManuallySet;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
 		bool isNonInStatementArrayBracket() const;
 		bool isPointerOrReference() const;
 		bool isPointerOrReferenceCentered() const;
+		bool isSharpStyleWithParen(const string* header) const;
 		bool isUnaryOperator() const;
 		bool isInExponent() const;
-		bool isOneLineBlockReached() const;
+		bool isOneLineBlockReached(string& line, int startChar) const;
 		bool isNextCharOpeningBracket(int startChar) const;
 		bool isOkToBreakBlock(BracketType bracketType) const;
 //		bool lineBeginsWith(char charToCheck) const;
@@ -554,6 +557,7 @@ class ASFormatter : public ASBeautifier
 		void setBreakBlocksVariables();
 		void fixOptionVariableConflicts();
 		void processPreprocessor();
+		size_t findNextChar(string& line, char searchChar, int searchStart = 0);
 		string getPreviousWord(const string& line, int currPos) const;
 		string peekNextText(const string& firstLine, bool endOnEmptyLine=false) const;
 

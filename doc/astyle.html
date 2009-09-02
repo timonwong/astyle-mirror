@@ -55,6 +55,7 @@
         <a class="contents" href="#_style=gnu">style=gnu</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=linux">style=linux</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=horstmann">style=horstmann</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_style=1tbs">style=1tbs</a>&nbsp;&nbsp;&nbsp;
 
     </p>
 
@@ -109,6 +110,8 @@
     <p class="contents2">
         <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp;        
         <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_add-brackets">add&#8209;brackets</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_add-one-line-brackets">add&#8209;one&#8209;line&#8209;brackets</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_align-pointer">align&#8209;pointer</a>&nbsp;&nbsp;&nbsp;       
@@ -361,7 +364,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         
         <p>&nbsp;</p>
 
-        <p id="_style=java"><code class="title">--style=java / -A2</code><code>&nbsp; / --style=kr (depreciated)</code><br />
+        <p id="_style=java"><code class="title">--style=java / -A2</code><br />
          Java style formatting/indenting uses attached brackets.</p>
 
         <div class="code">
@@ -483,15 +486,16 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 
         <p id="_style=linux"><code class="title">--style=linux / -A8</code><br />
          Linux style formatting/indenting uses linux style brackets. Brackets are broken from namespace, class,
-            and function definitions. Brackets are attached to statements within a function. <strong>Indentation</strong> is 8 spaces.
-            </p>
+            and function definitions. Brackets are attached to statements within a function. <strong>Indentation</strong> is 8 spaces. <strong>Minumum conditional indent</strong> is 4 spaces, or one-half the spaces per indent if a different setting is used. If
+            you want to change the spaces per indent for this style it will be easier to use
+            the K&amp;R style instead.</p>
     <p>
             Also known as Kernel Normal Form (KNF) style, this is the style used in the Linux kernel.</p>
 
         <div class="code">
             <pre>int Foo(bool isBar)
 <span class="brace">{</span>
-        if (isBar) <span class="brace">{</span>
+        if (isFoo) <span class="brace">{</span>
                 bar();
                 return 1;
 <span class="brace">        }</span> else
@@ -519,6 +523,27 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 </pre>
         </div>
 
+        <p>&nbsp;</p>
+
+        <p id="_style=1tbs"><code class="title">--style=1tbs / --style=otbs / -A10</code><br />
+            "One True Brace Style" formatting/indenting uses linux style brackets and adds brackets
+            to unbracketed one line conditional statements. In the following example brackets
+            have been added to the "<code>return 0;</code>" statement. The option 
+            &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets 
+            can also be used with this style.</p>
+
+        <div class="code">
+            <pre>int Foo(bool isBar)
+<span class="brace">{</span>
+    if (isFoo) <span class="brace">{</span>
+        bar();
+        return 1;
+<span class="brace">    }</span> else <span class="brace">{</span>
+        return 0;
+    <span class="brace">}</span>
+<span class="brace">}</span>
+</pre>
+        </div>
 
     <p>&nbsp;</p>
     
@@ -551,9 +576,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 
         <p id="_indent=force-tab">
         <code class="title">--indent=force-tab / --indent=force-tab=<span class="option">#</span> /
-        -T / -T<span class="option">#</span>
-        </code><code>/ --force-indent=tab=<span class="option">#</span>
-        (depreciated)</code><br />
+        -T / -T<span class="option">#</span></code><br />
         Indent using tab characters. Treat each tab as #
         spaces (e.g. <code>-T<span class="option">6</span></code> /
         <code>--indent=<span lang="en-us">force-</span>tab=<span class="option">6</span></code>). 
@@ -1045,11 +1068,10 @@ isBar = false;
                 
         <p>&nbsp;</p>
         
-        <p id="_pad-oper"><code class="title">--pad-oper / -p </code>
-        <code>/ --pad=oper (depreciated)</code><br />
+        <p id="_pad-oper"><code class="title">--pad-oper / -p </code><br />
          Insert space padding around operators. Operators inside block parens [] are
-        <strong>not</strong> padded. Any end of line comments will remain in the original column, if possible. Note that there is no option to unpad. Once padded, they stay
-        padded.</p>
+        <strong>not</strong> padded. Any end of line comments will remain in the original column, if possible. 
+        Note that there is no option to unpad. Once padded, they stay padded.</p>
 
         <div class="code">
             <pre>if (foo==2)
@@ -1064,8 +1086,7 @@ isBar = false;
 
         <p>&nbsp;</p>
 
-        <p id="_pad-paren"><code class="title">--pad-paren / -P </code>
-        <code>/ --pad=paren (depreciated)</code><br />
+        <p id="_pad-paren"><code class="title">--pad-paren / -P </code><br />
          Insert space padding around parenthesis on both the <strong>outside</strong> and the
         <strong>inside</strong>. Any end of line comments will remain in the original column, if possible.</p>
 
@@ -1082,8 +1103,7 @@ isBar = false;
 
         <p>&nbsp;</p>
 
-        <p id="_pad-paren-out"><code class="title">--pad-paren-out / -d </code>
-        <code>/ --pad=paren-out (depreciated)</code><br />
+        <p id="_pad-paren-out"><code class="title">--pad-paren-out / -d </code><br />
          Insert space padding around parenthesis on the <strong>outside</strong> only. Any end of line comments
             will remain in the original column, if possible. This can be
         used with <code>unpad-paren</code> below to remove unwanted spaces.</p>
@@ -1101,8 +1121,7 @@ isBar = false;
 
         <p>&nbsp;</p>
 
-        <p id="_pad-paren-in"><code class="title">--pad-paren-in / -D </code>
-        <code>/ --pad=paren-in (depreciated)</code><br />
+        <p id="_pad-paren-in"><code class="title">--pad-paren-in / -D </code><br />
          Insert space padding around parenthesis on the <strong>inside</strong> only. Any end of line comments will
             remain in the original column, if possible. This can be
         used with <code>unpad-paren</code> below to remove unwanted spaces.</p>
@@ -1138,8 +1157,7 @@ isBar = false;
 
         <p>&nbsp;</p>
         
-        <p id="_unpad-paren"><code class="title">--unpad-paren / -U </code>
-        <code>/ --unpad=paren (depreciated)</code><br />
+        <p id="_unpad-paren"><code class="title">--unpad-paren / -U </code><br />
          Remove extra space padding around parenthesis on the inside and outside. &nbsp;Any end of line comments
             will remain in the original column, if possible. This option can be used in
         combination with the paren padding options <code>pad&#8209;paren</code>, <code>pad&#8209;paren&#8209;out</code>,
@@ -1203,8 +1221,7 @@ isBar = false;
 
     <h3 id="_Formatting_Options">Formatting Options</h3>
 
-        <p id="_break-closing-brackets"><code class="title">--break-closing-brackets /
-        -y </code><code>/ --brackets=break-closing (depreciated)</code><br />
+        <p id="_break-closing-brackets"><code class="title">--break-closing-brackets / -y </code><br />
          When used with --brackets=attach, --brackets=linux, or --brackets=stroustrup,
         this breaks closing headers (e.g. 
             'else', 'catch', ...) from their immediately preceding closing brackets. Closing header brackets are always
@@ -1269,8 +1286,46 @@ else
 
         <p>&nbsp;</p>
 
-        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code>
-        <code>/ --one-line=keep-blocks (depreciated)</code><br />
+        <p id="_add-brackets"><code class="title">--add-brackets / -j </code><br />
+            Add brackets to unbracketed one line conditional statements&nbsp; (e.g. '<code>if</code>',
+            '<code>for</code>', '<code>while</code>'...). The statement must be on a single
+            line.&nbsp;The brackets will be added according to the currently requested predefined
+            style or bracket type. If no style or bracket type is requested the brackets will
+            be attached. If --add-one-line brackets is also used the result will be one line
+            brackets.</p>
+
+        <div class="code">
+<pre>if (isFoo)
+    isFoo = false;
+</pre>
+<p class="code">becomes:</p>
+<pre>if (isFoo) <span class="brace">{</span>
+    isFoo = false;
+    <span class="brace">}</span>
+</pre>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_add-one-line-brackets"><code class="title">--add-one-line-brackets / -J </code><br />
+            Add one line brackets to unbracketed one line conditional statements&nbsp; (e.g.
+            '<code>if</code>', '<code>for</code>', '<code>while</code>'...). The statement must
+            be on a single line. The option implies --keep-one-line-blocks and will not break
+            the one line blocks.</p>
+
+        <div class="code">
+<pre>if (isFoo)
+    isFoo = false;
+</pre>
+<p class="code">becomes:</p>
+<pre>if (isFoo)
+    <span class="brace">{</span> isFoo = false; <span class="brace">}</span>
+</pre>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_keep-one-line-blocks"><code class="title">--keep-one-line-blocks / -O </code><br />
          Don't break one-line blocks.</p>
 
         <div class="code">
@@ -1283,8 +1338,7 @@ else
 
         <p>&nbsp;</p>
 
-        <p id="_keep-one-line-statements"><code class="title">--keep-one-line-statements /
-        -o </code><code>/ --one-line=keep-statements (depreciated)</code><br />
+        <p id="_keep-one-line-statements"><code class="title">--keep-one-line-statements / -o </code><br />
          Don't break complex statements and multiple statements residing on a single line.</p>
 
         <div class="code">

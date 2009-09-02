@@ -40,11 +40,20 @@
         been some general improvements to array formatting. The minimum value for spaces
         per tab was changed from 1 to 2.</p>
     <p>
-        The above options allow two new predefined styles. Horstmann style uses Horstmann
-        brackets and three spaces per indent. (Pending 1TBS). The "Predefinde Style Options"
-        section in the documentation contains the details. The basic criteria for all predefined
+        Two new options, --add-brackets (-j) and --add-one-line-brackets (-J), will add
+        brackets to unbracketed one line conditional statements. The --add-brackets will
+        add the brackets according to the currently requested predefined style or bracket
+        type. If no style or bracket type is requested the brackets will be attached. The
+        --add-one-line-brackets will add the brackets as one line brackets. It implies --keep-one-line-blocks
+        and will not break the one line blocks.</p>
+    <p>
+        The above options allow two new predefined styles. Horstmann style, --style=horstmann
+        (-A9), uses Horstmann brackets and three spaces per indent. The so called "One True
+        Brace Style", --style=1tbs or --style=otbs (-A10), uses linux brackets and the option
+        --add-brackets. The basic criteria for all predefined
         styles was obtained from
-        the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent Style</a> discussion at Wikipedia.</p>
+        the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent Style</a> discussion at Wikipedia. The "Predefinde Style Options"
+        section in the documentation contains the details. </p>
     <p>
         New options --align-pointer=type (-k1), --align-pointer=middle (-k2), and 
             --align-pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type
@@ -63,27 +72,34 @@
         The spaces per indent can now be changed for any of the predefined styles. In prevoius
         releases the change would be ignored. This will allow any of the &#8209;&#8209;indent
         options
-        to be used with a predefined style.</p>
+        to be used with a predefined style. If the spaces per indent is not secified,
+        the default for the style will be used.</p>
     <p>
-        The
-        Stroustroup predefined style has been changed to use 5 spaces per indent. This
-        is the indentation used in the book "The C++ Programming Language".</p>
+        The Stroustroup predefined style has been changed to use 5 spaces per indent. This
+        is the indentation used in the book "The C++ Programming Language" by Bjarne Stroustrup.</p>
+    <p>
+        The minimum conditional indent for the Linux predefined style has been changed to
+        4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). This conforms
+        to the soft tab in the style description and gives a better appearance for continuation lines. If
+        you want to change the indent-length
+        for this style it
+        will be easier to use the K&amp;R style instead.</p>
     <p>
         The continuation line for "class" statements has been changes from two indents to
         one.</p>
     <p>
-        The intermediate file .tmp has been eliminated and memory is used instead.</p>
+        The intermediate .tmp file used in formatting has been eliminated and memory is used instead. This may result in a slight speed increase if most of your source
+        files are already formatted.</p>
     <p>
         The option preserve-date (-Z) has been removed. This was added before Artistic Syle
-        had the capabibilty to identify unchanged files. It does not seem to be a useful
-        option &nbsp;now.</p>
+        had the capabibilty to identify unchanged files and is no longer a useful option.</p>
     <p>
         Checks for the maximum in-statement indent have been fixed. The indent for some long
         contiuation lines may be decreased. If you want the previous indentation, increase
         the &#8209;&#8209;max&#8209;in&#8209;statement option.</p>
     <p>
         The documentation has been changed to include a new "Padding Options"section.
-        The padding options were previously in the "Formatting Options" section. This was done to allow for the new formatting
+        The padding options were previously in the "Formatting Options" section. This was done to allow for additional formatting
         options.</p>
     <p>
         Thanks to J P Nurmi (align-pointer),
@@ -92,11 +108,6 @@
     </p>
     <h4>
         Developers</h4>
-    <p>
-        The Stroustroup predefined style has been changed to use 5 spaces per indent.</p>
-    <p>
-        The documentation has been changed to include a new "Padding Options"section. Some
-        of the old "formatting Options" have been moved to the new section.</p>
     <p>
         The Artistic Style for Windows program has been updated to support the current release
         and can be used for an example GUI. It will run on Linux under WINE. It is available

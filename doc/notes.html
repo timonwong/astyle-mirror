@@ -20,12 +20,17 @@
         <li>Add &#8209;&#8209;brackets=horstmann (-g) to place run&#8209;in statements on the
             same line as an opening bracket. </li>
         <li>Add --style=horstmann (-A9) using horstmann brackets to predefined styles. </li>
+        <li>Add &#8209;&#8209;add-brackets (-j) and --add-one-line-brackets (-J) to place brackets
+            around one line statements. </li>
+        <li>Add --style=1tbs and &nbsp;--style=otbs (-A10) using linux brackets and the --add-brackets option to predefined styles. </li>
         <li>Add new option &#8209;&#8209;pad&#8209;header (&#8209;H) from Mario Gleichmann to insert 
             space padding after paren headers. </li>
         <li>Add new options &#8209;&#8209;align&#8209;pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle
             (-k2) and &#8209;&#8209;align&#8209;pointer=name (-k3) from J P Nurmi. </li>
         <li>Remove .tmp file by using ostringstream insteadof ofstream.</li>
         <li>Remove option preserve-date (-Z).</li>
+        <li>Remove depreciated option style=kr.</li>
+        <li>Change --style=linux default minimum conditional indent to 4.</li>
         <li>Change "class" statement continuation lines to one indent.</li>
         <li>Change default formatting to leave paren headers unchanged instead of always inserting
             space padding after them. </li>
@@ -41,6 +46,8 @@
         <li>Change ASBeautifier to output the entire comment line instead of characters. </li>
         <li>Improve recognition of pointers and references vs. arithmetic operators.</li>
         <li>Improve recognition of arithmetic operators for --pad-oper (-p) option. </li>
+        <li>Fix to move comments when breaking one line blocks when -keep-one-line-statements
+            is used.</li>
         <li>Fix to recognize parens in template definitions.</li>
         <li>Fix recognition of class initializer when class description contains multiple lines.</li>
         <li>Fix identification of pointer dereferences and address-of indicators.</li>
@@ -87,7 +94,8 @@
         <li>Fix memory leak reporting of global and static class member vectors. </li>
         <li>Refactor to implement unit testing and improve decomposition:
         <ul>
-            <li>Replace multiple conditional statement with isOkToBreakBlock function.</li>
+            <li>Replace multiple line conditional statements with a function and eliminate complex
+                "not" (!) logic. </li>
             <li>Extract function formatCinToCout. </li>
             <li>Encapsulate global variables isModeManuallySet. </li>
             <li>Extract function isLineBreakBeforeClosingHeader. </li>

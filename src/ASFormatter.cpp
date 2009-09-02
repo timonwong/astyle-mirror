@@ -57,8 +57,6 @@ ASFormatter::ASFormatter()
 	formattingStyle = STYLE_NONE;
 	bracketFormatMode = NONE_MODE;
 	pointerAlignment = ALIGN_NONE;
-	isModeManuallySet = false;
-	isIndentManuallySet = false;
 	shouldPadOperators = false;
 	shouldPadParensOutside = false;
 	shouldPadParensInside = false;
@@ -223,6 +221,8 @@ void ASFormatter::fixOptionVariableConflicts()
 			else
 				setSpaceIndentation(8);
 		}
+		if (!getMinConditionalManuallySet())
+			setMinConditionalIndentLength(getIndentLength() / 2);
 	}
 	else if (formattingStyle == STYLE_HORSTMANN)
 	{
@@ -408,7 +408,9 @@ string ASFormatter::nextLine()
 		else // stuff to do when reading a new character...
 		{
 			// make sure that a virgin '{' at the begining of the file will be treated as a block...
-			if (isInVirginLine && currentChar == '{' && currentLineBeginsWithBracket)	// lineBeginsWith('{')
+			if (isInVirginLine && currentChar == '{'
+			        && currentLineBeginsWithBracket	// lineBeginsWith('{')
+			        && previousCommandChar == ' ')
 				previousCommandChar = '{';
 			if (isInHorstmannRunIn)
 				isInLineBreak = false;
@@ -546,14 +548,15 @@ string ASFormatter::nextLine()
 		// reset isImmediatelyPostHeader information
 		if (isImmediatelyPostHeader)
 		{
+			// should brackets be added
 			if (currentChar != '{' && shouldAddBrackets)
 			{
-				addBracketsToStatement();
-				if (!shouldAddOneLineBrackets)
+				size_t firstText = currentLine.find_first_not_of(" \t");
+				assert(firstText != string::npos);
+				if (!shouldAddOneLineBrackets && (int) firstText == charNum)
 					breakCurrentOneLineBlock = true;
+				addBracketsToStatement();
 			}
-
-			isImmediatelyPostHeader = false;
 
 			// Make sure headers are broken from their succeeding blocks
 			// (e.g.
@@ -570,6 +573,8 @@ string ASFormatter::nextLine()
 				if (shouldBreakElseIfs)
 					isInLineBreak = true;
 			}
+
+			isImmediatelyPostHeader = false;
 		}
 
 		if (passedSemicolon)    // need to break the formattedLine
@@ -590,10 +595,7 @@ string ASFormatter::nextLine()
 						assert((currentLine.compare(commentStart, 2, "//") == 0)
 						       || (currentLine.compare(commentStart, 2, "/*") == 0));
 						size_t commentLength = currentLine.length() - commentStart;
-						int tabCount = getIndentLength();
-						appendSpacePad();
-						for (int i=1; i<tabCount; i++)
-							formattedLine.append(1, ' ');
+						formattedLine.append(getIndentLength() - 1, ' ');
 						formattedLine.append(currentLine, commentStart, commentLength);
 						currentLine.erase(commentStart, commentLength);
 					}
@@ -744,6 +746,7 @@ string ASFormatter::nextLine()
 				// but the block exists immediately before a closing bracket,
 				// then there is no need for the post block empty line.
 				isAppendPostBlockEmptyLineRequested = false;
+				breakCurrentOneLineBlock = false;
 
 				if (bracketTypeStack->size() > 1)
 				{
@@ -831,7 +834,6 @@ string ASFormatter::nextLine()
 			         && !isCharImmediatelyPostComment)
 			{
 				previousCommandChar = ' ';
-				breakCurrentOneLineBlock = false;
 				isInLineBreak = true;
 			}
 		}
@@ -930,8 +932,9 @@ string ASFormatter::nextLine()
 				if (!(foundClosingHeader && currentHeader == &AS_WHILE))
 				{
 					isInHeader = true;
+
 					// in C# 'catch' and 'delegate' can be a paren or non-paren header
-					if (isNonParenHeader && peekNextChar() != '(')
+					if (isNonParenHeader && !isSharpStyleWithParen(currentHeader))
 					{
 						isImmediatelyPostHeader = true;
 						isInHeader = false;
@@ -1002,24 +1005,27 @@ string ASFormatter::nextLine()
 				goForward(newHeader->length() - 1);
 				continue;
 			}
-		}   // (isPotentialHeader &&  !isInTemplate)
+		}   // (isPotentialHeader && !isInTemplate)
 
 		if (isInLineBreak)          // OK to break line here
 			breakLine();
 
 		if (previousNonWSChar == '}' || currentChar == ';')
 		{
-			if (shouldBreakOneLineStatements && currentChar == ';'
-			        && (isOkToBreakBlock(bracketTypeStack->back()))
-			   )
+			if (currentChar == ';')
 			{
-				passedSemicolon = true;
-			}
+				if ((shouldBreakOneLineStatements
+				        || isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE))
+				        && isOkToBreakBlock(bracketTypeStack->back()))
+				{
+					passedSemicolon = true;
+				}
 
-			// append post block empty line for unbracketed header
-			if (shouldBreakBlocks && currentChar == ';' && currentHeader != NULL && parenStack->back() == 0)
-			{
-				isAppendPostBlockEmptyLineRequested = true;
+				// append post block empty line for unbracketed header
+				if (shouldBreakBlocks && currentHeader != NULL && parenStack->back() == 0)
+				{
+					isAppendPostBlockEmptyLineRequested = true;
+				}
 			}
 
 			// end of block if a closing bracket was found
@@ -1245,22 +1251,6 @@ bool ASFormatter::isBracketType(BracketType a, BracketType b) const
 }
 
 /**
- * get indent manually set flag
- */
-bool ASFormatter::getIndentManuallySet()
-{
-	return isIndentManuallySet;
-}
-
-/**
- * get mode manually set flag
- */
-bool ASFormatter::getModeManuallySet()
-{
-	return isModeManuallySet;
-}
-
-/**
  * set the formatting style.
  *
  * @param mode         the formatting style.
@@ -1333,22 +1323,6 @@ void ASFormatter::setBreakClosingHeaderBracketsMode(bool state)
 void ASFormatter::setBreakElseIfsMode(bool state)
 {
 	shouldBreakElseIfs = state;
-}
-
-/**
- * set indent manually set flag
- */
-void ASFormatter::setIndentManuallySet(bool state)
-{
-	isIndentManuallySet = state;
-}
-
-/**
- * set mode manually set flag
- */
-void ASFormatter::setModeManuallySet(bool state)
-{
-	isModeManuallySet = state;
 }
 
 /**
@@ -1970,7 +1944,7 @@ BracketType ASFormatter::getBracketType()
 			returnVal = (isCommandType ? COMMAND_TYPE : ARRAY_TYPE);
 	}
 
-	if (isOneLineBlockReached())
+	if (isOneLineBlockReached(currentLine, charNum))
 		returnVal = (BracketType)(returnVal | SINGLE_LINE_TYPE);
 
 	if (isBracketType(returnVal, ARRAY_TYPE)
@@ -2249,21 +2223,23 @@ bool ASFormatter::isNonInStatementArrayBracket() const
  *.
  * @return        has a one-line bracket been reached?
  */
-bool ASFormatter::isOneLineBlockReached() const
+bool ASFormatter::isOneLineBlockReached(string& line, int startChar) const
 {
+	assert(line[startChar] == '{');
+
 	bool isInComment = false;
 	bool isInQuote = false;
 	int bracketCount = 1;
-	int currentLineLength = currentLine.length();
+	int lineLength = line.length();
 	char quoteChar = ' ';
 
-	for (int i = charNum + 1; i < currentLineLength; ++i)
+	for (int i = startChar + 1; i < lineLength; ++i)
 	{
-		char ch = currentLine[i];
+		char ch = line[i];
 
 		if (isInComment)
 		{
-			if (currentLine.compare(i, 2, "*/") == 0)
+			if (line.compare(i, 2, "*/") == 0)
 			{
 				isInComment = false;
 				++i;
@@ -2291,10 +2267,10 @@ bool ASFormatter::isOneLineBlockReached() const
 			continue;
 		}
 
-		if (currentLine.compare(i, 2, "//") == 0)
+		if (line.compare(i, 2, "//") == 0)
 			break;
 
-		if (currentLine.compare(i, 2, "/*") == 0)
+		if (line.compare(i, 2, "/*") == 0)
 		{
 			isInComment = true;
 			++i;
@@ -3473,6 +3449,30 @@ void ASFormatter::convertTabToSpaces()
 }
 
 /**
+* is it ok to break this block?
+*/
+bool ASFormatter::isOkToBreakBlock(BracketType bracketType) const
+{
+	if (!isBracketType(bracketType,  SINGLE_LINE_TYPE)
+	        || shouldBreakOneLineBlocks
+	        || breakCurrentOneLineBlock)
+		return true;
+	return false;
+}
+
+/**
+* check if a sharp header is a paren or nonparen header
+*/
+bool ASFormatter::isSharpStyleWithParen(const string* header) const
+{
+	if (isSharpStyle() && peekNextChar() == '('
+	        && (header == &AS_CATCH
+	            || header == &AS_DELEGATE))
+		return true;
+	return false;
+}
+
+/**
  * check for a following header when a comment is reached.
  * if a header follows, the comments are kept as part of the header block.
  * firstLine must contain the start of the comment.
@@ -4027,7 +4027,8 @@ int ASFormatter::getCurrentLineCommentAdjustment()
 /**
  * get the previous word
  * the argument 'end' must point to the search start.
- * return is the previous word.
+ *
+ * @return is the previous word.
  */
 string ASFormatter::getPreviousWord(const string& line, int currPos) const
 {
@@ -4093,9 +4094,13 @@ void ASFormatter::isLineBreakBeforeClosingHeader()
 		{
 			// if a blank line does not preceed this
 			// or last line is not a one line block, attach header
-			size_t firstText = formattedLine.find_first_not_of(" \t");
-			if (firstText != string::npos
-			        && formattedLine[firstText] != '{')
+			bool previousLineIsEmpty = isEmptyLine(formattedLine);
+			bool previousLineIsOneLineBlock = false;
+			size_t firstBracket = findNextChar(formattedLine, '{');
+			if (firstBracket != string::npos)
+				previousLineIsOneLineBlock = isOneLineBlockReached(formattedLine, firstBracket);
+			if (!previousLineIsEmpty
+			        && !previousLineIsOneLineBlock)
 			{
 				isInLineBreak = false;
 				appendSpacePad();
@@ -4109,8 +4114,10 @@ void ASFormatter::isLineBreakBeforeClosingHeader()
 }
 
 /**
-* add brackets to a single line statement following a header.
-*/
+ * Add brackets to a single line statement following a header.
+ * Brackets are not added if the proper conditions are not met.
+ * Brackets are added to the currentLine.
+ */
 void ASFormatter::addBracketsToStatement()
 {
 	assert(isImmediatelyPostHeader);
@@ -4129,53 +4136,80 @@ void ASFormatter::addBracketsToStatement()
 			return;
 
 	// find the next semi-colon
-	size_t i;
-	for (i = charNum + 1; i < currentLine.length(); i++)
-	{
-		if (currentLine.compare(i, 2, "//") == 0)
-			return;
-		if (currentLine.compare(i, 2, "/*") == 0)
-		{
-			size_t endComment = currentLine.find("*/", i+2);
-			if (endComment == string::npos)
-				return;
-			i = endComment + 2;
-		}
-		if (currentLine[i] == '\'' || currentLine[i] == '\"')
-		{
-			size_t endQuote = currentLine.find(currentLine[i], i+1);
-			if (endQuote == string::npos)
-				return;
-			if (currentLine[endQuote-1] == '\\')
-				return;
-			i = endQuote;
-		}
-		if (currentLine[i] == ';')
-			break;
-	}
-	if (i >= currentLine.length())	// didn't find semi-colon
+	size_t nextSemiColon = findNextChar(currentLine, ';', charNum+1);
+	if (nextSemiColon == string::npos)
 		return;
 
 	// add closing bracket before changing the line length
-	if (i == currentLine.length() - 1)
+	if (nextSemiColon == currentLine.length() - 1)
 		currentLine.append(" }");
 	else
-		currentLine.insert(i+1, " }");
+		currentLine.insert(nextSemiColon + 1, " }");
 	// add opening bracket
 	currentLine.insert(charNum, "{ ");
 	currentChar = '{';
+	// remove extra spaces
+	if (!shouldAddOneLineBrackets)
+	{
+		size_t lastText = formattedLine.find_last_not_of(" \t");
+		if ((formattedLine.length() - 1) - lastText > 1)
+			formattedLine.erase(lastText + 1);
+	}
 }
 
 /**
-* is it ok to break this block?
-*/
-bool ASFormatter::isOkToBreakBlock(BracketType bracketType) const
+ * Find the next character that is not in quotes or a comment.
+ *
+ * @param line         the line to be searched.
+ * @param searchChar   the char to find.
+ * @param searchStart  the char to find.
+ * @return the position on the line or string::npos if not found.
+ */
+
+size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart /*0*/)
 {
-	if (!isBracketType(bracketType,  SINGLE_LINE_TYPE)
-	        || shouldBreakOneLineBlocks
-	        || breakCurrentOneLineBlock)
-		return true;
-	return false;
+	// find the next searchChar
+	size_t i;
+	for (i = searchStart; i < line.length(); i++)
+	{
+		if (line.compare(i, 2, "//") == 0)
+			return string::npos;
+		if (line.compare(i, 2, "/*") == 0)
+		{
+			size_t endComment = line.find("*/", i+2);
+			if (endComment == string::npos)
+				return string::npos;
+			i = endComment + 2;
+		}
+		if (line[i] == '\'' || line[i] == '\"')
+		{
+			char quote = line[i];
+			while (i < line.length())
+			{
+				size_t endQuote = line.find(quote, i+1);
+				if (endQuote == string::npos)
+					return string::npos;
+				i = endQuote;
+				if (line[endQuote-1] != '\\')	// check for '\"'
+					break;
+				if (line[endQuote-2] == '\\')	// check for '\\'
+					break;
+			}
+		}
+
+		if (line[i] == searchChar)
+			break;
+
+		// for now don't process C# 'delegate' brackets
+		// do this last in case the search char is a '{'
+		if (line[i] == '{')
+			return string::npos;
+	}
+	if (i >= line.length())	// didn't find searchChar
+		return string::npos;
+
+	return i;
 }
+
 
 }   // end namespace astyle

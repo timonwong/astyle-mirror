@@ -87,11 +87,11 @@ ASBeautifier::ASBeautifier()
 	inStatementIndentStackSizeStack = NULL;
 	parenIndentStack = NULL;
 	sourceIterator = NULL;
-
-	isMinimalConditinalIndentSet = false;
+	isIndentManuallySet = false;
+	isMinConditionalManuallySet = false;
+	isModeManuallySet = false;
 	shouldForceTabIndentation = false;
-
-	setSpaceIndentation(4);
+	setSpaceIndentation(4);				// also sets minConditionalIndent
 	setMaxInStatementIndentLength(40);
 	classInitializerTabs = 1;
 	setClassIndent(false);
@@ -197,7 +197,9 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	labelIndent = other.labelIndent;
 	preprocessorIndent = other.preprocessorIndent;
 	isInConditional = other.isInConditional;
-	isMinimalConditinalIndentSet = other.isMinimalConditinalIndentSet;
+	isIndentManuallySet = other.isIndentManuallySet;
+	isMinConditionalManuallySet = other.isMinConditionalManuallySet;
+	isModeManuallySet = other.isModeManuallySet;
 	shouldForceTabIndentation = other.shouldForceTabIndentation;
 	emptyLineFill = other.emptyLineFill;
 	lineOpensComment = other.lineOpensComment;
@@ -307,6 +309,7 @@ void ASBeautifier::init()
 	isInHeader = false;
 	isInTemplate = false;
 	isInConditional = false;
+
 	templateDepth = 0;
 	parenDepth = 0;
 	blockTabCount = 0;
@@ -362,6 +365,14 @@ void ASBeautifier::setSharpStyle()
 }
 
 /**
+ * set mode manually set flag
+ */
+void ASBeautifier::setModeManuallySet(bool state)
+{
+	isModeManuallySet = state;
+}
+
+/**
  * indent using one tab per indentation
  */
 void ASBeautifier::setTabIndentation(int length, bool forceTabs)
@@ -370,7 +381,7 @@ void ASBeautifier::setTabIndentation(int length, bool forceTabs)
 	indentLength = length;
 	shouldForceTabIndentation = forceTabs;
 
-	if (!isMinimalConditinalIndentSet)
+	if (!isMinConditionalManuallySet)
 		minConditionalIndent = indentLength * 2;
 }
 
@@ -384,8 +395,16 @@ void ASBeautifier::setSpaceIndentation(int length)
 	indentString = string(length, ' ');
 	indentLength = length;
 
-	if (!isMinimalConditinalIndentSet)
+	if (!isMinConditionalManuallySet)
 		minConditionalIndent = indentLength * 2;
+}
+
+/**
+ * set indent manually set flag
+ */
+void ASBeautifier::setIndentManuallySet(bool state)
+{
+	isIndentManuallySet = state;
 }
 
 /**
@@ -406,7 +425,14 @@ void ASBeautifier::setMaxInStatementIndentLength(int max)
 void ASBeautifier::setMinConditionalIndentLength(int min)
 {
 	minConditionalIndent = min;
-	isMinimalConditinalIndentSet = true;
+}
+
+/**
+ * set min conditional manually set flag
+ */
+void ASBeautifier::setMinConditionalManuallySet(bool state)
+{
+	isMinConditionalManuallySet = state;
 }
 
 /**
@@ -540,6 +566,32 @@ int ASBeautifier::getIndentLength(void)
 string ASBeautifier::getIndentString(void)
 {
 	return indentString;
+}
+
+/**
+ * get indent manually set flag
+ */
+bool ASBeautifier::getIndentManuallySet()
+{
+	return isIndentManuallySet;
+}
+
+/**
+ * get the state of the isMinConditionalManuallySet flag
+ *
+ * @return   the state of isMinConditionalManuallySet.
+ */
+bool ASBeautifier::getMinConditionalManuallySet()
+{
+	return isMinConditionalManuallySet;
+}
+
+/**
+ * get mode manually set flag
+ */
+bool ASBeautifier::getModeManuallySet()
+{
+	return isModeManuallySet;
 }
 
 /**
