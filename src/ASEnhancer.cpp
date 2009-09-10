@@ -125,7 +125,6 @@ void ASEnhancer::enhance(string &line)
 		sw.unindentDepth++;
 		sw.unindentCase = true;
 		unindentNextLine = false;
-//      cout << " unindent case " << sw.unindentDepth << endl;
 	}
 
 	// parse characters in the current line.
@@ -156,7 +155,7 @@ void ASEnhancer::enhance(string &line)
 		}
 
 		// handle quotes (such as 'x' and "Hello Dolly")
-		if (!(isInComment) && (ch == '"' || ch == '\''))
+		if (!isInComment && (ch == '"' || ch == '\''))
 		{
 			if (!isInQuote)
 			{
@@ -210,14 +209,12 @@ void ASEnhancer::enhance(string &line)
 
 		// ----------------  process event tables  --------------------------------------
 
-		// check for event table begin
 		if (isPotentialKeyword)
 		{
 			if (findKeyword(line, i, "BEGIN_EVENT_TABLE")
 			        || findKeyword(line, i, "BEGIN_MESSAGE_MAP"))
 				nextLineIsEventTable = true;
 
-			// check for event table end
 			if (findKeyword(line, i, "END_EVENT_TABLE")
 			        || findKeyword(line, i, "END_MESSAGE_MAP"))
 				isInEventTable = false;
@@ -228,7 +225,6 @@ void ASEnhancer::enhance(string &line)
 		if (isPotentialKeyword && findKeyword(line, i, "switch"))
 		{
 			switchDepth++;
-//          cout << " switch " <<  switchDepth << endl;
 			swVector.push_back(sw);                         // save current variables
 			sw.switchBracketCount = 0;
 			sw.unindentCase = false;                        // don't clear case until end of switch
@@ -236,112 +232,22 @@ void ASEnhancer::enhance(string &line)
 			continue;
 		}
 
-		// just want switch statements from this point
+		// just want unindented switch statements from this point
 
-		if (caseIndent || switchDepth == 0)               // from here just want switch statements
-			continue;
-
-		if (line[i] == '{')
+		if (caseIndent || switchDepth == 0)
 		{
-			sw.switchBracketCount++;
-			if (lookingForCaseBracket)                      // if 1st after case statement
+			// bypass the entire name
+			if (isPotentialKeyword)
 			{
-				sw.unindentCase = true;                     // unindenting this case
-				sw.unindentDepth++;
-				lookingForCaseBracket = false;              // not looking now
-//              cout << " unindent case " <<  sw.unindentDepth << endl;
+				string name = getCurrentWord(line, i);
+				i += name.length() - 1;
 			}
 			continue;
 		}
 
-		lookingForCaseBracket = false;                      // no opening bracket, don't indent
+		i = processSwitchBlock(line, i);
 
-		if (line[i] == '}')                                 // if close bracket
-		{
-			sw.switchBracketCount--;
-			if (sw.switchBracketCount == 0)                 // if end of switch statement
-			{
-//              cout << "  endsw " << switchDepth << endl;
-				switchDepth--;                              // one less switch
-				sw = swVector.back();                       // restore sw struct
-				swVector.pop_back();                        // remove last entry from stack
-			}
-			continue;
-		}
-
-		// look for case or default header
-
-		if (isPotentialKeyword
-		        && (findKeyword(line, i, "case") || findKeyword(line, i, "default")))
-		{
-			if (sw.unindentCase)                            // if unindented last case
-			{
-				sw.unindentCase = false;                    // stop unindenting previous case
-				sw.unindentDepth--;                         // reduce depth
-			}
-			bool isInQuote = false;
-			char quoteChar = ' ';
-			for (; i < lineLength; i++)                     // find colon
-			{
-				if (isInQuote)
-				{
-					if (line[i] == '\\')
-					{
-						i++;                                // bypass next char
-						continue;
-					}
-					else if (line[i] == quoteChar)          // check ending quote
-					{
-						isInQuote = false;
-						quoteChar = ' ';
-						continue;
-					}
-					else
-					{
-						continue;                           // must close quote before continuing
-					}
-				}
-				if (line[i] == '\'' || line[i] == '\"')		// check opening quote
-				{
-					isInQuote = true;
-					quoteChar = line[i];
-					continue;
-				}
-				if (line[i] == ':')
-				{
-					if ((i + 1 < lineLength) && (line[i + 1] == ':'))
-						i++;                                // bypass scope resolution operator
-					else
-						break;                              // found it
-				}
-			}
-			i++;
-			for (; i < lineLength; i++)                     // bypass whitespace
-			{
-				if (!(isWhiteSpace(line[i])))
-					break;
-			}
-			if (i < lineLength)
-			{
-				if (line[i] == '{')
-				{
-					sw.switchBracketCount++;
-					unindentNextLine = true;
-					continue;
-				}
-			}
-			lookingForCaseBracket = true;                   // bracket must be on next line
-			i--;                                            // need to check for comments
-			continue;
-		}
-
-		if (isPotentialKeyword)
-		{
-			string name = getCurrentWord(line, i);          // bypass the entire name
-			i += name.length() - 1;
-		}
-
-	}   // end of for loop
+	}   // end of for loop * end of for loop * end of for loop * end of for loop
 
 	if (isInEventTable)                                     // if need to indent
 	{
@@ -354,14 +260,63 @@ void ASEnhancer::enhance(string &line)
 }
 
 /**
+ * find the colon following a 'case' statement
+ *
+ * @param line          a reference to the line.
+ * @param i             the line index of the case statement.
+ * @return              the line index of the colon.
+ */
+size_t ASEnhancer::findCaseColon(string  &line, size_t caseIndex) const
+{
+	size_t i = caseIndex;
+	bool isInQuote = false;
+	char quoteChar = ' ';
+	for (; i < line.length(); i++)
+	{
+		if (isInQuote)
+		{
+			if (line[i] == '\\')
+			{
+				i++;
+				continue;
+			}
+			else if (line[i] == quoteChar)          // check ending quote
+			{
+				isInQuote = false;
+				quoteChar = ' ';
+				continue;
+			}
+			else
+			{
+				continue;                           // must close quote before continuing
+			}
+		}
+		if (line[i] == '\'' || line[i] == '\"')		// check opening quote
+		{
+			isInQuote = true;
+			quoteChar = line[i];
+			continue;
+		}
+		if (line[i] == ':')
+		{
+			if ((i + 1 < line.length()) && (line[i + 1] == ':'))
+				i++;                                // bypass scope resolution operator
+			else
+				break;                              // found it
+		}
+	}
+	return i;
+}
+
+/**
  * indent a line by a given number of tabsets
  *    by inserting leading whitespace to the line argument.
  *
- * @param line          a pointer to the line to indent.
+ * @param line          a reference to the line to indent.
  * @param unindent      the number of tabsets to insert.
  * @return              the number of characters inserted.
  */
-int ASEnhancer::indentLine(string  &line, const int indent) const
+int ASEnhancer::indentLine(string  &line, int indent) const
 {
 	if (line.length() == 0
 	        && ! emptyLineFill)
@@ -384,14 +339,89 @@ int ASEnhancer::indentLine(string  &line, const int indent) const
 }
 
 /**
+ * process the character at he current index in a switch block.
+ *
+ * @param line          a reference to the line to indent.
+ * @param index         the current line index.
+ * @return              the new line index.
+ */
+size_t ASEnhancer::processSwitchBlock(string  &line, size_t index)
+{
+	size_t i = index;
+	bool isPotentialKeyword = isCharPotentialHeader(line, i);
+
+	if (line[i] == '{')
+	{
+		sw.switchBracketCount++;
+		if (lookingForCaseBracket)                      // if 1st after case statement
+		{
+			sw.unindentCase = true;                     // unindenting this case
+			sw.unindentDepth++;
+			lookingForCaseBracket = false;              // not looking now
+		}
+		return i;
+	}
+	lookingForCaseBracket = false;                      // no opening bracket, don't indent
+
+	if (line[i] == '}')                                 // if close bracket
+	{
+		sw.switchBracketCount--;
+		if (sw.switchBracketCount == 0)                 // if end of switch statement
+		{
+			switchDepth--;                              // one less switch
+			sw = swVector.back();                       // restore sw struct
+			swVector.pop_back();                        // remove last entry from stack
+		}
+		return i;
+	}
+
+	if (isPotentialKeyword
+	        && (findKeyword(line, i, "case") || findKeyword(line, i, "default")))
+	{
+		if (sw.unindentCase)                            // if unindented last case
+		{
+			sw.unindentCase = false;                    // stop unindenting previous case
+			sw.unindentDepth--;                         // reduce depth
+		}
+
+		i = findCaseColon(line, i);
+
+		i++;
+		for (; i < line.length(); i++)                  // bypass whitespace
+		{
+			if (!isWhiteSpace(line[i]))
+				break;
+		}
+		if (i < line.length())
+		{
+			if (line[i] == '{')
+			{
+				sw.switchBracketCount++;
+				unindentNextLine = true;
+				return i;
+			}
+		}
+		lookingForCaseBracket = true;                   // bracket must be on next line
+		i--;                                            // need to check for comments
+		return i;
+	}
+	if (isPotentialKeyword)
+	{
+		string name = getCurrentWord(line, i);          // bypass the entire name
+		i += name.length() - 1;
+	}
+	return i;
+}
+
+/**
  * unindent a line by a given number of tabsets
  *    by erasing the leading whitespace from the line argument.
  *
- * @param line          a pointer to the line to unindent.
+ * @param line          a reference to the line to unindent.
  * @param unindent      the number of tabsets to erase.
  * @return              the number of characters erased.
  */
-int ASEnhancer::unindentLine(string  &line, const int unindent) const
+int ASEnhancer::unindentLine(string  &line, int unindent) const
 {
 	size_t whitespace = line.find_first_not_of(" \t");
 

@@ -459,8 +459,10 @@ class ASEnhancer : protected ASBase
 		bool isInEventTable;                    // need to indent an event table
 
 	private:  // functions
-		int  indentLine(string  &line, const int indent) const;
-		int  unindentLine(string  &line, const int unindent) const;
+		size_t  findCaseColon(string  &line, size_t caseIndex) const;
+		int     indentLine(string  &line, int indent) const;
+		size_t  processSwitchBlock(string  &line, size_t index);
+		int     unindentLine(string  &line, int unindent) const;
 };  // Class ASEnhancer
 
 //----------------------------------------------------------------------------
@@ -597,7 +599,7 @@ class ASFormatter : public ASBeautifier
 		int  horstmannIndentChars;
 		size_t leadingSpaces;
 		size_t formattedLineCommentNum;     // comment location on formattedLine
-		size_t currentLineBracketNum;		// first bracket location on currentLine
+		size_t currentLineFirstBracketNum;	// first bracket location on currentLine
 		size_t previousReadyFormattedLineLength;
 		FormatStyle formattingStyle;
 		BracketMode bracketFormatMode;

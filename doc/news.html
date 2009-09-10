@@ -28,23 +28,23 @@
         because of changes to Artistic Style. You may want to format your source before
         making program changes in order to bring it up to date.</p>
     <p>
-        A new bracket type option, &#8209;&#8209;brackets=horstmann (-g), will allow run-in
-        statements
-        on the same line as an opening broken bracket. This bracket type has
-        about the same vertical compression as attached brackets and in addition provides
-        aligned brackets. It is the only style that combines the advantages of saving space and aligning braces.
+        A new bracket type option, &#8209;&#8209;brackets=horstmann (-g), uses broken brackets
+        and places run-in statements on the same line as an opening bracket. This bracket type has
+        about the same vertical compression as attached brackets and in addition provides bracket alignment. It is the only style that combines the advantages of saving space and aligning brackets.
         The "Tab and Bracket Options" section in the
         documentation contains the details.
         To accomodate Hostmann brackets the "none mode" brackets will now allow run-in statements.
         Array formatting has been changed to format run-in statements when required. There has
         been some general improvements to array formatting. The minimum value for spaces
-        per tab was changed from 1 to 2.</p>
+        per tab was changed from one to
+        two.</p>
     <p>
         Two new options, --add-brackets (-j) and --add-one-line-brackets (-J), will add
         brackets to unbracketed one line conditional statements. The --add-brackets will
         add the brackets according to the currently requested predefined style or bracket
-        type. If no style or bracket type is requested the brackets will be attached. The
-        --add-one-line-brackets will add the brackets as one line brackets. It implies --keep-one-line-blocks
+        type. If no style or bracket type is requested the brackets will be the attached
+        type. The --add-one-line-brackets will add the brackets as one line brackets. This
+        implies --keep-one-line-blocks
         and will not break the one line blocks.</p>
     <p>
         The above options allow two new predefined styles. Horstmann style, --style=horstmann
@@ -56,23 +56,23 @@
         section in the documentation contains the details. </p>
     <p>
         New options --align-pointer=type (-k1), --align-pointer=middle (-k2), and 
-            --align-pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type
-        (left) or operator name (right). The spacing between the type and name will be preserved,
+            --align-pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type (left), operator name (right), or align it between the type and name. The spacing between the type and name will be preserved,
         if possible. The recognition of pointers and references has been improved.
         This resulted in an improvement of the --pad-oper (-p) option.</p>
    <p>
-        A new option, &#8209;&#8209;pad&#8209;header (&#8209;H), will insert the
+        A new option, &#8209;&#8209;pad&#8209;header (&#8209;H), will insert 
         space padding after headers ('if',
         'for', 'while'...). To remove any unwanted current space padding, use the
         option &#8209;&#8209;unpad&#8209;paren (&#8209;U). If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren
-        are used, the headers will be padded and padding will be removed from other parens. This has required a change to the default formatting
+        are used, the headers will be padded and the
+       padding will be removed from other parens. This has required a change to the default formatting
        of paren headers. They will now be left unchanged instead of automatically inserting space 
         padding after them, unless the new option is requested. </p>
     <p>
         The spaces per indent can now be changed for any of the predefined styles. In prevoius
         releases the change would be ignored. This will allow any of the &#8209;&#8209;indent
         options
-        to be used with a predefined style. If the spaces per indent is not secified,
+        to be used with a predefined style. If the spaces per indent is not specified,
         the default for the style will be used.</p>
     <p>
         The Stroustroup predefined style has been changed to use 5 spaces per indent. This
@@ -81,8 +81,8 @@
         The minimum conditional indent for the Linux predefined style has been changed to
         4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). This conforms
         to the soft tab in the style description and gives a better appearance for continuation lines. If
-        you want to change the indent-length
-        for this style it
+        you want to decrease the indent-length
+        for this style, it
         will be easier to use the K&amp;R style instead.</p>
     <p>
         The continuation line for "class" statements has been changes from two indents to

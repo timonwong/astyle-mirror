@@ -302,7 +302,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	preprocBracketTypeStackSize = 0;
 	spacePadNum = 0;
 	nextLineSpacePadNum = 0;
-	currentLineBracketNum = string::npos;
+	currentLineFirstBracketNum = string::npos;
 	previousReadyFormattedLineLength = string::npos;
 	templateDepth = 0;
 	traceLineNumber = 0;
@@ -1008,7 +1008,14 @@ string ASFormatter::nextLine()
 		}   // (isPotentialHeader && !isInTemplate)
 
 		if (isInLineBreak)          // OK to break line here
+		{
 			breakLine();
+			if (isInVirginLine)		// adjust for the first line
+			{
+				lineCommentNoBeautify = lineCommentNoIndent;
+				lineCommentNoIndent = false;
+			}
+		}
 
 		if (previousNonWSChar == '}' || currentChar == ';')
 		{
@@ -1216,6 +1223,10 @@ string ASFormatter::nextLine()
 		horstmannIndentInStatement = horstmannIndentChars;
 		beautifiedLine = beautify(readyFormattedLine);
 		previousReadyFormattedLineLength = readyFormattedLineLength;
+		// the enhancer is not called for new empty lines
+		// or no-indent line comments
+		if (!lineCommentNoBeautify)
+			enhancer->enhance(beautifiedLine);
 		horstmannIndentChars = 0;
 		lineCommentNoBeautify = lineCommentNoIndent;
 		lineCommentNoIndent = false;
@@ -1227,7 +1238,6 @@ string ASFormatter::nextLine()
 	}
 
 	prependEmptyLine = false;
-	enhancer->enhance(beautifiedLine);
 	return beautifiedLine;
 }
 
@@ -1766,7 +1776,7 @@ void ASFormatter::initNewLine()
 	doesLineStartComment = false;
 	currentLineBeginsWithBracket = false;
 	lineIsEmpty = false;
-	currentLineBracketNum = string::npos;
+	currentLineFirstBracketNum = string::npos;
 	tabIncrementIn = 0;
 
 	for (charNum = 0; isWhiteSpace(currentLine[charNum]) && charNum + 1 < (int) len; charNum++)
@@ -1787,7 +1797,7 @@ void ASFormatter::initNewLine()
 	else if (isSequenceReached("{"))
 	{
 		currentLineBeginsWithBracket = true;
-		currentLineBracketNum = charNum;
+		currentLineFirstBracketNum = charNum;
 		size_t firstText = currentLine.find_first_not_of(" \t", charNum + 1);
 		if (firstText != string::npos)
 		{
@@ -2194,7 +2204,7 @@ bool ASFormatter::isNonInStatementArrayBracket() const
 	bool returnVal = false;
 
 	// if this opening bracket begins the line there will be no inStatement indent
-	if (currentLineBeginsWithBracket && charNum == (int) currentLineBracketNum)
+	if (currentLineBeginsWithBracket && charNum == (int) currentLineFirstBracketNum)
 		returnVal = true;
 	// if an opening bracket ends the line there will be no inStatement indent
 	char nextChar = peekNextChar();
@@ -3144,7 +3154,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 							appendCurrentChar(false);       // OK to attach
 
 							if (currentLineBeginsWithBracket
-							        && (int)currentLineBracketNum == charNum)
+							        && (int)currentLineFirstBracketNum == charNum)
 								shouldBreakLineAtNextChar = true;
 						}
 						else
@@ -3173,7 +3183,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				appendCurrentChar();
 
 				if (currentLineBeginsWithBracket
-				        && (int)currentLineBracketNum == charNum
+				        && (int)currentLineFirstBracketNum == charNum
 				        && !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE))
 					shouldBreakLineAtNextChar = true;
 			}
@@ -3596,7 +3606,8 @@ bool ASFormatter::isCurrentBracketBroken() const
 	}
 	else if (bracketFormatMode == NONE_MODE)
 	{
-		if (currentLineBeginsWithBracket)		// lineBeginsWith('{')
+		if (currentLineBeginsWithBracket
+		        && (int)currentLineFirstBracketNum == charNum)		// lineBeginsWith('{')
 			breakBracket = true;
 	}
 	else if (bracketFormatMode == BREAK_MODE || bracketFormatMode == HORSTMANN_MODE)
@@ -4165,7 +4176,6 @@ void ASFormatter::addBracketsToStatement()
  * @param searchStart  the char to find.
  * @return the position on the line or string::npos if not found.
  */
-
 size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart /*0*/)
 {
 	// find the next searchChar
@@ -4210,6 +4220,5 @@ size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart 
 
 	return i;
 }
-
 
 }   // end namespace astyle
