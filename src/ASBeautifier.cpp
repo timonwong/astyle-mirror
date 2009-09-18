@@ -169,6 +169,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isSharpDelegate = other.isSharpDelegate;
 	isInExtern = other.isInExtern;
 	isInEnum = other.isInEnum;
+	isInBeautifySQL = other.isInBeautifySQL;
 
 	// private variables
 	indentString = other.indentString;
@@ -335,6 +336,7 @@ void ASBeautifier::init()
 	isSharpDelegate = false;
 	isInExtern = false;
 	isInEnum = false;
+	isInBeautifySQL = false;
 	inLineNumber = 0;
 	horstmannIndentInStatement = 0;
 	nonInStatementBracket = 0;
@@ -743,19 +745,9 @@ string ASBeautifier::beautify(const string &originalLine)
 		if (!(originalLine.length() == 1 && originalLine[0] == ' '))
 			line = originalLine;
 	}
-	else if (!isInComment)
+	else if (isInComment || isInBeautifySQL)
 	{
-		line = trim(originalLine);
-		if (line.length() > 0 && line[0] == '{')
-			lineBeginsWithBracket = true;
-
-		size_t j = line.find_first_not_of(" \t{");
-		if (j != string::npos && line.compare(j, 2, "/*") == 0)
-			lineOpensComment = true;
-	}
-	else
-	{
-		// trim the end of comment lines
+		// trim the end of comment and SQL lines
 		line = originalLine;
 		size_t trimEnd = line.find_last_not_of(" \t");
 		if (trimEnd == string::npos)
@@ -764,6 +756,16 @@ string ASBeautifier::beautify(const string &originalLine)
 			trimEnd++;
 		if (trimEnd < line.length())
 			line.erase(trimEnd);
+	}
+	else
+	{
+		line = trim(originalLine);
+		if (line.length() > 0 && line[0] == '{')
+			lineBeginsWithBracket = true;
+
+		size_t j = line.find_first_not_of(" \t{");
+		if (j != string::npos && line.compare(j, 2, "/*") == 0)
+			lineOpensComment = true;
 	}
 
 	if (line.length() == 0)
@@ -1021,6 +1023,9 @@ string ASBeautifier::beautify(const string &originalLine)
 		prevCh = ch;
 		ch = tempCh;
 
+		if (isInBeautifySQL)
+			continue;
+
 		if (isWhiteSpace(ch))
 		{
 			if (ch == '\t')
@@ -1132,6 +1137,10 @@ string ASBeautifier::beautify(const string &originalLine)
 		}
 
 		// if we have reached this far then we are NOT in a comment or string of special character...
+
+		// SQL if formatted in ASEnhancer
+		if (isInBeautifySQL)
+			continue;
 
 		if (probationHeader != NULL)
 		{

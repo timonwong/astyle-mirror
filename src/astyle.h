@@ -196,7 +196,7 @@ class ASBase
 
 		// functions definitions are at the end of ASResource.cpp
 		bool findKeyword(const string &line, int i, const string &keyword) const;
-		string getCurrentWord(const string& line, size_t charNum) const;
+		string getCurrentWord(const string& line, size_t index) const;
 
 	protected:
 
@@ -319,6 +319,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isSharpDelegate;
 		bool isInExtern;
 		bool isInEnum;
+		bool isInBeautifySQL;
 
 	private:
 		ASBeautifier(const ASBeautifier &copy);
@@ -422,7 +423,7 @@ class ASEnhancer : protected ASBase
 		ASEnhancer();
 		~ASEnhancer();
 		void init(int, int, string, bool, bool);
-		void enhance(string &line);
+		void enhance(string &line, bool isInSQL);
 
 	private:
 		// options from command line or options file
@@ -455,12 +456,19 @@ class ASEnhancer : protected ASBase
 		vector<switchVariables>  swVector;       // stack vector of switch variables
 
 		// event table variables
-		bool nextLineIsEventTable;              // begin event table is reached
+		bool nextLineIsEventIndent;             // begin event table indent is reached
 		bool isInEventTable;                    // need to indent an event table
+
+		// SQL variables
+		bool nextLineIsDeclareIndent;           // begin declare section indent is reached
+		bool isInDeclareSection;                // need to indent a declare section
+
 
 	private:  // functions
 		size_t  findCaseColon(string  &line, size_t caseIndex) const;
 		int     indentLine(string  &line, int indent) const;
+		bool    isBeginDeclareSectionSQL(string  &line, size_t index) const;
+		bool    isEndDeclareSectionSQL(string  &line, size_t index) const;
 		size_t  processSwitchBlock(string  &line, size_t index);
 		int     unindentLine(string  &line, int unindent) const;
 };  // Class ASEnhancer
@@ -513,6 +521,7 @@ class ASFormatter : public ASBeautifier
 		bool isBracketType(BracketType a, BracketType b) const;
 		bool isCurrentBracketBroken() const;
 		bool isDereferenceOrAddressOf() const;
+		bool isExecSQL(string  &line, size_t index) const;
 		bool isEmptyLine(const string &line) const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
 		bool isNonInStatementArrayBracket() const;
@@ -559,6 +568,7 @@ class ASFormatter : public ASBeautifier
 		void setBreakBlocksVariables();
 		void fixOptionVariableConflicts();
 		void processPreprocessor();
+		void trimContinuationLine();
 		size_t findNextChar(string& line, char searchChar, int searchStart = 0);
 		string getPreviousWord(const string& line, int currPos) const;
 		string peekNextText(const string& firstLine, bool endOnEmptyLine=false) const;
@@ -641,6 +651,7 @@ class ASFormatter : public ASBeautifier
 		bool isInLineBreak;
 		bool endOfCodeReached;
 		bool lineCommentNoIndent;
+		bool isInExecSQL;
 		bool isLineReady;
 		bool isPreviousBracketBlockRelated;
 		bool isInPotentialCalculation;

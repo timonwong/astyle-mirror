@@ -527,18 +527,18 @@ bool ASBase::findKeyword(const string &line, int i, const string &keyword) const
 }
 
 // get the current word on a line
-// i must point to the beginning of the word
-string ASBase::getCurrentWord(const string& line, size_t charNum) const
+// index must point to the beginning of the word
+string ASBase::getCurrentWord(const string& line, size_t index) const
 {
-	assert(isCharPotentialHeader(line, charNum));
+	assert(isCharPotentialHeader(line, index));
 	size_t lineLength = line.length();
 	size_t i;
-	for (i = charNum; i < lineLength; i++)
+	for (i = index; i < lineLength; i++)
 	{
 		if (!isLegalNameChar(line[i]))
 			break;
 	}
-	return line.substr(charNum, i - charNum);
+	return line.substr(index, i - index);
 }
 
 }   // end namespace astyle

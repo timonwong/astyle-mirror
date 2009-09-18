@@ -79,11 +79,13 @@
         is the indentation used in the book "The C++ Programming Language" by Bjarne Stroustrup.</p>
     <p>
         The minimum conditional indent for the Linux predefined style has been changed to
-        4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). This conforms
-        to the soft tab in the style description and gives a better appearance for continuation lines. If
-        you want to decrease the indent-length
-        for this style, it
-        will be easier to use the K&amp;R style instead.</p>
+        4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). The new value conforms
+        to the soft tab in the style description and gives a better appearance for continuation lines.</p>
+    <p>
+        Embedded SQL statement are now formatted correctly.&nbsp; The formattig of the SQL
+        statements will be maintained as long as the standard hanging indent format is used.
+        If the "exec sql" statement is indented more than the following statements, the
+        SQL will be aligned in a single column.</p>
     <p>
         The continuation line for "class" statements has been changes from two indents to
         one.</p>

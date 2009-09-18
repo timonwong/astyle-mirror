@@ -171,13 +171,20 @@
     
     <h4>Considerations</h4>
     
-    <p>Artistic Style can format standard class library statements such as wxWidgets, QT, Open GL, and MFC.
-        It can <strong>usually</strong> format embedded assembler language. There are occasional problems with
+    <p>Artistic Style can format standard class library statements such as wxWidgets, QT, Open GL, and MFC.</p>
+    <p>
+        Embedded assembler language is <strong>usually</strong> formatted correctly. There are occasional problems with
         assembler since it can vary in syntax depending on the platform.</p>
     
-        <p>Embedded statements that are multiple-line and are NOT in a C type format, such as SQL or Python, are
+        <p>
+            Artistic Style can format embedded SQL statements. The SQL formatting will be maintained
+            as long as the standard hanging indent format is used. If the "exec sql" statement
+            is indented more than the following statements, the SQL will be aligned in a single
+            column.</p>
+    <p>
+        Embedded statements that are multiple-line and are NOT in a C type format, such as Python, are
             usually mal-formatted. (a C type format has blocks enclosed
-            by brackets and statements terminated by a semi-colon). Macros defining functions
+            by brackets and statements terminated by a semi-colon). Macros that define functions
             may cause the following code to be mal-formatted because the macro is missing the
             brackets and semi-colons from the definition.
         If you have source code with these types of statements, exclude them with the <code>--exclude=</code> 

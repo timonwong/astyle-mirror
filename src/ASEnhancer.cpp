@@ -87,8 +87,11 @@ void ASEnhancer::init(int fileType,
 	sw.unindentCase = false;
 	swVector.clear();
 
-	nextLineIsEventTable = false;
+	// other variables
+	nextLineIsEventIndent = false;
 	isInEventTable = false;
+	nextLineIsDeclareIndent = false;
+	isInDeclareSection = false;
 }
 
 /**
@@ -100,22 +103,29 @@ void ASEnhancer::init(int fileType,
  *
  * @param line       the original formatted line will be updated if necessary.
  */
-void ASEnhancer::enhance(string &line)
+void ASEnhancer::enhance(string &line, bool isInSQL)
 {
-	bool   isSpecialChar = false;
-	size_t  lineLength = line.length();
+	bool isSpecialChar = false;			// is a backslash escape character
 
 	lineNumber++;
 
 	// check for beginning of event table
-	if (nextLineIsEventTable)
+	if (nextLineIsEventIndent)
 	{
 		isInEventTable = true;
-		nextLineIsEventTable = false;
+		nextLineIsEventIndent = false;
 	}
 
-	if (lineLength == 0
+	// check for beginning of SQL declare section
+	if (nextLineIsDeclareIndent)
+	{
+		isInDeclareSection = true;
+		nextLineIsDeclareIndent = false;
+	}
+
+	if (line.length() == 0
 	        && ! isInEventTable
+	        && ! isInDeclareSection
 	        && ! emptyLineFill)
 		return;
 
@@ -129,7 +139,7 @@ void ASEnhancer::enhance(string &line)
 
 	// parse characters in the current line.
 
-	for (size_t i = 0; i < lineLength; i++)
+	for (size_t i = 0; i < line.length(); i++)
 	{
 		char ch = line[i];
 
@@ -213,11 +223,28 @@ void ASEnhancer::enhance(string &line)
 		{
 			if (findKeyword(line, i, "BEGIN_EVENT_TABLE")
 			        || findKeyword(line, i, "BEGIN_MESSAGE_MAP"))
-				nextLineIsEventTable = true;
+			{
+				nextLineIsEventIndent = true;
+				break;
+			}
 
 			if (findKeyword(line, i, "END_EVENT_TABLE")
 			        || findKeyword(line, i, "END_MESSAGE_MAP"))
+			{
 				isInEventTable = false;
+				break;
+			}
+		}
+
+		// ----------------  process SQL  -----------------------------------------------
+
+		if (isInSQL)
+		{
+			if (isBeginDeclareSectionSQL(line, i))
+				nextLineIsDeclareIndent = true;
+			if (isEndDeclareSectionSQL(line, i))
+				isInDeclareSection = false;
+			break;
 		}
 
 		// ----------------  process switch statements  ---------------------------------
@@ -236,7 +263,7 @@ void ASEnhancer::enhance(string &line)
 
 		if (caseIndent || switchDepth == 0)
 		{
-			// bypass the entire name
+			// bypass the entire word
 			if (isPotentialKeyword)
 			{
 				string name = getCurrentWord(line, i);
@@ -249,13 +276,13 @@ void ASEnhancer::enhance(string &line)
 
 	}   // end of for loop * end of for loop * end of for loop * end of for loop
 
-	if (isInEventTable)                                     // if need to indent
+	if (isInEventTable || isInDeclareSection)
 	{
 		if (line[0] != '#')
 			indentLine(line, 1);
 	}
 
-	if (sw.unindentDepth > 0)                               // if need to unindent
+	if (sw.unindentDepth > 0)
 		unindentLine(line, sw.unindentDepth);
 }
 
@@ -339,7 +366,105 @@ int ASEnhancer::indentLine(string  &line, int indent) const
 }
 
 /**
- * process the character at he current index in a switch block.
+ * check for SQL "BEGIN DECLARE SECTION".
+ * must compare case insensitive and allow any spacing between words.
+ *
+ * @param line          a reference to the line to indent.
+ * @param index         the current line index.
+ * @return              true if a hit.
+ */
+bool ASEnhancer::isBeginDeclareSectionSQL(string  &line, size_t index) const
+{
+	string word;
+	size_t hits = 0;
+	size_t i = index;
+	for (i = index; i < line.length(); i++)
+	{
+		i = line.find_first_not_of(" \t", i);
+		if (i == string::npos)
+			return false;
+		if (line[i] == ';')
+			break;
+		if (!isCharPotentialHeader(line, i))
+			continue;
+		word = getCurrentWord(line, i);
+		for (size_t j = 0; j < word.length(); j++)
+			word[j] = (char) toupper(word[j]);
+		if (word == "EXEC" || word == "SQL")
+		{
+			i += word.length() - 1;
+			continue;
+		}
+		if (word == "DECLARE" || word == "SECTION")
+		{
+			hits++;
+			i += word.length() - 1;
+			continue;
+		}
+		if (word == "BEGIN")
+		{
+			hits++;
+			i += word.length() - 1;
+			continue;
+		}
+		return false;
+	}
+	if (hits == 3)
+		return true;
+	return false;
+}
+
+/**
+ * check for SQL "END DECLARE SECTION".
+ * must compare case insensitive and allow any spacing between words.
+ *
+ * @param line          a reference to the line to indent.
+ * @param index         the current line index.
+ * @return              true if a hit.
+ */
+bool ASEnhancer::isEndDeclareSectionSQL(string  &line, size_t index) const
+{
+	string word;
+	size_t hits = 0;
+	size_t i = index;
+	for (i = index; i < line.length(); i++)
+	{
+		i = line.find_first_not_of(" \t", i);
+		if (i == string::npos)
+			return false;
+		if (line[i] == ';')
+			break;
+		if (!isCharPotentialHeader(line, i))
+			continue;
+		word = getCurrentWord(line, i);
+		for (size_t j = 0; j < word.length(); j++)
+			word[j] = (char) toupper(word[j]);
+		if (word == "EXEC" || word == "SQL")
+		{
+			i += word.length() - 1;
+			continue;
+		}
+		if (word == "DECLARE" || word == "SECTION")
+		{
+			hits++;
+			i += word.length() - 1;
+			continue;
+		}
+		if (word == "END")
+		{
+			hits++;
+			i += word.length() - 1;
+			continue;
+		}
+		return false;
+	}
+	if (hits == 3)
+		return true;
+	return false;
+}
+
+/**
+ * process the character at the current index in a switch block.
  *
  * @param line          a reference to the line to indent.
  * @param index         the current line index.

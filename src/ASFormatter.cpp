@@ -54,6 +54,7 @@ ASFormatter::ASFormatter()
 	bracketTypeStack = NULL;
 	parenStack = NULL;
 	lineCommentNoIndent = false;
+	isInExecSQL = false;
 	formattingStyle = STYLE_NONE;
 	bracketFormatMode = NONE_MODE;
 	pointerAlignment = ALIGN_NONE;
@@ -434,6 +435,14 @@ string ASFormatter::nextLine()
 			shouldBreakLineAtNextChar = false;
 		}
 
+		if (isInExecSQL && !passedSemicolon)
+		{
+			if (currentChar == ';')
+				passedSemicolon = true;
+			appendCurrentChar();
+			continue;
+		}
+
 		if (isInLineComment)
 		{
 			formatLineCommentBody();
@@ -501,7 +510,7 @@ string ASFormatter::nextLine()
 			continue;
 		}
 
-		/* not in MIDDLE of quote or comment or white-space of any type ... */
+		/* not in MIDDLE of quote or comment or SQL or white-space of any type ... */
 
 		// check if in preprocessor
 		// ** isInPreprocessor will be automatically reset at the begining
@@ -600,6 +609,7 @@ string ASFormatter::nextLine()
 						currentLine.erase(commentStart, commentLength);
 					}
 				}
+				isInExecSQL = false;
 				shouldReparseCurrentChar = true;
 				isInLineBreak = true;
 				if (needHeaderOpeningBracket)
@@ -1105,6 +1115,9 @@ string ASFormatter::nextLine()
 			if (isCStyle() && findKeyword(currentLine, charNum, AS_ENUM))
 				isInEnum = true;
 
+			if (isCStyle() && isExecSQL(currentLine, charNum))
+				isInExecSQL = true;
+
 			if (isJavaStyle()
 			        && (findKeyword(currentLine, charNum, AS_STATIC)
 			            && isNextCharOpeningBracket(charNum + 6)))
@@ -1226,9 +1239,10 @@ string ASFormatter::nextLine()
 		// the enhancer is not called for new empty lines
 		// or no-indent line comments
 		if (!lineCommentNoBeautify)
-			enhancer->enhance(beautifiedLine);
+			enhancer->enhance(beautifiedLine, isInBeautifySQL);
 		horstmannIndentChars = 0;
 		lineCommentNoBeautify = lineCommentNoIndent;
+		isInBeautifySQL = isInExecSQL;
 		lineCommentNoIndent = false;
 		if (clearNonInStatement)
 		{
@@ -1677,6 +1691,8 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		        || isEmptyLine(currentLine))
 			isInPreprocessor = false;
 
+		if (passedSemicolon)
+			isInExecSQL = false;
 		initNewLine();
 		currentChar = currentLine[charNum];
 		if (isInHorstmannRunIn && previousNonWSChar == '{')
@@ -1726,46 +1742,40 @@ void ASFormatter::initNewLine()
 	if (isInPreprocessor || isInQuoteContinuation)
 		return;
 
-	// trim comment line
+	// SQL continuation lines must be adjusted so the leading spaces
+	// is equivalent to the opening EXEC SQL
+	if (isInExecSQL)
+	{
+		// replace leading tabs with spaces
+		// so that continuation indent will be spaces
+		size_t i = 0;
+		size_t tabCount = 0;
+		for (i = 0; i < currentLine.length(); i++)
+		{
+			if (!isWhiteSpace(currentLine[i]))		// stop at first text
+				break;
+			if (currentLine[i] == '\t')
+			{
+				size_t numSpaces = indent - ((tabCount + i) % indent);
+				currentLine.replace(i, 1, numSpaces, ' ');
+				tabCount++;
+				i += indent - 1;
+			}
+		}
+		// correct format if EXEC SQL is not a hanging indent
+		if (i < leadingSpaces)
+			currentLine.insert(0, leadingSpaces - i, ' ');
+		trimContinuationLine();
+		return;
+	}
+
+	// comment continuation lines must be adjusted so the leading spaces
+	// is equivalent to the opening comment
 	if (isInComment)
 	{
-		// the continuation lines must be adjusted so the leading spaces
-		// is equivalent to the opening comment
 		if (noTrimCommentContinuation)
 			leadingSpaces = tabIncrementIn = 0;
-		if (leadingSpaces > 0 && len > 0)
-		{
-			size_t j;
-			size_t commentIncrementIn = 0;
-			for (j = 0; (j < len) && (j + commentIncrementIn < leadingSpaces); j++)
-			{
-				if (!isWhiteSpace(currentLine[j]))		// don't delete any text
-				{
-					j = 0;
-					commentIncrementIn = tabIncrementIn;
-					break;
-				}
-				if (currentLine[j] == '\t')
-					commentIncrementIn += indent - 1 - ((commentIncrementIn + j) % indent);
-			}
-
-			if ((int) commentIncrementIn == tabIncrementIn)
-				charNum = j;
-			else
-			{
-				// build a new line with the equivalent leading chars
-				string newLine;
-				int leadingChars = 0;
-				if ((int) leadingSpaces > tabIncrementIn)
-					leadingChars = leadingSpaces - tabIncrementIn;
-				newLine.append(leadingChars, ' ');
-				newLine.append(currentLine, j, len-j);
-				currentLine = newLine;
-				charNum = leadingChars;
-			}
-			if (j >= len)
-				charNum = 0;
-		}
+		trimContinuationLine();
 		return;
 	}
 
@@ -1803,9 +1813,9 @@ void ASFormatter::initNewLine()
 		{
 			if (currentLine.compare(firstText, 2, "//") == 0)
 				lineIsLineCommentOnly = true;
-			else if (currentLine.compare(firstText, 2, "/*") == 0)
+			else if (currentLine.compare(firstText, 2, "/*") == 0
+			         || isExecSQL(currentLine, firstText))
 			{
-				doesLineStartComment = true;
 				// get the extra adjustment
 				size_t j;
 				for (j = charNum + 1; isWhiteSpace(currentLine[j]) && j < firstText; j++)
@@ -1814,6 +1824,8 @@ void ASFormatter::initNewLine()
 						tabIncrementIn += indent - 1 - ((tabIncrementIn + j) % indent);
 				}
 				leadingSpaces = j + tabIncrementIn;
+				if (currentLine.compare(firstText, 2, "/*") == 0)
+					doesLineStartComment = true;
 			}
 		}
 	}
@@ -3437,7 +3449,7 @@ void ASFormatter::initContainer(T &container, T value)
 }
 
 /**
- * convert tabs to spaces.
+ * convert a tab to spaces.
  * charNum points to the current character to convert to spaces.
  * tabIncrementIn is the increment that must be added for tab indent characters
  *     to get the correct column for the current tab.
@@ -4220,5 +4232,86 @@ size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart 
 
 	return i;
 }
+
+/**
+ * Check to see if this is an EXEC SQL statement.
+ *
+ * @param line          a reference to the line to indent.
+ * @param index         the current line index.
+ * @return              true if the statement is EXEC SQL.
+ */
+bool ASFormatter::isExecSQL(string  &line, size_t index) const
+{
+	if (line[index] != 'e' && line[index] != 'E')	// quick check to reject most
+		return false;
+	string word;
+	if (isCharPotentialHeader(line, index))
+		word = getCurrentWord(line, index);
+	for (size_t i = 0; i < word.length(); i++)
+		word[i] = (char) toupper(word[i]);
+	if (word != "EXEC")
+		return false;
+	size_t index2 = index + word.length();
+	index2 = line.find_first_not_of(" \t", index2);
+	if (index2 == string::npos)
+		return false;
+	word.erase();
+	if (isCharPotentialHeader(line, index2))
+		word = getCurrentWord(line, index2);
+	for (size_t i = 0; i < word.length(); i++)
+		word[i] = (char) toupper(word[i]);
+	if (word != "SQL")
+		return false;
+	return true;
+}
+
+/**
+ * The continuation lines must be adjusted so the leading spaces
+ *     is equivalent to the text on the opening line.
+ *
+ * Updates currentLine and charNum.
+ */
+void ASFormatter::trimContinuationLine()
+{
+	size_t len = currentLine.length();
+	size_t indent = getIndentLength();
+	charNum = 0;
+
+	if (leadingSpaces > 0 && len > 0)
+	{
+		size_t i;
+		size_t continuationIncrementIn = 0;
+		for (i = 0; (i < len) && (i + continuationIncrementIn < leadingSpaces); i++)
+		{
+			if (!isWhiteSpace(currentLine[i]))		// don't delete any text
+			{
+				i = 0;
+				continuationIncrementIn = tabIncrementIn;
+				break;
+			}
+			if (currentLine[i] == '\t')
+				continuationIncrementIn += indent - 1 - ((continuationIncrementIn + i) % indent);
+		}
+
+		if ((int) continuationIncrementIn == tabIncrementIn)
+			charNum = i;
+		else
+		{
+			// build a new line with the equivalent leading chars
+			string newLine;
+			int leadingChars = 0;
+			if ((int) leadingSpaces > tabIncrementIn)
+				leadingChars = leadingSpaces - tabIncrementIn;
+			newLine.append(leadingChars, ' ');
+			newLine.append(currentLine, i, len-i);
+			currentLine = newLine;
+			charNum = leadingChars;
+		}
+		if (i >= len)
+			charNum = 0;
+	}
+	return;
+}
+
 
 }   // end namespace astyle
