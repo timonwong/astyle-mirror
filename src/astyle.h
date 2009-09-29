@@ -34,7 +34,7 @@
 #include <cassert>
 #endif
 
-#include <string.h>
+#include <string.h>         // need both string and string.h for GCC
 #include <string>
 #include <vector>
 #include <cctype>
@@ -536,7 +536,7 @@ class ASFormatter : public ASBeautifier
 //		bool lineBeginsWith(char charToCheck) const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
-		void addBracketsToStatement();;
+		void addBracketsToStatement();
 		void appendCharInsideComments();
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
@@ -563,6 +563,7 @@ class ASFormatter : public ASBeautifier
 		void formatQuoteBody();
 		void formatQuoteOpener();
 		void formatPointerOrReference();
+		void formatPointerOrReferenceCast();
 		void adjustComments();
 		void isLineBreakBeforeClosingHeader();
 		void setBreakBlocksVariables();

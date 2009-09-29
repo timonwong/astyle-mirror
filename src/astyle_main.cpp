@@ -713,7 +713,7 @@ string ASStreamIterator<T>::nextLine(bool emptyLineWasDeleted)
 		{
 			if (peekCh == '\n')
 			{
-				inStream->get(ch);
+				inStream->get();
 				eolWindows++;
 			}
 			else
@@ -723,7 +723,7 @@ string ASStreamIterator<T>::nextLine(bool emptyLineWasDeleted)
 		{
 			if (peekCh == '\r')
 			{
-				inStream->get(ch);
+				inStream->get();
 				eolWindows++;
 			}
 			else
@@ -784,7 +784,7 @@ string ASStreamIterator<T>::peekNextLine()
 	if (!inStream->eof())
 	{
 		if ((peekCh == '\n' || peekCh == '\r') && peekCh != ch)  /////////////  changed  //////////
-			inStream->get(ch);
+			inStream->get();
 	}
 
 	return nextLine;
@@ -1771,7 +1771,7 @@ bool ASConsole::stringEndsWith(const string &str, const string &suffix) const
 void ASConsole::wait(int seconds) const
 {
 	clock_t endwait;
-	endwait = clock () + seconds * CLOCKS_PER_SEC ;
+	endwait = clock_t (clock () + seconds * CLOCKS_PER_SEC);
 	while (clock() < endwait) {}
 }
 
@@ -2092,7 +2092,7 @@ int main(int argc, char** argv)
 
 		// show processing time
 		clock_t stopTime = clock();
-		float secs = (float) (stopTime - startTime) / CLOCKS_PER_SEC;
+		float secs = float ((stopTime - startTime) / CLOCKS_PER_SEC);
 		if (secs < 60)
 		{
 			// show tenths of a second if time is less than 20 seconds

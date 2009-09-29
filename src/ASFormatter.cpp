@@ -1714,7 +1714,8 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 			        || !isImmediatelyPostCommentOnly
 			        || !commentAndHeaderFollows())
 			{
-				isInPreprocessor = isImmediatelyPostPreprocessor;  // restore isInPreprocessor
+				isInPreprocessor = isImmediatelyPostPreprocessor;		// restore
+//				lineIsLineCommentOnly = isImmediatelyPostCommentOnly;	// no restore
 				lineIsEmpty = false;
 				return getNextLine(true);
 			}
@@ -1748,8 +1749,8 @@ void ASFormatter::initNewLine()
 	{
 		// replace leading tabs with spaces
 		// so that continuation indent will be spaces
-		size_t i = 0;
 		size_t tabCount = 0;
+		size_t i;
 		for (i = 0; i < currentLine.length(); i++)
 		{
 			if (!isWhiteSpace(currentLine[i]))		// stop at first text
@@ -1762,9 +1763,9 @@ void ASFormatter::initNewLine()
 				i += indent - 1;
 			}
 		}
-		// correct format if EXEC SQL is not a hanging indent
+		// correct the format if EXEC SQL is not a hanging indent
 		if (i < leadingSpaces)
-			currentLine.insert(0, leadingSpaces - i, ' ');
+			currentLine.insert((size_t)0, leadingSpaces - i, ' ');
 		trimContinuationLine();
 		return;
 	}
@@ -2006,6 +2007,9 @@ bool ASFormatter::isPointerOrReference() const
 	if (!isCStyle())
 		return false;
 
+	if (currentChar == '&' && previousChar == '&')
+		return false;
+
 	if (previousNonWSChar == '=' || isCharImmediatelyPostReturn)
 		return true;
 
@@ -2095,15 +2099,29 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 	// check for **
 	if (currentChar == '*'
 	        && (int) currentLine.length() > charNum
-	        && currentLine[charNum+1] == '*'
-	        && previousNonWSChar != '('
-	        && (int) currentLine.length() > charNum + 1
-	        && currentLine[charNum+2] != ')')
+	        && currentLine[charNum+1] == '*')
+	{
+		if (previousNonWSChar == '(')
+			return true;
+		if ((int) currentLine.length() < charNum + 2)
+			return true;
+		//size_t nextChar = currentLine.find_first_not_of(" \t", charNum+2);
+		//if (nextChar != string::npos
+		//		&& currentLine[nextChar] == ')')
+		//	return true;
 		return false;
+	}
 
 	// check first char on the line
 	if (charNum == (int) currentLine.find_first_not_of(" \t"))
 		return true;
+
+	size_t nextChar = currentLine.find_first_not_of(" \t", charNum+1);
+	if (nextChar != string::npos
+	        && (currentLine[nextChar] == ')'
+	            || currentLine[nextChar] == '>'
+	            || currentLine[nextChar] == ','))
+		return false;
 
 	string lastWord = getPreviousWord(currentLine, charNum);
 	if (lastWord == "else" || lastWord == "delete")
@@ -2111,7 +2129,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 
 	bool isDA = (!(isLegalNameChar(previousNonWSChar) || previousNonWSChar == '>')
 	             || !isLegalNameChar(peekNextChar())
-	             || peekNextChar() == ')'
+//	             || peekNextChar() == ')'
 	             || (ispunct(previousNonWSChar) && previousNonWSChar != '.')
 	             || isCharImmediatelyPostReturn);
 
@@ -2400,8 +2418,7 @@ string ASFormatter::peekNextText(const string& firstLine, bool endOnEmptyLine /*
 		{
 			if (endOnEmptyLine && !isInComment)
 				break;
-			else
-				continue;
+			continue;
 		}
 
 		if (nextLine.compare(firstChar, 2, "/*") == 0)
@@ -2601,15 +2618,33 @@ void ASFormatter::padOperators(const string *newOperator)
 }
 
 /**
- * align pointer or reference
+ * format pointer or reference
  * currentChar contains the pointer or reference
- * the sign and necessary padding will be appended to formattedLine
+ * the symbol and necessary padding will be appended to formattedLine
  * the calling function should have a continue statement after calling this method
  */
 void ASFormatter::formatPointerOrReference(void)
 {
 	assert(currentChar == '*' || currentChar == '&');
 	assert(isCStyle());
+
+	// check for cast
+	char peekedChar = peekNextChar();
+	if (currentChar == '*'
+	        && (int) currentLine.length() > charNum
+	        && currentLine[charNum+1] == '*')
+	{
+		size_t nextChar = currentLine.find_first_not_of(" \t", charNum+2);
+		if (nextChar == string::npos)
+			peekedChar = ' ';
+		else
+			peekedChar = currentLine[nextChar];
+	}
+	if (peekedChar == ')' || peekedChar =='>' || peekedChar ==',')
+	{
+		formatPointerOrReferenceCast();
+		return;
+	}
 
 	// do this before bumping charNum
 	bool isOldPRCentered = isPointerOrReferenceCentered();
@@ -2662,19 +2697,21 @@ void ASFormatter::formatPointerOrReference(void)
 			sequenceToInsert = "**";
 			goForward(1);
 		}
-		// compute current whitespace after
-		size_t wsAfter = currentLine.find_first_not_of(" \t", charNum + 1);
+		size_t charNumSave = charNum;
+		// goForward() to convert tabs to spaces, if necessary,
+		// and move following characters to preceding characters
+		// this may not work every time with tab characters
+		for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
+		{
+			goForward(1);
+			formattedLine.append(1, currentLine[i]);
+		}
+		// whitespace should be at least 2 chars
+		size_t wsAfter = currentLine.find_first_not_of(" \t", charNumSave + 1);
 		if (wsAfter == string::npos)
 			wsAfter = 0;
 		else
-			wsAfter = wsAfter - charNum - 1;
-		// add whitespace after
-		// this may not work every time with tab characters
-		string charSave = currentLine.substr(charNum+1, wsAfter);
-		formattedLine.append(charSave);
-		// adjust current position before adjusting spaces
-		goForward(wsAfter);
-		// whitespace should be at least 2 chars
+			wsAfter = wsAfter - charNumSave - 1;
 		if (wsBefore + wsAfter < 2)
 		{
 			size_t charsToAppend = (2 - (wsBefore + wsAfter));
@@ -2685,11 +2722,8 @@ void ASFormatter::formatPointerOrReference(void)
 		}
 		// insert the pointer or reference char
 		size_t padAfter = (wsBefore + wsAfter) / 2;
-		if ((wsBefore + wsAfter) % 2)
-			padAfter++;
 		formattedLine.insert(formattedLine.length() - padAfter, sequenceToInsert);
 	}
-
 	else if (pointerAlignment == ALIGN_NAME)
 	{
 		size_t startNum = formattedLine.find_last_not_of(" \t");
@@ -2699,21 +2733,15 @@ void ASFormatter::formatPointerOrReference(void)
 			sequenceToInsert = "**";
 			goForward(1);
 		}
-		size_t nextCh = currentLine.find_first_not_of(" \t", charNum+1);
-		if (nextCh == string::npos)
-			nextCh = currentLine.length();
-		int charsToInsert = nextCh - charNum - 1;
-		if (charsToInsert > 0)
+		// goForward() to convert tabs to spaces, if necessary,
+		// and move following characters to preceding characters
+		// this may not work every time with tab characters
+		for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
 		{
-			// exchange preceding characters with the following characters
-			// this may not work every time with tab characters
-			string charSave = currentLine.substr(charNum+1, charsToInsert);
-			formattedLine.append(charSave);
-			appendSequence(sequenceToInsert, false);
-			goForward(charsToInsert);
+			goForward(1);
+			formattedLine.append(1, currentLine[i]);
 		}
-		else
-			appendSequence(sequenceToInsert, false);
+		appendSequence(sequenceToInsert, false);
 		// if no space before * then add one
 		if (startNum != string::npos
 		        && !isWhiteSpace(formattedLine[startNum+1]))
@@ -2735,6 +2763,47 @@ void ASFormatter::formatPointerOrReference(void)
 		appendCurrentChar();
 	}
 	return;
+}
+
+/**
+ * format pointer or reference cast
+ * currentChar contains the pointer or reference
+ * NOTE: the pointers and references in function definitions
+ *       are processed as a cast (e.g. void foo(void*, void*))
+ *       is processed here.
+ */
+void ASFormatter::formatPointerOrReferenceCast(void)
+{
+	assert(currentChar == '*' || currentChar == '&');
+	assert(isCStyle());
+
+	string sequenceToInsert = currentChar == '*' ? "*" : "&";
+	if (isSequenceReached("**"))
+	{
+		sequenceToInsert = "**";
+		goForward(1);
+	}
+	// remove trailing whitespace
+	size_t prevCh = formattedLine.find_last_not_of(" \t");
+	if (prevCh == string::npos)
+		prevCh = 0;
+	if (formattedLine.length() > 0 && isWhiteSpace(formattedLine[prevCh+1]))
+	{
+		spacePadNum -= (formattedLine.length() - 1 - prevCh);
+		formattedLine.erase(prevCh+1);
+	}
+	if (pointerAlignment == ALIGN_TYPE)
+	{
+		appendSequence(sequenceToInsert, false);
+	}
+	else if (pointerAlignment == ALIGN_MIDDLE
+	         || pointerAlignment == ALIGN_NAME)
+	{
+		appendSpacePad();
+		appendSequence(sequenceToInsert, false);
+	}
+	else
+		appendSequence(sequenceToInsert, false);
 }
 
 /**
@@ -3577,7 +3646,6 @@ bool ASFormatter::commentAndHeaderFollows() const
 	}
 
 	// if next line is a comment, find the next non-comment text
-	// peekNextText will do the peekReset
 	string nextText = peekNextText(nextLine, true);
 	if (nextText.length() == 0 || !isCharPotentialHeader(nextText, 0))
 		return false;

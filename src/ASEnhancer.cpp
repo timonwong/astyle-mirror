@@ -377,7 +377,7 @@ bool ASEnhancer::isBeginDeclareSectionSQL(string  &line, size_t index) const
 {
 	string word;
 	size_t hits = 0;
-	size_t i = index;
+	size_t i;
 	for (i = index; i < line.length(); i++)
 	{
 		i = line.find_first_not_of(" \t", i);
@@ -426,7 +426,7 @@ bool ASEnhancer::isEndDeclareSectionSQL(string  &line, size_t index) const
 {
 	string word;
 	size_t hits = 0;
-	size_t i = index;
+	size_t i;
 	for (i = index; i < line.length(); i++)
 	{
 		i = line.find_first_not_of(" \t", i);

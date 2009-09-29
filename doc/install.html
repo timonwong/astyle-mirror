@@ -71,10 +71,10 @@
     <h4 id="_GCC_Compiler">GCC Compiler</h4>
 
     <p>To compile using the GCC compiler you must have GCC (3.1 or better) installed. To build the
-    Artistic Style configurations use the makefile located in the astyle/buildgcc directory. The
-    executables will be in the astyle/bin directory. To build the command line configuration enter
+    Artistic Style configurations use the makefile located in the astyle/build/gcc
+        directory. The executables will be in the astyle/build/gcc/bin directory. To build the command line configuration enter
     the following:</p>
-    <pre> cd astyle/buildgcc<br /> make
+    <pre> cd astyle/build/gcc<br /> make
 </pre>
 
     <p>To build the other astyle configurations you can enter the file name or a symbolic name.
@@ -122,22 +122,35 @@
 
     <p>More than one configuration can be built at the same time. For example, to build all of the
     release configurations enter:</p>
-    <pre> cd astyle/build<br /> make release shared static
+    <pre> cd astyle/build/gcc<br /> make release shared static
 </pre>
 
     <h4 id="_Intel_Compiler">Intel Compiler</h4>
 
-    <p>To build the Artistic Style configurations use the makefile located in the astyle/buildintel
-    directory. The executables will be in the astyle/bin directory. To build the command line
+    <p>To use the Intel makefile the files icc and icpc should be copied to /usr/sbin.
+        If the compiler release is 11.1 or higher the file iccvars.sh should also be copied
+        to /usr/sbin. These files are located in the installed directories of the compiler.</p>
+    <p>
+        Beginning with compiler release 11.1 there are environment variables that should
+        be set before the make. There is a script, make.sh, that will set the variables by calling iccvars.sh then
+        run the make. The script assumes the ia32 compiler. If the ia64 compiler
+        is used the script will need to be changed. Instructions for the options are in the documentation file "getting_started_c.pdf" in the section "Starting
+        the Compiler from the Command Line". Instead of using <strong>make</strong> in the following
+        instructions use <strong>make.sh</strong>. The options are the same for make and
+        make.sh. The make.sh can also be used for compiler releases prior to 11.1. In this
+        case the make will be run without calling the iccvars.sh file.</p>
+    <p>
+        To build the Artistic Style configurations use the makefile or make.sh script located in the astyle/build/intel
+        directory. The executables will be in the astyle/build/intel/bin directory. To build the command line
     configuration enter the following:</p>
-    <pre> cd astyle/buildintel<br /> make
+    <pre> cd astyle/build/intel<br /> make  (or make.sh)
 </pre>
 
     <p>To build the other astyle configurations you can enter the file name or a symbolic name. The
     configuration names for Intel are the same as for the <a href="#_GCC_Compiler">GCC
     compiler</a>. More than one configuration can be built at the same time. For example, to build
     all of the debug configurations enter:</p>
-    <pre> cd astyle/buildintel<br /> make debug shareddebug staticdebug
+    <pre> cd astyle/build/intel<br /> make debug shareddebug staticdebug  (or make.sh debug shareddebug staticdebug)
 </pre>
 
     <h4 id="_Other_Makefile_Options">Other Makefile Options</h4>
@@ -197,14 +210,14 @@
     <p>To build the Artistic Style configurations use the makefile located in the astyle/buildmac
     directory. The executables will be in the astyle/bin directory. To build the command line
     configuration enter the following:</p>
-    <pre> cd astyle/buildmac<br /> make
+    <pre> cd astyle/build/mac<br /> make
 </pre>
 
     <p>To build the other astyle configurations you can enter the file name or a symbolic name. The
     configurations for Mac are the same as for the <a href="#_GCC_Compiler">Linux GCC compiler</a>.
     More than one configuration can be built at the same time. For example, to build all of the
     release configurations enter:</p>
-    <pre> cd astyle/buildmac<br /> make release shared static
+    <pre> cd astyle/build/mac<br /> make release shared static
 </pre><br />
 
     <p>The <a href="#_Other_Makefile_Options">Other Makefile Options</a> are the same as for the
@@ -322,7 +335,8 @@
     <p>Artistic Style is a small program and it is best to optimize for speed. The debug
     configuration is not usually optimized. To optimize for speed in the release configurations use
     the macro NDEBUG to remove asserts. Use an option that allows inline function expansion.
-    Runtime Type Information (RTTI) is NOT needed. Use whole program optimization if your compiler
+    Runtime Type Information (RTTI) is NOT needed if the compler will allow
+        it. Use whole program optimization if your compiler
     supports it. There may be other options you can use depending on the compiler.</p>
 
     <p>&nbsp;</p>
