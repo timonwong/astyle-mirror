@@ -87,6 +87,7 @@
         <a class="contents" href="#_indent-namespaces">indent&#8209;namespaces</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-labels">indent&#8209;labels</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-preprocessor">indent&#8209;preprocessor</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_indent-col1-comments">indent&#8209;col1&#8209;comments</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_max-instatement-indent">max&#8209;instatement&#8209;indent</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_min-conditional-indent">min&#8209;conditional&#8209;indent</a>&nbsp;&nbsp;&nbsp;
     </p>
@@ -171,7 +172,7 @@
     
     <h4>Considerations</h4>
     
-    <p>Artistic Style can format standard class library statements such as wxWidgets, QT, Open GL, and MFC.</p>
+    <p>Artistic Style can format standard class library statements such as Open GL, wxWidgets, QT, and MFC.</p>
     <p>
         Embedded assembler language is <strong>usually</strong> formatted correctly. There are occasional problems with
         assembler since it can vary in syntax depending on the platform.</p>
@@ -181,6 +182,11 @@
             as long as the standard hanging indent format is used. If the "exec sql" statement
             is indented more than the following statements, the SQL will be aligned in a single
             column.</p>
+    <p>
+        Files encoded as UTF 16 or 32 bit can NOT be formatted. These are left unformatted
+        anda warning message is dislayed. These files can be converted with the program
+        iconv and with some text editors, such as SciTE.
+    </p>
     <p>
         Embedded statements that are multiple-line and are NOT in a C type format, such as Python, are
             usually mal-formatted. (a C type format has blocks enclosed
@@ -931,6 +937,33 @@ error:
             <pre>#define Is_Bar(arg,a,b) \
     (Is_Foo((arg), (a)) \
      || Is_Foo((arg), (b)))
+</pre>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <p id="_indent-col1-comments"><code class="title">--indent-col1-comments / -Y</code><br />
+         Indent C++ comments beginning in column one. By default C++ comments beginning in
+            column one are not indented. This option will allow the comments to be indented
+            with the code.
+        </p>
+
+        <div class="code">
+            <pre>void Foo()\n"
+<span class="brace">{</span>
+// comment
+    if (isFoo)
+        bar();
+<span class="brace">}</span>
+</pre>
+            <p class="code">becomes:</p>
+            <pre>
+void Foo()\n"
+<span class="brace">{</span>
+    // comment
+    if (isFoo)
+        bar();
+<span class="brace">}</span>
 </pre>
         </div>
 

@@ -102,7 +102,6 @@ ASBeautifier::ASBeautifier()
 	setNamespaceIndent(false);
 	setLabelIndent(false);
 	setEmptyLineFill(false);
-	fileType = C_TYPE;
 	setCStyle();
 	setPreprocessorIndent(false);
 }
@@ -168,7 +167,6 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isSharpAccessor = other.isSharpAccessor;
 	isSharpDelegate = other.isSharpDelegate;
 	isInExtern = other.isInExtern;
-	isInEnum = other.isInEnum;
 	isInBeautifySQL = other.isInBeautifySQL;
 
 	// private variables
@@ -190,6 +188,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	classIndent = other.classIndent;
 	isInClassHeader = other.isInClassHeader;
 	isInClassHeaderTab = other.isInClassHeaderTab;
+	isInEnum = other.isInEnum;
 	switchIndent = other.switchIndent;
 	caseIndent = other.caseIndent;
 	namespaceIndent = other.namespaceIndent;
@@ -307,6 +306,7 @@ void ASBeautifier::init()
 	isInQuestion = false;
 	isInClassHeader = false;
 	isInClassHeaderTab = false;
+	isInEnum = false;
 	isInHeader = false;
 	isInTemplate = false;
 	isInConditional = false;
@@ -335,7 +335,6 @@ void ASBeautifier::init()
 	isSharpAccessor = false;
 	isSharpDelegate = false;
 	isInExtern = false;
-	isInEnum = false;
 	isInBeautifySQL = false;
 	inLineNumber = 0;
 	horstmannIndentInStatement = 0;
@@ -1402,6 +1401,15 @@ string ASBeautifier::beautify(const string &originalLine)
 
 		if (isPotentialHeader)
 		{
+			string keyword = "enum";
+			if (isCStyle() && findKeyword(line, i, keyword))
+			{
+				isInEnum = true;
+				outBuffer.append(keyword.substr(1));
+				i += keyword.length() - 1;
+				continue;
+			}
+
 			const string *newHeader = findHeader(line, i, headers);
 
 			if (newHeader != NULL)
@@ -1757,6 +1765,7 @@ string ASBeautifier::beautify(const string &originalLine)
 
 			previousLastLineHeader = NULL;
 			isInClassHeader = false;
+			isInEnum = false;
 			isInQuestion = false;
 
 			continue;
@@ -1769,7 +1778,8 @@ string ASBeautifier::beautify(const string &originalLine)
 			if (!isInTemplate && !(isCStyle() && parenDepth > 0))
 			{
 				const string *newHeader = findHeader(line, i, preBlockStatements);
-				if (newHeader != NULL)
+				if (newHeader != NULL 
+					&& !(isCStyle() && newHeader == &AS_CLASS && isInEnum))	// is it 'enum class'
 				{
 					isInClassHeader = true;
 

@@ -66,6 +66,7 @@ ASFormatter::ASFormatter()
 	shouldBreakOneLineBlocks = true;
 	shouldBreakOneLineStatements = true;
 	shouldConvertTabs = false;
+	shouldIndentCol1Comments = false;
 	shouldBreakBlocks = false;
 	shouldBreakClosingHeaderBlocks = false;
 	shouldBreakClosingHeaderBrackets = false;
@@ -913,7 +914,8 @@ string ASFormatter::nextLine()
 				isNonParenHeader = findHeader(nonParenHeaders) != NULL;
 
 				// join 'else if' statements
-				if (currentHeader == &AS_IF && previousHeader == &AS_ELSE && isInLineBreak && !shouldBreakElseIfs)
+				if (currentHeader == &AS_IF && previousHeader == &AS_ELSE && isInLineBreak 
+					&& !shouldBreakElseIfs && !isCharImmediatelyPostLineComment)
 				{
 					// 'else' must be last thing on the line, but must not be #else
 					size_t start = formattedLine.length() >= 6 ? formattedLine.length()-6 : 0;
@@ -1063,7 +1065,6 @@ string ASFormatter::nextLine()
 			isSharpAccessor = false;
 			isSharpDelegate = false;
 			isInExtern = false;
-			isInEnum = false;
 			nonInStatementBracket = 0;
 		}
 
@@ -1111,9 +1112,6 @@ string ASFormatter::nextLine()
 
 			if (isCStyle() && findKeyword(currentLine, charNum, AS_EXTERN))
 				isInExtern = true;
-
-			if (isCStyle() && findKeyword(currentLine, charNum, AS_ENUM))
-				isInEnum = true;
 
 			if (isCStyle() && isExecSQL(currentLine, charNum))
 				isInExecSQL = true;
@@ -1444,6 +1442,15 @@ void ASFormatter::setTabSpaceConversionMode(bool state)
 	shouldConvertTabs = state;
 }
 
+/**
+ * set option to indent comments in column 1.
+ *
+ * @param state        true = indent, false = don't indent.
+ */
+void ASFormatter::setIndentCol1CommentsMode(bool state)
+{
+	shouldIndentCol1Comments = state;
+}
 
 /**
  * set option to break unrelated blocks of code with empty lines.
@@ -2816,10 +2823,13 @@ void ASFormatter::padParens(void)
 {
 	assert(currentChar == '(' || currentChar == ')');
 
+	int spacesOutsideToDelete = 0;
+	int spacesInsideToDelete = 0;
+
 	if (currentChar == '(')
 	{
-		int spacesOutsideToDelete = formattedLine.length() - 1;
-		int spacesInsideToDelete = 0;
+		spacesOutsideToDelete = formattedLine.length() - 1;
+		spacesInsideToDelete = 0;
 
 		// compute spaces outside the opening paren to delete
 		if (shouldUnPadParens)
@@ -2944,8 +2954,8 @@ void ASFormatter::padParens(void)
 	}
 	else if (currentChar == ')' /*|| currentChar == ']'*/)
 	{
-		int spacesOutsideToDelete = 0;
-		int spacesInsideToDelete = formattedLine.length();
+		spacesOutsideToDelete = 0;
+		spacesInsideToDelete = formattedLine.length();
 
 		// unpad close paren inside
 		if (shouldUnPadParens)
@@ -3889,7 +3899,7 @@ void ASFormatter::formatLineCommentOpener()
 	isCharImmediatelyPostComment = false;
 
 	// do not indent if in column 1 or 2
-	if (lineCommentNoIndent == false)
+	if (!shouldIndentCol1Comments && !lineCommentNoIndent)
 	{
 		if (charNum == 0)
 			lineCommentNoIndent = true;

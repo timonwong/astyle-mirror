@@ -48,16 +48,18 @@
 #endif
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4996)  // secure version deprecation warnings for .NET 2005
+#pragma warning(disable: 4996)  // secure version deprecation warnings
 #pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
+#endif
+
+#ifdef __BORLANDC__
+#pragma warn -aus	// variable is assigned a value that is never used in function.
 #endif
 
 #ifdef __INTEL_COMPILER
 #pragma warning(disable:  383)  // value copied to temporary, reference to temporary used
 #pragma warning(disable:  444)  // destructor for base class is not virtual
 #pragma warning(disable:  981)  // operands are evaluated in unspecified order
-// #pragma warning(disable: 1418)  // external function with no prior declaration
-// #pragma warning(disable: 1419)  // external declaration in primary source file
 #endif
 
 using namespace std;
@@ -110,6 +112,13 @@ enum PointerAlign { ALIGN_NONE,
                     ALIGN_MIDDLE,
                     ALIGN_NAME
                   };
+
+enum FileEncoding { ENCODING_OK,
+                    UTF_16BE,
+                    UTF_16LE,
+                    UTF_32BE,
+                    UTF_32LE
+};
 
 //----------------------------------------------------------------------------
 // Class ASSourceIterator
@@ -318,7 +327,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isSharpAccessor;
 		bool isSharpDelegate;
 		bool isInExtern;
-		bool isInEnum;
 		bool isInBeautifySQL;
 
 	private:
@@ -377,6 +385,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool classIndent;
 		bool isInClassHeader;
 		bool isInClassHeaderTab;
+		bool isInEnum;
 		bool switchIndent;
 		bool caseIndent;
 		bool namespaceIndent;
@@ -495,6 +504,7 @@ class ASFormatter : public ASBeautifier
 		void setBreakElseIfsMode(bool state);
 		void setBreakOneLineBlocksMode(bool state);
 		void setDeleteEmptyLinesMode(bool state);
+		void setIndentCol1CommentsMode(bool state);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
@@ -623,6 +633,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldPadHeader;
 		bool shouldUnPadParens;
 		bool shouldConvertTabs;
+		bool shouldIndentCol1Comments;
 		bool isInLineComment;
 		bool isInComment;
 		bool noTrimCommentContinuation;

@@ -27,7 +27,10 @@
             space padding after paren headers. </li>
         <li>Add new options &#8209;&#8209;align&#8209;pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle
             (-k2) and &#8209;&#8209;align&#8209;pointer=name (-k3) from J P Nurmi. </li>
+        <li>Add new option &#8209;&#8209;indent&#8209;col1&#8209;comments (-Y) to indent C++ comments
+            beginning in column one. </li>
         <li>Add formatting of embedded SQL statements in C/C++.</li>
+        <li>Add rejecting 16 or 32 bit file encoding and displaying a warning message.</li>
         <li>Remove .tmp file by using ostringstream insteadof ofstream.</li>
         <li>Remove option preserve-date (-Z).</li>
         <li>Remove depreciated option style=kr.</li>
@@ -47,6 +50,8 @@
         <li>Change ASBeautifier to output the entire comment line instead of characters. </li>
         <li>Improve recognition of pointers and references vs. arithmetic operators.</li>
         <li>Improve recognition of arithmetic operators for --pad-oper (-p) option. </li>
+        <li>Fix in-statement indent of "enum class".</li>
+        <li>Fix 'if' statement following an 'else' sometimes attaching to a comment.</li>
         <li>Fix recognition of non-indent line comments in the first two ines of a source file.</li>
         <li>Fix indenting non-indent line comments in an event table or message map.</li>
         <li>Fix to move comments when breaking one line blocks when -keep-one-line-statements

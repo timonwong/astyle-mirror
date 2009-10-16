@@ -39,34 +39,41 @@
         per tab was changed from one to
         two.</p>
     <p>
-        Two new options, --add-brackets (-j) and --add-one-line-brackets (-J), will add
-        brackets to unbracketed one line conditional statements. The --add-brackets will
+        Two new options, &#8209;&#8209;add&#8209;brackets (-j) and 
+        &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets (-J), will add
+        brackets to unbracketed one line conditional statements. The &#8209;&#8209;add-brackets will
         add the brackets according to the currently requested predefined style or bracket
         type. If no style or bracket type is requested the brackets will be the attached
-        type. The --add-one-line-brackets will add the brackets as one line brackets. This
-        implies --keep-one-line-blocks
+        type. The &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets will add the brackets 
+        as one line brackets. This option implies &#8209;&#8209;keep&#8209;one&#8209;line&#8209;blocks
         and will not break the one line blocks.</p>
     <p>
-        The above options allow two new predefined styles. Horstmann style, --style=horstmann
+        A new option, &#8209;&#8209;indent&#8209;col1&#8209;comments (-Y), will indent C++ comments
+        beginning in column one. By default C++ comments beginning in column one are not
+        indented. This option will allow the comments to be indented with the code.
+    </p>
+    <p>
+        The above options allow two new predefined styles. Horstmann style, &#8209;&#8209;style=horstmann
         (-A9), uses Horstmann brackets and three spaces per indent. The so called "One True
-        Brace Style", --style=1tbs or --style=otbs (-A10), uses linux brackets and the option
-        --add-brackets. The basic criteria for all predefined
+        Brace Style", &#8209;&#8209;style=1tbs or &#8209;&#8209;style=otbs (-A10), uses linux brackets and the option
+        &#8209;&#8209;add&#8209;brackets. The basic criteria for all predefined
         styles was obtained from
         the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent Style</a> discussion at Wikipedia. The "Predefinde Style Options"
         section in the documentation contains the details. </p>
     <p>
-        New options --align-pointer=type (-k1), --align-pointer=middle (-k2), and 
-            --align-pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type (left), operator name (right), or align it between the type and name. The spacing between the type and name will be preserved,
+        New options --align-pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle (-k2), and 
+        &#8209;&#8209;align&#8209;pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator 
+        type (left), operator name (right), or align it between the type and name. The spacing between the type and name will be preserved,
         if possible. The recognition of pointers and references has been improved.
-        This resulted in an improvement of the --pad-oper (-p) option.</p>
+        This resulted in an improvement of the &#8209;&#8209;pad&#8209;oper (-p) option.</p>
    <p>
         A new option, &#8209;&#8209;pad&#8209;header (&#8209;H), will insert 
         space padding after headers ('if',
         'for', 'while'...). To remove any unwanted current space padding, use the
         option &#8209;&#8209;unpad&#8209;paren (&#8209;U). If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren
         are used, the headers will be padded and the
-       padding will be removed from other parens. This has required a change to the default formatting
-       of paren headers. They will now be left unchanged instead of automatically inserting space 
+        padding will be removed from other parens. This has required a change to the default formatting
+        of paren headers. They will now be left unchanged instead of automatically inserting space 
         padding after them, unless the new option is requested. </p>
     <p>
         The spaces per indent can now be changed for any of the predefined styles. In prevoius
@@ -79,16 +86,26 @@
         is the indentation used in the book "The C++ Programming Language" by Bjarne Stroustrup.</p>
     <p>
         The minimum conditional indent for the Linux predefined style has been changed to
-        4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). The new value conforms
-        to the soft tab in the style description and gives a better appearance for continuation lines.</p>
+        4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). The new value 
+        conforms to the soft tab in the style description and gives a better appearance for continuation lines.</p>
     <p>
-        Embedded SQL statement are now formatted correctly.&nbsp; The formattig of the SQL
+        Embedded SQL statement are now formatted correctly. The formattig of the SQL
         statements will be maintained as long as the standard hanging indent format is used.
         If the "exec sql" statement is indented more than the following statements, the
         SQL will be aligned in a single column.</p>
     <p>
         The continuation line for "class" statements has been changes from two indents to
         one.</p>
+    <p>
+        Occasionally, someone will use Artistic Style to format a file encoded with 
+        UTF-16 or UTF-32 bit encoding. These files contain many nul bytes are incompatible with the 8 bit encoding
+        assumed by Artistic Style. Since this
+        rarely happens, Artistic Style has been changed to list these files as "unformatted"
+        and display a warning message. The files must have a Byte Order Mark (BOM) for the encoding to be
+        recognized. These files can be changed with the program iconv and with some
+        text editors, such as SciTE. For more information see
+        the Wikipedia discussion on 
+        <a href="http://en.wikipedia.org/wiki/Comparison_of_Unicode_encodings#Compatibility_issues">Compatibility issues</a>.</p>
     <p>
         The intermediate .tmp file used in formatting has been eliminated and memory is used instead. This may result in a slight speed increase if most of your source
         files are already formatted.</p>

@@ -496,6 +496,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		formatter.setAddOneLineBracketsMode(true);
 	}
+	else if ( IS_OPTIONS(arg, "Y", "indent-col1-comments") )
+	{
+		formatter.setIndentCol1CommentsMode(true);
+	}
 	else if ( IS_OPTION(arg, "align-pointer=type") )
 	{
 		formatter.setPointerAlignment(ALIGN_TYPE);
@@ -863,13 +867,23 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 			formatter.setCStyle();
 	}
 
-	// format the file
-
 	ASStreamIterator<istream> streamIterator(&in);
 	formatter.init(&streamIterator);
 
 	bool filesAreIdentical = true;   // input and output files are identical
 	string nextLine;                 // next output line
+
+	// make sure encoding is 8 bit
+	// if not set the eofbit so the file is not formatted
+	getline(in, nextLine);
+	in.seekg(0);
+	int encoding = getFileEncoding(nextLine);
+	nextLine.clear();
+	if (encoding != ENCODING_OK)
+		in.setstate(ios::eofbit);
+
+	// format the file
+
 	while (formatter.hasMoreLines())
 	{
 		nextLine = formatter.nextLine();
@@ -915,6 +929,39 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 		fout.close();
 
 		isFormatted = true;
+	}
+
+	// remove targetDirectory from filename if required
+	string displayName;
+	if (g_console->hasWildcard)
+		displayName = fileName.substr(targetDirectory.length() + 1);
+	else
+		displayName = fileName;
+
+	if (encoding != ENCODING_OK && !isQuiet)
+	{
+		cout << "********** following file unchanged: ";
+		if (encoding == UTF_16BE)
+			cout << "UTF-16BE encoding" << endl;
+		else if (encoding == UTF_16LE)
+			cout << "UTF-16LE encoding" << endl;
+		else if (encoding == UTF_32BE)
+			cout << "UTF-32BE encoding" << endl;
+		else if (encoding == UTF_32LE)
+			cout << "UTF-32LE encoding" << endl;
+		else
+			cout << "???????? encoding" << endl;
+	}
+	if (isFormatted)
+	{
+		if (!isQuiet)
+			cout << "formatted  " << displayName.c_str() << endl;
+	}
+	else
+	{
+		if (!isQuiet)
+			if (!isFormattedOnly || encoding != ENCODING_OK)
+				cout << "unchanged* " << displayName.c_str() << endl;
 	}
 
 	return isFormatted;
@@ -1130,6 +1177,25 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 
 #endif  // _WIN32
 
+// reject files with 16 or 32 bit encoding
+// the file must have a Byte Order Mark (BOM)
+int ASConsole::getFileEncoding(const string &firstLine) const
+{
+	FileEncoding encoding = ENCODING_OK;
+	if (firstLine.length() > 0)
+	{
+		if (firstLine.compare(0, 4, "\x00\x00\xFE\xFF") == 0)
+			encoding = UTF_32BE;
+		else if (firstLine.compare(0, 4, "\xFF\xFE\x00\x00") == 0)
+			encoding = UTF_32LE;
+		else if (firstLine.compare(0, 2, "\xFE\xFF") == 0)
+			encoding = UTF_16BE;
+		else if (firstLine.compare(0, 2, "\xFF\xFE") == 0)
+			encoding = UTF_16LE;
+	}
+	return encoding;
+}
+
 // compare a path to the exclude vector
 // used for both directories and filenames
 // updates the g_excludeHitsVector
@@ -1317,6 +1383,9 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --indent-preprocessor  OR  -w\n";
 	(*_err) << "    Indent multi-line #define statements.\n";
+	(*_err) << endl;
+	(*_err) << "    --indent-col1-comments  OR  -Y\n";
+	(*_err) << "    Indent line comments that start in column one.\n";
 	(*_err) << endl;
 	(*_err) << "    --max-instatement-indent=#  OR  -M#\n";
 	(*_err) << "    Indent a maximal # spaces in a continuous statement,\n";
@@ -2060,25 +2129,30 @@ int main(int argc, char** argv)
 			// format the file
 			bool isFormatted = g_console->formatFile(g_console->fileName[j], formatter);
 
-			// remove targetDirectory from filename if required
-			string displayName;
-			if (g_console->hasWildcard)
-				displayName = g_console->fileName[j].substr(g_console->targetDirectory.length() + 1);
-			else
-				displayName = g_console->fileName[j];
-
 			if (isFormatted)
-			{
 				g_console->filesFormatted++;
-				if (!g_console->isQuiet)
-					cout << "formatted  " << displayName.c_str() << endl;
-			}
 			else
-			{
 				g_console->filesUnchanged++;
-				if (!g_console->isQuiet && !g_console->isFormattedOnly)
-					cout << "unchanged* " << displayName.c_str() << endl;
-			}
+
+			//// remove targetDirectory from filename if required
+			//string displayName;
+			//if (g_console->hasWildcard)
+			//	displayName = g_console->fileName[j].substr(g_console->targetDirectory.length() + 1);
+			//else
+			//	displayName = g_console->fileName[j];
+
+			//if (isFormatted)
+			//{
+			//	g_console->filesFormatted++;
+			//	if (!g_console->isQuiet)
+			//		cout << "formatted  " << displayName.c_str() << endl;
+			//}
+			//else
+			//{
+			//	g_console->filesUnchanged++;
+			//	if (!g_console->isQuiet && !g_console->isFormattedOnly)
+			//		cout << "unchanged* " << displayName.c_str() << endl;
+			//}
 		}
 	}
 
