@@ -875,10 +875,10 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 
 	// make sure encoding is 8 bit
 	// if not set the eofbit so the file is not formatted
-	getline(in, nextLine);
+	char buff[4] = {'\0'};
+	in.read(buff, 4);
 	in.seekg(0);
-	int encoding = getFileEncoding(nextLine);
-	nextLine.clear();
+	int encoding = getFileEncoding(buff);
 	if (encoding != ENCODING_OK)
 		in.setstate(ios::eofbit);
 
@@ -1177,22 +1177,26 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 
 #endif  // _WIN32
 
-// reject files with 16 or 32 bit encoding
+// check files for 16 or 32 bit encoding
 // the file must have a Byte Order Mark (BOM)
-int ASConsole::getFileEncoding(const string &firstLine) const
+// NOTE: some string functions don't work with NULLs (e.g. length())
+int ASConsole::getFileEncoding(const char* firstLine) const
 {
 	FileEncoding encoding = ENCODING_OK;
-	if (firstLine.length() > 0)
-	{
-		if (firstLine.compare(0, 4, "\x00\x00\xFE\xFF") == 0)
-			encoding = UTF_32BE;
-		else if (firstLine.compare(0, 4, "\xFF\xFE\x00\x00") == 0)
-			encoding = UTF_32LE;
-		else if (firstLine.compare(0, 2, "\xFE\xFF") == 0)
-			encoding = UTF_16BE;
-		else if (firstLine.compare(0, 2, "\xFF\xFE") == 0)
-			encoding = UTF_16LE;
-	}
+
+	// BOM is max 4 bytes
+	char buff[4] = {'\0'};
+	memcpy(buff, firstLine, 4);
+
+	if (memcmp(buff, "\x00\x00\xFE\xFF", 4) == 0)
+		encoding = UTF_32BE;
+	else if (memcmp(buff, "\xFF\xFE\x00\x00", 4) == 0)
+		encoding = UTF_32LE;
+	else if (memcmp(buff, "\xFE\xFF", 2) == 0)
+		encoding = UTF_16BE;
+	else if (memcmp(buff, "\xFF\xFE", 2) == 0)
+		encoding = UTF_16LE;
+
 	return encoding;
 }
 

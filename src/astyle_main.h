@@ -158,6 +158,7 @@ class ASConsole
 		void error(const char *why, const char* what) const;
 		void formatCinToCout(ASFormatter& formatter) const;
 		bool formatFile(const string &fileName, astyle::ASFormatter &formatter) const;
+		int  getFileEncoding(const char* firstLine) const;
 		void getFilePaths(string &filePath);
 		processReturn processOptions(int argc, char** argv, ASFormatter &formatter);
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
@@ -171,7 +172,6 @@ class ASConsole
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;
 		bool stringEndsWith(const string &str, const string &suffix) const;
 		void wait(int seconds) const;
-		int  getFileEncoding(const string &firstLine) const;
 		int  waitForRemove(const char* oldFileName) const;
 		int  wildcmp(const char *wild, const char *data) const;
 };
