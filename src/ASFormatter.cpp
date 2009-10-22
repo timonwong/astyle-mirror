@@ -914,8 +914,8 @@ string ASFormatter::nextLine()
 				isNonParenHeader = findHeader(nonParenHeaders) != NULL;
 
 				// join 'else if' statements
-				if (currentHeader == &AS_IF && previousHeader == &AS_ELSE && isInLineBreak 
-					&& !shouldBreakElseIfs && !isCharImmediatelyPostLineComment)
+				if (currentHeader == &AS_IF && previousHeader == &AS_ELSE && isInLineBreak
+				        && !shouldBreakElseIfs && !isCharImmediatelyPostLineComment)
 				{
 					// 'else' must be last thing on the line, but must not be #else
 					size_t start = formattedLine.length() >= 6 ? formattedLine.length()-6 : 0;

@@ -278,9 +278,9 @@ void ASResource::buildHeaders(vector<const string*> &headers, int fileType, bool
 void ASResource::buildIndentableHeaders(vector<const string*> &indentableHeaders)
 {
 	indentableHeaders.push_back(&AS_RETURN);
-	indentableHeaders.push_back(&AS_COUT);
-	indentableHeaders.push_back(&AS_CERR);
-	indentableHeaders.push_back(&AS_CIN);
+//	indentableHeaders.push_back(&AS_COUT);
+//	indentableHeaders.push_back(&AS_CERR);
+//	indentableHeaders.push_back(&AS_CIN);
 
 	sort(indentableHeaders.begin(), indentableHeaders.end(), sortOnName);
 }

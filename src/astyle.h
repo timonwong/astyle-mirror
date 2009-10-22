@@ -118,7 +118,7 @@ enum FileEncoding { ENCODING_OK,
                     UTF_16LE,
                     UTF_32BE,
                     UTF_32LE
-};
+                  };
 
 //----------------------------------------------------------------------------
 // Class ASSourceIterator

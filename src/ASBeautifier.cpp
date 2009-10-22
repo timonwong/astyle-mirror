@@ -1778,8 +1778,8 @@ string ASBeautifier::beautify(const string &originalLine)
 			if (!isInTemplate && !(isCStyle() && parenDepth > 0))
 			{
 				const string *newHeader = findHeader(line, i, preBlockStatements);
-				if (newHeader != NULL 
-					&& !(isCStyle() && newHeader == &AS_CLASS && isInEnum))	// is it 'enum class'
+				if (newHeader != NULL
+				        && !(isCStyle() && newHeader == &AS_CLASS && isInEnum))	// is it 'enum class'
 				{
 					isInClassHeader = true;
 
@@ -1858,6 +1858,17 @@ string ASBeautifier::beautify(const string &originalLine)
 				{
 					outBuffer.append(foundNonAssignmentOp->substr(1));
 					i += foundNonAssignmentOp->length() - 1;
+				}
+
+				// For C++ input/output, operator << and >> should be
+				// aligned, if we are not in a statement already
+				if (inStatementIndentStack->empty()
+				        && isCStyle()
+				        && (foundNonAssignmentOp == &AS_GR_GR ||
+				            foundNonAssignmentOp == &AS_LS_LS))
+				{
+					// Align to the beginning column of the operator
+					registerInStatementIndent(line, i - foundNonAssignmentOp->length(), spaceTabCount, tabIncrementIn, 0, false);
 				}
 			}
 
