@@ -182,7 +182,7 @@ class ASResource
 		static const string AS_PLUS, AS_MINUS, AS_MULT, AS_DIV, AS_MOD, AS_GR, AS_LS;
 		static const string AS_NOT, AS_BIT_XOR, AS_BIT_OR, AS_BIT_AND, AS_BIT_NOT;
 		static const string AS_QUESTION, AS_COLON, AS_SEMICOLON, AS_COMMA;
-		static const string AS_ASM;
+		static const string AS_ASM, AS__ASM__, AS_MS_ASM, AS_MS__ASM;
 		static const string AS_FOREACH, AS_LOCK, AS_UNSAFE, AS_FIXED;
 		static const string AS_GET, AS_SET, AS_ADD, AS_REMOVE;
 		static const string AS_DELEGATE, AS_UNCHECKED;
@@ -374,6 +374,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInQuote;
 		bool isInVerbatimQuote;
 		bool haveLineContinuationChar;
+		bool isInAsm;
+		bool isInAsmOneLine;
+		bool isInAsmBlock;
 		bool isInComment;
 		bool isInCase;
 		bool isInQuestion;
@@ -664,6 +667,9 @@ class ASFormatter : public ASBeautifier
 		bool endOfCodeReached;
 		bool lineCommentNoIndent;
 		bool isInExecSQL;
+		bool isInAsm;
+		bool isInAsmOneLine;
+		bool isInAsmBlock;
 		bool isLineReady;
 		bool isPreviousBracketBlockRelated;
 		bool isInPotentialCalculation;

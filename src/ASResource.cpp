@@ -61,6 +61,9 @@ const string ASResource::AS_WHERE = string("where");
 const string ASResource::AS_NEW = string("new");
 
 const string ASResource::AS_ASM = string("asm");
+const string ASResource::AS__ASM__ = string("__asm__");
+const string ASResource::AS_MS_ASM = string("_asm");
+const string ASResource::AS_MS__ASM = string("__asm");
 
 const string ASResource::AS_BAR_DEFINE = string("#define");
 const string ASResource::AS_BAR_INCLUDE = string("#include");

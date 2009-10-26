@@ -54,7 +54,6 @@ ASFormatter::ASFormatter()
 	bracketTypeStack = NULL;
 	parenStack = NULL;
 	lineCommentNoIndent = false;
-	isInExecSQL = false;
 	formattingStyle = STYLE_NONE;
 	bracketFormatMode = NONE_MODE;
 	pointerAlignment = ALIGN_NONE;
@@ -340,6 +339,10 @@ void ASFormatter::init(ASSourceIterator *si)
 	foundQuestionMark = false;
 	isInLineBreak = false;
 	endOfCodeReached = false;
+	isInExecSQL = false;
+	isInAsm = false;
+	isInAsmOneLine = false;
+	isInAsmBlock = false;
 	isLineReady = false;
 	isPreviousBracketBlockRelated = false;
 	isInPotentialCalculation = false;
@@ -717,7 +720,11 @@ string ASFormatter::nextLine()
 			if (currentChar == ']')
 				isInBlParen = false;
 			if (currentChar == ')')
+			{
 				foundCastOperator = false;
+				if (parenStack->back() == 0)
+					isInAsm = false;
+			}
 		}
 
 		// handle brackets
@@ -758,6 +765,15 @@ string ASFormatter::nextLine()
 				// then there is no need for the post block empty line.
 				isAppendPostBlockEmptyLineRequested = false;
 				breakCurrentOneLineBlock = false;
+				isInAsmBlock = false;
+
+				// added for release 1.24
+				// TODO: remove at the appropriate time
+				assert(isInAsm == false);
+				assert(isInAsmOneLine == false);
+				assert(isInQuote == false);
+				isInAsm = isInAsmOneLine = isInQuote = false;
+				// end remove
 
 				if (bracketTypeStack->size() > 1)
 				{
@@ -1083,7 +1099,10 @@ string ASFormatter::nextLine()
 			         && previousCommandChar != ')'  // not immediately after closing paren of a method header, e.g. ASFormatter::ASFormatter(...) : ASBeautifier(...)
 			         && previousChar != ':'         // not part of '::'
 			         && peekNextChar() != ':'       // not part of '::'
-			         && !isdigit(peekNextChar()))   // not a bit field
+			         && !isdigit(peekNextChar())    // not a bit field
+			         && !isInAsm                    // not in extended assembler
+			         && !isInAsmOneLine             // not in extended assembler
+			         && !isInAsmBlock)              // not in extended assembler
 			{
 				passedColon = true;
 			}
@@ -1115,6 +1134,28 @@ string ASFormatter::nextLine()
 
 			if (isCStyle() && isExecSQL(currentLine, charNum))
 				isInExecSQL = true;
+
+			if (isCStyle())
+			{
+				if (findKeyword(currentLine, charNum, AS_ASM)
+				        || findKeyword(currentLine, charNum, AS__ASM__))
+				{
+					isInAsm = true;
+				}
+				else if (findKeyword(currentLine, charNum, AS_MS_ASM)		// microsoft specific
+				         || findKeyword(currentLine, charNum, AS_MS__ASM))
+				{
+					int index = 4;
+					if (peekNextChar() == '_')	// check for __asm
+						index = 5;
+
+					char peekedChar = ASBase::peekNextChar(currentLine, charNum + index);
+					if (peekedChar == '{' || peekedChar == ' ')
+						isInAsmBlock = true;
+					else
+						isInAsmOneLine = true;
+				}
+			}
 
 			if (isJavaStyle()
 			        && (findKeyword(currentLine, charNum, AS_STATIC)
@@ -1675,6 +1716,7 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 //		nextLineSpacePadNum = 0;
 		inLineNumber++;
 		isInCase = false;
+		isInAsmOneLine = false;
 		isInQuoteContinuation = isInVerbatimQuote | haveLineContinuationChar;
 		haveLineContinuationChar= false;
 		isImmediatelyPostEmptyLine = lineIsEmpty;
@@ -2586,6 +2628,9 @@ void ASFormatter::padOperators(const string *newOperator)
 	                       && ASBase::peekNextChar(currentLine, charNum+1) == '>')
 	                  && !(newOperator == &AS_GR && previousNonWSChar == '?')
 	                  && !isInCase
+	                  && !isInAsm
+	                  && !isInAsmOneLine
+	                  && !isInAsmBlock
 	                 );
 
 	// pad before operator
@@ -2789,6 +2834,11 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	{
 		sequenceToInsert = "**";
 		goForward(1);
+	}
+	if (pointerAlignment == ALIGN_NONE)
+	{
+		appendSequence(sequenceToInsert, false);
+		return;
 	}
 	// remove trailing whitespace
 	size_t prevCh = formattedLine.find_last_not_of(" \t");

@@ -177,6 +177,9 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInQuote = other.isInQuote;
 	isInVerbatimQuote = other.isInVerbatimQuote;
 	haveLineContinuationChar = other.haveLineContinuationChar;
+	isInAsm = other.isInAsm;
+	isInAsmOneLine = other.isInAsmOneLine;
+	isInAsmBlock = other.isInAsmBlock;
 	isInComment = other.isInComment;
 	isInCase = other.isInCase;
 	isInQuestion = other.isInQuestion;
@@ -300,6 +303,9 @@ void ASBeautifier::init()
 	isInQuote = false;
 	isInVerbatimQuote = false;
 	haveLineContinuationChar = false;
+	isInAsm = false;
+	isInAsmOneLine = false;
+	isInAsmBlock = false;
 	isInComment = false;
 	isInStatement = false;
 	isInCase = false;
@@ -730,6 +736,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	currentHeader = NULL;
 	lineStartsInComment = isInComment;
 	blockCommentNoBeautify = blockCommentNoIndent;
+	isInAsmOneLine = false;
 	lineOpensComment = false;
 	previousLineProbationTab = false;
 	haveLineContinuationChar = false;
@@ -1257,6 +1264,7 @@ string ASBeautifier::beautify(const string &originalLine)
 						parenStatementStack->pop_back();
 					}
 					ch = ' ';
+					isInAsm = false;
 					isInConditional = false;
 				}
 
@@ -1611,6 +1619,12 @@ string ASBeautifier::beautify(const string &originalLine)
 				// so do nothing special
 			}
 
+			else if (isCStyle()
+			         && (isInAsm || isInAsmOneLine || isInAsmBlock))
+			{
+				// do nothing special
+			}
+
 			else if (isCStyle() && isdigit(peekNextChar(line, i)))
 			{
 				// found a bit field
@@ -1623,18 +1637,19 @@ string ASBeautifier::beautify(const string &originalLine)
 				--tabCount;
 			}
 
-			else if (isJavaStyle() && lastLineHeader == &AS_FOR)
-			{
-				// found a java for-each statement
-				// so do nothing special
-			}
-
 			else if (isCStyle() && prevNonSpaceCh == ')' && !isInCase)
 			{
 				isInClassHeader = true;
 				if (i == 0)
 					tabCount += classInitializerTabs;
 			}
+
+			else if (isJavaStyle() && lastLineHeader == &AS_FOR)
+			{
+				// found a java for-each statement
+				// so do nothing special
+			}
+
 			else
 			{
 				currentNonSpaceCh = ';'; // so that brackets after the ':' will appear as block-openers
@@ -1714,6 +1729,16 @@ string ASBeautifier::beautify(const string &originalLine)
 				}
 
 				closingBracketReached = true;
+				isInAsmOneLine = false;
+
+				// added for release 1.24
+				// TODO: remove at the appropriate time
+				assert(isInAsm == false);
+				assert(isInAsmOneLine == false);
+				assert(isInQuote == false);
+				isInAsm = isInAsmOneLine = isInQuote = false;
+				// end remove
+
 				int headerPlace = indexOf(*headerStack, &AS_OPEN_BRACKET);
 				if (headerPlace != -1)
 				{
@@ -1821,6 +1846,28 @@ string ASBeautifier::beautify(const string &originalLine)
 			{
 				if (prevNonSpaceCh == '=' && isInStatement && !inStatementIndentStack->empty())
 					inStatementIndentStack->back() = 0;
+			}
+
+			if (isCStyle())
+			{
+				if (findKeyword(line, i, AS_ASM)
+				        || findKeyword(line, i, AS__ASM__))
+				{
+					isInAsm = true;
+				}
+				else if (findKeyword(line, i, AS_MS_ASM)		// microsoft specific
+				         || findKeyword(line, i, AS_MS__ASM))
+				{
+					int index = 4;
+					if (peekNextChar(line, i) == '_')		// check for __asm
+						index = 5;
+
+					char peekedChar = ASBase::peekNextChar(line, i + index);
+					if (peekedChar == '{' || peekedChar == ' ')
+						isInAsmBlock = true;
+					else
+						isInAsmOneLine = true;
+				}
 			}
 
 			// append the entire name for all others
