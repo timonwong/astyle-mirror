@@ -360,8 +360,11 @@ class ASBeautifier : protected ASResource, protected ASBase
 		vector<int> *inStatementIndentStack;
 		vector<int> *inStatementIndentStackSizeStack;
 		vector<int> *parenIndentStack;
-		int convertTabToSpaces(int i, int tabIncrementIn) const;
+		int  convertTabToSpaces(int i, int tabIncrementIn) const;
+		int  getPreviousWordIndex(const string& line, int currPos) const;
 		bool isClassAccessModifier(string& line) const;
+		bool isLineEndComment(string& line, int startPos) const;
+		bool statementEndsWithComma(string &line, int index);
 		template<typename T> void deleteContainer(T &container);
 		void deleteContainer(vector<vector<const string*>*>* &container);
 		template<typename T> void initContainer(T &container, T value);

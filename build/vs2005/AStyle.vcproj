@@ -68,7 +68,7 @@
 				OutputFile="bin/$(ProjectName)d.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/AStyle.pdb"
+				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
 				SubSystem="1"
 				TargetMachine="0"
 			/>
@@ -451,7 +451,7 @@
 				OutputFile="bin/$(ProjectName)d.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/AStyle.pdb"
+				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
 				SubSystem="0"
 				TargetMachine="0"
 			/>
@@ -618,7 +618,7 @@
 				OutputFile="bin/$(ProjectName)jd.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(OutDir)/AStyle.pdb"
+				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
 				SubSystem="0"
 				TargetMachine="0"
 			/>

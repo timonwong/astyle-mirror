@@ -715,6 +715,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	bool isInOperator = false;
 	bool isSpecialChar = false;
 	bool haveCaseIndent = false;
+	bool haveMultipleAssignment = false;
 	bool lineBeginsWithBracket = false;
 	bool closingBracketReached = false;
 	bool shouldIndentBrackettedLine = true;
@@ -1914,7 +1915,10 @@ string ASBeautifier::beautify(const string &originalLine)
 				        && (foundNonAssignmentOp == &AS_GR_GR ||
 				            foundNonAssignmentOp == &AS_LS_LS))
 				{
-					// Align to the beginning column of the operator
+					// this will be true if the line begins with the operator
+					if (i < 2 && spaceTabCount == 0)
+						spaceTabCount += 2 * indentLength;
+					// align to the beginning column of the operator
 					registerInStatementIndent(line, i - foundNonAssignmentOp->length(), spaceTabCount, tabIncrementIn, 0, false);
 				}
 			}
@@ -1929,7 +1933,22 @@ string ASBeautifier::beautify(const string &originalLine)
 
 				if (!isInOperator && !isInTemplate && !isNonInStatementArray)
 				{
-					registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, 0, false);
+					// if multiple assignments, align on the previous word
+					if (foundAssignmentOp == &AS_ASSIGN
+					        && prevNonSpaceCh != ']'		// an array
+					        && statementEndsWithComma(line, i))
+					{
+						if (!haveMultipleAssignment)		// only one assignment indent per line
+						{
+							haveMultipleAssignment = true;
+							int prevWordIndex = getPreviousWordIndex(line, i);
+							int inStatementIndent = prevWordIndex + spaceTabCount + tabIncrementIn;
+							inStatementIndentStack->push_back(inStatementIndent);
+						}
+					}
+					else
+						registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, 0, false);
+
 					isInStatement = true;
 				}
 			}
@@ -2366,6 +2385,138 @@ void ASBeautifier::initContainer(T &container, T value)
 	if (container != NULL )
 		deleteContainer(container);
 	container = value;
+}
+
+/**
+ * Determine if an assignment statement ends with a comma
+ *     that is not in a function argument. It ends with a
+ *     comma if a comma is the last char on the line.
+ *
+ * @return  true if line ends with a comma, otherwise false.
+ */
+bool ASBeautifier::statementEndsWithComma(string &line, int index)
+{
+	assert(line[index] == '=');
+
+	bool isInComment = false;
+	bool isInQuote = false;
+	int parenCount = 0;
+	size_t lineLength = line.length();
+	size_t i = 0;
+	char quoteChar = ' ';
+
+	for (i = index + 1; i < lineLength; ++i)
+	{
+		char ch = line[i];
+
+		if (isInComment)
+		{
+			if (line.compare(i, 2, "*/") == 0)
+			{
+				isInComment = false;
+				++i;
+			}
+			continue;
+		}
+
+		if (ch == '\\')
+		{
+			++i;
+			continue;
+		}
+
+		if (isInQuote)
+		{
+			if (ch == quoteChar)
+				isInQuote = false;
+			continue;
+		}
+
+		if (ch == '"' || ch == '\'')
+		{
+			isInQuote = true;
+			quoteChar = ch;
+			continue;
+		}
+
+		if (line.compare(i, 2, "//") == 0)
+			break;
+
+		if (line.compare(i, 2, "/*") == 0)
+		{
+			if (isLineEndComment(line, i))
+				break;
+			else
+			{
+				isInComment = true;
+				++i;
+				continue;
+			}
+		}
+
+		if (ch == '(')
+			parenCount++;
+		if (ch == ')')
+			parenCount--;
+	}
+	if (isInComment
+	        || isInQuote
+	        || parenCount > 0)
+		return false;
+
+	size_t lastChar = line.find_last_not_of(" \t", i - 1);
+
+	if (lastChar == string::npos || line[lastChar] != ',')
+		return false;
+
+	return true;
+}
+
+/**
+ * check if current comment is a line-end comment
+ *
+ * @return     is before a line-end comment.
+ */
+bool ASBeautifier::isLineEndComment(string& line, int startPos) const
+{
+	assert(line.compare(startPos, 2, "/*") == 0);
+
+	// comment must be closed on this line with nothing after it
+	size_t endNum = line.find("*/", startPos + 2);
+	if (endNum != string::npos)
+	{
+		size_t nextChar = line.find_first_not_of(" \t", endNum + 2);
+		if (nextChar == string::npos)
+			return true;
+	}
+	return false;
+}
+
+/**
+ * get the previous word index
+ * the argument 'end' must point to the search start.
+ *
+ * @return is the index to the previous word.
+ */
+int ASBeautifier::getPreviousWordIndex(const string& line, int currPos) const
+{
+	// get the last legal word (may be a number)
+	if (currPos == 0)
+		return 0;
+
+	size_t end = line.find_last_not_of(" \t", currPos-1);
+	if (end == string::npos || !isLegalNameChar(line[end]))
+		return 0;
+
+	int start;          // start of the previous word
+	for (start = end; start > -1; start--)
+	{
+		if (!isLegalNameChar(line[start]) || line[start] == '.')
+			break;
+	}
+	start++;
+
+	return start;
 }
 
 
