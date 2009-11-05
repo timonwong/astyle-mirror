@@ -924,6 +924,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	}
 
 	// calculate preliminary indentation based on data from past lines
+
 	if (!inStatementIndentStack->empty())
 		spaceTabCount = inStatementIndentStack->back();
 
@@ -971,7 +972,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			isInSwitch = true;
 		}
 
-	}
+	}	// end of for loop * end of for loop * end of for loop * end of for loop * end of for loop *
 
 	iPrelim = i;
 
@@ -1377,6 +1378,12 @@ string ASBeautifier::beautify(const string &originalLine)
 				tabCount--;
 			}
 
+			// an indentable struct is treated like a class in the header stack
+			if (headerStack->size() > 0
+			        && (*headerStack).back() == &AS_STRUCT
+			        && isInIndentableStruct)
+				(*headerStack).back() = &AS_CLASS;
+
 			// do not allow inStatementIndent - should occur for Java files only
 			//if (inStatementIndentStack->size() > 0)
 			//{
@@ -1410,15 +1417,6 @@ string ASBeautifier::beautify(const string &originalLine)
 
 		if (isPotentialHeader)
 		{
-			string keyword = "enum";
-			if (isCStyle() && findKeyword(line, i, keyword))
-			{
-				isInEnum = true;
-				outBuffer.append(keyword.substr(1));
-				i += keyword.length() - 1;
-				continue;
-			}
-
 			const string *newHeader = findHeader(line, i, headers);
 
 			if (newHeader != NULL)
@@ -1593,6 +1591,10 @@ string ASBeautifier::beautify(const string &originalLine)
 
 				continue;
 			}  // newHeader != NULL
+
+			if (isCStyle() && findKeyword(line, i, AS_ENUM))
+				isInEnum = true;
+
 		}   // isPotentialHeader
 
 		if (ch == '?')
@@ -1908,9 +1910,11 @@ string ASBeautifier::beautify(const string &originalLine)
 					i += foundNonAssignmentOp->length() - 1;
 				}
 
-				// For C++ input/output, operator << and >> should be
-				// aligned, if we are not in a statement already
-				if (inStatementIndentStack->empty()
+				// For C++ input/output, operator<< and >> should be
+				// aligned, if we are not in a statement already and
+				// also not in the "operator<<(...)" header line
+				if (!isInOperator
+				        && inStatementIndentStack->empty()
 				        && isCStyle()
 				        && (foundNonAssignmentOp == &AS_GR_GR ||
 				            foundNonAssignmentOp == &AS_LS_LS))
@@ -1953,7 +1957,7 @@ string ASBeautifier::beautify(const string &originalLine)
 				}
 			}
 		}
-	}   // end of for loop  *  end of for loop  *  end of for loop  *  end of for loop
+	}	// end of for loop * end of for loop * end of for loop * end of for loop * end of for loop *
 
 	// handle special cases of unindentation:
 
@@ -2266,7 +2270,7 @@ const string* ASBeautifier::findOperator(const string &line, int i,
 /**
  * find the index number of a string element in a container of strings
  *
- * @return              the index number of element in the ocntainer. -1 if element not found.
+ * @return              the index number of element in the container. -1 if element not found.
  * @param container     a vector of strings.
  * @param element       the element to find .
  */

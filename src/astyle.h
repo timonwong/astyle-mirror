@@ -328,6 +328,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isSharpDelegate;
 		bool isInExtern;
 		bool isInBeautifySQL;
+		bool isInIndentableStruct;
 
 	private:
 		ASBeautifier(const ASBeautifier &copy);
@@ -544,6 +545,7 @@ class ASFormatter : public ASBeautifier
 		bool isPointerOrReference() const;
 		bool isPointerOrReferenceCentered() const;
 		bool isSharpStyleWithParen(const string* header) const;
+		bool isStructAccessModified(string  &firstLine, size_t index) const;
 		bool isUnaryOperator() const;
 		bool isInExponent() const;
 		bool isOneLineBlockReached(string& line, int startChar) const;
@@ -606,6 +608,7 @@ class ASFormatter : public ASBeautifier
 		vector<const string*> *preBracketHeaderStack;
 		vector<BracketType> *bracketTypeStack;
 		vector<int> *parenStack;
+		vector<bool> *structStack;
 		string readyFormattedLine;
 		string currentLine;
 		string formattedLine;

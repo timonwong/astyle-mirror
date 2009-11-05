@@ -89,6 +89,11 @@
         4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). The new value 
         conforms to the soft tab in the style description and gives a better appearance for continuation lines.</p>
     <p>
+        The --indent-clases (-C) option has been fixed to indent C++ struct blocks containing
+        access modifiers (public, protected, and private). The struct block is not indented
+        if there are no access modifiers in the block.
+    </p>
+    <p>
         Embedded SQL statement are now formatted correctly. The formattig of the SQL
         statements will be maintained as long as the standard hanging indent format is used.
         If the "exec sql" statement is indented more than the following statements, the
@@ -120,7 +125,7 @@
         contiuation lines may be decreased. If you want the previous indentation, increase
         the &#8209;&#8209;max&#8209;in&#8209;statement option.</p>
     <p>
-        The Intel compiler release 11.1 has a new procedure for compiles. Read the new Install
+        The Linux Intel compiler release 11.1 has a new procedure for compiles. Read the new Install
         Information before using this compiler release.</p>
     <p>
         The documentation has been changed to include a new "Padding Options"section.

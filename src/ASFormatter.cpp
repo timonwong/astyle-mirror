@@ -53,6 +53,7 @@ ASFormatter::ASFormatter()
 	preBracketHeaderStack = NULL;
 	bracketTypeStack = NULL;
 	parenStack = NULL;
+	structStack = NULL;
 	lineCommentNoIndent = false;
 	formattingStyle = STYLE_NONE;
 	bracketFormatMode = NONE_MODE;
@@ -85,8 +86,9 @@ ASFormatter::~ASFormatter()
 {
 	// delete ASFormatter stack vectors
 	deleteContainer(preBracketHeaderStack);
-	deleteContainer(parenStack);
 	deleteContainer(bracketTypeStack);
+	deleteContainer(parenStack);
+	deleteContainer(structStack);
 
 	// delete static member vectors using swap to eliminate memory leak reporting
 	// delete ASFormatter static member vectors
@@ -111,6 +113,133 @@ ASFormatter::~ASFormatter()
 	ASBeautifier::deleteStaticVectors();
 
 	delete enhancer;
+}
+
+/**
+ * initialize the ASFormatter.
+ *
+ * init() should be called every time a ASFormatter object is to start
+ * formatting a NEW source file.
+ * init() recieves a pointer to a DYNAMICALLY CREATED ASSourceIterator object
+ * that will be used to iterate through the source code. This object will be
+ * deleted during the ASFormatter's destruction, and thus should not be
+ * deleted elsewhere.
+ *
+ * @param iter     a pointer to the DYNAMICALLY CREATED ASSourceIterator object.
+ */
+void ASFormatter::init(ASSourceIterator *si)
+{
+	buildLanguageVectors();
+	fixOptionVariableConflicts();
+
+	ASBeautifier::init(si);
+	enhancer->init(getFileType(),
+	               getIndentLength(),
+	               getIndentString(),
+	               getCaseIndent(),
+	               getEmptyLineFill());
+	sourceIterator = si;
+
+	initContainer(preBracketHeaderStack, new vector<const string*>);
+	initContainer(parenStack, new vector<int>);
+	initContainer(structStack, new vector<bool>);
+	parenStack->push_back(0);               // parenStack must contain this default entry
+	initContainer(bracketTypeStack, new vector<BracketType>);
+	bracketTypeStack->push_back(NULL_TYPE);
+
+	currentHeader = NULL;
+	currentLine = string("");
+	readyFormattedLine = string("");
+	formattedLine = "";
+	currentChar = ' ';
+	previousChar = ' ';
+	previousCommandChar = ' ';
+	previousNonWSChar = ' ';
+	quoteChar = '"';
+	charNum = 0;
+	leadingSpaces = 0;
+	preprocBracketTypeStackSize = 0;
+	spacePadNum = 0;
+	nextLineSpacePadNum = 0;
+	currentLineFirstBracketNum = string::npos;
+	previousReadyFormattedLineLength = string::npos;
+	templateDepth = 0;
+	traceLineNumber = 0;
+	horstmannIndentChars = 0;
+	tabIncrementIn = 0;
+	previousBracketType = NULL_TYPE;
+	previousOperator = NULL;
+
+	isVirgin = true;
+	isInLineComment = false;
+	isInComment = false;
+	noTrimCommentContinuation = false;
+	isInPreprocessor = false;
+	doesLineStartComment = false;
+	lineEndsInCommentOnly = false;
+	lineIsLineCommentOnly = false;
+	lineIsEmpty = false;
+	isImmediatelyPostCommentOnly = false;
+	isImmediatelyPostEmptyLine = false;
+	isInQuote = false;
+	isInVerbatimQuote = false;
+	haveLineContinuationChar = false;
+	isInQuoteContinuation = false;
+	isSpecialChar = false;
+	isNonParenHeader = false;
+	foundNamespaceHeader = false;
+	foundClassHeader = false;
+	foundStructHeader = false;
+	foundInterfaceHeader = false;
+	foundPreDefinitionHeader = false;
+	foundPreCommandHeader = false;
+	foundCastOperator = false;
+	foundQuestionMark = false;
+	isInLineBreak = false;
+	endOfCodeReached = false;
+	isInExecSQL = false;
+	isInAsm = false;
+	isInAsmOneLine = false;
+	isInAsmBlock = false;
+	isInIndentableStruct = false;
+	isLineReady = false;
+	isPreviousBracketBlockRelated = false;
+	isInPotentialCalculation = false;
+	shouldReparseCurrentChar = false;
+	needHeaderOpeningBracket = false;
+	shouldBreakLineAtNextChar = false;
+	passedSemicolon = false;
+	passedColon = false;
+	clearNonInStatement = false;
+	isInTemplate = false;
+	isInBlParen = false;
+	isImmediatelyPostComment = false;
+	isImmediatelyPostLineComment = false;
+	isImmediatelyPostEmptyBlock = false;
+	isImmediatelyPostPreprocessor = false;
+	isImmediatelyPostReturn = false;
+	isImmediatelyPostOperator = false;
+	isCharImmediatelyPostReturn = false;
+	isCharImmediatelyPostOperator = false;
+	isCharImmediatelyPostComment = false;
+	isPreviousCharPostComment = false;
+	isCharImmediatelyPostLineComment = false;
+	isCharImmediatelyPostOpenBlock = false;
+	isCharImmediatelyPostCloseBlock = false;
+	isCharImmediatelyPostTemplate = false;
+//	previousBracketIsBroken = false;
+	breakCurrentOneLineBlock = false;
+	isInHorstmannRunIn = false;
+	currentLineBeginsWithBracket = false;
+	isPrependPostBlockEmptyLineRequested = false;
+	isAppendPostBlockEmptyLineRequested = false;
+	prependEmptyLine = false;
+	appendOpeningBracket = false;
+	foundClosingHeader = false;
+	isImmediatelyPostHeader = false;
+	isInHeader = false;
+	isInCase = false;
+	isJavaStaticConstructor = false;
 }
 
 /**
@@ -256,131 +385,6 @@ void ASFormatter::fixOptionVariableConflicts()
 	// cannot have indent-brackets with horstmann brackets
 	if (bracketFormatMode == HORSTMANN_MODE)
 		setBracketIndent(false);
-}
-
-/**
- * initialize the ASFormatter.
- *
- * init() should be called every time a ASFormatter object is to start
- * formatting a NEW source file.
- * init() recieves a pointer to a DYNAMICALLY CREATED ASSourceIterator object
- * that will be used to iterate through the source code. This object will be
- * deleted during the ASFormatter's destruction, and thus should not be
- * deleted elsewhere.
- *
- * @param iter     a pointer to the DYNAMICALLY CREATED ASSourceIterator object.
- */
-void ASFormatter::init(ASSourceIterator *si)
-{
-	buildLanguageVectors();
-	fixOptionVariableConflicts();
-
-	ASBeautifier::init(si);
-	enhancer->init(getFileType(),
-	               getIndentLength(),
-	               getIndentString(),
-	               getCaseIndent(),
-	               getEmptyLineFill());
-	sourceIterator = si;
-
-	initContainer(preBracketHeaderStack, new vector<const string*>);
-	initContainer(parenStack, new vector<int>);
-	parenStack->push_back(0);               // parenStack must contain this default entry
-	initContainer(bracketTypeStack, new vector<BracketType>);
-	bracketTypeStack->push_back(NULL_TYPE);
-
-	currentHeader = NULL;
-	currentLine = string("");
-	readyFormattedLine = string("");
-	formattedLine = "";
-	currentChar = ' ';
-	previousChar = ' ';
-	previousCommandChar = ' ';
-	previousNonWSChar = ' ';
-	quoteChar = '"';
-	charNum = 0;
-	leadingSpaces = 0;
-	preprocBracketTypeStackSize = 0;
-	spacePadNum = 0;
-	nextLineSpacePadNum = 0;
-	currentLineFirstBracketNum = string::npos;
-	previousReadyFormattedLineLength = string::npos;
-	templateDepth = 0;
-	traceLineNumber = 0;
-	horstmannIndentChars = 0;
-	tabIncrementIn = 0;
-	previousBracketType = NULL_TYPE;
-	previousOperator = NULL;
-
-	isVirgin = true;
-	isInLineComment = false;
-	isInComment = false;
-	noTrimCommentContinuation = false;
-	isInPreprocessor = false;
-	doesLineStartComment = false;
-	lineEndsInCommentOnly = false;
-	lineIsLineCommentOnly = false;
-	lineIsEmpty = false;
-	isImmediatelyPostCommentOnly = false;
-	isImmediatelyPostEmptyLine = false;
-	isInQuote = false;
-	isInVerbatimQuote = false;
-	haveLineContinuationChar = false;
-	isInQuoteContinuation = false;
-	isSpecialChar = false;
-	isNonParenHeader = false;
-	foundNamespaceHeader = false;
-	foundClassHeader = false;
-	foundStructHeader = false;
-	foundInterfaceHeader = false;
-	foundPreDefinitionHeader = false;
-	foundPreCommandHeader = false;
-	foundCastOperator = false;
-	foundQuestionMark = false;
-	isInLineBreak = false;
-	endOfCodeReached = false;
-	isInExecSQL = false;
-	isInAsm = false;
-	isInAsmOneLine = false;
-	isInAsmBlock = false;
-	isLineReady = false;
-	isPreviousBracketBlockRelated = false;
-	isInPotentialCalculation = false;
-	shouldReparseCurrentChar = false;
-	needHeaderOpeningBracket = false;
-	shouldBreakLineAtNextChar = false;
-	passedSemicolon = false;
-	passedColon = false;
-	clearNonInStatement = false;
-	isInTemplate = false;
-	isInBlParen = false;
-	isImmediatelyPostComment = false;
-	isImmediatelyPostLineComment = false;
-	isImmediatelyPostEmptyBlock = false;
-	isImmediatelyPostPreprocessor = false;
-	isImmediatelyPostReturn = false;
-	isImmediatelyPostOperator = false;
-	isCharImmediatelyPostReturn = false;
-	isCharImmediatelyPostOperator = false;
-	isCharImmediatelyPostComment = false;
-	isPreviousCharPostComment = false;
-	isCharImmediatelyPostLineComment = false;
-	isCharImmediatelyPostOpenBlock = false;
-	isCharImmediatelyPostCloseBlock = false;
-	isCharImmediatelyPostTemplate = false;
-//	previousBracketIsBroken = false;
-	breakCurrentOneLineBlock = false;
-	isInHorstmannRunIn = false;
-	currentLineBeginsWithBracket = false;
-	isPrependPostBlockEmptyLineRequested = false;
-	isAppendPostBlockEmptyLineRequested = false;
-	prependEmptyLine = false;
-	appendOpeningBracket = false;
-	foundClosingHeader = false;
-	isImmediatelyPostHeader = false;
-	isInHeader = false;
-	isInCase = false;
-	isJavaStaticConstructor = false;
 }
 
 /**
@@ -744,11 +748,15 @@ string ASFormatter::nextLine()
 				isJavaStaticConstructor = false;
 				needHeaderOpeningBracket = false;
 
+				isPreviousBracketBlockRelated = !isBracketType(newBracketType, ARRAY_TYPE);
 				bracketTypeStack->push_back(newBracketType);
 				preBracketHeaderStack->push_back(currentHeader);
 				currentHeader = NULL;
-
-				isPreviousBracketBlockRelated = !isBracketType(newBracketType, ARRAY_TYPE);
+				structStack->push_back(isInIndentableStruct);
+				if (isBracketType(newBracketType, STRUCT_TYPE) && isCStyle())
+					isInIndentableStruct = isStructAccessModified(currentLine, charNum);
+				else
+					isInIndentableStruct = false;
 			}
 
 			// this must be done before the bracketTypeStack is popped
@@ -795,9 +803,16 @@ string ASFormatter::nextLine()
 				else
 					currentHeader = NULL;
 
+				if (!structStack->empty())
+				{
+					isInIndentableStruct = structStack->back();
+					structStack->pop_back();
+				}
+				else
+					isInIndentableStruct = false;
+
 				if (isBracketType(bracketType, ARRAY_NIS_TYPE))
 					clearNonInStatement = true;
-
 			}
 
 			// format brackets
@@ -1281,8 +1296,8 @@ string ASFormatter::nextLine()
 			enhancer->enhance(beautifiedLine, isInBeautifySQL);
 		horstmannIndentChars = 0;
 		lineCommentNoBeautify = lineCommentNoIndent;
-		isInBeautifySQL = isInExecSQL;
 		lineCommentNoIndent = false;
+		isInBeautifySQL = isInExecSQL;
 		if (clearNonInStatement)
 		{
 			isNonInStatementArray = false;
@@ -3424,8 +3439,10 @@ void ASFormatter::formatRunIn()
 
 	// cannot attach a class modifier without indent-classes
 	if (isCStyle()
-	        && isBracketType(bracketTypeStack->back(), CLASS_TYPE)
-	        && isCharPotentialHeader(currentLine, charNum))
+	        && isCharPotentialHeader(currentLine, charNum)
+	        && (isBracketType(bracketTypeStack->back(), CLASS_TYPE)
+	            || (isBracketType(bracketTypeStack->back(), STRUCT_TYPE)
+	                && isInIndentableStruct)))
 	{
 		if (findKeyword(currentLine, charNum, AS_PUBLIC)
 		        || findKeyword(currentLine, charNum, AS_PRIVATE)
@@ -4359,6 +4376,91 @@ size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart 
 		return string::npos;
 
 	return i;
+}
+
+/**
+ * Look ahead in the file to see if a struct has access modifiers.
+ *
+ * @param line          a reference to the line to indent.
+ * @param index         the current line index.
+ * @return              true if the struct has access modifiers.
+ */
+bool ASFormatter::isStructAccessModified(string  &firstLine, size_t index) const
+{
+	assert(firstLine[index] == '{');
+	assert(isCStyle());
+
+	bool isFirstLine = true;
+	bool needReset = false;
+	size_t bracketCount = 1;
+	string nextLine = firstLine.substr(index + 1);
+
+	// find the first non-blank text, bypassing all comments.
+	bool isInComment = false;
+	while (sourceIterator->hasMoreLines())
+	{
+		if (isFirstLine)
+			isFirstLine = false;
+		else
+		{
+			nextLine = sourceIterator->peekNextLine();
+			needReset = true;
+		}
+		// parse the line
+		for (size_t i = 0; i < nextLine.length(); i++)
+		{
+			if (isWhiteSpace(nextLine[i]))
+				continue;
+			if (nextLine.compare(i, 2, "/*") == 0)
+				isInComment = true;
+			if (isInComment)
+			{
+				i = nextLine.find("*/", i);
+				if (i == string::npos)
+				{
+					i = nextLine.length();
+					continue;
+				}
+				i++;
+				isInComment = false;
+				continue;
+			}
+			if (nextLine.compare(i, 2, "//") == 0)
+			{
+				i = nextLine.length();
+				continue;
+			}
+			// handle brackets
+			if (nextLine[i] == '{')
+				bracketCount++;
+			if (nextLine[i] == '}')
+				bracketCount--;
+			if (bracketCount == 0)
+			{
+				if (needReset)
+					sourceIterator->peekReset();
+				return false;
+			}
+			// check for access modifiers
+			if (isCharPotentialHeader(nextLine, i))
+			{
+				if (findKeyword(nextLine, i, AS_PUBLIC)
+				        || findKeyword(nextLine, i, AS_PRIVATE)
+				        || findKeyword(nextLine, i, AS_PROTECTED))
+				{
+					if (needReset)
+						sourceIterator->peekReset();
+					return true;
+				}
+				string name = getCurrentWord(nextLine, i);
+				i += name.length() - 1;
+			}
+		}	// end of for loop
+	}	// end of while loop
+
+	if (needReset)
+		sourceIterator->peekReset();
+	return false;
 }
 
 /**

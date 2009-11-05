@@ -710,7 +710,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_indent-classes"><code class="title">--indent-classes / -C</code><br />
      Indent '<code>class</code>' and '<code>struct</code>' blocks so that the blocks
     '<code>public:</code>', '<code>protected:</code>' and '<code>private:</code>' are indented.
-    The entire block is indented. This option is effective for C++ files only.</p>
+    The struct blocks are indented only if an access modifier is declared somewhere
+        in the struct. The entire block is indented. This option is effective for C++ files only.</p>
 
         <div class="code">
             <pre>class Foo
