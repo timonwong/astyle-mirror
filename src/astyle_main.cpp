@@ -1538,13 +1538,6 @@ void ASConsole::printHelp() const
 // get individual file names from the command-line file path
 void ASConsole::getFilePaths(string &filePath)
 {
-//	vector<string> fileName;        // files to be processed including path
-//	string targetDirectory;         // path to the directory being processed
-//	string targetFilename;          // file name being processed
-
-	// standardize the file separators
-//	standardizePath(filePath);
-
 	fileName.clear();
 	targetDirectory = string();
 	targetFilename = string();
@@ -2137,26 +2130,6 @@ int main(int argc, char** argv)
 				g_console->filesFormatted++;
 			else
 				g_console->filesUnchanged++;
-
-			//// remove targetDirectory from filename if required
-			//string displayName;
-			//if (g_console->hasWildcard)
-			//	displayName = g_console->fileName[j].substr(g_console->targetDirectory.length() + 1);
-			//else
-			//	displayName = g_console->fileName[j];
-
-			//if (isFormatted)
-			//{
-			//	g_console->filesFormatted++;
-			//	if (!g_console->isQuiet)
-			//		cout << "formatted  " << displayName.c_str() << endl;
-			//}
-			//else
-			//{
-			//	g_console->filesUnchanged++;
-			//	if (!g_console->isQuiet && !g_console->isFormattedOnly)
-			//		cout << "unchanged* " << displayName.c_str() << endl;
-			//}
 		}
 	}
 

@@ -227,7 +227,6 @@ void ASFormatter::init(ASSourceIterator *si)
 	isCharImmediatelyPostOpenBlock = false;
 	isCharImmediatelyPostCloseBlock = false;
 	isCharImmediatelyPostTemplate = false;
-//	previousBracketIsBroken = false;
 	breakCurrentOneLineBlock = false;
 	isInHorstmannRunIn = false;
 	currentLineBeginsWithBracket = false;
@@ -940,8 +939,6 @@ string ASFormatter::nextLine()
 				}
 
 				// check if the found header is non-paren header
-//				isNonParenHeader = (find(nonParenHeaders.begin(), nonParenHeaders.end(),
-//				                         newHeader) != nonParenHeaders.end());
 				isNonParenHeader = findHeader(nonParenHeaders) != NULL;
 
 				// join 'else if' statements
@@ -1727,8 +1724,6 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		else
 			currentLine = sourceIterator->nextLine(emptyLineWasDeleted);
 		// reset variables for new line
-//		spacePadNum = 0;
-//		nextLineSpacePadNum = 0;
 		inLineNumber++;
 		isInCase = false;
 		isInAsmOneLine = false;
@@ -1779,7 +1774,6 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 			        || !commentAndHeaderFollows())
 			{
 				isInPreprocessor = isImmediatelyPostPreprocessor;		// restore
-//				lineIsLineCommentOnly = isImmediatelyPostCommentOnly;	// no restore
 				lineIsEmpty = false;
 				return getNextLine(true);
 			}
@@ -2169,10 +2163,6 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 			return true;
 		if ((int) currentLine.length() < charNum + 2)
 			return true;
-		//size_t nextChar = currentLine.find_first_not_of(" \t", charNum+2);
-		//if (nextChar != string::npos
-		//		&& currentLine[nextChar] == ')')
-		//	return true;
 		return false;
 	}
 
@@ -2193,7 +2183,6 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 
 	bool isDA = (!(isLegalNameChar(previousNonWSChar) || previousNonWSChar == '>')
 	             || !isLegalNameChar(peekNextChar())
-//	             || peekNextChar() == ')'
 	             || (ispunct(previousNonWSChar) && previousNonWSChar != '.')
 	             || isCharImmediatelyPostReturn);
 
@@ -2394,25 +2383,6 @@ bool ASFormatter::isOneLineBlockReached(string& line, int startChar) const
 }
 
 /**
- * check if a line begins with the specified character
- * i.e. if the current line begins with a open bracket.
- *
- * @return        true or false
- */
-/*
-bool ASFormatter::lineBeginsWith(char charToCheck) const
-{
-	bool beginsWith = false;
-	size_t i = currentLine.find_first_not_of(" \t");
-
-	if (i != string::npos)
-		if (currentLine[i] == charToCheck && (int) i == charNum)
-			beginsWith = true;
-
-	return beginsWith;
-}
-*/
-/**
  * peek at the next word to determine if it is a C# non-paren header.
  * will look ahead in the input file if necessary.
  *
@@ -2573,7 +2543,6 @@ void ASFormatter::adjustComments(void)
 void ASFormatter::appendCharInsideComments(void)
 {
 	if (formattedLineCommentNum == string::npos)    // does the comment start on the previous line?
-//	        || isBeforeAnyComment())                   // does a comment follow on this line?
 	{
 		appendCurrentChar();                        // don't attach
 		return; // false;
@@ -3094,7 +3063,6 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 	parenStack->push_back(0);
 
 	bool breakBracket = isCurrentBracketBroken();
-//	previousBracketIsBroken = breakBracket;
 
 	if (breakBracket)
 	{
@@ -3106,10 +3074,6 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 				currentChar = ' ';              // remove bracket from current line
 				currentLine[charNum] = currentChar;
 				appendOpeningBracket = true;    // append bracket to following line
-				// if possible comment was moved by attaching a bracket
-				// move comment 2 spaces to the left
-//				if (currentLine.compare(charNum+1, 2, " /") == 0)
-//					spacePadNum += 2;
 			}
 			// else put comment after the bracket
 			else if (!isBeforeMultipleLineEndComments(charNum))
@@ -3150,17 +3114,10 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 			        && previousCommandChar != ';')  // don't attach ; {
 			{
 				appendCharInsideComments();
-//				if (!appendCharInsideComments())
-//					previousBracketIsBroken = true;
-				//if (isBeforeComment())
-				//{
-				//	breakLine();
-				//}
 			}
 			else
 			{
 				appendCurrentChar();            // don't attach
-//				previousBracketIsBroken = true;
 			}
 		}
 		else if (previousCommandChar == '{'
@@ -3238,11 +3195,6 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 	}
 	else
 	{
-		//			if (!isCharImmediatelyPostComment
-		////                  && !bracketFormatMode == NONE_MODE
-		//			        && !isImmediatelyPostEmptyBlock)
-		//				isInLineBreak = false;
-
 		appendCurrentChar();
 	}
 
@@ -3359,16 +3311,12 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				if (!isInLineBreak)
 					appendSpacePad();
 				appendCurrentChar();
-				//if (isWhiteSpace(peekNextChar()))
-				//	formatRunIn();
 			}
 			else if (bracketFormatMode == NONE_MODE)
 			{
 				if (currentLineBeginsWithBracket)       // lineBeginsWith('{')
 				{
 					appendCurrentChar();                // don't attach
-					//if (!isWhiteSpace(peekNextChar()))
-					//	formatRunIn();
 				}
 				else
 				{
@@ -3500,7 +3448,6 @@ void ASFormatter::formatRunIn()
 		}
 	}
 	isInHorstmannRunIn = true;
-	// return true;
 }
 
 /**

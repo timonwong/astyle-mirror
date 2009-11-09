@@ -123,16 +123,18 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	headerStack  = new vector<const string*>;
 	*headerStack = *other.headerStack;
 
-	tempStacks = new vector<vector<const string*>*>;
-	vector<vector<const string*>*>::iterator iter;
-	for (iter = other.tempStacks->begin();
-	        iter != other.tempStacks->end();
-	        ++iter)
-	{
-		vector<const string*> *newVec = new vector<const string*>;
-		*newVec = **iter;
-		tempStacks->push_back(newVec);
-	}
+	//tempStacks = new vector<vector<const string*>*>;
+	//vector<vector<const string*>*>::iterator iter;
+	//for (iter = other.tempStacks->begin();
+	//        iter != other.tempStacks->end();
+	//        ++iter)
+	//{
+	//	vector<const string*> *newVec = new vector<const string*>;
+	//	*newVec = **iter;
+	//	tempStacks->push_back(newVec);
+	//}
+	tempStacks = copyTempStacks(other);
+
 	blockParenDepthStack = new vector<int>;
 	*blockParenDepthStack = *other.blockParenDepthStack;
 
@@ -168,6 +170,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isSharpDelegate = other.isSharpDelegate;
 	isInExtern = other.isInExtern;
 	isInBeautifySQL = other.isInBeautifySQL;
+	isInIndentableStruct = other.isInIndentableStruct;
 
 	// private variables
 	indentString = other.indentString;
@@ -342,6 +345,7 @@ void ASBeautifier::init()
 	isSharpDelegate = false;
 	isInExtern = false;
 	isInBeautifySQL = false;
+	isInIndentableStruct = false;
 	inLineNumber = 0;
 	horstmannIndentInStatement = 0;
 	nonInStatementBracket = 0;
@@ -919,6 +923,9 @@ string ASBeautifier::beautify(const string &originalLine)
 		activeBeautifierStack->back()->isNonInStatementArray = isNonInStatementArray;
 		activeBeautifierStack->back()->isSharpAccessor = isSharpAccessor;
 		activeBeautifierStack->back()->isSharpDelegate = isSharpDelegate;
+		activeBeautifierStack->back()->isInExtern = isInExtern;
+		activeBeautifierStack->back()->isInBeautifySQL = isInBeautifySQL;
+		activeBeautifierStack->back()->isInIndentableStruct = isInIndentableStruct;
 		// must return originalLine not the trimmed line
 		return activeBeautifierStack->back()->beautify(originalLine);
 	}
@@ -1132,7 +1139,6 @@ string ASBeautifier::beautify(const string &originalLine)
 		         (line.compare(i, 7, "#region") == 0 || line.compare(i, 10, "#endregion") == 0))
 		{
 			isInLineComment = true;
-//			continue;
 		}
 
 		if (isInComment || isInLineComment)
@@ -1309,13 +1315,6 @@ string ASBeautifier::beautify(const string &originalLine)
 			                          (prevNonSpaceCh == '('
 			                           || isLegalNameChar(prevNonSpaceCh))));
 
-			//if (isNonInStatementArray
-			//        && prevNonSpaceCh != ')'
-			//        && prevNonSpaceCh != '='
-			//        && !isInEnum
-			//        && i == nonInStatementBracket)
-			//	isBlockOpener = false;
-
 			isInClassHeader = false;
 
 			if (!isBlockOpener && currentHeader != NULL)
@@ -1327,11 +1326,6 @@ string ASBeautifier::beautify(const string &originalLine)
 						break;
 					}
 			}
-
-			// TODO: TEMPORARY??? fix to give C# }) statements a full indent
-			// check for anonymous method
-			//if (isBlockOpener && isSharpStyle() && !parenIndentStack->empty())
-			//	isBlockOpener = false;
 
 			bracketBlockStateStack->push_back(isBlockOpener);
 
@@ -1383,13 +1377,6 @@ string ASBeautifier::beautify(const string &originalLine)
 			        && (*headerStack).back() == &AS_STRUCT
 			        && isInIndentableStruct)
 				(*headerStack).back() = &AS_CLASS;
-
-			// do not allow inStatementIndent - should occur for Java files only
-			//if (inStatementIndentStack->size() > 0)
-			//{
-			//	spaceTabCount = 0;
-			//	inStatementIndentStack->back() = 0;
-			//}
 
 			blockParenDepthStack->push_back(parenDepth);
 			blockStatementStack->push_back(isInStatement);
@@ -2317,6 +2304,25 @@ string ASBeautifier::trim(const string &str)
 
 	string returnStr(str, start, end + 1 - start);
 	return returnStr;
+}
+
+/**
+ * Copy tempStacks for the copy constructor.
+ * The value of the vectors must also be copied.
+ */
+vector<vector<const string*>*>* ASBeautifier::copyTempStacks(const ASBeautifier &other) const
+{
+	vector<vector<const string*>*> *tempStacksNew = new vector<vector<const string*>*>;
+	vector<vector<const string*>*>::iterator iter;
+	for (iter = other.tempStacks->begin();
+	        iter != other.tempStacks->end();
+	        ++iter)
+	{
+		vector<const string*> *newVec = new vector<const string*>;
+		*newVec = **iter;
+		tempStacksNew->push_back(newVec);
+	}
+	return tempStacksNew;
 }
 
 /**

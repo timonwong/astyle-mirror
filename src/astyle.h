@@ -366,6 +366,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isClassAccessModifier(string& line) const;
 		bool isLineEndComment(string& line, int startPos) const;
 		bool statementEndsWithComma(string &line, int index);
+		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier &other) const;
 		template<typename T> void deleteContainer(T &container);
 		void deleteContainer(vector<vector<const string*>*>* &container);
 		template<typename T> void initContainer(T &container, T value);
@@ -551,7 +552,6 @@ class ASFormatter : public ASBeautifier
 		bool isOneLineBlockReached(string& line, int startChar) const;
 		bool isNextCharOpeningBracket(int startChar) const;
 		bool isOkToBreakBlock(BracketType bracketType) const;
-//		bool lineBeginsWith(char charToCheck) const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
 		void addBracketsToStatement();
@@ -687,7 +687,6 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostTemplate;
 		bool isCharImmediatelyPostReturn;
 		bool isCharImmediatelyPostOperator;
-//		bool previousBracketIsBroken;
 		bool breakCurrentOneLineBlock;
 		bool isInHorstmannRunIn;
 		bool currentLineBeginsWithBracket;
