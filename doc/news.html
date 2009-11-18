@@ -105,6 +105,8 @@
         The continuation line for "class" statements has been changes from two indents to
         one.</p>
     <p>
+        The intermediate .tmp file used in formatting has been eliminated and memory is used instead. In most cases this should result in a noticable seppd improvement.</p>
+    <p>
         Occasionally, someone will use Artistic Style to format a file encoded with 
         UTF-16 or UTF-32 bit encoding. These files contain many nul bytes are incompatible with the 8 bit encoding
         assumed by Artistic Style. Since this
@@ -115,17 +117,11 @@
         the Wikipedia discussion on 
         <a href="http://en.wikipedia.org/wiki/Comparison_of_Unicode_encodings#Compatibility_issues">Compatibility issues</a>.</p>
     <p>
-        The intermediate .tmp file used in formatting has been eliminated and memory is used instead. This may result in a slight speed increase if most of your source
-        files are already formatted.</p>
-    <p>
-        The option preserve-date (-Z) has been removed. This was added before Artistic Syle
-        had the capabibilty to identify unchanged files and is no longer a useful option.</p>
-    <p>
         Checks for the maximum in-statement indent have been fixed. The indent for some long
         contiuation lines may be decreased. If you want the previous indentation, increase
         the &#8209;&#8209;max&#8209;in&#8209;statement option.</p>
     <p>
-        The Linux Intel compiler release 11.1 has a new procedure for compiles. Read the new Install
+        The Intel compiler for Linux release 11.1 has a new procedure for compiles. Read the new Install
         Information before using this compiler release.</p>
     <p>
         The documentation has been changed to include a new "Padding Options"section.

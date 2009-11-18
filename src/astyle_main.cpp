@@ -31,7 +31,6 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
-#include <ctime>
 #include <errno.h>
 
 // includes for recursive getFileNames() function
@@ -603,15 +602,15 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	{
 		string suffixParam = GET_PARAM(arg, "exclude=");
 		if (suffixParam.length() > 0)
-		{
-			g_console->standardizePath(suffixParam, true);
-			g_console->excludeVector.push_back(suffixParam);
-			g_console->excludeHitsVector.push_back(false);
-		}
+			g_console->updateExcludeVector(suffixParam);
 	}
 	else if ( IS_OPTIONS(arg, "r", "R") || IS_OPTION(arg, "recursive") )
 	{
 		g_console->isRecursive = true;
+	}
+	else if ( IS_OPTIONS(arg, "Z", "preserve-date") )
+	{
+		g_console->preserveDate = true;
 	}
 	else if ( IS_OPTIONS(arg, "v", "verbose") )
 	{
@@ -842,11 +841,10 @@ void ASConsole::formatCinToCout(ASFormatter& formatter) const
  *
  * @param fileName      The path and name of the file to be processed.
  * @param formatter     The formatter object.
- * @return              true if the file was formatted, false if it was not (no changes).
  */
-bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
+void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 {
-	bool isFormatted = false;         // return value
+	bool isFormatted = false;
 
 	// open input file
 	ifstream in(fileName.c_str(), ios::binary);
@@ -888,7 +886,7 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 	{
 		nextLine = formatter.nextLine();
 		out << nextLine;
-		g_console->linesOut++;
+		linesOut++;
 		if (formatter.hasMoreLines())
 			out << streamIterator.getOutputEOL();
 		else
@@ -908,63 +906,46 @@ bool ASConsole::formatFile(const string &fileName, ASFormatter &formatter) const
 	}
 	in.close();
 
-	// create output files
-
 	// if file has changed, write the new file
 	if (!filesAreIdentical)
 	{
-		// create a backup
-		if (!noBackup)
-		{
-			string origFileName = fileName + origSuffix;
-			removeFile(origFileName.c_str(), "Could not remove pre-existing backup file");
-			renameFile(fileName.c_str(), origFileName.c_str(), "Could not create backup file");
-		}
-
-		// write the output file
-		ofstream fout(fileName.c_str(), ios::binary | ios::trunc);
-		if (!fout)
-			error("Could not open output file", fileName.c_str());
-		fout << out.str();
-		fout.close();
-
+		writeOutputFile(fileName, out);
 		isFormatted = true;
+		filesFormatted++;
+	}
+	else
+		 filesUnchanged++;
+
+	if (encoding != ENCODING_OK)
+	{
+		string msg = "********** following file unchanged: ";
+		if (encoding == UTF_16BE)
+			msg += "UTF-16BE encoding";
+		else if (encoding == UTF_16LE)
+			msg += "UTF-16LE encoding";
+		else if (encoding == UTF_32BE)
+			msg += "UTF-32BE encoding";
+		else if (encoding == UTF_32LE)
+			msg += "UTF-32LE encoding";
+		else
+			msg += "???????? encoding";
+		printMsg(msg);
 	}
 
-	// remove targetDirectory from filename if required
+	// remove targetDirectory from filename if required by print
 	string displayName;
-	if (g_console->hasWildcard)
+	if (hasWildcard)
 		displayName = fileName.substr(targetDirectory.length() + 1);
 	else
 		displayName = fileName;
 
-	if (encoding != ENCODING_OK && !isQuiet)
-	{
-		cout << "********** following file unchanged: ";
-		if (encoding == UTF_16BE)
-			cout << "UTF-16BE encoding" << endl;
-		else if (encoding == UTF_16LE)
-			cout << "UTF-16LE encoding" << endl;
-		else if (encoding == UTF_32BE)
-			cout << "UTF-32BE encoding" << endl;
-		else if (encoding == UTF_32LE)
-			cout << "UTF-32LE encoding" << endl;
-		else
-			cout << "???????? encoding" << endl;
-	}
 	if (isFormatted)
-	{
-		if (!isQuiet)
-			cout << "formatted  " << displayName.c_str() << endl;
-	}
+		printMsg("formatted  " + displayName);
 	else
 	{
-		if (!isQuiet)
-			if (!isFormattedOnly || encoding != ENCODING_OK)
-				cout << "unchanged* " << displayName.c_str() << endl;
+		if (!isFormattedOnly || encoding != ENCODING_OK)
+			printMsg("unchanged* " + displayName);
 	}
-
-	return isFormatted;
 }
 
 #ifdef _WIN32  // Windows specific
@@ -984,28 +965,6 @@ string ASConsole::getCurrentDirectory(const string &fileName) const
 		error("Cannot find file", fileName.c_str());
 	return string(currdir);
 }
-
-#else  // not _WIN32
-
-/**
- * LINUX function to get the current directory.
- * This is done if the fileName does not contain a path.
- * It is probably from an editor sending a single file.
- *
- * @param fileName      The filename is used only for  the error message.
- * @return              The path of the current directory
- */
-string ASConsole::getCurrentDirectory(const string &fileName) const
-{
-	char *currdir = getenv("PWD");
-	if (currdir == NULL)
-		error("Cannot find file", fileName.c_str());
-	return string(currdir);
-}
-
-#endif
-
-#ifdef _WIN32  // Windows specific
 
 /**
  * WINDOWS function to resolve wildcards and recurse into sub directories.
@@ -1041,10 +1000,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 		{
 			string subDirectoryPath = directory + g_fileSeparator + FindFileData.cFileName;
 			if (isPathExclued(subDirectoryPath))
-			{
-				if (!isQuiet)
-					cout << "exclude " << subDirectoryPath.substr(mainDirectoryLength) << endl;
-			}
+				printMsg("exclude " + subDirectoryPath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(subDirectoryPath);
 			continue;
@@ -1058,7 +1014,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 		if (wildcmp(wildcard.c_str(), FindFileData.cFileName))
 		{
 			if (isExcluded)
-				cout << "exclude " << filePathName.substr(mainDirectoryLength) << endl;
+				printMsg("exclude " + filePathName.substr(mainDirectoryLength));
 			else
 				fileName.push_back(filePathName);
 		}
@@ -1082,6 +1038,22 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 }
 
 #else  // not _WIN32
+
+/**
+ * LINUX function to get the current directory.
+ * This is done if the fileName does not contain a path.
+ * It is probably from an editor sending a single file.
+ *
+ * @param fileName      The filename is used only for  the error message.
+ * @return              The path of the current directory
+ */
+string ASConsole::getCurrentDirectory(const string &fileName) const
+{
+	char *currdir = getenv("PWD");
+	if (currdir == NULL)
+		error("Cannot find file", fileName.c_str());
+	return string(currdir);
+}
 
 /**
  * LINUX function to resolve wildcards and recurse into sub directories.
@@ -1130,7 +1102,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 		if (S_ISDIR(statbuf.st_mode) && isRecursive)
 		{
 			if (isPathExclued(entryFilepath))
-				cout << "exclude " << entryFilepath.substr(mainDirectoryLength) << endl;
+				printMsg("exclude " + entryFilepath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(entryFilepath);
 			continue;
@@ -1145,7 +1117,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 			if (wildcmp(wildcard.c_str(), entry->d_name))
 			{
 				if (isExcluded)
-					cout << "exclude " << entryFilepath.substr(mainDirectoryLength) << endl;
+					printMsg("exclude " + entryFilepath.substr(mainDirectoryLength));
 				else
 					fileName.push_back(entryFilepath);
 			}
@@ -1200,6 +1172,77 @@ int ASConsole::getFileEncoding(const char* firstLine) const
 	return encoding;
 }
 
+// get individual file names from the command-line file path
+void ASConsole::getFilePaths(string &filePath)
+{
+	fileName.clear();
+	targetDirectory = string();
+	targetFilename = string();
+
+	// separate directory and file name
+	size_t separator = filePath.find_last_of(g_fileSeparator);
+	if (separator == string::npos)
+	{
+		// if no directory is present, use the currently active directory
+		targetDirectory = getCurrentDirectory(filePath);
+		targetFilename  = filePath;
+		mainDirectoryLength = targetDirectory.length() + 1;    // +1 includes trailing separator
+	}
+	else
+	{
+		targetDirectory = filePath.substr(0, separator);
+		targetFilename  = filePath.substr(separator+1);
+		mainDirectoryLength = targetDirectory.length() + 1;    // +1 includes trailing separator
+	}
+
+	if (targetFilename.length() == 0)
+		error("Missing filename in", filePath.c_str());
+
+	// check filename for wildcards
+	hasWildcard = false;
+	if (targetFilename.find_first_of( "*?") != string::npos)
+		hasWildcard = true;
+
+	// clear exclude hits vector
+	for (size_t ix = 0; ix < excludeHitsVector.size(); ix++)
+		excludeHitsVector[ix] = false;
+
+	// display directory name for wildcard processing
+	if (hasWildcard)
+	{
+		printMsg("--------------------------------------------------");
+		printMsg("directory " + targetDirectory + g_fileSeparator + targetFilename);
+	}
+
+	// create a vector of paths and file names to process
+	if (hasWildcard || isRecursive)
+		getFileNames(targetDirectory, targetFilename);
+	else
+		fileName.push_back(targetDirectory + g_fileSeparator + targetFilename);
+
+	if (hasWildcard)
+		printMsg("--------------------------------------------------");
+
+	// check for unprocessed excludes
+	bool excludeErr = false;
+	for (size_t ix = 0; ix < excludeHitsVector.size(); ix++)
+	{
+		if (excludeHitsVector[ix] == false)
+		{
+			(*_err) << "Unmatched exclude " << excludeVector[ix].c_str() << endl;
+			excludeErr = true;
+		}
+	}
+#ifndef ASTYLECON_TEST
+	// abort if not a test
+	if (excludeErr)
+		exit(EXIT_FAILURE);
+#endif
+	// check if files were found (probably an input error if not)
+	if (fileName.size() == 0)
+		(*_err) << "No file to process " << filePath.c_str() << endl;
+}
+
 // compare a path to the exclude vector
 // used for both directories and filenames
 // updates the g_excludeHitsVector
@@ -1213,31 +1256,33 @@ bool ASConsole::isPathExclued(const string &subPath)
 	{
 		string exclude = excludeVector[i];
 
-		if (subPath.length() > exclude.length())
-		{
-			size_t compareStart = subPath.length() - exclude.length();
-			char lastPathChar = subPath[compareStart - 1];
+		if (subPath.length() < exclude.length())
+			continue;
 
-			// exclude must start with a directory name
-			if (lastPathChar == g_fileSeparator)
-			{
-				string compare = subPath.substr(compareStart);
-				if (!g_isCaseSensitive)
-				{
-					// make it case insensitive for Windows
-					for (size_t j=0; j<compare.length(); j++)
-						compare[j] = (char)tolower(compare[j]);
-					for (size_t j=0; j<exclude.length(); j++)
-						exclude[j] = (char)tolower(exclude[j]);
-				}
-				// compare sub directory to exclude data - must check them all
-				if (compare == exclude)
-				{
-					excludeHitsVector[i] = true;
-					retVal = true;
-					break;
-				}
-			}
+		size_t compareStart = subPath.length() - exclude.length();
+		// subPath compare must start with a directory name
+		if (compareStart > 0)
+		{
+			char lastPathChar = subPath[compareStart - 1];
+			if (lastPathChar != g_fileSeparator)
+				continue;
+		}
+
+		string compare = subPath.substr(compareStart);
+		if (!g_isCaseSensitive)
+		{
+			// make it case insensitive for Windows
+			for (size_t j=0; j<compare.length(); j++)
+				compare[j] = (char)tolower(compare[j]);
+			for (size_t j=0; j<exclude.length(); j++)
+				exclude[j] = (char)tolower(exclude[j]);
+		}
+		// compare sub directory to exclude data - must check them all
+		if (compare == exclude)
+		{
+			excludeHitsVector[i] = true;
+			retVal = true;
+			break;
 		}
 	}
 	return retVal;
@@ -1503,6 +1548,9 @@ void ASConsole::printHelp() const
 	(*_err) << "    Print errors and help information to standard-output rather than\n";
 	(*_err) << "    to standard-error.\n";
 	(*_err) << endl;
+	(*_err) << "    --preserve-date  OR  -Z\n";
+	(*_err) << "    The date and time modified will not be changed in the formatted file.\n";
+	(*_err) << endl;
 	(*_err) << "    --verbose  OR  -v\n";
 	(*_err) << "    Verbose mode. Extra informational messages will be displayed.\n";
 	(*_err) << endl;
@@ -1535,73 +1583,33 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 }
 
-// get individual file names from the command-line file path
-void ASConsole::getFilePaths(string &filePath)
+
+/**
+ * Process files in the fileNameVector.
+ *
+ * @param formatter     The formatter object.
+ */
+void ASConsole::processFiles(ASFormatter &formatter)
 {
-	fileName.clear();
-	targetDirectory = string();
-	targetFilename = string();
+	if (isVerbose)
+		printVerboseHeader();
 
-	// separate directory and file name
-	size_t separator = filePath.find_last_of(g_fileSeparator);
-	if (separator == string::npos)
+	clock_t startTime = clock();     // start time of file formatting
+
+	// loop thru input fileNameVector and process the files
+	for (size_t i = 0; i < fileNameVector.size(); i++)
 	{
-		// if no directory is present, use the currently active directory
-		targetDirectory = getCurrentDirectory(filePath);
-		targetFilename  = filePath;
-		mainDirectoryLength = targetDirectory.length() + 1;    // +1 includes trailing separator
-	}
-	else
-	{
-		targetDirectory = filePath.substr(0, separator);
-		targetFilename  = filePath.substr(separator+1);
-		mainDirectoryLength = targetDirectory.length() + 1;    // +1 includes trailing separator
+		getFilePaths(fileNameVector[i]);
+
+		// loop thru fileName vector formatting the files
+		for (size_t j = 0; j < fileName.size(); j++)
+			formatFile(fileName[j], formatter);
 	}
 
-	if (targetFilename.length() == 0)
-		error("Missing filename in", filePath.c_str());
+	// files are processed, display stats
+	if (isVerbose)
+		printVerboseStats(startTime);
 
-	// check filename for wildcards
-	hasWildcard = false;
-	if (targetFilename.find_first_of( "*?") != string::npos)
-		hasWildcard = true;
-
-	// clear exclude hits vector
-	for (size_t ix = 0; ix < excludeHitsVector.size(); ix++)
-		excludeHitsVector[ix] = false;
-
-	// display directory name for wildcard processing
-	if (hasWildcard && ! isQuiet)
-	{
-		cout << "--------------------------------------------------" << endl;
-		cout << "directory " << targetDirectory << g_fileSeparator << targetFilename <<  endl;
-	}
-
-	// create a vector of paths and file names to process
-	if (hasWildcard || isRecursive)
-		getFileNames(targetDirectory, targetFilename);
-	else
-		fileName.push_back(targetDirectory + g_fileSeparator + targetFilename);
-
-	if (hasWildcard && ! isQuiet)
-		cout << "--------------------------------------------------" << endl;
-
-	// check for unprocessed excludes
-	bool excludeErr = false;
-	for (size_t ix = 0; ix < excludeHitsVector.size(); ix++)
-	{
-		if (excludeHitsVector[ix] == false)
-		{
-			(*_err) << "Unmatched exclude " << excludeVector[ix].c_str() << endl;
-			excludeErr = true;
-		}
-	}
-	if (excludeErr)
-		exit(EXIT_FAILURE);
-
-	// check if files were found (probably an input error if not)
-	if (fileName.size() == 0)
-		(*_err) << "No file to process " << filePath.c_str() << endl;
 }
 
 // process options from the command line and options file
@@ -1647,7 +1655,7 @@ processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &form
 		}
 		else // file-name
 		{
-			g_console->standardizePath(arg);
+			standardizePath(arg);
 			fileNameVector.push_back(arg);
 		}
 	}
@@ -1817,6 +1825,57 @@ void ASConsole::standardizePath(string &path, bool removeBeginningSeparator /*fa
 		path.erase(0, 1);
 }
 
+void ASConsole::printMsg(const string &msg) const
+{
+	if (isQuiet)
+		return;
+	cout << msg << endl;
+}
+
+void ASConsole::printVerboseHeader() const
+{
+	assert(isVerbose);
+	if (isQuiet)
+		return;
+	cout << "Artistic Style " << _version << endl;
+	if (optionsFileName.compare("") != 0)
+		cout << "Using default options file " << optionsFileName << endl;
+}
+
+void ASConsole::printVerboseStats(clock_t startTime) const
+{
+	assert(isVerbose);
+	if (isQuiet)
+		return;
+	if (hasWildcard)
+		cout << "--------------------------------------------------" << endl;
+	cout << filesFormatted << " formatted, ";
+	cout << filesUnchanged << " unchanged, ";
+
+	// show processing time
+	clock_t stopTime = clock();
+	float secs = float ((stopTime - startTime) / CLOCKS_PER_SEC);
+	if (secs < 60)
+	{
+		// show tenths of a second if time is less than 20 seconds
+		cout.precision(2);
+		if (secs >= 10 && secs < 20)
+			cout.precision(3);
+		cout << secs << " seconds, ";
+		cout.precision(0);
+	}
+	else
+	{
+		// show minutes and seconds if time is greater than one minute
+		int min = (int) secs / 60;
+		secs -= min * 60;
+		int minsec = int (secs + .5);
+		cout << min << " min " << minsec << " sec, ";
+	}
+
+	cout << linesOut << " lines" << endl;
+}
+
 bool ASConsole::stringEndsWith(const string &str, const string &suffix) const
 {
 	int strIndex = (int) str.length() - 1;
@@ -1830,8 +1889,17 @@ bool ASConsole::stringEndsWith(const string &str, const string &suffix) const
 		--strIndex;
 		--suffixIndex;
 	}
-
+	// suffix longer than string
+	if (strIndex < 0 && suffixIndex >= 0)
+		return false;
 	return true;
+}
+
+void ASConsole::updateExcludeVector(string suffixParam)
+{
+	excludeVector.push_back(suffixParam);
+	standardizePath(excludeVector.back(), true);
+	excludeHitsVector.push_back(false);
 }
 
 void ASConsole::wait(int seconds) const
@@ -1915,6 +1983,47 @@ int ASConsole::wildcmp(const char *wild, const char *data) const
 		wild++;
 	}
 	return !*wild;
+}
+
+void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) const
+{
+	// save date accessed and date modified of original file
+	struct stat stBuf;
+	bool statErr = false;
+	if (stat(fileName.c_str(), &stBuf) == -1)
+		statErr = true;
+
+	// create a backup
+	if (!noBackup)
+	{
+		string origFileName = fileName + origSuffix;
+		removeFile(origFileName.c_str(), "Could not remove pre-existing backup file");
+		renameFile(fileName.c_str(), origFileName.c_str(), "Could not create backup file");
+	}
+
+	// write the output file
+	ofstream fout(fileName.c_str(), ios::binary | ios::trunc);
+	if (!fout)
+		error("Could not open output file", fileName.c_str());
+	fout << out.str();
+	fout.close();
+
+	// change date modified to original file date
+	if (preserveDate)
+	{
+		if (!statErr)
+		{
+			struct utimbuf outBuf;
+			outBuf.actime = stBuf.st_atime;
+			// add ticks so 'make' will recoginze a change
+			// Visual Studio 2008 needs more than 1
+			outBuf.modtime = stBuf.st_mtime + 10;
+			if (utime(fileName.c_str(), &outBuf) == -1)
+				statErr = true;
+		}
+		if (statErr)
+			(*_err) << "*********  could not preserve following file date" << endl;
+	}
 }
 
 #endif
@@ -2075,8 +2184,8 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 	return _version;
 }
 
-// ASTYLE_NO_MAIN is defined to exclude "main" from the test programs
-#elif !defined(ASTYLE_NO_MAIN)
+// ASTYLECON_TEST is defined to exclude "main" from the test programs
+#elif !defined(ASTYLECON_TEST)
 
 // **************************   main function   ***************************************************
 
@@ -2089,6 +2198,7 @@ int main(int argc, char** argv)
 	// build the vectors fileNameVector, optionsVector, and fileOptionsVector
 	processReturn returnValue = g_console->processOptions(argc, argv, formatter);
 
+	// check for end of processing
 	if (returnValue == END_SUCCESS)
 		return EXIT_SUCCESS;
 	if (returnValue == END_FAILURE)
@@ -2104,66 +2214,8 @@ int main(int argc, char** argv)
 		return EXIT_SUCCESS;
 	}
 
-	// indent the given files
-
-	if (g_console->isVerbose)
-	{
-		cout << "Artistic Style " << _version << endl;
-		if (g_console->optionsFileName.compare("") != 0)
-			cout << "Using default options file " << g_console->optionsFileName << endl;
-	}
-
-	clock_t startTime = clock();     // start time of file formatting
-
-	// loop thru input fileNameVector and process the files
-	for (size_t i = 0; i < g_console->fileNameVector.size(); i++)
-	{
-		g_console->getFilePaths(g_console->fileNameVector[i]);
-
-		// loop thru fileName vector formatting the files
-		for (size_t j = 0; j < g_console->fileName.size(); j++)
-		{
-			// format the file
-			bool isFormatted = g_console->formatFile(g_console->fileName[j], formatter);
-
-			if (isFormatted)
-				g_console->filesFormatted++;
-			else
-				g_console->filesUnchanged++;
-		}
-	}
-
-	// files are processed, display stats
-	if (g_console->isVerbose)
-	{
-		if (g_console->hasWildcard)
-			cout << "--------------------------------------------------" << endl;
-		cout << g_console->filesFormatted << " formatted, ";
-		cout << g_console->filesUnchanged << " unchanged, ";
-
-		// show processing time
-		clock_t stopTime = clock();
-		float secs = float ((stopTime - startTime) / CLOCKS_PER_SEC);
-		if (secs < 60)
-		{
-			// show tenths of a second if time is less than 20 seconds
-			cout.precision(2);
-			if (secs >= 10 && secs < 20)
-				cout.precision(3);
-			cout << secs << " seconds, ";
-			cout.precision(0);
-		}
-		else
-		{
-			// show minutes and seconds if time is greater than one minute
-			int min = (int) secs / 60;
-			secs -= min * 60;
-			int minsec = int (secs + .5);
-			cout << min << " min " << minsec << " sec, ";
-		}
-
-		cout << g_console->linesOut << " lines" << endl;
-	}
+	// process entries in the fileNameVector
+	g_console->processFiles(formatter);
 
 	delete g_console;
 	return EXIT_SUCCESS;

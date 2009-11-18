@@ -17,8 +17,7 @@ vpath %.h   ../../src
 # NOTE for java compiles the environment variable $JAVA_HOME must be set
 # example: export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.00
 ifndef JAVA_HOME
-#   JAVA_HOME = /usr/lib/jvm/java-6-sun-1.6.0.06
-	JAVA_HOME = /usr/lib/jvm/java-6-sun-1.6.0.10
+	JAVA_HOME = /usr/lib/jvm/java-6-sun-1.6.0.16
 endif
 
 # set prefix if not defined on the command line

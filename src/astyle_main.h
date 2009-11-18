@@ -31,6 +31,7 @@
 // headers
 //----------------------------------------------------------------------------
 
+#include <ctime>
 #include "astyle.h"
 
 #if defined(_MSC_VER) || defined(__DMC__)
@@ -114,6 +115,7 @@ class ASConsole
 		bool isRecursive;                   // recursive option
 		string origSuffix;                  // suffix= option
 		bool noBackup;                      // suffix=none option
+		bool preserveDate;                  // preserve-date option
 		bool isVerbose;                     // verbose option
 		bool isQuiet;                       // quiet option
 		bool isFormattedOnly;               // formatted lines only option
@@ -141,6 +143,7 @@ class ASConsole
 			isRecursive = false;
 			origSuffix = ".orig";
 			noBackup = false;
+			preserveDate = false;
 			isVerbose = false;
 			isQuiet = false;
 			isFormattedOnly = false;
@@ -157,23 +160,29 @@ class ASConsole
 		// functions
 		void error(const char *why, const char* what) const;
 		void formatCinToCout(ASFormatter& formatter) const;
-		bool formatFile(const string &fileName, astyle::ASFormatter &formatter) const;
 		int  getFileEncoding(const char* firstLine) const;
-		void getFilePaths(string &filePath);
+		void processFiles(ASFormatter &formatter);
 		processReturn processOptions(int argc, char** argv, ASFormatter &formatter);
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
+		bool stringEndsWith(const string &str, const string &suffix) const;
+		void updateExcludeVector(string suffixParam);
 
 	private:
+		void formatFile(const string &fileName, ASFormatter &formatter);
 		string getCurrentDirectory(const string &fileName) const;
 		void getFileNames(const string &directory, const string &wildcard);
+		void getFilePaths(string &filePath);
 		bool isPathExclued(const string &subPath);
 		void printHelp() const;
+		void printMsg(const string &msg) const;
+		void printVerboseHeader() const;
+		void printVerboseStats(clock_t startTime) const;
 		void removeFile(const char* fileName, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;
-		bool stringEndsWith(const string &str, const string &suffix) const;
 		void wait(int seconds) const;
 		int  waitForRemove(const char* oldFileName) const;
 		int  wildcmp(const char *wild, const char *data) const;
+		void writeOutputFile(const string &fileName, ostringstream &out) const;
 };
 
 
