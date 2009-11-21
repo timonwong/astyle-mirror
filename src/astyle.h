@@ -120,8 +120,19 @@ enum FileEncoding { ENCODING_OK,
                     UTF_32LE
                   };
 
+enum LineEndFormat { LINEEND_DEFAULT, // Use line break that matches most of the file
+                     LINEEND_WINDOWS,
+                     LINEEND_LINUX,
+                     LINEEND_MACOLD
+                   };
+
+
 //----------------------------------------------------------------------------
 // Class ASSourceIterator
+// A pure virtual class is used by ASFormatter and ASBeautifier instead of
+// ASStreamIterator. This allows programs using AStyle as a plugin to define
+// their own ASStreamIterator. The ASStreamIterator class must inherit 
+// this class.
 //----------------------------------------------------------------------------
 
 class ASSourceIterator
@@ -270,7 +281,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 	public:
 		ASBeautifier();
 		virtual ~ASBeautifier();
-		virtual void init(ASSourceIterator* iter); // pointer to dynamically created iterator.
+		virtual void init(ASSourceIterator* iter);
 		void init();
 		virtual bool hasMoreLines() const;
 		virtual string nextLine();
@@ -502,6 +513,7 @@ class ASFormatter : public ASBeautifier
 		virtual void init(ASSourceIterator* iter);
 		virtual bool hasMoreLines() const;
 		virtual string nextLine();
+		LineEndFormat getLineEndFormat() const;
 		void setFormattingStyle(FormatStyle style);
 		void setAddBracketsMode(bool state);
 		void setAddOneLineBracketsMode(bool state);
@@ -513,6 +525,7 @@ class ASFormatter : public ASBeautifier
 		void setBreakOneLineBlocksMode(bool state);
 		void setDeleteEmptyLinesMode(bool state);
 		void setIndentCol1CommentsMode(bool state);
+		void setLineEndFormat(LineEndFormat fmt);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
@@ -635,6 +648,7 @@ class ASFormatter : public ASBeautifier
 		BracketMode bracketFormatMode;
 		BracketType previousBracketType;
 		PointerAlign pointerAlignment;
+		LineEndFormat lineEnd;
 		bool isVirgin;
 		bool shouldPadOperators;
 		bool shouldPadParensOutside;
@@ -647,7 +661,7 @@ class ASFormatter : public ASBeautifier
 		bool isInComment;
 		bool noTrimCommentContinuation;
 		bool isInPreprocessor;
-		bool isInTemplate;   // true both in template definitions (e.g. template<class A>) and template usage (e.g. F<int>).
+		bool isInTemplate;
 		bool doesLineStartComment;
 		bool lineEndsInCommentOnly;
 		bool lineIsLineCommentOnly;

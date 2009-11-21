@@ -123,17 +123,16 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	headerStack  = new vector<const string*>;
 	*headerStack = *other.headerStack;
 
-	//tempStacks = new vector<vector<const string*>*>;
-	//vector<vector<const string*>*>::iterator iter;
-	//for (iter = other.tempStacks->begin();
-	//        iter != other.tempStacks->end();
-	//        ++iter)
-	//{
-	//	vector<const string*> *newVec = new vector<const string*>;
-	//	*newVec = **iter;
-	//	tempStacks->push_back(newVec);
-	//}
-	tempStacks = copyTempStacks(other);
+	tempStacks = new vector<vector<const string*>*>;
+	vector<vector<const string*>*>::iterator iter;
+	for (iter = other.tempStacks->begin();
+	        iter != other.tempStacks->end();
+	        ++iter)
+	{
+		vector<const string*> *newVec = new vector<const string*>;
+		*newVec = **iter;
+		tempStacks->push_back(newVec);
+	}
 
 	blockParenDepthStack = new vector<int>;
 	*blockParenDepthStack = *other.blockParenDepthStack;
@@ -256,12 +255,10 @@ ASBeautifier::~ASBeautifier()
  *
  * init() should be called every time a ABeautifier object is to start
  * beautifying a NEW source file.
- * init() recieves a pointer to a DYNAMICALLY CREATED ASSourceIterator object
- * that will be used to iterate through the source code. This object will be
- * deleted during the ASBeautifier's destruction, and thus should not be
- * deleted elsewhere.
+ * init() recieves a pointer to a ASSourceIterator object that will be 
+ * used to iterate through the source code.
  *
- * @param iter     a pointer to the DYNAMICALLY CREATED ASSourceIterator object.
+ * @param iter     a pointer to the ASSourceIterator or ASStreamIterator object.
  */
 void ASBeautifier::init(ASSourceIterator *iter)
 {
@@ -2304,25 +2301,6 @@ string ASBeautifier::trim(const string &str)
 
 	string returnStr(str, start, end + 1 - start);
 	return returnStr;
-}
-
-/**
- * Copy tempStacks for the copy constructor.
- * The value of the vectors must also be copied.
- */
-vector<vector<const string*>*>* ASBeautifier::copyTempStacks(const ASBeautifier &other) const
-{
-	vector<vector<const string*>*> *tempStacksNew = new vector<vector<const string*>*>;
-	vector<vector<const string*>*>::iterator iter;
-	for (iter = other.tempStacks->begin();
-	        iter != other.tempStacks->end();
-	        ++iter)
-	{
-		vector<const string*> *newVec = new vector<const string*>;
-		*newVec = **iter;
-		tempStacksNew->push_back(newVec);
-	}
-	return tempStacksNew;
 }
 
 /**

@@ -526,6 +526,33 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		else if (align == 3)
 			formatter.setPointerAlignment(ALIGN_NAME);
 	}
+	else if ( IS_OPTION(arg, "lineend=windows") )
+	{
+		formatter.setLineEndFormat(LINEEND_WINDOWS);
+	}
+	else if ( IS_OPTION(arg, "lineend=linux") )
+	{
+		formatter.setLineEndFormat(LINEEND_LINUX);
+	}
+	else if ( IS_OPTION(arg, "lineend=macold") )
+	{
+		formatter.setLineEndFormat(LINEEND_MACOLD);
+	}
+	else if ( isParamOption(arg, "z") )
+	{
+		int lineendType = 0;
+		string lineendParam = GET_PARAM(arg, "z");
+		if (lineendParam.length() > 0)
+			lineendType = atoi(lineendParam.c_str());
+		if (lineendType < 1 || lineendType > 3)
+			isOptionError(arg, errorInfo);
+		else if (lineendType == 1)
+			formatter.setLineEndFormat(LINEEND_WINDOWS);
+		else if (lineendType == 2)
+			formatter.setLineEndFormat(LINEEND_LINUX);
+		else if (lineendType == 3)
+			formatter.setLineEndFormat(LINEEND_MACOLD);
+	}
 	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
 	// depreciated in release 1.22
 	// removed from documentation in release 1.24 - may be removed at an appropriate time
@@ -644,11 +671,16 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 //--------------------------------------------------------------------------------------
 
 template<typename T>
-ASStreamIterator<T>::ASStreamIterator(T *in)
+ASStreamIterator<T>::ASStreamIterator(T *in, LineEndFormat lineEndArg)
 {
 	inStream = in;
 	buffer.reserve(200);
-	eolWindows = eolLinux = eolMacOld = 0;
+	eolWindows = 0;
+	eolLinux = 0;
+	eolMacOld = 0;
+	lineEnd = lineEndArg;
+	setOutputEOL(lineEndArg);
+	lineEndChange = false;
 	peekStart = 0;
 	prevLineDeleted = false;
 	checkForEmptyLine = false;
@@ -657,14 +689,6 @@ ASStreamIterator<T>::ASStreamIterator(T *in)
 template<typename T>
 ASStreamIterator<T>::~ASStreamIterator()
 {
-}
-
-// save the last input line after input has reached EOF
-template<typename T>
-void ASStreamIterator<T>::saveLastInputLine()
-{
-	assert(inStream->eof());
-	prevBuffer = buffer;
 }
 
 /**
@@ -738,19 +762,28 @@ string ASStreamIterator<T>::nextLine(bool emptyLineWasDeleted)
 		inStream->clear();
 	}
 
-	// set output end of line characters
-	if (eolWindows >= eolLinux)
+	// check for line end change
+	if (lineEnd == LINEEND_WINDOWS)
+		lineEndChange = (eolLinux + eolMacOld != 0);
+	else if (lineEnd == LINEEND_LINUX)
+		lineEndChange = (eolWindows + eolMacOld != 0);
+	else if (lineEnd == LINEEND_MACOLD)
+		lineEndChange = (eolWindows + eolLinux != 0);
+	else
 	{
-		if (eolWindows >= eolMacOld)
-			strcpy(outputEOL, "\r\n");  // Windows (CR+LF)
+		// set output end of line characters
+		if (eolWindows >= eolLinux)
+		{
+			if (eolWindows >= eolMacOld)
+				strcpy(outputEOL, "\r\n");  // Windows (CR+LF)
+			else
+				strcpy(outputEOL, "\r");    // MacOld (CR)
+		}
+		else if (eolLinux >= eolMacOld)
+			strcpy(outputEOL, "\n");    // Linux (LF)
 		else
 			strcpy(outputEOL, "\r");    // MacOld (CR)
 	}
-	else if (eolLinux >= eolMacOld)
-		strcpy(outputEOL, "\n");    // Linux (LF)
-	else
-		strcpy(outputEOL, "\r");    // MacOld (CR)
-
 	return buffer;
 }
 
@@ -803,6 +836,31 @@ void ASStreamIterator<T>::peekReset()
 	peekStart = 0;
 }
 
+// save the last input line after input has reached EOF
+template<typename T>
+void ASStreamIterator<T>::saveLastInputLine()
+{
+	assert(inStream->eof());
+	prevBuffer = buffer;
+}
+
+// set the outputEOL variable
+template<typename T>
+void ASStreamIterator<T>::setOutputEOL(LineEndFormat lineEndArg)
+{
+	assert(lineEndArg == LINEEND_DEFAULT
+	       || lineEndArg == LINEEND_WINDOWS
+	       || lineEndArg == LINEEND_LINUX
+	       || lineEndArg == LINEEND_MACOLD);
+	// set lineend character
+	if (lineEndArg == LINEEND_WINDOWS)
+		strcpy(outputEOL, "\r\n");
+	else if (lineEndArg == LINEEND_LINUX)
+		strcpy(outputEOL, "\n");
+	else if (lineEndArg == LINEEND_MACOLD)
+		strcpy(outputEOL, "\r");
+}
+
 #ifndef ASTYLE_LIB
 //--------------------------------------------------------------------------------------
 // ASConsole class
@@ -824,7 +882,7 @@ void ASConsole::error(const char *why, const char* what) const
  */
 void ASConsole::formatCinToCout(ASFormatter& formatter) const
 {
-	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
+	ASStreamIterator<istream> streamIterator(&cin, formatter.getLineEndFormat());     // create iterator for cin
 	formatter.init(&streamIterator);
 
 	while (formatter.hasMoreLines())
@@ -865,7 +923,7 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 			formatter.setCStyle();
 	}
 
-	ASStreamIterator<istream> streamIterator(&in);
+	ASStreamIterator<istream> streamIterator(&in, formatter.getLineEndFormat());
 	formatter.init(&streamIterator);
 
 	bool filesAreIdentical = true;   // input and output files are identical
@@ -914,7 +972,7 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 		filesFormatted++;
 	}
 	else
-		 filesUnchanged++;
+		filesUnchanged++;
 
 	if (encoding != ENCODING_OK)
 	{
@@ -1505,14 +1563,20 @@ void ASConsole::printHelp() const
 	(*_err) << "    Don't break lines containing multiple statements into\n";
 	(*_err) << "    multiple single-statement lines.\n";
 	(*_err) << endl;
+	(*_err) << "    --convert-tabs  OR  -c\n";
+	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
+	(*_err) << endl;
 	(*_err) << "    --align-pointer=type    OR  -k1\n";
 	(*_err) << "    --align-pointer=middle  OR  -k2\n";
 	(*_err) << "    --align-pointer=name    OR  -k3\n";
 	(*_err) << "    Attach a pointer or reference operator (* or &) to either\n";
 	(*_err) << "    the operator type (left), middle, or operator name (right).\n";
 	(*_err) << endl;
-	(*_err) << "    --convert-tabs  OR  -c\n";
-	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
+	(*_err) << "    --lineend=windows  OR  -z1\n";
+	(*_err) << "    --lineend=linux    OR  -z2\n";
+	(*_err) << "    --lineend=macold   OR  -z3\n";
+	(*_err) << "    Force use of the specified line end style. Valid options\n";
+	(*_err) << "    are windows (CRLF), linux (LF), and macold (CR).\n";
 	(*_err) << endl;
 	(*_err) << "    --mode=c\n";
 	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
@@ -2154,7 +2218,7 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	_err = NULL;
 
 	istringstream in(pSourceIn);
-	ASStreamIterator<istringstream> streamIterator(&in);
+	ASStreamIterator<istringstream> streamIterator(&in, formatter.getLineEndFormat());
 	ostringstream out;
 	formatter.init(&streamIterator);
 

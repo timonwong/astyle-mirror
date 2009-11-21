@@ -1408,7 +1408,7 @@ else
 
         <p id="_align-pointer"><code class="title">--align-pointer=type&nbsp;&nbsp; / -k1<br />
             --align-pointer=middle / -k2<br />
-        --align-pointer=name&nbsp;&nbsp; / -k3</code><br />
+            --align-pointer=name&nbsp;&nbsp; / -k3</code><br />
             Attach a pointer or reference operator (* or &amp;) to either the variable type
             (left) or variable name (right), or place it between the type and name. The spacing between the type and name will be preserved,
             if possible. This option is effective for C/C++ files only.</p>
@@ -1431,6 +1431,15 @@ else
                
     <p>&nbsp;</p>
 
+        <p id="P1"><code class="title">--lineend=windows&nbsp; / -z1<br />
+            --lineend=linux &nbsp; / -z2<br />
+            --lineend=macold&nbsp;&nbsp;/ -z3</code><br />
+            Force use of the specified line end style. Valid options are windows (CRLF), linux
+            (LF), and macold (CR). MacOld style is the format for OS 9 and earlier. Mac OS X
+            uses the Linux style. If one of these options is not used the line ends will be 
+            determined automatically from the input file.</p>
+
+    <p>&nbsp;</p>
         <p id="_mode=c"><code class="title">--mode=c</code><br />
          Indent a C or C++ file. The option is usually set from the file extension for each file.
         You can override the setting with this entry. It will be used for all files regardless of

@@ -58,6 +58,7 @@ ASFormatter::ASFormatter()
 	formattingStyle = STYLE_NONE;
 	bracketFormatMode = NONE_MODE;
 	pointerAlignment = ALIGN_NONE;
+	lineEnd = LINEEND_DEFAULT;
 	shouldPadOperators = false;
 	shouldPadParensOutside = false;
 	shouldPadParensInside = false;
@@ -74,9 +75,6 @@ ASFormatter::ASFormatter()
 	shouldBreakElseIfs = false;
 	shouldAddBrackets = false;
 	shouldAddOneLineBrackets = false;
-	// the following prevents warning messages with cppcheck
-	// it will NOT compile if activated
-//	init();
 }
 
 /**
@@ -120,12 +118,10 @@ ASFormatter::~ASFormatter()
  *
  * init() should be called every time a ASFormatter object is to start
  * formatting a NEW source file.
- * init() recieves a pointer to a DYNAMICALLY CREATED ASSourceIterator object
- * that will be used to iterate through the source code. This object will be
- * deleted during the ASFormatter's destruction, and thus should not be
- * deleted elsewhere.
+ * init() recieves a pointer to a ASSourceIterator object that will be 
+ * used to iterate through the source code.
  *
- * @param iter     a pointer to the DYNAMICALLY CREATED ASSourceIterator object.
+ * @param iter     a pointer to the ASSourceIterator or ASStreamIterator object.
  */
 void ASFormatter::init(ASSourceIterator *si)
 {
@@ -148,8 +144,8 @@ void ASFormatter::init(ASSourceIterator *si)
 	bracketTypeStack->push_back(NULL_TYPE);
 
 	currentHeader = NULL;
-	currentLine = string("");
-	readyFormattedLine = string("");
+	currentLine = "";
+	readyFormattedLine = "";
 	formattedLine = "";
 	currentChar = ' ';
 	previousChar = ' ';
@@ -158,6 +154,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	quoteChar = '"';
 	charNum = 0;
 	leadingSpaces = 0;
+	formattedLineCommentNum = 0;
 	preprocBracketTypeStackSize = 0;
 	spacePadNum = 0;
 	nextLineSpacePadNum = 0;
@@ -201,7 +198,6 @@ void ASFormatter::init(ASSourceIterator *si)
 	isInAsm = false;
 	isInAsmOneLine = false;
 	isInAsmBlock = false;
-	isInIndentableStruct = false;
 	isLineReady = false;
 	isPreviousBracketBlockRelated = false;
 	isInPotentialCalculation = false;
@@ -1503,6 +1499,16 @@ void ASFormatter::setTabSpaceConversionMode(bool state)
 void ASFormatter::setIndentCol1CommentsMode(bool state)
 {
 	shouldIndentCol1Comments = state;
+}
+
+/**
+ * set option to force all line ends to a particular style.
+ *
+ * @param fmt           format enum value
+ */
+void ASFormatter::setLineEndFormat(LineEndFormat fmt)
+{
+	lineEnd = fmt;
 }
 
 /**
@@ -4119,6 +4125,11 @@ int ASFormatter::getNextLineCommentAdjustment()
 	if (lastBracket != string::npos)
 		return (lastBracket - charNum);	// return a negative number
 	return 0;
+}
+
+LineEndFormat ASFormatter::getLineEndFormat() const
+{
+	return lineEnd;
 }
 
 /**

@@ -66,7 +66,16 @@
         type (left), operator name (right), or align it between the type and name. The spacing between the type and name will be preserved,
         if possible. The recognition of pointers and references has been improved.
         This resulted in an improvement of the &#8209;&#8209;pad&#8209;oper (-p) option.</p>
-   <p>
+    <p>
+        New options --lineend=windows&nbsp; (-z1), --lineend=linux&nbsp; (-z2), and --lineend=macold&nbsp;
+        (-z3) will force use of the specified line end style. Valid options are windows
+        (CRLF), linux (LF), and macold (CR). MacOld style is the format for OS 9 and earlier.
+        Mac OS X uses the Linux style. Changes in line ends will cause the file to be updated,
+        even if no other changes occur. If one of these options is not used the line ends
+        will be determined automatically from the input file.</p>
+    <p>
+    </p>
+    <p>
         A new option, &#8209;&#8209;pad&#8209;header (&#8209;H), will insert 
         space padding after headers ('if',
         'for', 'while'...). To remove any unwanted current space padding, use the
@@ -74,7 +83,8 @@
         are used, the headers will be padded and the
         padding will be removed from other parens. This has required a change to the default formatting
         of paren headers. They will now be left unchanged instead of automatically inserting space 
-        padding after them, unless the new option is requested. </p>
+        padding after them, unless the new option is requested. 
+    </p>
     <p>
         The spaces per indent can now be changed for any of the predefined styles. In prevoius
         releases the change would be ignored. This will allow any of the &#8209;&#8209;indent

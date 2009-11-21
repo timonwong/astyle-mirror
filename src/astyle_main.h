@@ -80,28 +80,34 @@ class ASStreamIterator : public ASSourceIterator
 		bool checkForEmptyLine;
 
 		// function declarations
-		ASStreamIterator(T *in);
+		ASStreamIterator(T *in, LineEndFormat lineEndArg);
 		virtual ~ASStreamIterator();
 		string nextLine(bool emptyLineWasDeleted);
 		string peekNextLine();
 		void peekReset();
 		void saveLastInputLine();
 
-		// inline functions
-		bool compareToInputBuffer(const string &nextLine) const { return nextLine == prevBuffer; }
-		const char* getOutputEOL() const { return outputEOL; }
-		bool hasMoreLines() const { return !inStream->eof(); }
-
 	private:
 		T * inStream;          // pointer to the input stream
 		string buffer;         // current input line
 		string prevBuffer;     // previous input line
-		int eolWindows;        // number of Windows line endings (CRLF)
-		int eolLinux;          // number of Linux line endings (LF)
-		int eolMacOld;         // number of old Mac line endings (CR)
-		int peekStart;         // starting position for peekNextLine()
-		char outputEOL[4];     // output end of line char
+		int eolWindows;        // number of Windows line endings, CRLF
+		int eolLinux;          // number of Linux line endings, LF
+		int eolMacOld;         // number of old Mac line endings. CR
+		LineEndFormat lineEnd; // enum LineEndFormat
+		char outputEOL[4];     // next output end of line char
+		bool lineEndChange;    // true if the lineend has changed
+		int peekStart;         // starting position for peekNextLine
 		bool prevLineDeleted;  // the previous input line was deleted
+
+	public:	// inline functions
+		bool compareToInputBuffer(const string &nextLine) const
+		{ return (nextLine == prevBuffer && !lineEndChange); }
+		const char* getOutputEOL() const { return outputEOL; }
+		bool hasMoreLines() const { return !inStream->eof(); }
+
+	private:
+		void setOutputEOL(LineEndFormat lineEndArg);
 };
 
 //----------------------------------------------------------------------------
@@ -151,7 +157,6 @@ class ASConsole
 			// other variables
 			hasWildcard = false;
 			mainDirectoryLength = 0;
-			optionsFileName = "";
 			filesFormatted = 0;
 			filesUnchanged = 0;
 			linesOut = 0;
