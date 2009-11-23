@@ -75,6 +75,9 @@ ASFormatter::ASFormatter()
 	shouldBreakElseIfs = false;
 	shouldAddBrackets = false;
 	shouldAddOneLineBrackets = false;
+	// the following prevents warning messages with cppcheck
+	// it will NOT compile if activated
+//	init();
 }
 
 /**

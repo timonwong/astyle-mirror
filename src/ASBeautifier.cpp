@@ -123,16 +123,17 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	headerStack  = new vector<const string*>;
 	*headerStack = *other.headerStack;
 
-	tempStacks = new vector<vector<const string*>*>;
-	vector<vector<const string*>*>::iterator iter;
-	for (iter = other.tempStacks->begin();
-	        iter != other.tempStacks->end();
-	        ++iter)
-	{
-		vector<const string*> *newVec = new vector<const string*>;
-		*newVec = **iter;
-		tempStacks->push_back(newVec);
-	}
+	//tempStacks = new vector<vector<const string*>*>;
+	//vector<vector<const string*>*>::iterator iter;
+	//for (iter = other.tempStacks->begin();
+	//        iter != other.tempStacks->end();
+	//        ++iter)
+	//{
+	//	vector<const string*> *newVec = new vector<const string*>;
+	//	*newVec = **iter;
+	//	tempStacks->push_back(newVec);
+	//}
+	tempStacks = copyTempStacks(other);
 
 	blockParenDepthStack = new vector<int>;
 	*blockParenDepthStack = *other.blockParenDepthStack;
@@ -2301,6 +2302,25 @@ string ASBeautifier::trim(const string &str)
 
 	string returnStr(str, start, end + 1 - start);
 	return returnStr;
+}
+
+/**
+ * Copy tempStacks for the copy constructor.
+ * The value of the vectors must also be copied.
+ */
+vector<vector<const string*>*>* ASBeautifier::copyTempStacks(const ASBeautifier &other) const
+{
+	vector<vector<const string*>*> *tempStacksNew = new vector<vector<const string*>*>;
+	vector<vector<const string*>*>::iterator iter;
+	for (iter = other.tempStacks->begin();
+	        iter != other.tempStacks->end();
+	        ++iter)
+	{
+		vector<const string*> *newVec = new vector<const string*>;
+		*newVec = **iter;
+		tempStacksNew->push_back(newVec);
+	}
+	return tempStacksNew;
 }
 
 /**
