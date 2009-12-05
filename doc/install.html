@@ -271,12 +271,13 @@
     <ul>
         <li><b>Release</b> builds the Artistic Style command line program (AStyle.exe).</li>
         <li><strong>Release Static</strong> builds the Artistic Style command line program (AStyle.exe).
-            This is the same as the Release build except that it links wth the static run-time
-            library instead of the dll. This build must be used if the program is to execute
-            on a machine that does not have Visual Studio installed.</li>
+            This is the same as the Release build except that it links with the static run-time
+            library instead of the dynamic. It is placed in the binStatic directory tp keep
+            it separate from the Release build. This build must be used if the program is to execute
+            on a machine that does not have the same version of Visual Studio installed.</li>
 
         <li><b>Release Dll</b> builds the Artistic Style program as a Dynamic Link Library
-        (AStyle.dll). This will also produce the exports library and the static library for linking
+        (AStyle.dll). This will also build an exports library and a static library for linking
         the dll.</li>
 
         <li><b>Release Lib</b> builds the Artistic Style program as a Static Library (AStyleLib.lib).
@@ -286,7 +287,8 @@
         (AStyled.exe).</li>
 
         <li><b>Debug Dll</b> builds the Artistic Style program as a Dynamic Link Library with
-        debugging information (AStyled.dll). This will also produce the exports library and the
+        debugging information (AStyled.dll). This will also build an exports library and
+            a
         static library for linking the dll.</li>
 
         <li>

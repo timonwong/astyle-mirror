@@ -1291,7 +1291,7 @@ void ASConsole::getFilePaths(string &filePath)
 			excludeErr = true;
 		}
 	}
-#ifndef ASTYLECON_TEST
+#ifndef ASTYLE_CONLIB
 	// abort if not a test
 	if (excludeErr)
 		exit(EXIT_FAILURE);
@@ -2248,8 +2248,8 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 	return _version;
 }
 
-// ASTYLECON_TEST is defined to exclude "main" from the test programs
-#elif !defined(ASTYLECON_TEST)
+// ASTYLE_CONLIB is defined to exclude "main" from the test programs
+#elif !defined(ASTYLE_CONLIB)
 
 // **************************   main function   ***************************************************
 

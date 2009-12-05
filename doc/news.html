@@ -61,18 +61,11 @@
         the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent Style</a> discussion at Wikipedia. The "Predefinde Style Options"
         section in the documentation contains the details. </p>
     <p>
-        New options --align-pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle (-k2), and 
-        &#8209;&#8209;align&#8209;pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator 
-        type (left), operator name (right), or align it between the type and name. The spacing between the type and name will be preserved,
-        if possible. The recognition of pointers and references has been improved.
-        This resulted in an improvement of the &#8209;&#8209;pad&#8209;oper (-p) option.</p>
-    <p>
-        New options --lineend=windows&nbsp; (-z1), --lineend=linux&nbsp; (-z2), and --lineend=macold&nbsp;
-        (-z3) will force use of the specified line end style. Valid options are windows
-        (CRLF), linux (LF), and macold (CR). MacOld style is the format for OS 9 and earlier.
-        Mac OS X uses the Linux style. Changes in line ends will cause the file to be updated,
-        even if no other changes occur. If one of these options is not used the line ends
-        will be determined automatically from the input file.</p>
+        The spaces per indent can now be changed for any of the predefined styles. In prevoius
+        releases the change would be ignored. This will allow any of the &#8209;&#8209;indent
+        options
+        to be used with a predefined style. If the spaces per indent is not specified,
+        the default for the style will be used.</p>
     <p>
     </p>
     <p>
@@ -86,23 +79,26 @@
         padding after them, unless the new option is requested. 
     </p>
     <p>
-        The spaces per indent can now be changed for any of the predefined styles. In prevoius
-        releases the change would be ignored. This will allow any of the &#8209;&#8209;indent
-        options
-        to be used with a predefined style. If the spaces per indent is not specified,
-        the default for the style will be used.</p>
+        New options --align-pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle (-k2), and 
+        &#8209;&#8209;align&#8209;pointer=name (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator 
+        type (left), operator name (right), or align it between the type and name. The spacing between the type and name will be preserved,
+        if possible. The recognition of pointers and references has been improved.
+        This resulted in an improvement of the &#8209;&#8209;pad&#8209;oper (-p) option.</p>
+    <p>
+        New options --lineend=windows&nbsp; (-z1), --lineend=linux&nbsp; (-z2), and --lineend=macold&nbsp;
+        (-z3) will force use of the specified line end style. Valid options are windows
+        (CRLF), linux (LF), and macold (CR). MacOld style is the format for OS 9 and earlier.
+        Mac OS X uses the Linux style. Changes in line ends will cause the file to be updated,
+        even if no other changes occur. If one of these options is not used the line ends
+        will be determined automatically from the input file.</p>
     <p>
         The Stroustroup predefined style has been changed to use 5 spaces per indent. This
         is the indentation used in the book "The C++ Programming Language" by Bjarne Stroustrup.</p>
     <p>
         The minimum conditional indent for the Linux predefined style has been changed to
-        4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). The new value 
-        conforms to the soft tab in the style description and gives a better appearance for continuation lines.</p>
-    <p>
-        The --indent-clases (-C) option has been fixed to indent C++ struct blocks containing
-        access modifiers (public, protected, and private). The struct block is not indented
-        if there are no access modifiers in the block.
-    </p>
+        4, or one-half the indent-length. The previous minimum conditional indent was 16 (2 * indent-length). The new value corresponds to the soft tab in the style description
+        and gives a better conformance to the style. It also gives a better appearance for
+        the continuation lines.</p>
     <p>
         Embedded SQL statement are now formatted correctly. The formattig of the SQL
         statements will be maintained as long as the standard hanging indent format is used.
@@ -110,12 +106,21 @@
         SQL will be aligned in a single column.</p>
     <p>
         Assembler statement processing has been improved to include extended assembly and
-        Microsoft specific lines and blocks.</p>
+        Microsoft specific assembler lines and blocks.</p>
+    <p>
+        The --indent-clases (-C) option has been fixed to indent C++ struct blocks containing
+        access modifiers (public, protected, and private). The struct block is not indented
+        if there are no access modifiers in the block.
+    </p>
     <p>
         The continuation line for "class" statements has been changes from two indents to
         one.</p>
     <p>
-        The intermediate .tmp file used in formatting has been eliminated and memory is used instead. In most cases this should result in a noticable seppd improvement.</p>
+        The intermediate .tmp file used in formatting has been eliminated and memory is used instead. In most cases this should result in a noticable speed improvement.</p>
+    <p>
+        Checks for the maximum in-statement indent have been fixed. The indent for some long
+        contiuation lines may be decreased. If you want the previous indentation, increase
+        the &#8209;&#8209;max&#8209;in&#8209;statement option.</p>
     <p>
         Occasionally, someone will use Artistic Style to format a file encoded with 
         UTF-16 or UTF-32 bit encoding. These files contain many nul bytes are incompatible with the 8 bit encoding
@@ -127,17 +132,27 @@
         the Wikipedia discussion on 
         <a href="http://en.wikipedia.org/wiki/Comparison_of_Unicode_encodings#Compatibility_issues">Compatibility issues</a>.</p>
     <p>
-        Checks for the maximum in-statement indent have been fixed. The indent for some long
-        contiuation lines may be decreased. If you want the previous indentation, increase
-        the &#8209;&#8209;max&#8209;in&#8209;statement option.</p>
-    <p>
-        The Intel compiler for Linux release 11.1 has a new procedure for compiles. Read the new Install
-        Information before using this compiler release.</p>
-    <p>
         The Artistic Style documentation has been changed to include a new "Padding Options"section.
         The padding options were previously in the "Formatting Options" section. This was done to allow for additional formatting
-        options. The Scripts page has a couple of
-        new scripts, including a "clean" script in python..</p>
+        options. 
+    </p>
+    <p>
+        The Scripts page has a couple of
+        new scripts, including a "clean" script in python.</p>
+    <p>
+        The Intel compiler for Linux, release 11.1, has a new procedure for compiles. Read the new Install
+        Information before using this compiler release.</p>
+    <p>
+        There is now a Subversion repository for Artistic Style. A new web page describes
+        how to check-out the files. The source code is under development and some changes
+        take several weeks to complete. Use reasonable precautions when using source code
+        from the repository.</p>
+    <p>
+        SourceForge recently made changes to their website which caused a few problems.
+        The web page links should be fixed with this release. It seems that some bug reports
+        may have been lost. If you have submitted a report that has not been addressed please
+        check to be sure it is still there. Yahoo closed their GeoCities site which made
+        the AStyleWin programs temporarily unavailabe. The new site is xxxxxxxxxxxxxxxxxxxx.</p>
     <p>
         Thanks to J P Nurmi (align-pointer), Mario Gleichmann (pad-header), MrTact (lineend), Christian.Stimming
         (&lt;&lt; and &gt;&gt; operators), Colin D Bennett (64-bit code), and Ettl Martin (cppcheck) for their contributions.
