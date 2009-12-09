@@ -1,39 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AStyle", "AStyle.vcproj", "{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AStyle", "AStyle\AStyle.vcproj", "{EB20762E-2B27-415C-9D86-751DBE3B45FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug Dll|Win32 = Debug Dll|Win32
-		Debug Java|Win32 = Debug Java|Win32
-		Debug Lib|Win32 = Debug Lib|Win32
 		Debug|Win32 = Debug|Win32
-		Release Dll|Win32 = Release Dll|Win32
-		Release Java|Win32 = Release Java|Win32
-		Release Lib|Win32 = Release Lib|Win32
-		Release Static|Win32 = Release Static|Win32
 		Release|Win32 = Release|Win32
+		Static|Win32 = Static|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug Dll|Win32.ActiveCfg = Debug Dll|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug Dll|Win32.Build.0 = Debug Dll|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug Java|Win32.ActiveCfg = Debug Java|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug Java|Win32.Build.0 = Debug Java|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug Lib|Win32.ActiveCfg = Debug Lib|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug Lib|Win32.Build.0 = Debug Lib|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Debug|Win32.Build.0 = Debug|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Dll|Win32.ActiveCfg = Release Dll|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Dll|Win32.Build.0 = Release Dll|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Java|Win32.ActiveCfg = Release Java|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Java|Win32.Build.0 = Release Java|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Lib|Win32.ActiveCfg = Release Lib|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Lib|Win32.Build.0 = Release Lib|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Static|Win32.ActiveCfg = Release Static|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release Static|Win32.Build.0 = Release Static|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release|Win32.ActiveCfg = Release|Win32
-		{8EFEDD3E-7E3B-450F-A58E-B91A59A8F6FC}.Release|Win32.Build.0 = Release|Win32
+		{EB20762E-2B27-415C-9D86-751DBE3B45FD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EB20762E-2B27-415C-9D86-751DBE3B45FD}.Debug|Win32.Build.0 = Debug|Win32
+		{EB20762E-2B27-415C-9D86-751DBE3B45FD}.Release|Win32.ActiveCfg = Release|Win32
+		{EB20762E-2B27-415C-9D86-751DBE3B45FD}.Release|Win32.Build.0 = Release|Win32
+		{EB20762E-2B27-415C-9D86-751DBE3B45FD}.Static|Win32.ActiveCfg = Static|Win32
+		{EB20762E-2B27-415C-9D86-751DBE3B45FD}.Static|Win32.Build.0 = Static|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

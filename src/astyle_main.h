@@ -97,7 +97,7 @@ class ASStreamIterator : public ASSourceIterator
 		LineEndFormat lineEnd; // enum LineEndFormat
 		char outputEOL[4];     // next output end of line char
 		bool lineEndChange;    // true if the lineend has changed
-		int peekStart;         // starting position for peekNextLine
+		streamoff peekStart;   // starting position for peekNextLine
 		bool prevLineDeleted;  // the previous input line was deleted
 
 	public:	// inline functions
