@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -34,38 +34,13 @@ namespace astyle
 {
 // static member variables
 int ASBeautifier::beautifierFileType = 9;		// initialized with an invalid type
-vector<const string*> ASBeautifier::headers;
-vector<const string*> ASBeautifier::nonParenHeaders;
-vector<const string*> ASBeautifier::preBlockStatements;
-vector<const string*> ASBeautifier::assignmentOperators;
-vector<const string*> ASBeautifier::nonAssignmentOperators;
-vector<const string*> ASBeautifier::indentableHeaders;
+vector<const string*>* ASBeautifier::headers = NULL;
+vector<const string*>* ASBeautifier::nonParenHeaders = NULL;
+vector<const string*>* ASBeautifier::preBlockStatements;
+vector<const string*>* ASBeautifier::assignmentOperators = NULL;
+vector<const string*>* ASBeautifier::nonAssignmentOperators;
+vector<const string*>* ASBeautifier::indentableHeaders;
 
-
-/*
- * initialize the static vars
- */
-void ASBeautifier::initStatic()
-{
-	if (fileType == beautifierFileType)    // don't build unless necessary
-		return;
-
-	beautifierFileType = fileType;
-
-	headers.clear();
-	nonParenHeaders.clear();
-	assignmentOperators.clear();
-	nonAssignmentOperators.clear();
-	preBlockStatements.clear();
-	indentableHeaders.clear();
-
-	ASResource::buildHeaders(headers, fileType, true);
-	ASResource::buildNonParenHeaders(nonParenHeaders, fileType, true);
-	ASResource::buildAssignmentOperators(assignmentOperators);
-	ASResource::buildNonAssignmentOperators(nonAssignmentOperators);
-	ASResource::buildPreBlockStatements(preBlockStatements, fileType);
-	ASResource::buildIndentableHeaders(indentableHeaders);
-}
 
 /**
  * ASBeautifier's constructor
@@ -104,6 +79,15 @@ ASBeautifier::ASBeautifier()
 	setEmptyLineFill(false);
 	setCStyle();
 	setPreprocessorIndent(false);
+
+	// initialize ASBeautifier static member vectors
+	beautifierFileType = 9;		// reset to an invalid type
+	initVector(headers);
+	initVector(nonParenHeaders);
+	initVector(assignmentOperators);
+	initVector(nonAssignmentOperators);
+	initVector(preBlockStatements);
+	initVector(indentableHeaders);
 }
 
 /**
@@ -256,7 +240,7 @@ ASBeautifier::~ASBeautifier()
  *
  * init() should be called every time a ABeautifier object is to start
  * beautifying a NEW source file.
- * init() recieves a pointer to a ASSourceIterator object that will be 
+ * init() recieves a pointer to a ASSourceIterator object that will be
  * used to iterate through the source code.
  *
  * @param iter     a pointer to the ASSourceIterator or ASStreamIterator object.
@@ -347,6 +331,31 @@ void ASBeautifier::init()
 	inLineNumber = 0;
 	horstmannIndentInStatement = 0;
 	nonInStatementBracket = 0;
+}
+
+/*
+ * initialize the static vars
+ */
+void ASBeautifier::initStatic()
+{
+	if (fileType == beautifierFileType)    // don't build unless necessary
+		return;
+
+	beautifierFileType = fileType;
+
+	headers->clear();
+	nonParenHeaders->clear();
+	assignmentOperators->clear();
+	nonAssignmentOperators->clear();
+	preBlockStatements->clear();
+	indentableHeaders->clear();
+
+	ASResource::buildHeaders(headers, fileType, true);
+	ASResource::buildNonParenHeaders(nonParenHeaders, fileType, true);
+	ASResource::buildAssignmentOperators(assignmentOperators);
+	ASResource::buildNonAssignmentOperators(nonAssignmentOperators);
+	ASResource::buildPreBlockStatements(preBlockStatements, fileType);
+	ASResource::buildIndentableHeaders(indentableHeaders);
 }
 
 /**
@@ -1317,8 +1326,8 @@ string ASBeautifier::beautify(const string &originalLine)
 
 			if (!isBlockOpener && currentHeader != NULL)
 			{
-				for (size_t n = 0; n < nonParenHeaders.size(); n++)
-					if (currentHeader == nonParenHeaders[n])
+				for (size_t n = 0; n < nonParenHeaders->size(); n++)
+					if (currentHeader == (*nonParenHeaders)[n])
 					{
 						isBlockOpener = true;
 						break;
@@ -1562,7 +1571,7 @@ string ASBeautifier::beautify(const string &originalLine)
 				{
 					headerStack->push_back(newHeader);
 					isInStatement = false;
-					if (indexOf(nonParenHeaders, newHeader) == -1)
+					if (indexOf(*nonParenHeaders, newHeader) == -1)
 					{
 						isInConditional = true;
 					}
@@ -2201,14 +2210,14 @@ int ASBeautifier::getNextProgramCharDistance(const string &line, int i) const
 
 // check if a specific line position contains a header.
 const string* ASBeautifier::findHeader(const string &line, int i,
-                                       const vector<const string*> &possibleHeaders) const
+                                       const vector<const string*>* possibleHeaders) const
 {
 	assert(isCharPotentialHeader(line, i));
 	// check the word
-	size_t maxHeaders = possibleHeaders.size();
+	size_t maxHeaders = possibleHeaders->size();
 	for (size_t p = 0; p < maxHeaders; p++)
 	{
-		const string* header = possibleHeaders[p];
+		const string* header = (*possibleHeaders)[p];
 		const size_t wordEnd = i + header->length();
 		if (wordEnd > line.length())
 			continue;
@@ -2231,23 +2240,22 @@ const string* ASBeautifier::findHeader(const string &line, int i,
 	return NULL;
 }
 
-
 // check if a specific line position contains an operator.
 const string* ASBeautifier::findOperator(const string &line, int i,
-        const vector<const string*> &possibleOperators) const
+        const vector<const string*>* possibleOperators) const
 {
 	assert(isCharPotentialOperator(line[i]));
 	// find the operator in the vector
 	// the vector contains the LONGEST operators first
 	// must loop thru the entire vector
-	size_t maxOperators = possibleOperators.size();
+	size_t maxOperators = possibleOperators->size();
 	for (size_t p = 0; p < maxOperators; p++)
 	{
-		const size_t wordEnd = i + (*possibleOperators[p]).length();
+		const size_t wordEnd = i + (*(*possibleOperators)[p]).length();
 		if (wordEnd > line.length())
 			continue;
-		if (line.compare(i, (*possibleOperators[p]).length(), *possibleOperators[p]) == 0)
-			return possibleOperators[p];
+		if (line.compare(i, (*(*possibleOperators)[p]).length(), *(*possibleOperators)[p]) == 0)
+			return (*possibleOperators)[p];
 	}
 	return NULL;
 }
@@ -2324,24 +2332,17 @@ vector<vector<const string*>*>* ASBeautifier::copyTempStacks(const ASBeautifier 
 }
 
 /**
- * delete a static member vector object using swap
- * to eliminate memory leak reporting for the vector
+ * delete a static member vector to eliminate memory leak reporting for the vector
  */
 void ASBeautifier::deleteStaticVectors()
 {
 	beautifierFileType = 9;		// reset to an invalid type
-	vector<const string*> headersClear;
-	headers.swap(headersClear);
-	vector<const string*> nonParenHeadersClear;
-	nonParenHeaders.swap(nonParenHeadersClear);
-	vector<const string*> preBlockStatementsClear;
-	preBlockStatements.swap(preBlockStatementsClear);
-	vector<const string*> assignmentOperatorsClear;
-	assignmentOperators.swap(assignmentOperatorsClear);
-	vector<const string*> nonAssignmentOperatorsClear;
-	nonAssignmentOperators.swap(nonAssignmentOperatorsClear);
-	vector<const string*> indentableHeadersClear;
-	indentableHeaders.swap(indentableHeadersClear);
+	deleteVector(headers);
+	deleteVector(nonParenHeaders);
+	deleteVector(preBlockStatements);
+	deleteVector(assignmentOperators);
+	deleteVector(nonAssignmentOperators);
+	deleteVector(indentableHeaders);
 }
 
 /**
@@ -2381,6 +2382,16 @@ void ASBeautifier::deleteContainer(vector<vector<const string*>*>* &container)
 }
 
 /**
+ * delete a vector<const string*>* object
+ */
+void ASBeautifier::deleteVector(vector<const string*>*& container)
+{
+	assert(container != NULL);
+	delete container;
+	container = NULL;
+}
+
+/**
  * initialize a vector object
  * T is the type of vector
  * used for all vectors
@@ -2393,6 +2404,15 @@ void ASBeautifier::initContainer(T &container, T value)
 	if (container != NULL )
 		deleteContainer(container);
 	container = value;
+}
+
+/**
+ * initialize a vector<const string*>* object
+ */
+void ASBeautifier::initVector(vector<const string*>*& container)
+{
+	assert(container == NULL);
+	container = new vector<const string*>;
 }
 
 /**

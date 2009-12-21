@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -120,10 +120,13 @@ enum FileEncoding { ENCODING_OK,
                     UTF_32LE
                   };
 
-enum LineEndFormat { LINEEND_DEFAULT, // Use line break that matches most of the file
+enum LineEndFormat { LINEEND_DEFAULT,	// Use line break that matches most of the file
                      LINEEND_WINDOWS,
                      LINEEND_LINUX,
-                     LINEEND_MACOLD
+                     LINEEND_MACOLD,
+                     LINEEND_CRLF = LINEEND_WINDOWS,
+                     LINEEND_LF   = LINEEND_LINUX,
+                     LINEEND_CR   = LINEEND_MACOLD
                    };
 
 
@@ -131,7 +134,7 @@ enum LineEndFormat { LINEEND_DEFAULT, // Use line break that matches most of the
 // Class ASSourceIterator
 // A pure virtual class is used by ASFormatter and ASBeautifier instead of
 // ASStreamIterator. This allows programs using AStyle as a plugin to define
-// their own ASStreamIterator. The ASStreamIterator class must inherit 
+// their own ASStreamIterator. The ASStreamIterator class must inherit
 // this class.
 //----------------------------------------------------------------------------
 
@@ -153,16 +156,16 @@ class ASSourceIterator
 class ASResource
 {
 	public:
-		void buildAssignmentOperators(vector<const string*> &assignmentOperators);
-		void buildCastOperators(vector<const string*> &castOperators);
-		void buildHeaders(vector<const string*> &headers, int fileType, bool beautifier=false);
-		void buildIndentableHeaders(vector<const string*> &indentableHeaders);
-		void buildNonAssignmentOperators(vector<const string*> &nonAssignmentOperators);
-		void buildNonParenHeaders(vector<const string*> &nonParenHeaders, int fileType, bool beautifier=false);
-		void buildOperators(vector<const string*> &operators);
-		void buildPreBlockStatements(vector<const string*> &preBlockStatements, int fileType);
-		void buildPreCommandHeaders(vector<const string*> &preCommandHeaders, int fileType);
-		void buildPreDefinitionHeaders(vector<const string*> &preDefinitionHeaders, int fileType);
+		void buildAssignmentOperators(vector<const string*>* assignmentOperators);
+		void buildCastOperators(vector<const string*>* castOperators);
+		void buildHeaders(vector<const string*>* headers, int fileType, bool beautifier=false);
+		void buildIndentableHeaders(vector<const string*>* indentableHeaders);
+		void buildNonAssignmentOperators(vector<const string*>* nonAssignmentOperators);
+		void buildNonParenHeaders(vector<const string*>* nonParenHeaders, int fileType, bool beautifier=false);
+		void buildOperators(vector<const string*>* operators);
+		void buildPreBlockStatements(vector<const string*>* preBlockStatements, int fileType);
+		void buildPreCommandHeaders(vector<const string*>* preCommandHeaders, int fileType);
+		void buildPreDefinitionHeaders(vector<const string*>* preDefinitionHeaders, int fileType);
 
 	public:
 		static const string AS_IF, AS_ELSE;
@@ -286,6 +289,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		virtual bool hasMoreLines() const;
 		virtual string nextLine();
 		virtual string beautify(const string &line);
+		void deleteVector(vector<const string*>*& container);
+		void initVector(vector<const string*>*& container);
 		void setTabIndentation(int length = 4, bool forceTabs = false);
 		void setSpaceIndentation(int length = 4);
 		void setMaxInStatementIndentLength(int max);
@@ -322,9 +327,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 	protected:
 		void deleteStaticVectors();
 		const string* findHeader(const string &line, int i,
-		                         const vector<const string*> &possibleHeaders) const;
+		                         const vector<const string*>* possibleHeaders) const;
 		const string* findOperator(const string &line, int i,
-		                           const vector<const string*> &possibleOperators) const;
+		                           const vector<const string*>* possibleOperators) const;
 		int getNextProgramCharDistance(const string &line, int i) const;
 		int  indexOf(vector<const string*> &container, const string *element);
 		string trim(const string &str);
@@ -351,12 +356,12 @@ class ASBeautifier : protected ASResource, protected ASBase
 		string preLineWS(int spaceTabCount, int tabCount);
 
 		static int beautifierFileType;
-		static vector<const string*> headers;
-		static vector<const string*> nonParenHeaders;
-		static vector<const string*> preBlockStatements;
-		static vector<const string*> assignmentOperators;
-		static vector<const string*> nonAssignmentOperators;
-		static vector<const string*> indentableHeaders;
+		static vector<const string*>* headers;
+		static vector<const string*>* nonParenHeaders;
+		static vector<const string*>* preBlockStatements;
+		static vector<const string*>* assignmentOperators;
+		static vector<const string*>* nonAssignmentOperators;
+		static vector<const string*>* indentableHeaders;
 
 		ASSourceIterator *sourceIterator;
 		vector<ASBeautifier*> *waitingBeautifierStack;
@@ -607,13 +612,13 @@ class ASFormatter : public ASBeautifier
 
 	private:  // variables
 		static int formatterFileType;
-		static vector<const string*> headers;
-		static vector<const string*> nonParenHeaders;
-		static vector<const string*> preDefinitionHeaders;
-		static vector<const string*> preCommandHeaders;
-		static vector<const string*> operators;
-		static vector<const string*> assignmentOperators;
-		static vector<const string*> castOperators;
+		static vector<const string*>* headers;
+		static vector<const string*>* nonParenHeaders;
+		static vector<const string*>* preDefinitionHeaders;
+		static vector<const string*>* preCommandHeaders;
+		static vector<const string*>* operators;
+		static vector<const string*>* assignmentOperators;
+		static vector<const string*>* castOperators;
 
 		ASSourceIterator *sourceIterator;
 		ASEnhancer *enhancer;
@@ -758,12 +763,12 @@ class ASFormatter : public ASBeautifier
 		}
 
 		// call ASBase::findHeader for the current character
-		const string *findHeader(const vector<const string*> &headers) {
+		const string *findHeader(const vector<const string*>* headers) {
 			return ASBeautifier::findHeader(currentLine, charNum, headers);
 		}
 
 		// call ASBase::findOperator for the current character
-		const string *findOperator(const vector<const string*> &headers) {
+		const string *findOperator(const vector<const string*>* headers) {
 			return ASBeautifier::findOperator(currentLine, charNum, headers);
 		}
 };  // Class ASFormatter

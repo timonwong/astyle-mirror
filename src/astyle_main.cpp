@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -527,36 +527,10 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 		else if (align == 3)
 			formatter.setPointerAlignment(ALIGN_NAME);
 	}
-	else if ( IS_OPTION(arg, "lineend=windows") )
-	{
-		formatter.setLineEndFormat(LINEEND_WINDOWS);
-	}
-	else if ( IS_OPTION(arg, "lineend=linux") )
-	{
-		formatter.setLineEndFormat(LINEEND_LINUX);
-	}
-	else if ( IS_OPTION(arg, "lineend=macold") )
-	{
-		formatter.setLineEndFormat(LINEEND_MACOLD);
-	}
-	else if ( isParamOption(arg, "z") )
-	{
-		int lineendType = 0;
-		string lineendParam = GET_PARAM(arg, "z");
-		if (lineendParam.length() > 0)
-			lineendType = atoi(lineendParam.c_str());
-		if (lineendType < 1 || lineendType > 3)
-			isOptionError(arg, errorInfo);
-		else if (lineendType == 1)
-			formatter.setLineEndFormat(LINEEND_WINDOWS);
-		else if (lineendType == 2)
-			formatter.setLineEndFormat(LINEEND_LINUX);
-		else if (lineendType == 3)
-			formatter.setLineEndFormat(LINEEND_MACOLD);
-	}
 	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
-	// depreciated in release 1.22
-	// removed from documentation in release 1.24 - may be removed at an appropriate time
+	// depreciated in release 1.23
+	// removed from documentation in release 1.24
+	// may be removed at an appropriate time
 //	else if ( IS_OPTION(arg, "style=kr") )
 //	{
 //		formatter.setFormattingStyle(STYLE_JAVA);
@@ -616,14 +590,14 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	// Options used by only console
 	else if ( IS_OPTIONS(arg, "n", "suffix=none") )
 	{
-		g_console->noBackup = true;
+		g_console->setNoBackup(true);
 	}
 	else if ( isParamOption(arg, "suffix=") )
 	{
 		string suffixParam = GET_PARAM(arg, "suffix=");
 		if (suffixParam.length() > 0)
 		{
-			g_console->origSuffix = suffixParam;
+			g_console->setOrigSuffix(suffixParam);
 		}
 	}
 	else if ( isParamOption(arg, "exclude=") )
@@ -634,27 +608,54 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 	}
 	else if ( IS_OPTIONS(arg, "r", "R") || IS_OPTION(arg, "recursive") )
 	{
-		g_console->isRecursive = true;
+		g_console->setIsRecursive(true);
 	}
 	else if ( IS_OPTIONS(arg, "Z", "preserve-date") )
 	{
-		g_console->preserveDate = true;
+		g_console->setPreserveDate(true);
 	}
 	else if ( IS_OPTIONS(arg, "v", "verbose") )
 	{
-		g_console->isVerbose = true;
+		g_console->setIsVerbose(true);
 	}
 	else if ( IS_OPTIONS(arg, "Q", "formatted") )
 	{
-		g_console->isFormattedOnly = true;
+		g_console->setIsFormattedOnly(true);
 	}
 	else if ( IS_OPTIONS(arg, "q", "quiet") )
 	{
-		g_console->isQuiet = true;
+		g_console->setIsQuiet(true);
 	}
 	else if ( IS_OPTIONS(arg, "X", "errors-to-stdout") )
 	{
 		_err = &cout;
+	}
+	else if ( IS_OPTION(arg, "lineend=windows") )
+	{
+		formatter.setLineEndFormat(LINEEND_WINDOWS);
+	}
+	else if ( IS_OPTION(arg, "lineend=linux") )
+	{
+		formatter.setLineEndFormat(LINEEND_LINUX);
+	}
+	else if ( IS_OPTION(arg, "lineend=macold") )
+	{
+		formatter.setLineEndFormat(LINEEND_MACOLD);
+	}
+	else if ( isParamOption(arg, "z") )
+	{
+		int lineendType = 0;
+		string lineendParam = GET_PARAM(arg, "z");
+		if (lineendParam.length() > 0)
+			lineendType = atoi(lineendParam.c_str());
+		if (lineendType < 1 || lineendType > 3)
+			isOptionError(arg, errorInfo);
+		else if (lineendType == 1)
+			formatter.setLineEndFormat(LINEEND_WINDOWS);
+		else if (lineendType == 2)
+			formatter.setLineEndFormat(LINEEND_LINUX);
+		else if (lineendType == 3)
+			formatter.setLineEndFormat(LINEEND_MACOLD);
 	}
 	else
 	{
@@ -672,16 +673,13 @@ bool parseOption(ASFormatter &formatter, const string &arg, const string &errorI
 //--------------------------------------------------------------------------------------
 
 template<typename T>
-ASStreamIterator<T>::ASStreamIterator(T *in, LineEndFormat lineEndArg)
+ASStreamIterator<T>::ASStreamIterator(T *in)
 {
 	inStream = in;
 	buffer.reserve(200);
 	eolWindows = 0;
 	eolLinux = 0;
 	eolMacOld = 0;
-	lineEnd = lineEndArg;
-	setOutputEOL(lineEndArg);
-	lineEndChange = false;
 	peekStart = 0;
 	prevLineDeleted = false;
 	checkForEmptyLine = false;
@@ -763,28 +761,19 @@ string ASStreamIterator<T>::nextLine(bool emptyLineWasDeleted)
 		inStream->clear();
 	}
 
-	// check for line end change
-	if (lineEnd == LINEEND_WINDOWS)
-		lineEndChange = (eolLinux + eolMacOld != 0);
-	else if (lineEnd == LINEEND_LINUX)
-		lineEndChange = (eolWindows + eolMacOld != 0);
-	else if (lineEnd == LINEEND_MACOLD)
-		lineEndChange = (eolWindows + eolLinux != 0);
-	else
+	// set output end of line characters
+	if (eolWindows >= eolLinux)
 	{
-		// set output end of line characters
-		if (eolWindows >= eolLinux)
-		{
-			if (eolWindows >= eolMacOld)
-				strcpy(outputEOL, "\r\n");  // Windows (CR+LF)
-			else
-				strcpy(outputEOL, "\r");    // MacOld (CR)
-		}
-		else if (eolLinux >= eolMacOld)
-			strcpy(outputEOL, "\n");    // Linux (LF)
+		if (eolWindows >= eolMacOld)
+			strcpy(outputEOL, "\r\n");  // Windows (CR+LF)
 		else
 			strcpy(outputEOL, "\r");    // MacOld (CR)
 	}
+	else if (eolLinux >= eolMacOld)
+		strcpy(outputEOL, "\n");    // Linux (LF)
+	else
+		strcpy(outputEOL, "\r");    // MacOld (CR)
+
 	return buffer;
 }
 
@@ -845,21 +834,32 @@ void ASStreamIterator<T>::saveLastInputLine()
 	prevBuffer = buffer;
 }
 
-// set the outputEOL variable
+// check for a change in line ends
 template<typename T>
-void ASStreamIterator<T>::setOutputEOL(LineEndFormat lineEndArg)
+bool ASStreamIterator<T>::getLineEndChange(int lineEndFormat) const
 {
-	assert(lineEndArg == LINEEND_DEFAULT
-	       || lineEndArg == LINEEND_WINDOWS
-	       || lineEndArg == LINEEND_LINUX
-	       || lineEndArg == LINEEND_MACOLD);
-	// set lineend character
-	if (lineEndArg == LINEEND_WINDOWS)
-		strcpy(outputEOL, "\r\n");
-	else if (lineEndArg == LINEEND_LINUX)
-		strcpy(outputEOL, "\n");
-	else if (lineEndArg == LINEEND_MACOLD)
-		strcpy(outputEOL, "\r");
+	assert(lineEndFormat == LINEEND_DEFAULT
+	       || lineEndFormat == LINEEND_WINDOWS
+	       || lineEndFormat == LINEEND_LINUX
+	       || lineEndFormat == LINEEND_MACOLD);
+
+	bool lineEndChange = false;
+	if (lineEndFormat == LINEEND_WINDOWS)
+		lineEndChange = (eolLinux + eolMacOld != 0);
+	else if (lineEndFormat == LINEEND_LINUX)
+		lineEndChange = (eolWindows + eolMacOld != 0);
+	else if (lineEndFormat == LINEEND_MACOLD)
+		lineEndChange = (eolWindows + eolLinux != 0);
+	else
+	{
+		if (eolWindows > 0)
+			lineEndChange = (eolLinux + eolMacOld != 0);
+		else if (eolLinux > 0)
+			lineEndChange = (eolWindows + eolMacOld != 0);
+		else if (eolMacOld > 0)
+			lineEndChange = (eolWindows + eolLinux != 0);
+	}
+	return lineEndChange;
 }
 
 #ifndef ASTYLE_LIB
@@ -867,6 +867,102 @@ void ASStreamIterator<T>::setOutputEOL(LineEndFormat lineEndArg)
 // ASConsole class
 // main function will be included only in the console build
 //--------------------------------------------------------------------------------------
+
+// rewrite a stringstream converting the line ends
+void ASConsole::convertLineEnds(ostringstream& out, int lineEnd)
+{
+	assert(lineEnd == LINEEND_WINDOWS || lineEnd == LINEEND_LINUX || lineEnd == LINEEND_MACOLD);
+	const string& inStr = out.str();	// avoids strange looking syntax
+	string outStr;						// the converted ouput
+	int inLength = inStr.length();
+	for (int pos = 0; pos < inLength; pos++)
+	{
+		if (inStr[pos] == '\r')
+		{
+			if (inStr[pos+ 1] == '\n')
+			{
+				// CRLF
+				if (lineEnd == LINEEND_CR)
+				{
+					outStr += inStr[pos];		// Delete the LF
+					pos++;
+					continue;
+				}
+				else if (lineEnd == LINEEND_LF)
+				{
+					outStr += inStr[pos+1];		// Delete the CR
+					pos++;
+					continue;
+				}
+				else
+				{
+					outStr += inStr[pos];		// Do not change
+					outStr += inStr[pos+1];
+					pos++;
+					continue;
+				}
+			}
+			else
+			{
+				// CR
+				if (lineEnd == LINEEND_CRLF)
+				{
+					outStr += inStr[pos];		// Insert the CR
+					outStr += '\n';				// Insert the LF
+					continue;
+				}
+				else if (lineEnd == LINEEND_LF)
+				{
+					outStr += '\n';				// Insert the LF
+					continue;
+				}
+				else
+				{
+					outStr += inStr[pos];		// Do not change
+					continue;
+				}
+			}
+		}
+		else if (inStr[pos] == '\n')
+		{
+			// LF
+			if (lineEnd == LINEEND_CRLF)
+			{
+				outStr += '\r';				// Insert the CR
+				outStr += inStr[pos];		// Insert the LF
+				continue;
+			}
+			else if (lineEnd == LINEEND_CR)
+			{
+				outStr += '\r';				// Insert the CR
+				continue;
+			}
+			else
+			{
+				outStr += inStr[pos];		// Do not change
+				continue;
+			}
+		}
+		else
+		{
+			outStr += inStr[pos];		// Write the current char
+		}
+	}
+	// replace the stream
+	out.str(outStr);
+}
+
+void ASConsole::correctMixedLineEnds(ostringstream& out)
+{
+	LineEndFormat lineEndFormat = LINEEND_DEFAULT;
+	if (strcmp(outputEOL, "\r\n") == 0)
+		lineEndFormat = LINEEND_WINDOWS;
+	if (strcmp(outputEOL, "\n") == 0)
+		lineEndFormat = LINEEND_LINUX;
+	if (strcmp(outputEOL, "\r") == 0)
+		lineEndFormat = LINEEND_MACOLD;
+	convertLineEnds(out, lineEndFormat);
+}
 
 void ASConsole::error(const char *why, const char* what) const
 {
@@ -883,7 +979,7 @@ void ASConsole::error(const char *why, const char* what) const
  */
 void ASConsole::formatCinToCout(ASFormatter& formatter) const
 {
-	ASStreamIterator<istream> streamIterator(&cin, formatter.getLineEndFormat());     // create iterator for cin
+	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
 	formatter.init(&streamIterator);
 
 	while (formatter.hasMoreLines())
@@ -924,30 +1020,32 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 			formatter.setCStyle();
 	}
 
-	ASStreamIterator<istream> streamIterator(&in, formatter.getLineEndFormat());
+	ASStreamIterator<istream> streamIterator(&in);
 	formatter.init(&streamIterator);
-
-	bool filesAreIdentical = true;   // input and output files are identical
-	string nextLine;                 // next output line
 
 	// make sure encoding is 8 bit
 	// if not set the eofbit so the file is not formatted
-	char buff[4] = {'\0'};
-	in.read(buff, 4);
-	in.seekg(0);
-	int encoding = getFileEncoding(buff);
+	FileEncoding encoding = getFileEncoding(in);
 	if (encoding != ENCODING_OK)
 		in.setstate(ios::eofbit);
 
-	// format the file
+	// set line end format
+	string nextLine;				// next output line
+	filesAreIdentical = true;		// input and output files are identical
+	LineEndFormat lineEndFormat = formatter.getLineEndFormat();
+	initializeOutputEOL(lineEndFormat);
 
+	// format the file
 	while (formatter.hasMoreLines())
 	{
 		nextLine = formatter.nextLine();
 		out << nextLine;
 		linesOut++;
 		if (formatter.hasMoreLines())
-			out << streamIterator.getOutputEOL();
+		{
+			setOutputEOL(lineEndFormat, streamIterator.getOutputEOL());
+			out << outputEOL;
+		}
 		else
 			streamIterator.saveLastInputLine();     // to compare the last input line
 
@@ -963,10 +1061,16 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 			streamIterator.checkForEmptyLine = false;
 		}
 	}
+	// correct for mixed line ends
+	if (lineEndsMixed)
+	{
+		correctMixedLineEnds(out);
+		filesAreIdentical = false;
+	}
 	in.close();
 
 	// if file has changed, write the new file
-	if (!filesAreIdentical)
+	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
 	{
 		writeOutputFile(fileName, out);
 		isFormatted = true;
@@ -976,20 +1080,7 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 		filesUnchanged++;
 
 	if (encoding != ENCODING_OK)
-	{
-		string msg = "********** following file unchanged: ";
-		if (encoding == UTF_16BE)
-			msg += "UTF-16BE encoding";
-		else if (encoding == UTF_16LE)
-			msg += "UTF-16LE encoding";
-		else if (encoding == UTF_32BE)
-			msg += "UTF-32BE encoding";
-		else if (encoding == UTF_32LE)
-			msg += "UTF-32LE encoding";
-		else
-			msg += "???????? encoding";
-		printMsg(msg);
-	}
+		printBadEncoding(encoding);
 
 	// remove targetDirectory from filename if required by print
 	string displayName;
@@ -1004,6 +1095,156 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 	{
 		if (!isFormattedOnly || encoding != ENCODING_OK)
 			printMsg("unchanged* " + displayName);
+	}
+}
+
+// for unit testing
+vector<bool> ASConsole::getExcludeHitsVector()
+{
+	return excludeHitsVector;
+}
+
+// for unit testing
+vector<string> ASConsole::getExcludeVector()
+{ return excludeVector; }
+
+// for unit testing
+vector<string> ASConsole::getFileName()
+{ return fileName; }
+
+// for unit testing
+vector<string> ASConsole::getFileNameVector()
+{ return fileNameVector; }
+
+// for unit testing
+vector<string> ASConsole::getFileOptionsVector()
+{ return fileOptionsVector; }
+
+int ASConsole::getFilesUnchanged()
+{ return filesUnchanged; }
+
+int ASConsole::getFilesFormatted()
+{ return filesFormatted; }
+
+bool ASConsole::getIsFormattedOnly()
+{ return isFormattedOnly; }
+
+bool ASConsole::getIsQuiet()
+{ return isQuiet; }
+
+bool ASConsole::getIsRecursive()
+{ return isRecursive; }
+
+bool ASConsole::getIsVerbose()
+{ return isVerbose; }
+
+bool ASConsole::getLineEndsMixed()
+{ return lineEndsMixed; }
+
+bool ASConsole::getNoBackup()
+{ return noBackup; }
+
+string ASConsole::getOptionsFileName()
+{ return optionsFileName; }
+
+bool ASConsole::getOptionsFileRequired()
+{ return optionsFileRequired; }
+
+// for unit testing
+vector<string> ASConsole::getOptionsVector()
+{ return optionsVector; }
+
+string ASConsole::getOrigSuffix()
+{ return origSuffix; }
+
+bool ASConsole::getPreserveDate()
+{ return preserveDate; }
+
+// initialize output end of line
+void ASConsole::initializeOutputEOL(LineEndFormat lineEndFormat)
+{
+	assert(lineEndFormat == LINEEND_DEFAULT
+	       || lineEndFormat == LINEEND_WINDOWS
+	       || lineEndFormat == LINEEND_LINUX
+	       || lineEndFormat == LINEEND_MACOLD);
+
+	outputEOL[0] = '\0';		// current line end
+	prevEOL[0] = '\0';			// previous line end
+	lineEndsMixed = false;		// output has mixed line ends, LINEEND_DEFAULT only
+
+	if (lineEndFormat == LINEEND_WINDOWS)
+		strcpy(outputEOL, "\r\n");
+	else if (lineEndFormat == LINEEND_LINUX)
+		strcpy(outputEOL, "\n");
+	else if (lineEndFormat == LINEEND_MACOLD)
+		strcpy(outputEOL, "\r");
+	else
+		outputEOL[0] = '\0';
+}
+
+void ASConsole::printBadEncoding(FileEncoding encoding) const
+{
+	string msg = "********** following file unchanged: ";
+	if (encoding == UTF_16BE)
+		msg += "UTF-16BE encoding";
+	else if (encoding == UTF_16LE)
+		msg += "UTF-16LE encoding";
+	else if (encoding == UTF_32BE)
+		msg += "UTF-32BE encoding";
+	else if (encoding == UTF_32LE)
+		msg += "UTF-32LE encoding";
+	else
+		msg += "???????? encoding";
+	printMsg(msg);
+}
+
+void ASConsole::setIsFormattedOnly(bool state)
+{ isFormattedOnly = state; }
+
+void ASConsole::setIsQuiet(bool state)
+{ isQuiet = state; }
+
+void ASConsole::setIsRecursive(bool state)
+{ isRecursive = state; }
+
+void ASConsole::setIsVerbose(bool state)
+{ isVerbose = state; }
+
+void ASConsole::setNoBackup(bool state)
+{ noBackup = state; }
+
+void ASConsole::setOptionsFileName(string name)
+{ optionsFileName = name; }
+
+void ASConsole::setOptionsFileRequired(bool state)
+{ optionsFileRequired = state; }
+
+void ASConsole::setOrigSuffix(string suffix)
+{ origSuffix = suffix; }
+
+void ASConsole::setPreserveDate(bool state)
+{ preserveDate = state; }
+
+// set outputEOL variable
+void ASConsole::setOutputEOL(LineEndFormat lineEndFormat, const char* currentEOL)
+{
+	if (lineEndFormat == LINEEND_DEFAULT)
+	{
+		strcpy(outputEOL, currentEOL);
+		if (strlen(prevEOL) == 0)
+			strcpy(prevEOL, outputEOL);
+		if (strcmp(prevEOL, outputEOL) != 0)
+		{
+			lineEndsMixed = true;
+			filesAreIdentical = false;
+			strcpy(prevEOL, outputEOL);
+		}
+	}
+	else
+	{
+		strcpy(prevEOL, currentEOL);
+		if (strcmp(prevEOL, outputEOL) != 0)
+			filesAreIdentical = false;
 	}
 }
 
@@ -1211,13 +1452,14 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 // check files for 16 or 32 bit encoding
 // the file must have a Byte Order Mark (BOM)
 // NOTE: some string functions don't work with NULLs (e.g. length())
-int ASConsole::getFileEncoding(const char* firstLine) const
+FileEncoding ASConsole::getFileEncoding(ifstream& in) const
 {
-	FileEncoding encoding = ENCODING_OK;
-
-	// BOM is max 4 bytes
+	// BOM max is 4 bytes
 	char buff[4] = {'\0'};
-	memcpy(buff, firstLine, 4);
+	in.read(buff, 4);
+	in.seekg(0);
+
+	FileEncoding encoding = ENCODING_OK;
 
 	if (memcmp(buff, "\x00\x00\xFE\xFF", 4) == 0)
 		encoding = UTF_32BE;
@@ -1300,6 +1542,11 @@ void ASConsole::getFilePaths(string &filePath)
 	// check if files were found (probably an input error if not)
 	if (fileName.size() == 0)
 		(*_err) << "No file to process " << filePath.c_str() << endl;
+}
+
+bool ASConsole::fileNameVectorIsEmpty()
+{
+	return fileNameVector.empty();
 }
 
 // compare a path to the exclude vector
@@ -1573,12 +1820,6 @@ void ASConsole::printHelp() const
 	(*_err) << "    Attach a pointer or reference operator (* or &) to either\n";
 	(*_err) << "    the operator type (left), middle, or operator name (right).\n";
 	(*_err) << endl;
-	(*_err) << "    --lineend=windows  OR  -z1\n";
-	(*_err) << "    --lineend=linux    OR  -z2\n";
-	(*_err) << "    --lineend=macold   OR  -z3\n";
-	(*_err) << "    Force use of the specified line end style. Valid options\n";
-	(*_err) << "    are windows (CRLF), linux (LF), and macold (CR).\n";
-	(*_err) << endl;
 	(*_err) << "    --mode=c\n";
 	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
 	(*_err) << endl;
@@ -1608,6 +1849,12 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --exclude=####\n";
 	(*_err) << "    Specify a file or directory #### to be excluded from processing.\n";
+	(*_err) << endl;
+	(*_err) << "    --lineend=windows  OR  -z1\n";
+	(*_err) << "    --lineend=linux    OR  -z2\n";
+	(*_err) << "    --lineend=macold   OR  -z3\n";
+	(*_err) << "    Force use of the specified line end style. Valid options\n";
+	(*_err) << "    are windows (CRLF), linux (LF), and macold (CR).\n";
 	(*_err) << endl;
 	(*_err) << "    --errors-to-stdout  OR  -X\n";
 	(*_err) << "    Print errors and help information to standard-output rather than\n";
@@ -1699,7 +1946,7 @@ processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &form
 			optionsFileName = GET_PARAM(arg, "--options=");
 			optionsFileRequired = true;
 			if (optionsFileName.compare("") == 0)
-				optionsFileName = ' ';
+				setOptionsFileName(" ");
 		}
 		else if ( IS_OPTION(arg, "-h")
 		          || IS_OPTION(arg, "--help")
@@ -1732,19 +1979,19 @@ processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &form
 		{
 			char* env = getenv("ARTISTIC_STYLE_OPTIONS");
 			if (env != NULL)
-				optionsFileName = string(env);
+				setOptionsFileName(env);
 		}
 		if (optionsFileName.compare("") == 0)
 		{
 			char* env = getenv("HOME");
 			if (env != NULL)
-				optionsFileName = string(env) + string("/.astylerc");
+				setOptionsFileName(string(env) + "/.astylerc");
 		}
 		if (optionsFileName.compare("") == 0)
 		{
 			char* env = getenv("USERPROFILE");
 			if (env != NULL)
-				optionsFileName = string(env) + string("/astylerc");
+				setOptionsFileName(string(env) + "/astylerc");
 		}
 		if (optionsFileName.compare("") != 0)
 			standardizePath(optionsFileName);
@@ -2219,7 +2466,7 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	_err = NULL;
 
 	istringstream in(pSourceIn);
-	ASStreamIterator<istringstream> streamIterator(&in, formatter.getLineEndFormat());
+	ASStreamIterator<istringstream> streamIterator(&in);
 	ostringstream out;
 	formatter.init(&streamIterator);
 
@@ -2273,7 +2520,7 @@ int main(int argc, char** argv)
 	}
 
 	// if no files have been given, use cin for input and cout for output
-	if (g_console->fileNameVector.empty())
+	if (g_console->fileNameVectorIsEmpty())
 	{
 		g_console->formatCinToCout(formatter);
 		return EXIT_SUCCESS;

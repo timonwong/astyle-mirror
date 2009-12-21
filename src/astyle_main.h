@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -80,8 +80,9 @@ class ASStreamIterator : public ASSourceIterator
 		bool checkForEmptyLine;
 
 		// function declarations
-		ASStreamIterator(T *in, LineEndFormat lineEndArg);
+		ASStreamIterator(T *in);
 		virtual ~ASStreamIterator();
+		bool getLineEndChange(int lineEndFormat) const;
 		string nextLine(bool emptyLineWasDeleted);
 		string peekNextLine();
 		void peekReset();
@@ -94,20 +95,15 @@ class ASStreamIterator : public ASSourceIterator
 		int eolWindows;        // number of Windows line endings, CRLF
 		int eolLinux;          // number of Linux line endings, LF
 		int eolMacOld;         // number of old Mac line endings. CR
-		LineEndFormat lineEnd; // enum LineEndFormat
 		char outputEOL[4];     // next output end of line char
-		bool lineEndChange;    // true if the lineend has changed
 		streamoff peekStart;   // starting position for peekNextLine
 		bool prevLineDeleted;  // the previous input line was deleted
 
 	public:	// inline functions
 		bool compareToInputBuffer(const string &nextLine) const
-		{ return (nextLine == prevBuffer && !lineEndChange); }
+		{ return (nextLine == prevBuffer); }
 		const char* getOutputEOL() const { return outputEOL; }
 		bool hasMoreLines() const { return !inStream->eof(); }
-
-	private:
-		void setOutputEOL(LineEndFormat lineEndArg);
 };
 
 //----------------------------------------------------------------------------
@@ -116,7 +112,7 @@ class ASStreamIterator : public ASSourceIterator
 
 class ASConsole
 {
-	public:
+	private:	// variables
 		// command line options
 		bool isRecursive;                   // recursive option
 		string origSuffix;                  // suffix= option
@@ -129,9 +125,17 @@ class ASConsole
 		// other variables
 		bool hasWildcard;                   // file name includes a wildcard
 		size_t mainDirectoryLength;         // directory length to be excluded in displays
+		bool filesAreIdentical;				// input and output files are identical
+		bool lineEndsMixed;					// outputhas mixed line ends
+		int  linesOut;                      // number of output lines
 		int  filesFormatted;                // number of files formatted
 		int  filesUnchanged;                // number of files unchanged
-		int  linesOut;                      // number of output lines
+		char outputEOL[4];					// current line end
+		char prevEOL[4];					// previous line end
+
+		string optionsFileName;             // file path and name of the options file to use
+		string targetDirectory;             // path to the directory being processed
+		string targetFilename;              // file name being processed
 
 		vector<string> excludeVector;       // exclude from wildcard hits
 		vector<bool>   excludeHitsVector;   // exclude flags for eror reporting
@@ -139,9 +143,6 @@ class ASConsole
 		vector<string> optionsVector;       // options from the command line
 		vector<string> fileOptionsVector;   // options from the options file
 		vector<string> fileName;            // files to be processed including path
-		string optionsFileName;             // file path and name of the options file to use
-		string targetDirectory;             // path to the directory being processed
-		string targetFilename;              // file name being processed
 
 	public:
 		ASConsole() {
@@ -156,6 +157,10 @@ class ASConsole
 			optionsFileRequired = false;
 			// other variables
 			hasWildcard = false;
+			filesAreIdentical = true;
+			lineEndsMixed = false;
+			outputEOL[0] = '\0';
+			prevEOL[0] = '\0';
 			mainDirectoryLength = 0;
 			filesFormatted = 0;
 			filesUnchanged = 0;
@@ -163,27 +168,62 @@ class ASConsole
 		}
 
 		// functions
+		void convertLineEnds(ostringstream& out, int lineEnd);
 		void error(const char *why, const char* what) const;
 		void formatCinToCout(ASFormatter& formatter) const;
-		int  getFileEncoding(const char* firstLine) const;
+		FileEncoding getFileEncoding(ifstream& in) const;
+		bool fileNameVectorIsEmpty();
+		int  getFilesFormatted();
+		int  getFilesUnchanged();
+		bool getIsFormattedOnly();
+		bool getIsQuiet();
+		bool getIsRecursive();
+		bool getIsVerbose();
+		bool getLineEndsMixed();
+		bool getNoBackup();
+		string getOptionsFileName();
+		bool getOptionsFileRequired();
+		string getOrigSuffix();
+		bool getPreserveDate();
 		void processFiles(ASFormatter &formatter);
 		processReturn processOptions(int argc, char** argv, ASFormatter &formatter);
+		void setIsFormattedOnly(bool state);
+		void setIsQuiet(bool state);
+		void setIsRecursive(bool state);
+		void setIsVerbose(bool state);
+		void setNoBackup(bool state);
+		void setOptionsFileName(string name);
+		void setOptionsFileRequired(bool state);
+		void setOrigSuffix(string suffix);
+		void setPreserveDate(bool state);
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
 		bool stringEndsWith(const string &str, const string &suffix) const;
 		void updateExcludeVector(string suffixParam);
 
+		// for unit testing
+		vector<string> getExcludeVector();
+		vector<bool>   getExcludeHitsVector();
+		vector<string> getFileNameVector();
+		vector<string> getOptionsVector();
+		vector<string> getFileOptionsVector();
+		vector<string> getFileName();
+
 	private:
+		void correctMixedLineEnds(ostringstream& out);
 		void formatFile(const string &fileName, ASFormatter &formatter);
 		string getCurrentDirectory(const string &fileName) const;
 		void getFileNames(const string &directory, const string &wildcard);
 		void getFilePaths(string &filePath);
+		void initializeOutputEOL(LineEndFormat lineEndFormat);
 		bool isPathExclued(const string &subPath);
+		void printBadEncoding(FileEncoding encoding) const;
 		void printHelp() const;
 		void printMsg(const string &msg) const;
 		void printVerboseHeader() const;
 		void printVerboseStats(clock_t startTime) const;
 		void removeFile(const char* fileName, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;
+		void setOutputEOL(LineEndFormat lineEndFormat, const char* currentEOL);
 		void wait(int seconds) const;
 		int  waitForRemove(const char* oldFileName) const;
 		int  wildcmp(const char *wild, const char *data) const;

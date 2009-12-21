@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- *   Copyright (C) 2006-2009 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -35,13 +35,13 @@ namespace astyle
 {
 // static member variables
 int ASFormatter::formatterFileType = 9;		// initialized with an invalid type
-vector<const string*> ASFormatter::headers;
-vector<const string*> ASFormatter::nonParenHeaders;
-vector<const string*> ASFormatter::preDefinitionHeaders;
-vector<const string*> ASFormatter::preCommandHeaders;
-vector<const string*> ASFormatter::operators;
-vector<const string*> ASFormatter::assignmentOperators;
-vector<const string*> ASFormatter::castOperators;
+vector<const string*>* ASFormatter::headers = NULL;
+vector<const string*>* ASFormatter::nonParenHeaders = NULL;
+vector<const string*>* ASFormatter::preDefinitionHeaders = NULL;
+vector<const string*>* ASFormatter::preCommandHeaders = NULL;
+vector<const string*>* ASFormatter::operators = NULL;
+vector<const string*>* ASFormatter::assignmentOperators = NULL;
+vector<const string*>* ASFormatter::castOperators = NULL;
 
 /**
  * Constructor of ASFormatter
@@ -75,6 +75,17 @@ ASFormatter::ASFormatter()
 	shouldBreakElseIfs = false;
 	shouldAddBrackets = false;
 	shouldAddOneLineBrackets = false;
+
+	// initialize ASFormatter static member vectors
+	formatterFileType = 9;		// reset to an invalid type
+	initVector(headers);
+	initVector(nonParenHeaders);
+	initVector(preDefinitionHeaders);
+	initVector(preCommandHeaders);
+	initVector(operators);
+	initVector(assignmentOperators);
+	initVector(castOperators);
+
 	// the following prevents warning messages with cppcheck
 	// it will NOT compile if activated
 //	init();
@@ -94,20 +105,13 @@ ASFormatter::~ASFormatter()
 	// delete static member vectors using swap to eliminate memory leak reporting
 	// delete ASFormatter static member vectors
 	formatterFileType = 9;		// reset to an invalid type
-	vector<const string*> headersClear;
-	headers.swap(headersClear);
-	vector<const string*> nonParenHeadersClear;
-	nonParenHeaders.swap(nonParenHeadersClear);
-	vector<const string*> preDefinitionHeadersClear;
-	preDefinitionHeaders.swap(preDefinitionHeadersClear);
-	vector<const string*> preCommandHeadersClear;
-	preCommandHeaders.swap(preCommandHeadersClear);
-	vector<const string*> operatorsClear;
-	operators.swap(operatorsClear);
-	vector<const string*> assignmentOperatorsClear;
-	assignmentOperators.swap(assignmentOperatorsClear);
-	vector<const string*> castOperatorsClear;
-	castOperators.swap(castOperatorsClear);
+	deleteVector(headers);
+	deleteVector(nonParenHeaders);
+	deleteVector(preDefinitionHeaders);
+	deleteVector(preCommandHeaders);
+	deleteVector(operators);
+	deleteVector(assignmentOperators);
+	deleteVector(castOperators);
 
 	// delete ASBeautifier static member vectors
 	// must be done when the ASFormatter object is deleted (not ASBeautifier)
@@ -121,10 +125,10 @@ ASFormatter::~ASFormatter()
  *
  * init() should be called every time a ASFormatter object is to start
  * formatting a NEW source file.
- * init() recieves a pointer to a ASSourceIterator object that will be 
+ * init() recieves a pointer to a ASSourceIterator object that will be
  * used to iterate through the source code.
  *
- * @param iter     a pointer to the ASSourceIterator or ASStreamIterator object.
+ * @param sourceIterator     a pointer to the ASSourceIterator or ASStreamIterator object.
  */
 void ASFormatter::init(ASSourceIterator *si)
 {
@@ -251,23 +255,23 @@ void ASFormatter::buildLanguageVectors()
 
 	formatterFileType = getFileType();
 
-	headers.clear();
-	nonParenHeaders.clear();
-	preDefinitionHeaders.clear();
-	preCommandHeaders.clear();
-	operators.clear();
-	assignmentOperators.clear();
-	castOperators.clear();
+	headers->clear();
+	nonParenHeaders->clear();
+	preDefinitionHeaders->clear();
+	preCommandHeaders->clear();
+	operators->clear();
+	assignmentOperators->clear();
+	castOperators->clear();
 
 	ASResource::buildHeaders(headers, getFileType());
 	ASResource::buildNonParenHeaders(nonParenHeaders, getFileType());
 	ASResource::buildPreDefinitionHeaders(preDefinitionHeaders, getFileType());
 	ASResource::buildPreCommandHeaders(preCommandHeaders, getFileType());
-	if (operators.size() == 0)
+	if (operators->size() == 0)
 		ASResource::buildOperators(operators);
-	if (assignmentOperators.size() == 0)
+	if (assignmentOperators->size() == 0)
 		ASResource::buildAssignmentOperators(assignmentOperators);
-	if (castOperators.size() == 0)
+	if (castOperators->size() == 0)
 		ASResource::buildCastOperators(castOperators);
 }
 
@@ -1206,8 +1210,8 @@ string ASFormatter::nextLine()
 				{
 					// must determine if newHeader is an assignment operator
 					// do NOT use findOperator!!!
-					if (find(assignmentOperators.begin(), assignmentOperators.end(), newHeader)
-					        != assignmentOperators.end())
+					if (find(assignmentOperators->begin(), assignmentOperators->end(), newHeader)
+					        != assignmentOperators->end())
 					{
 						char peekedChar = peekNextChar();
 						isInPotentialCalculation = (!(newHeader == &AS_EQUAL && peekedChar == '*')
