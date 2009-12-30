@@ -378,7 +378,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		vector<int> *inStatementIndentStackSizeStack;
 		vector<int> *parenIndentStack;
 		int  convertTabToSpaces(int i, int tabIncrementIn) const;
-		int  getPreviousWordIndex(const string& line, int currPos) const;
+		int  getInStatementIndentAssign(const string& line, size_t currPos) const;
+		int  getInStatementIndentComma(const string& line, size_t currPos) const;
 		bool isClassAccessModifier(string& line) const;
 		bool isLineEndComment(string& line, int startPos) const;
 		bool statementEndsWithComma(string &line, int index);
@@ -399,6 +400,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInAsmOneLine;
 		bool isInAsmBlock;
 		bool isInComment;
+		bool isInHorstmannComment;
 		bool isInCase;
 		bool isInQuestion;
 		bool isInStatement;
@@ -407,7 +409,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInDefine;
 		bool isInDefineDefinition;
 		bool classIndent;
-		bool isInClassHeader;
+		bool isInClassInitializer;
 		bool isInClassHeaderTab;
 		bool isInEnum;
 		bool switchIndent;
@@ -547,6 +549,7 @@ class ASFormatter : public ASBeautifier
 		template<typename T> void initContainer(T &container, T value);
 		char peekNextChar() const;
 		BracketType getBracketType();
+		bool addBracketsToStatement();
 		bool commentAndHeaderFollows() const;
 		bool getNextChar();
 		bool getNextLine(bool emptyLineWasDeleted = false);
@@ -572,7 +575,6 @@ class ASFormatter : public ASBeautifier
 		bool isOkToBreakBlock(BracketType bracketType) const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
-		void addBracketsToStatement();
 		void appendCharInsideComments();
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();

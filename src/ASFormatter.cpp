@@ -384,9 +384,6 @@ void ASFormatter::fixOptionVariableConflicts()
 	// cannot have both indent-blocks and indent-brackets, default to indent-blocks
 	if (getBlockIndent())
 		setBracketIndent(false);
-	// cannot have indent-brackets with horstmann brackets
-	if (bracketFormatMode == HORSTMANN_MODE)
-		setBracketIndent(false);
 }
 
 /**
@@ -423,6 +420,11 @@ string ASFormatter::nextLine()
 			        && currentLineBeginsWithBracket	// lineBeginsWith('{')
 			        && previousCommandChar == ' ')
 				previousCommandChar = '{';
+			if (clearNonInStatement)
+			{
+				isNonInStatementArray = false;
+				clearNonInStatement = false;
+			}
 			if (isInHorstmannRunIn)
 				isInLineBreak = false;
 			if (!isWhiteSpace(currentChar))
@@ -570,11 +572,14 @@ string ASFormatter::nextLine()
 			// should brackets be added
 			if (currentChar != '{' && shouldAddBrackets)
 			{
-				size_t firstText = currentLine.find_first_not_of(" \t");
-				assert(firstText != string::npos);
-				if (!shouldAddOneLineBrackets && (int) firstText == charNum)
-					breakCurrentOneLineBlock = true;
-				addBracketsToStatement();
+				bool bracketsAdded = addBracketsToStatement();
+				if (bracketsAdded && !shouldAddOneLineBrackets)
+				{
+					size_t firstText = currentLine.find_first_not_of(" \t");
+					assert(firstText != string::npos);
+					if ((int) firstText == charNum)
+						breakCurrentOneLineBlock = true;
+				}
 			}
 
 			// Make sure headers are broken from their succeeding blocks
@@ -813,7 +818,7 @@ string ASFormatter::nextLine()
 				else
 					isInIndentableStruct = false;
 
-				if (isBracketType(bracketType, ARRAY_NIS_TYPE))
+				if (isBracketType(bracketType, ARRAY_NIS_TYPE) && !isBracketType(bracketType, SINGLE_LINE_TYPE))
 					clearNonInStatement = true;
 			}
 
@@ -1298,11 +1303,6 @@ string ASFormatter::nextLine()
 		lineCommentNoBeautify = lineCommentNoIndent;
 		lineCommentNoIndent = false;
 		isInBeautifySQL = isInExecSQL;
-		if (clearNonInStatement)
-		{
-			isNonInStatementArray = false;
-			clearNonInStatement = false;
-		}
 	}
 
 	prependEmptyLine = false;
@@ -2041,8 +2041,7 @@ BracketType ASFormatter::getBracketType()
 	if (isOneLineBlockReached(currentLine, charNum))
 		returnVal = (BracketType)(returnVal | SINGLE_LINE_TYPE);
 
-	if (isBracketType(returnVal, ARRAY_TYPE)
-	        && isNonInStatementArrayBracket())
+	if (isBracketType(returnVal, ARRAY_TYPE) && isNonInStatementArrayBracket())
 	{
 		returnVal = (BracketType)(returnVal | ARRAY_NIS_TYPE);
 		isNonInStatementArray = true;
@@ -2161,6 +2160,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 	assert(isPointerOrReference());
 
 	if (previousNonWSChar == '='
+	        || previousNonWSChar == ','
 	        || previousNonWSChar == '.'
 	        || previousNonWSChar == '>'
 	        || previousNonWSChar == '<'
@@ -2298,12 +2298,13 @@ bool ASFormatter::isInExponent() const
 bool ASFormatter::isNonInStatementArrayBracket() const
 {
 	bool returnVal = false;
-
+	char nextChar = peekNextChar();
 	// if this opening bracket begins the line there will be no inStatement indent
-	if (currentLineBeginsWithBracket && charNum == (int) currentLineFirstBracketNum)
+	if (currentLineBeginsWithBracket
+	        && charNum == (int) currentLineFirstBracketNum
+	        && nextChar != '}')
 		returnVal = true;
 	// if an opening bracket ends the line there will be no inStatement indent
-	char nextChar = peekNextChar();
 	if (isWhiteSpace(nextChar)
 	        || isBeforeAnyLineEndComment(charNum)
 	        || nextChar == '{')
@@ -2582,7 +2583,7 @@ void ASFormatter::appendCharInsideComments(void)
 
 	if (isBeforeComment())
 		breakLine();
-	if (isCharImmediatelyPostLineComment)
+	else if (isCharImmediatelyPostLineComment)
 		shouldBreakLineAtNextChar = true;
 	return; // true;
 }
@@ -3581,7 +3582,13 @@ void ASFormatter::convertTabToSpaces()
 */
 bool ASFormatter::isOkToBreakBlock(BracketType bracketType) const
 {
-	if (!isBracketType(bracketType,  SINGLE_LINE_TYPE)
+	// Actually, there should not be an ARRAY_TYPE bracket here.
+	// But this will avoid breaking a one line block when there is.
+	// Otherwise they will be formatted differently on consecutive runs.
+	if (isBracketType(bracketType, ARRAY_TYPE)
+	        && isBracketType(bracketType, SINGLE_LINE_TYPE))
+		return false;
+	if (!isBracketType(bracketType, SINGLE_LINE_TYPE)
 	        || shouldBreakOneLineBlocks
 	        || breakCurrentOneLineBlock)
 		return true;
@@ -4251,7 +4258,7 @@ void ASFormatter::isLineBreakBeforeClosingHeader()
  * Brackets are not added if the proper conditions are not met.
  * Brackets are added to the currentLine.
  */
-void ASFormatter::addBracketsToStatement()
+bool ASFormatter::addBracketsToStatement()
 {
 	assert(isImmediatelyPostHeader);
 
@@ -4261,17 +4268,17 @@ void ASFormatter::addBracketsToStatement()
 	        && currentHeader != &AS_WHILE
 	        && currentHeader != &AS_DO
 	        && currentHeader != &AS_FOREACH)
-		return;
+		return false;
 
 	// do not add if a header follows (i.e. else if)
 	if (isCharPotentialHeader(currentLine, charNum))
 		if (findHeader(headers) != NULL)
-			return;
+			return false;
 
 	// find the next semi-colon
 	size_t nextSemiColon = findNextChar(currentLine, ';', charNum+1);
 	if (nextSemiColon == string::npos)
-		return;
+		return false;
 
 	// add closing bracket before changing the line length
 	if (nextSemiColon == currentLine.length() - 1)
@@ -4288,6 +4295,7 @@ void ASFormatter::addBracketsToStatement()
 		if ((formattedLine.length() - 1) - lastText > 1)
 			formattedLine.erase(lastText + 1);
 	}
+	return true;
 }
 
 /**

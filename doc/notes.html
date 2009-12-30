@@ -21,27 +21,34 @@
         Artistic Style 1.24&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add &#8209;&#8209;brackets=horstmann (-g) to place run&#8209;in statements on the same line as an opening bracket.
+        <li>Add new option &#8209;&#8209;brackets=horstmann (-g) to place run&#8209;in statements on the same line as an opening bracket.
         </li>
-        <li>Add --style=horstmann (-A9) using horstmann brackets to predefined styles. </li>
-        <li>Add &#8209;&#8209;add-brackets (-j) and --add-one-line-brackets (-J) to place brackets around one line statements.
+        <li>Add new style --style=horstmann (-A9) using horstmann brackets to predefined styles. </li>
+        <li>Add new option &#8209;&#8209;add-brackets (-j) and --add-one-line-brackets (-J) to place brackets around one line statements.
         </li>
-        <li>Add --style=1tbs and --style=otbs (-A10) using linux brackets and the --add-brackets option to predefined
+        <li>Add new style --style=1tbs and --style=otbs (-A10) using linux brackets and the --add-brackets option to predefined
             styles. </li>
         <li>Add new option &#8209;&#8209;pad&#8209;header (&#8209;H) from Mario Gleichmann to insert space padding after paren
             headers. </li>
-        <li>Add new options &#8209;&#8209;align&#8209;pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle (-k2) and
+        <li>Add new option &#8209;&#8209;align&#8209;pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle (-k2) and
             &#8209;&#8209;align&#8209;pointer=name (-k3) from J P Nurmi. </li>
-        <li>Add new options &#8209;&#8209;lineend=windows (-z1), &#8209;&#8209;lineend=linux (-z2) and &#8209;&#8209;lineend=macold
+        <li>Add new option &#8209;&#8209;lineend=windows (-z1), &#8209;&#8209;lineend=linux (-z2) and &#8209;&#8209;lineend=macold
             (-z3) from MrTact. </li>
         <li>Add new option &#8209;&#8209;indent&#8209;col1&#8209;comments (-Y) to indent C++ comments beginning in column
             one. </li>
         <li>Add formatting of embedded SQL statements in C/C++.</li>
-        <li>Add rejecting 16 or 32 bit file encoding and displaying a warning message.</li>
+        <li>Add rejecting 16 or 32 bit file encoding and display a warning message.</li>
         <li>Remove .tmp file by using ostringstream instead of ofstream. &nbsp;</li>
         <li>Remove depreciated option style=kr.</li>
+        <li>Remove trace file from ASFormatter and use 'cout' instead. </li>
+        <li>Improve assembler statement processing to include extended assembly.</li>
+        <li>Improve assembler statement processing to include Microsoft specific lines and blocks.</li>
+        <li>Improve recognition of pointers and references vs. arithmetic operators.</li>
+        <li>Improve recognition of arithmetic operators for --pad-oper (-p) option. </li>
+        <li>Change the help display "Formatting Options" to "Formatting Options" and "Padding Options".</li>
         <li>Change --style=linux default minimum conditional indent to 4.</li>
-        <li>Change "class" statement continuation lines to one indent.</li>
+        <li>Change "class" initializer statement to one indent.</li>
+        <li>Change &quot;class&quot; initializer statement continuation lines to align on the first initializer.</li>
         <li>Change default formatting to leave paren headers unchanged instead of always inserting space padding after them.
         </li>
         <li>Change &#8209;&#8209;unpad&#8209;paren to unpad headers unless padding is requested. </li>
@@ -51,11 +58,13 @@
         <li>Change spaces per tab minimum value from 1 to 2.</li>
         <li>Change --min-conditional-indent to allow for statements preceded by a bracket (horstmann brackets). </li>
         <li>Change predefined styles to allow changes to spaces per indent.</li>
-        <li>Change ASBeautifier to output the entire comment line instead of characters. </li>
-        <li>Improve assembler statement processing to include extended assembly.</li>
-        <li>Improve assembler statement processing to include Microsoft specific lines and blocks.</li>
-        <li>Improve recognition of pointers and references vs. arithmetic operators.</li>
-        <li>Improve recognition of arithmetic operators for --pad-oper (-p) option. </li>
+        <li>Change ASBeautifier to output an entire comment line instead of characters. </li>
+        <li>Change from Ettl Martin for cppcheck compliance. </li>
+        <li>Change space padding of line end comments to one space when the proper alignment cannot be maintained.</li>
+        <li>Change comment formatting in ASFormatter to output the entire comment instead of single characters.</li>
+        <li>Change quote formatting in ASFormatter to output the entire string instead of single characters.</li>
+        <li>Fix non-instatement array to recognize an empty bracket.</li>
+        <li>Fix occasional array formatting problem with one-line blocks when indent-brackets is used.</li>
         <li>Fix default line end processing to always output consistent line ends.</li>
         <li>Fix memory leaks by changing static vectors to static vector pointers so the object can be deleted.</li>
         <li>Fix console build trying to use Unicode character set.</li>
@@ -74,7 +83,7 @@
         <li>Fix to recognize parens in template definitions.</li>
         <li>Fix recognition of class initializer when class description contains multiple lines.</li>
         <li>Fix identification of pointer dereferences and address-of indicators.</li>
-        <li>Fix from Colin D Bennett to fix 64-bit comparison. </li>
+        <li>Fix from Colin D Bennett for 64-bit comparison. </li>
         <li>Fix console error procedure to terminate on an error.</li>
         <li>Fix 'return' statement for padding or not padding arithmetic operators.</li>
         <li>Fix C# 'delegate' and 'unchecked' not being identified as keywords.</li>
@@ -98,36 +107,36 @@
         <li>Fix to leave tab indentation on no-indent line comments.</li>
         <li>Fix comments when a bracket is added or removed from a line.</li>
         <li>Fix indenting preprocessor statements in a wxWidgets or MFC macro.</li>
-        <li>Changes from Ettl Martin for cppcheck compliance. </li>
-        <li>Change space padding of line end comments to one space when the proper alignment cannot be maintained.</li>
-        <li>Remove trace file from ASFormatter and use 'cout' instead. </li>
-        <li>Split the help display "Formatting Options" into "Formatting Options" and "Padding Options".</li>
-        <li>Change comment formatting in ASFormatter to output the entire comment instead of single characters.</li>
-        <li>Change quote formatting in ASFormatter to output the entire string instead of single characters.</li>
-        <li>Remove peekNextChar() function from ASBeautifier and use the function in ASBase.</li>
         <li>Fix memory leak reporting of global and static class member vectors. </li>
         <li>Refactor to implement unit testing and improve design and decomposition:
             <ul>
-                <li>Extract method copyTempStacks.</li>
-                <li>Extract methods processSwitchBlock and findCaseColon. </li>
                 <li>Replace multiple line conditional statements with a method and eliminate complex "not" (!) logic. </li>
-                <li>Extract method formatCinToCout. </li>
-                <li>Encapsulate global variables isModeManuallySet. </li>
-                <li>Extract method isLineBreakBeforeClosingHeader. </li>
-                <li>Change standardizePath to be called when the vector entry is built. </li>
-                <li>Move formatFile call from getFilePaths to main.</li>
-                <li>Change g_console from an object to an object pointer to allow rebuilding the object.</li>
-                <li>Change ASConsole variables to private with getters and setters.</li>
-                <li>Change processOptions method to return to main instead of exiting.</li>
-                <li>Move multi-line comment alignment from ASBeautifier to ASFormatter. </li>
-                <li>Extract methods formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
-                <li>Extract methods formatCommentOpener and formatCommentBody.</li>
-                <li>Extract methods formatLineCommentOpener and formatLineCommentBody.</li>
-                <li>Extract methods formatQuoteOpener and formatQuoteBody. </li>
-                <li>Extract methods processFiles and writeOutputFile. </li>
-                <li>Extract method updateExcludeVector.</li>
             </ul>
         </li>
+        <ul>
+            <li>Change standardizePath to be called when a vector entry is built. </li>
+        </ul>
+        <ul>
+            <li>Change g_console from an object to an object pointer to allow rebuilding the object.</li>
+            <li>Change ASConsole variables to private with getters and setters.</li>
+            <li>Change processOptions method to return to main instead of exiting.</li>
+            <li>Move formatFile call from getFilePaths to main.</li>
+            <li>Move peekNextChar() function from ASBeautifier to ASBase.</li>
+            <li>Move multi-line comment alignment from ASBeautifier to ASFormatter. </li>
+            <li>Encapsulate global variable isModeManuallySet. </li>
+            <li>Extract methods formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
+            <li>Extract methods formatCommentOpener and formatCommentBody.</li>
+            <li>Extract methods formatLineCommentOpener and formatLineCommentBody.</li>
+            <li>Extract methods formatQuoteOpener and formatQuoteBody. </li>
+            <li>Extract methods processFiles and writeOutputFile. </li>
+            <li>Extract methods processSwitchBlock and findCaseColon. </li>
+            <li>Extract method updateExcludeVector.</li>
+            <li>Extract method copyTempStacks.</li>
+        </ul>
+        <ul>
+            <li>Extract method formatCinToCout. </li>
+            <li>Extract method isLineBreakBeforeClosingHeader. </li>
+        </ul>
     </ul>
 
     <h3 id="_1.23">
@@ -1097,7 +1106,7 @@
 
     <center style="margin-left: -0.4in;">
         <a href="http://sourceforge.net/projects/astyle">
-            <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&type=16" width="150" height="40" alt="[SourceForge.net Logo]" /></a>
+            <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&type=16" width="150" height="40" alt="[SourceForge.net]" /></a>
     </center>
 
     <p>

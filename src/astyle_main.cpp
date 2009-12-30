@@ -680,6 +680,7 @@ ASStreamIterator<T>::ASStreamIterator(T *in)
 	eolWindows = 0;
 	eolLinux = 0;
 	eolMacOld = 0;
+	outputEOL[0] = '\0';
 	peekStart = 0;
 	prevLineDeleted = false;
 	checkForEmptyLine = false;
