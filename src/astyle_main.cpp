@@ -1374,7 +1374,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	errno = 0;
 
 	DIR *dp = opendir(directory.c_str());
-	if (errno)
+	if (dp == NULL)
 		error("Cannot open directory", directory.c_str());
 
 	// save the first fileName entry for this recursion
@@ -1385,8 +1385,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	{
 		// get file status
 		string entryFilepath = directory + g_fileSeparator + entry->d_name;
-		stat(entryFilepath.c_str(), &statbuf);
-		if (errno)
+		if (stat(entryFilepath.c_str(), &statbuf) != 0)
 		{
 			if (errno == EOVERFLOW)         // file over 2 GB is OK
 			{
@@ -1424,9 +1423,8 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 			}
 		}
 	}
-	closedir(dp);
 
-	if (errno)
+	if (closedir(dp) != 0)
 	{
 		perror("errno message");
 		error("Error reading directory", directory.c_str());
@@ -1535,7 +1533,7 @@ void ASConsole::getFilePaths(string &filePath)
 			excludeErr = true;
 		}
 	}
-#ifndef ASTYLE_CONLIB
+#ifndef ASTYLECON_LIB
 	// abort if not a test
 	if (excludeErr)
 		exit(EXIT_FAILURE);
@@ -2215,7 +2213,7 @@ void ASConsole::updateExcludeVector(string suffixParam)
 	excludeHitsVector.push_back(false);
 }
 
-void ASConsole::wait(int seconds) const
+void ASConsole::sleep(int seconds) const
 {
 	clock_t endwait;
 	endwait = clock_t (clock () + seconds * CLOCKS_PER_SEC);
@@ -2226,10 +2224,10 @@ int ASConsole::waitForRemove(const char* newFileName) const
 {
 	struct stat stBuf;
 	int seconds;
-	// wait a max of 20 seconds for the remove
+	// sleep a max of 20 seconds for the remove
 	for (seconds = 0; seconds < 20; seconds++)
 	{
-		wait(1);
+		sleep(1);
 		if (stat(newFileName, &stBuf) != 0)
 			break;
 	}
@@ -2497,8 +2495,8 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 	return _version;
 }
 
-// ASTYLE_CONLIB is defined to exclude "main" from the test programs
-#elif !defined(ASTYLE_CONLIB)
+// ASTYLECON_LIB is defined to exclude "main" from the test programs
+#elif !defined(ASTYLECON_LIB)
 
 // **************************   main function   ***************************************************
 

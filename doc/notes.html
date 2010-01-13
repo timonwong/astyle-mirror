@@ -45,54 +45,53 @@
         <li>Improve assembler statement processing to include Microsoft specific lines and blocks.</li>
         <li>Improve recognition of pointers and references vs. arithmetic operators.</li>
         <li>Improve recognition of arithmetic operators for --pad-oper (-p) option. </li>
-        <li>Change the help display "Formatting Options" to "Formatting Options" and "Padding Options".</li>
-        <li>Change --style=linux default minimum conditional indent to 4.</li>
         <li>Change "class" initializer statement to one indent.</li>
         <li>Change &quot;class&quot; initializer statement continuation lines to align on the first initializer.</li>
+        <li>Change predefined styles to allow changes to spaces per indent.</li>
+        <li>Change --style=stroustroup to 5 spaces per indent.</li>
+        <li>Change --style=linux default minimum conditional indent to 4.</li>
         <li>Change default formatting to leave paren headers unchanged instead of always inserting space padding after them.
         </li>
         <li>Change &#8209;&#8209;unpad&#8209;paren to unpad headers unless padding is requested. </li>
         <li>Change NONE_MODE brackets to allow run-in statements from horstmann type brackets.</li>
         <li>Change array brackets to allow run-in statements from horstmann type brackets.</li>
-        <li>Change style=stroustroup to 5 spaces per indent.</li>
-        <li>Change spaces per tab minimum value from 1 to 2.</li>
         <li>Change --min-conditional-indent to allow for statements preceded by a bracket (horstmann brackets). </li>
-        <li>Change predefined styles to allow changes to spaces per indent.</li>
-        <li>Change ASBeautifier to output an entire comment line instead of characters. </li>
+        <li>Change ASBeautifier and ASFormatter to output an entire comment line instead of characters. </li>
+        <li>Change quote formatting in ASFormatter to output the entire string instead of single characters.</li>
         <li>Change from Ettl Martin for cppcheck compliance. </li>
         <li>Change space padding of line end comments to one space when the proper alignment cannot be maintained.</li>
-        <li>Change comment formatting in ASFormatter to output the entire comment instead of single characters.</li>
-        <li>Change quote formatting in ASFormatter to output the entire string instead of single characters.</li>
-        <li>Fix non-instatement array to recognize an empty bracket.</li>
-        <li>Fix occasional array formatting problem with one-line blocks when indent-brackets is used.</li>
+        <li>Change spaces per tab minimum value from 1 to 2.</li>
+        <li>Change the help display "Formatting Options" to "Formatting Options" and "Padding Options".</li>
+        <li>Fix MinGW file globing by moving the _CRT_glob variable outside the astyle namespace. </li>
         <li>Fix default line end processing to always output consistent line ends.</li>
+        <li>Fix identification of pointer dereferences and address-of indicators.</li>
         <li>Fix memory leaks by changing static vectors to static vector pointers so the object can be deleted.</li>
         <li>Fix console build trying to use Unicode character set.</li>
         <li>Fix stringEndsWith method when end is longer than the string.</li>
         <li>Fix --exclude option rejecting a full file path.</li>
-        <li>Fix --verbose when used with --quiet. </li>
-        <li>Fix --quiet for excluded files and directories.</li>
+        <li>Fix --verbose option when used with --quiet. </li>
+        <li>Fix --quiet option for excluded files and directories.</li>
         <li>Fix --indent-classes for C++ structs containing access modifiers.</li>
         <li>Fix formatting of variable types with multiple names.</li>
         <li>Fix from Christian Stimming for alignment of &lt;&lt; and &gt;&gt; operators.</li>
         <li>Fix in-statement indent of "enum class".</li>
         <li>Fix 'if' statement following an 'else' sometimes attaching to a comment.</li>
         <li>Fix recognition of non-indent line comments in the first two lines of a source file.</li>
+        <li>Fix non-instatement array to recognize an empty bracket.</li>
         <li>Fix indenting non-indent line comments in an event table or message map.</li>
         <li>Fix to move comments when breaking one line blocks when -keep-one-line-statements is used.</li>
         <li>Fix to recognize parens in template definitions.</li>
         <li>Fix recognition of class initializer when class description contains multiple lines.</li>
-        <li>Fix identification of pointer dereferences and address-of indicators.</li>
         <li>Fix from Colin D Bennett for 64-bit comparison. </li>
         <li>Fix console error procedure to terminate on an error.</li>
         <li>Fix 'return' statement for padding or not padding arithmetic operators.</li>
         <li>Fix C# 'delegate' and 'unchecked' not being identified as keywords.</li>
+        <li>Fix occasional array formatting problem with one-line blocks when indent-brackets is used.</li>
         <li>Fix to check for max-instatement-indent when the previous line ends with an opening paren.</li>
         <li>Fix predefined style options to allow the use of --indent=tab (-t) and --indent=force-tab (-T) options.</li>
-        <li>Fix in-statement indent to allow for non-indentation tabs in the line.</li>
+        <li>Fix --in-statement indent to allow for non-indentation tabs in the line.</li>
         <li>Fix formatting problems with non in-statement arrays. </li>
-        <li>Fix infinite loop when #else with missing #if.</li>
-        <li>Fix MinGW file globing by moving the _CRT_glob variable outside the astyle namespace. </li>
+        <li>Fix infinite loop when preprocessor #else is missing #if.</li>
         <li>Fix Borland string compares to check for comparison past the end of string. </li>
         <li>Fix &#8209;&#8209;fill&#8209;empty&#8209;lines when &#8209;&#8209;indent=force&#8209;tab is also used.</li>
         <li>Fix break-blocks formatting with preceding mixed comments and line comments.</li>
@@ -102,6 +101,7 @@
         <li>Fix attached brackets attaching a closing header to a single line block.</li>
         <li>Fix broken brackets breaking a single line block before a comment.</li>
         <li>Fix 'extern' keyword using in-statement indents instead of tab indents. </li>
+        <li>Fix errno checking problem on old OpenVMS versions.</li>
         <li>Fix deleting a space before a line end comment when attaching 'else' to a closing bracket. </li>
         <li>Fix adding a space before a line end comment when the comment is preceded by a tab.</li>
         <li>Fix to leave tab indentation on no-indent line comments.</li>
@@ -110,33 +110,33 @@
         <li>Fix memory leak reporting of global and static class member vectors. </li>
         <li>Refactor to implement unit testing and improve design and decomposition:
             <ul>
-                <li>Replace multiple line conditional statements with a method and eliminate complex "not" (!) logic. </li>
+                <li>Replace multiple line conditional statements with a method to eliminate complex "not" (!) logic. </li>
             </ul>
         </li>
-        <ul>
-            <li>Change standardizePath to be called when a vector entry is built. </li>
-        </ul>
-        <ul>
-            <li>Change g_console from an object to an object pointer to allow rebuilding the object.</li>
-            <li>Change ASConsole variables to private with getters and setters.</li>
-            <li>Change processOptions method to return to main instead of exiting.</li>
-            <li>Move formatFile call from getFilePaths to main.</li>
-            <li>Move peekNextChar() function from ASBeautifier to ASBase.</li>
-            <li>Move multi-line comment alignment from ASBeautifier to ASFormatter. </li>
-            <li>Encapsulate global variable isModeManuallySet. </li>
-            <li>Extract methods formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
-            <li>Extract methods formatCommentOpener and formatCommentBody.</li>
-            <li>Extract methods formatLineCommentOpener and formatLineCommentBody.</li>
-            <li>Extract methods formatQuoteOpener and formatQuoteBody. </li>
-            <li>Extract methods processFiles and writeOutputFile. </li>
-            <li>Extract methods processSwitchBlock and findCaseColon. </li>
-            <li>Extract method updateExcludeVector.</li>
-            <li>Extract method copyTempStacks.</li>
-        </ul>
-        <ul>
-            <li>Extract method formatCinToCout. </li>
-            <li>Extract method isLineBreakBeforeClosingHeader. </li>
-        </ul>
+            <ul>
+                <li>Change to call standardizePath when a vector entry is built. </li>
+            </ul>
+            <ul>
+                <li>Change g_console from an object to an object pointer to allow rebuilding the object.</li>
+                <li>Change ASConsole variables to private with getters and setters.</li>
+                <li>Change processOptions method to return to main instead of exiting.</li>
+                <li>Move formatFile call from getFilePaths to main.</li>
+                <li>Move peekNextChar() function from ASBeautifier to ASBase.</li>
+                <li>Move multi-line comment alignment from ASBeautifier to ASFormatter. </li>
+                <li>Encapsulate global variable isModeManuallySet. </li>
+                <li>Extract methods formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
+                <li>Extract methods formatCommentOpener and formatCommentBody.</li>
+                <li>Extract methods formatLineCommentOpener and formatLineCommentBody.</li>
+                <li>Extract methods formatQuoteOpener and formatQuoteBody. </li>
+                <li>Extract methods processFiles and writeOutputFile. </li>
+                <li>Extract methods processSwitchBlock and findCaseColon. </li>
+                <li>Extract method updateExcludeVector.</li>
+                <li>Extract method copyTempStacks.</li>
+            </ul>
+            <ul>
+                <li>Extract method formatCinToCout. </li>
+                <li>Extract method isLineBreakBeforeClosingHeader. </li>
+            </ul>
     </ul>
 
     <h3 id="_1.23">

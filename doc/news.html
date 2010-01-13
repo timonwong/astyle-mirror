@@ -97,7 +97,8 @@
         The --indent-classes (-C) option has been fixed to indent C++ struct blocks containing access modifiers (public,
         protected, and private). The struct block is not indented if there are no access modifiers in the block.</p>
     <p>
-        The continuation line for "class" statements has been changed from two indents to one.</p>
+        The formatting for C++ class initializer statements has been changed from two indents to one 
+        and an in-statement indent added for continuation lines.</p>
     <p>
         The intermediate .tmp file used in formatting has been eliminated and memory is used instead. In most cases this
         should result in a noticeable speed improvement.</p>
@@ -147,7 +148,7 @@
         own method for handling line ends.</p>
     <p>
         The changes for&nbsp; UTF-16 or UTF-32 bit encoding apply only to the console build. Some class libraries, such 
-        as wxWidgets, have the methods to convert the files to UTF-8. The handling for these types of files must be 
+        as wxWidgets (and probably Qt), have the methods to convert the files to UTF-8. The handling for these types of files must be 
         determined by the application.</p>
 
     <h3>

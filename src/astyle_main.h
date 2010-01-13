@@ -224,7 +224,7 @@ class ASConsole
 		void removeFile(const char* fileName, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;
 		void setOutputEOL(LineEndFormat lineEndFormat, const char* currentEOL);
-		void wait(int seconds) const;
+		void sleep(int seconds) const;
 		int  waitForRemove(const char* oldFileName) const;
 		int  wildcmp(const char *wild, const char *data) const;
 		void writeOutputFile(const string &fileName, ostringstream &out) const;
