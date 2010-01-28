@@ -117,9 +117,7 @@
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_align-pointer">align&#8209;pointer</a>&nbsp;&nbsp;&nbsp;       
-        <a class="contents" href="#_mode=c">mode=c</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=java">mode=java</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_mode=cs">mode=cs</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
     </p>
     
     <p class="contents1"><a class="contents" href="#_Other_Options">Other&nbsp;Options</a></p>
@@ -134,8 +132,8 @@
         <a class="contents" href="#_preserve-date">preserve&#8209;date</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_verbose">verbose</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_formatted">formatted</a>&nbsp;&nbsp;&nbsp;
-         <a class="contents" href="#_lineend">lineend</a>&nbsp;&nbsp;&nbsp;     
         <a class="contents" href="#_quiet">quiet</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_lineend">lineend</a>&nbsp;&nbsp;&nbsp;     
         <a class="contents" href="#_version">version</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_help">help</a>&nbsp;&nbsp;&nbsp;
     </p>
@@ -199,7 +197,7 @@
         These files can be converted with the program iconv and with some text editors, such as SciTE.</p>
     <p>
         Embedded statements that are multiple-line and are NOT in a C type format, such as Python, are usually mal-formatted.
-        (a C type format has blocks enclosed by brackets and statements terminated by a semi-colon). Macros that define
+        (A C type format has blocks enclosed by brackets and statements terminated by a semi-colon). Macros that define
         functions may cause the following code to be mal-formatted because the macro is missing the brackets and semi-colons
         from the definition. If you have source code with these types of statements, exclude them with the <code>--exclude=</code>
         statement described in the "Other Options" section.</p>
@@ -286,7 +284,7 @@
         Options File</h3>
 
     <p>
-        A default options file may be used to set your favorite source style options.</p>
+        An OPTIONAL default options file may be used to supplement or replace the command line options.&nbsp;</p>
     <ul>
         <li>The command line options have precedence. If there is a conflict between a command line option and an option in
             the default options file, the command line option will be used.</li>
@@ -1234,7 +1232,7 @@ else
         <code class="title">--add-brackets / -j </code><br />Add brackets to unbracketed one line conditional statements&nbsp;
         (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...). The statement must be on a single line.&nbsp;The
         brackets will be added according to the currently requested predefined style or bracket type. If no style or bracket
-        type is requested the brackets will be attached. If --add-one-line brackets is also used the result will be one
+        type is requested the brackets will be attached. If --add-one-line-brackets is also used the result will be one
         line brackets.</p>
     <div class="code">
         <pre>if (isFoo)
@@ -1326,18 +1324,11 @@ else
     </div>
     <p>
         &nbsp;</p>
-    <p id="_mode=c">
-        <code class="title">--mode=c</code><br />Indent a C or C++ file. The option is usually set from the file extension
-        for each file. You can override the setting with this entry. It will be used for all files regardless of the file
-        extension. It allows the formatter to identify language specific syntax such as C++ classes, templates, and keywords.</p>
-    <p id="_mode=java">
-        <code class="title">--mode=java</code><br />Indent a Java file. The option is usually set from the file extension
-        for each file. You can override the setting with this entry. It will be used for all files regardless of the file
-        extension. It allows the formatter to identify language specific syntax such as Java class's keywords.</p>
-    <p id="_mode=cs">
-        <code class="title">--mode=cs</code><br />Indent a C# file. The option is usually set from the file extension
-        for each file. You can override the setting with this entry. It will be used for all files regardless of the file
-        extension. It allows the formatter to identify language specific syntax such as C sharp classes and keywords.</p>
+    <p id="_mode">
+        <code class="title">--mode=c</code><br /><code class="title">--mode=cs</code><br /><code class="title">--mode=java</code><br />
+        Indent a C/C++, C#, or Java file. The option is usually set from the file extension for each file. You can override the
+        setting with this entry. It will be used for all files regardless of the file extension. It allows the formatter
+        to identify language specific syntax such as C++ classes, templates, and keywords.</p>
     <p>
         &nbsp;</p>
     <hr />

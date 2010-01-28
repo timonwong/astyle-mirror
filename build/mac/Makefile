@@ -1,7 +1,7 @@
 # Make file for GCC compiler on Mac OS X
 # The license.html file describes the conditions under which this software may be distributed.
 
-# to test on Linux use "make test=1"
+# to test on Linux use "make  linux=1"
 
 # list of source files
 SRC = astyle_main.cpp \
@@ -17,15 +17,17 @@ vpath %.h   ../../src
 # NOTE for java compiles the environment variable $JAVA_HOME must be set
 # example: export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.00
 ifndef JAVA_HOME
-	JAVA_HOME = /usr/lib/jvm/java-6-sun-1.6.0.16
+    JAVA_HOME = /usr/lib/jvm/java-6-sun-1.6.0.16
 endif
 
 # set prefix if not defined on the command line
 ifndef prefix
     prefix=/usr
 endif
+SYSCONF_PATH=$(prefix)/share/astyle
 
 # define macros
+dylib = dylib
 dynamiclib = -dynamiclib
 bindir = bin
 objdir = obj
@@ -36,7 +38,8 @@ CXX = g++
 INSTALL=install -o $(USER) -g $(USER)
 
 # for testing on linux
-ifdef test
+ifdef linux
+    dylib = so
     dynamiclib = -shared
 endif
 
@@ -121,14 +124,14 @@ astyled:  $(OBJd)
 	$(CXX) -o $(bindir)/$@ $^
 	@ echo
 
-shared:  libastyle.so
-libastyle.so:  $(OBJs)
+shared:  libastyle.$(dylib)
+libastyle.$(dylib):  $(OBJs)
 	@ mkdir -p $(bindir)
 	$(CXX) $(dynamiclib) -o $(bindir)/$@ $^
 	@ echo
 
-shareddebug:  libastyled.so
-libastyled.so:  $(OBJsd)
+shareddebug:  libastyled.$(dylib)
+libastyled.$(dylib):  $(OBJsd)
 	@ mkdir -p $(bindir)
 	$(CXX) $(dynamiclib) -o $(bindir)/$@ $^
 	@ echo
@@ -145,14 +148,14 @@ libastyled.a:  $(OBJad)
 	ar crs $(bindir)/$@ $^
 	@ echo
 
-java:  libastylej.so
-libastylej.so:  $(OBJsj)
+java:  libastylej.$(dylib)
+libastylej.$(dylib):  $(OBJsj)
 	@ mkdir -p $(bindir)
 	$(CXX) $(dynamiclib) -o $(bindir)/$@ $^
 	@ echo
 
-javadebug:  libastylejd.so
-libastylejd.so:  $(OBJsjd)
+javadebug:  libastylejd.$(dylib)
+libastylejd.$(dylib):  $(OBJsjd)
 	@ mkdir -p $(bindir)
 	$(CXX) $(dynamiclib) -o $(bindir)/$@ $^
 	@ echo
@@ -168,8 +171,15 @@ cleanobj:
 	rm -f $(objdir)/*.o
 	
 install:
-	@ $(INSTALL) -m 755 -d $(ipath)
-	$(INSTALL) -m 755 $(bindir)/astyle  $(ipath)
+	$(INSTALL) -m 755 -d $(ipath)
+	@$(INSTALL) -m 755 $(bindir)/astyle  $(ipath)
+
+	$(INSTALL) -m 755 -d $(SYSCONF_PATH)
+	@for files in ../../doc/*.html  ../../doc/*.css; \
+	do \
+		$(INSTALL)  -m 644  $$files  $(SYSCONF_PATH); \
+	done
 
 uninstall:
 	rm -f $(ipath)/astyle
+	rm -rf $(SYSCONF_PATH)

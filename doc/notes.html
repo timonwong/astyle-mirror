@@ -50,7 +50,7 @@
         <li>Change predefined styles to allow changes to spaces per indent.</li>
         <li>Change --style=stroustroup to 5 spaces per indent.</li>
         <li>Change --style=linux default minimum conditional indent to 4.</li>
-        <li>Change default formatting to leave paren headers unchanged instead of always inserting space padding after them.
+        <li>Change default formatting to leave paren headers unchanged instead of inserting space padding.
         </li>
         <li>Change &#8209;&#8209;unpad&#8209;paren to unpad headers unless padding is requested. </li>
         <li>Change NONE_MODE brackets to allow run-in statements from horstmann type brackets.</li>
@@ -61,7 +61,7 @@
         <li>Change from Ettl Martin for cppcheck compliance. </li>
         <li>Change space padding of line end comments to one space when the proper alignment cannot be maintained.</li>
         <li>Change spaces per tab minimum value from 1 to 2.</li>
-        <li>Change the help display "Formatting Options" to "Formatting Options" and "Padding Options".</li>
+        <li>Change the help display of "Formatting Options" to "Formatting Options" and "Padding Options".</li>
         <li>Fix MinGW file globing by moving the _CRT_glob variable outside the astyle namespace. </li>
         <li>Fix default line end processing to always output consistent line ends.</li>
         <li>Fix identification of pointer dereferences and address-of indicators.</li>
@@ -79,7 +79,7 @@
         <li>Fix recognition of non-indent line comments in the first two lines of a source file.</li>
         <li>Fix non-instatement array to recognize an empty bracket.</li>
         <li>Fix indenting non-indent line comments in an event table or message map.</li>
-        <li>Fix to move comments when breaking one line blocks when -keep-one-line-statements is used.</li>
+        <li>Fix to move comments when breaking one line blocks and -keep-one-line-statements is used.</li>
         <li>Fix to recognize parens in template definitions.</li>
         <li>Fix recognition of class initializer when class description contains multiple lines.</li>
         <li>Fix from Colin D Bennett for 64-bit comparison. </li>
@@ -111,17 +111,12 @@
         <li>Refactor to implement unit testing and improve design and decomposition:
             <ul>
                 <li>Replace multiple line conditional statements with a method to eliminate complex "not" (!) logic. </li>
-            </ul>
-        </li>
-            <ul>
                 <li>Change to call standardizePath when a vector entry is built. </li>
-            </ul>
-            <ul>
                 <li>Change g_console from an object to an object pointer to allow rebuilding the object.</li>
                 <li>Change ASConsole variables to private with getters and setters.</li>
                 <li>Change processOptions method to return to main instead of exiting.</li>
                 <li>Move formatFile call from getFilePaths to main.</li>
-                <li>Move peekNextChar() function from ASBeautifier to ASBase.</li>
+                <li>Move peekNextChar function from ASBeautifier to ASBase.</li>
                 <li>Move multi-line comment alignment from ASBeautifier to ASFormatter. </li>
                 <li>Encapsulate global variable isModeManuallySet. </li>
                 <li>Extract methods formatOpeningBracket, formatClosingBracket and isCurrentBracketBroken.</li>
@@ -132,11 +127,10 @@
                 <li>Extract methods processSwitchBlock and findCaseColon. </li>
                 <li>Extract method updateExcludeVector.</li>
                 <li>Extract method copyTempStacks.</li>
-            </ul>
-            <ul>
                 <li>Extract method formatCinToCout. </li>
                 <li>Extract method isLineBreakBeforeClosingHeader. </li>
             </ul>
+        </li>
     </ul>
 
     <h3 id="_1.23">

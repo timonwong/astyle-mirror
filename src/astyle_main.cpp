@@ -87,7 +87,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* _version = "1.24 beta";
+const char* _version = "1.24";
 
 
 /**
@@ -1849,12 +1849,6 @@ void ASConsole::printHelp() const
 	(*_err) << "    --exclude=####\n";
 	(*_err) << "    Specify a file or directory #### to be excluded from processing.\n";
 	(*_err) << endl;
-	(*_err) << "    --lineend=windows  OR  -z1\n";
-	(*_err) << "    --lineend=linux    OR  -z2\n";
-	(*_err) << "    --lineend=macold   OR  -z3\n";
-	(*_err) << "    Force use of the specified line end style. Valid options\n";
-	(*_err) << "    are windows (CRLF), linux (LF), and macold (CR).\n";
-	(*_err) << endl;
 	(*_err) << "    --errors-to-stdout  OR  -X\n";
 	(*_err) << "    Print errors and help information to standard-output rather than\n";
 	(*_err) << "    to standard-error.\n";
@@ -1870,6 +1864,12 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --quiet  OR  -q\n";
 	(*_err) << "    Quiet mode. Suppress all output except error messages.\n";
+	(*_err) << endl;
+	(*_err) << "    --lineend=windows  OR  -z1\n";
+	(*_err) << "    --lineend=linux    OR  -z2\n";
+	(*_err) << "    --lineend=macold   OR  -z3\n";
+	(*_err) << "    Force use of the specified line end style. Valid options\n";
+	(*_err) << "    are windows (CRLF), linux (LF), and macold (CR).\n";
 	(*_err) << endl;
 	(*_err) << "    --version  OR  -V\n";
 	(*_err) << "    Print version number.\n";

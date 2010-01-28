@@ -27,32 +27,28 @@
         A new bracket type option, &#8209;&#8209;brackets=horstmann (-g), uses broken brackets and places run-in statements
         on the same line as an opening bracket. This bracket type has about the same vertical compression as attached
         brackets and in addition provides bracket alignment. It is the only style that combines the advantages of saving
-        space and aligning brackets. The "Tab and Bracket Options" section in the documentation contains the details.
-        To accommodate Hostmann brackets the "none mode" brackets will now allow run-in statements. Array formatting has
-        been changed to format run-in statements when required. There have been some general improvements to array formatting.
-        The minimum value for spaces per tab was changed from one to two.</p>
+        space and aligning brackets. The &quot;Tab and Bracket Options&quot; section in the documentation contains the
+        details. To accommodate Hostmann brackets the &quot;none mode&quot; brackets will now allow run-in statements.
+        Array formatting has been changed to format run-in statements when required. There have been some general improvements
+        to array formatting. The minimum value for spaces per tab was changed from one to two. The example programs in the &quot;Developer
+        Information&quot; section have been changed to Horstmann brackets.</p>
     <p>
         Two new options, &#8209;&#8209;add&#8209;brackets (-j) and &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets
         (-J), will add brackets to unbracketed one line conditional statements. The &#8209;&#8209;add-brackets will add
         the brackets according to the currently requested predefined style or bracket type. If no style or bracket type
         is requested the brackets will be the attached type. The &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets
-        will add the brackets as one line brackets. This option implies &#8209;&#8209;keep&#8209;one&#8209;line&#8209;blocks
-        and will not break the one line blocks.</p>
-    <p>
-        A new option, &#8209;&#8209;indent&#8209;col1&#8209;comments (-Y), will indent C++ comments beginning in column
-        one. By default C++ comments beginning in column one are not indented. This option will allow the comments to
-        be indented with the code.
+        will add the brackets as single line brackets. This option implies &#8209;&#8209;keep&#8209;one&#8209;line&#8209;blocks
+        and will not break single line blocks.
     </p>
     <p>
-        The above options allow two new predefined styles. Horstmann style, &#8209;&#8209;style=horstmann (-A9), uses
-        Horstmann brackets and three spaces per indent. The so called "One True Brace Style", &#8209;&#8209;style=1tbs
+        The above options allow two new predefined styles. Horstmann style, &#8209;&#8209;style=horstmann
+        (-A9), uses Horstmann brackets and three spaces per indent. The so called "One True Brace Style", &#8209;&#8209;style=1tbs
         or &#8209;&#8209;style=otbs (-A10), uses linux brackets and the option &#8209;&#8209;add&#8209;brackets. The basic
-        criteria for all predefined styles were obtained from the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent
+        criteria for most predefined styles were obtained from the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent
             Style</a> discussion at Wikipedia. The "Predefined Style Options" section in the documentation contains the
-        details.
-    </p>
+        details.</p>
     <p>
-        The spaces per indent can now be changed for any of the predefined styles. In previous releases the change would
+        The spaces per indent can now be changed for any of the predefined styles. In previous releases the option would
         be ignored. This will allow any of the &#8209;&#8209;indent options to be used with a predefined style. If the
         spaces per indent is not specified, the default for the style will be used.</p>
     <p>
@@ -60,9 +56,8 @@
         'while'...). To remove any unwanted current space padding, use the option &#8209;&#8209;unpad&#8209;paren (&#8209;U).
         If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren are used, the headers will be padded
         and the padding will be removed from other parens. This has required a change to the default formatting of paren
-        headers. They will now be left unchanged instead of automatically inserting space padding after them, unless the
-        new option is requested.
-    </p>
+        headers. They will now be left unchanged instead of automatically inserting space padding, unless the
+        new option is requested.</p>
     <p>
         New options --align-pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle (-k2), and &#8209;&#8209;align&#8209;pointer=name
         (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type (left), operator name
@@ -70,22 +65,26 @@
         The recognition of pointers and references has been improved. This resulted in an improvement of the &#8209;&#8209;pad&#8209;oper
         (-p) option.</p>
     <p>
-        New options --lineend=windows&nbsp; (-z1), --lineend=linux&nbsp; (-z2), and --lineend=macold&nbsp; (-z3) will
-        force use of the specified line end style. Valid options are windows (CRLF), linux (LF), and macold (CR). MacOld
-        style is the format for OS 9 and earlier. Mac OS X uses the Linux style. Changes in line ends will cause the file
-        to be updated, even if no other changes occur. If one of these options is not used the line ends will be determined
+        A new option, &#8209;&#8209;indent&#8209;col1&#8209;comments (-Y), will indent C++ comments beginning in column
+        one. By default C++ comments beginning in column one are not indented. This option will allow the comments to
+        be indented with the code.</p>
+    <p>
+        New options --lineend=windows&nbsp;(-z1), --lineend=linux&nbsp;(-z2), and --lineend=macold&nbsp;(-z3) will force
+        use of the specified line end style. Valid options are windows (CRLF), linux (LF), and macold (CR). MacOld style
+        is the format for OS 9 and earlier. Mac OS X uses the Linux style. Changes in line ends will cause the file to
+        be updated, even if no other changes occur. If one of these options is not used the line ends will be determined
         automatically from the input file.</p>
     <p>
-        Default line end processing has been improved to always output consistent line ends. It will use the line ends 
-        that are most commonly used in the input.</p>
+        Default line end processing has been improved to always output consistent line ends. It will use the line ends
+        that are most frequently used in the input.</p>
     <p>
         The Stroustroup predefined style has been changed to use 5 spaces per indent. This is the indentation used in
         the book "The C++ Programming Language" by Bjarne Stroustrup.</p>
     <p>
         The minimum conditional indent for the Linux predefined style has been changed to 4, or one-half the indent-length.
-        The previous minimum conditional indent was 16 (2 * indent-length). The new value corresponds to the soft tab
-        in the style description and gives a better conformance to the style. It also gives a better appearance for the
-        continuation lines.</p>
+        The previous minimum conditional indent was 16 (2 indents). The new value corresponds to the soft tab in the style
+        description at Wikipedia and gives a better conformance to the definition of the style. And it gives a better
+        appearance to the continuation lines.</p>
     <p>
         Embedded SQL statements are now formatted correctly. The formatting of the SQL statements will be maintained as
         long as the standard hanging indent format is used. If the "exec sql" statement is indented more than the following
@@ -97,8 +96,8 @@
         The --indent-classes (-C) option has been fixed to indent C++ struct blocks containing access modifiers (public,
         protected, and private). The struct block is not indented if there are no access modifiers in the block.</p>
     <p>
-        The formatting for C++ class initializer statements has been changed from two indents to one 
-        and an in-statement indent added for continuation lines.</p>
+        The formatting for C++ class initializer statements has been changed from two indents to one and an in-statement
+        indent added for continuation lines.</p>
     <p>
         The intermediate .tmp file used in formatting has been eliminated and memory is used instead. In most cases this
         should result in a noticeable speed improvement.</p>
@@ -110,46 +109,69 @@
         files contain many nul bytes are incompatible with the 8 bit encoding assumed by Artistic Style. Since this rarely
         happens, Artistic Style has been changed to list these files as "unformatted" and display a warning message. The
         files must have a Byte Order Mark (BOM) for the encoding to be recognized. These files can be changed with the
-        program iconv and with some text editors, such as SciTE. For more information see the Wikipedia discussion on
-        <a href="http://en.wikipedia.org/wiki/Comparison_of_Unicode_encodings#Compatibility_issues">Compatibility issues</a>.</p>
+        program iconv and with some text editors such as SciTE. For more information see the Wikipedia discussion on <a
+            href="http://en.wikipedia.org/wiki/Comparison_of_Unicode_encodings#Compatibility_issues">Compatibility issues</a>.</p>
     <p>
         The Artistic Style documentation has been changed to include a new "Padding Options" section. The padding options
-        were previously in the "Formatting Options" section. This was done to allow for additional formatting options.</p>
+        were previously in the "Formatting Options" section. This was done to allow space for additional options in GUIs.</p>
     <p>
         The Scripts page has a couple of new scripts, including a "clean" script in python.</p>
     <p>
-        There are new configuration and project files for Visual Studio. There are instructions in the &quot;Install Information&quot;.</p>
+        There are new configuration and project files for Visual Studio, and additional files for Visual Studio 2010.
+        There are instructions in the &quot;Install Information&quot;.</p>
     <p>
         The Intel compiler for Linux, release 11.1, has a new procedure for compiles. Read the new &quot;Install Information&quot;
         before using this compiler release.</p>
     <p>
-        There is now a Subversion repository for Artistic Style. A new web page describes how to check-out the files.
-        The source code is under development and some changes take several weeks to complete. And the program has not 
-        been through the extensive system tests that are done before each release. Use reasonable precautions
+        There is now a Subversion repository for Artistic Style. A new Subversion web page describes how to check-out the files.
+        The source code is under development and some changes take several weeks to complete. And the intermediate source
+        files have not been through the extensive system tests that are done before each release. Use reasonable precautions
         when using source code from the repository.</p>
     <p>
         SourceForge recently made changes to their website which caused a few problems. The web page links should be fixed
         with this release. It seems that some bug reports may have been lost. If you have submitted a report that has
-        not been addressed please check to be sure it is still there. Yahoo closed their GeoCities site which made the
-        AStyleWin programs temporarily unavailable. The new site is xxxxxxxxxxxxxxxxxxxx.</p>
+        not been addressed please check to be sure it is still there. In addition Yahoo closed their GeoCities site which
+        made the AStyleWin programs temporarily unavailable. The new site is <a href="http://jimp03.zxq.net/" target="astyle"
+            title="open new window">jimp03.zxq.net/</a>.</p>
     <p>
-        Thanks to J P Nurmi (align-pointer), Mario Gleichmann (pad-header), MrTact (lineend), Christian.Stimming (&lt;&lt;
-        and &gt;&gt; operators), Wim Rosseel (Perl script), Colin D Bennett (64-bit code), and Ettl Martin (cppcheck) for their contributions.</p>
+        The release announcements mailing list was discontinued with the new SourceForge system. There is a new <a href="https://lists.sourceforge.net/lists/listinfo/astyle-announce">
+            astyle-announce</a> mailing list that will be used instead. This is a low volume list that will be used for
+        new release announcements and notification of important repository commits. Member postings will not be accepted.
+        Membership in the old list was not retained so you will need to register for the new list. There is information
+        for subscribing on the "Bug Reports, Change Requests, Notification" section of the Home page.</p>
+    <p>
+        Thanks to J P Nurmi (align-pointer), Mario Gleichmann (pad-header), MrTact (lineend), Christian Stimming (&lt;&lt;
+        and &gt;&gt; operators), Wim Rosseel (Perl script), Colin D Bennett (64-bit code), and Ettl Martin (cppcheck)
+        for their contributions.</p>
+    <p>
+        The OpenVMS distribution is prepared by Jim Duff, an OpenVMS Systems Specialist living in Sydney, Australia. His
+        website is <a href="http://www.eight-cubed.com/index.html" target="astyle" title="open new window">eight&#8209;cubed.com</a>.</p>
 
     <h4>
         Developers</h4>
 
     <p>
         The Artistic Style for Windows program has been updated to support the current release and can be used for an
-        example GUI. It will run on Linux under WINE. It is available at <a href="http://www.geocities.com/jpattee/">www.geocities.com/jpattee/</a></p>
+        example GUI. It will run on Linux under WINE. It is available at <a href="http://jimp03.zxq.net/" target="astyle"
+            title="open new window">jimp03.zxq.net</a></p>
     <p>
-        The options --lineend=windows&nbsp; (-z1), --lineend=linux&nbsp; (-z2), and --lineend=macold&nbsp; (-z3) apply 
-        only to the console build. It was not included in the developer builds because developers usually have their 
+        The options --lineend=windows&nbsp;(-z1), --lineend=linux&nbsp;(-z2), and --lineend=macold&nbsp;(-z3) apply only
+        to the console build. It was not included in the developer builds because developers usually have their
         own method for handling line ends.</p>
     <p>
-        The changes for&nbsp; UTF-16 or UTF-32 bit encoding apply only to the console build. Some class libraries, such 
-        as wxWidgets (and probably Qt), have the methods to convert the files to UTF-8. The handling for these types of files must be 
-        determined by the application.</p>
+        The option --break-closing-brackets has been moved from Bracket Options to Formatting Options. It was being mistaken
+        for a bracket type, which it is not.</p>
+    <p>
+        Rejecting a file for&nbsp; UTF-16 or UTF-32 bit encoding apply only to the console build. Some class libraries, such
+        as wxWidgets (and probably Qt), have the methods to convert the files to UTF-8. The handling for these types of
+        files must be determined by the individual applications. </p>
+    <p>
+        There has been an additional variable, formattingStyle, added to the ASFormatter class. This is now the ONLY option
+        that needs to be set to define the style. Setting the individual options is no longer necessary. The individual
+        options are now set in the fixOptionVariableConflicts function in ASFormatter. The predefined style options will
+        now override all other options. The order of entry does not matter as in previous versions.</p>
+    <p>
+        &nbsp;</p>
 
     <h3>
         Artistic Style 1.23&nbsp; (February 2009)</h3>
@@ -369,8 +391,8 @@
         The conflicts will be resolved by the fixOptionVariableConflicts function which is called after all options have
         been processed. All you need to do is set the options selected by the user.</p>
     <p>
-        The Artistic Style for Windows program has been updated to support the current release. It is available at <a href="http://www.geocities.com/jpattee/">
-            www.geocities.com/jpattee/</a></p>
+        The Artistic Style for Windows program has been updated to support the current release. It is available at <a href="http://jimp03.zxq.net/">
+            jimp03.zxq.net</a></p>
     <p>
         I apologize for the unplanned changes this may add to your system. But Artistic Style is starting to mature as
         an application and the changes are needed to bring it up to date. If you have any questions or problems, email
@@ -501,7 +523,7 @@
         on your source code without saving the file. You can review the results of the formatting options before updating
         the file. It can be used with a test file or with your actual source code. It supports several other formatting
         programs. The <b>Artistic Style for Windows</b> program has been updated to support the current release. It is
-        available at <a href="http://www.geocities.com/jpattee/">www.geocities.com/jpattee/</a></p>
+        available at <a href="http://jimp03.zxq.net/">jimp03.zxq.net</a></p>
     <p>
         There have been a few inquiries about how to customize Artistic Style for an unsupported format. Changes can be
         made with Python or another text processing program after formatting the source, or you can modify the Artistic
@@ -524,7 +546,7 @@
     <p>
         Release 1.20.2 fixed problems with the new stream I/O procedure added in release 1.20.1. Release 1.20.1 improved
         the processing for Mac OS X platforms. The compatibility with <a href="http://www.barebones.com/products/textwrangler/"
-            target="_blank" title="open new window">TextWrangler</a> was improved. There is now a separate release for
+            target="astyle" title="open new window">TextWrangler</a> was improved. There is now a separate release for
         Mac.</p>
     <p>
         Artistic Style will now indent message maps for Microsoft Foundation Class (MFC) and event tables for wxWidgets.
@@ -544,10 +566,10 @@
         the project. See the <a href="develop/">Artistic Style Developer Information</a> for the calling procedure and
         other details.</p>
     <p>
-        There is a sample GUI program for Windows available at <a href="http://www.geocities.com/jpattee/" target="_blank"
-            title="open new window">http://www.geocities.com/jpattee/</a>. It uses the unmodified Artistic Style compiled
-        for a GUI. The source code needs some work so it is not available for now. It should work under Linux using WINE.
-        Future enhancements and platform support will depend on the response to the sample program.</p>
+        There is a sample GUI program for Windows available at <a href="http://jimp03.zxq.net/" target="astyle" title="open new window">
+            http://jimp03.zxq.net/</a>. It uses the unmodified Artistic Style compiled for a GUI. The source code needs
+        some work so it is not available for now. It should work under Linux using WINE. Future enhancements and platform
+        support will depend on the response to the sample program.</p>
     <p>
         To support the new Artistic Style preprocessor option there are new makefiles and project files. Windows users
         have a project file for Microsoft Visual C++ 2003 (version 7). Linux users have a new makefile that has several
@@ -555,13 +577,12 @@
             Style Install Information</a> for the details.</p>
     <p>
         Intel&reg; is now offering it's C++ and Fortran compilers free for non-commercial use. Information is available
-        at the <a href="http://www3.intel.com/cd/software/products/asmo-na/eng/" target="_blank" title="open new window">Intel&reg;
-            Software Development Products</a> website. Click on the <a href="http://www3.intel.com/cd/software/products/asmo-na/eng/download/download/"
-                target="_blank" title="open new window">Free Non-Commercial Download</a> link to see if you qualify. The
-        Intel Compilers on Windows and Linux require that other compilers be installed (Microsoft Visual C++ or GNU gcc
-        respectively). This is because the Intel Compilers require the header files, runtime libraries and linkers distributed
-        as part of these other compilers. If you want to use this compiler there is now a makefile (makeintel) included
-        with the project. See <a href="install.html">Artistic Style Install Information</a> for instructions.</p>
+        at the Intel&reg; Software Development Products website. Click on the <a href="http://www3.intel.com/cd/software/products/asmo-na/eng/download/download/"
+            target="astyle" title="open new window">Free Non-Commercial Download</a> link to see if you qualify. The Intel
+        Compilers on Windows and Linux require that other compilers be installed (Microsoft Visual C++ or GNU gcc respectively).
+        This is because the Intel Compilers require the header files, runtime libraries and linkers distributed as part
+        of these other compilers. If you want to use this compiler there is now a makefile (makeintel) included with the
+        project. See <a href="install.html">Artistic Style Install Information</a> for instructions.</p>
     <p>
         &nbsp;</p>
 
