@@ -1834,9 +1834,7 @@ void ASFormatter::initNewLine()
 				i += indent - 1;
 			}
 		}
-		// correct the format if EXEC SQL is not a hanging indent
-		if (i < leadingSpaces)
-			currentLine.insert((size_t)0, leadingSpaces - i, ' ');
+		// this will correct the format if EXEC SQL is not a hanging indent
 		trimContinuationLine();
 		return;
 	}
@@ -2078,6 +2076,9 @@ bool ASFormatter::isPointerOrReference() const
 		return false;
 
 	if (currentChar == '&' && previousChar == '&')
+		return false;
+
+	if (isInBlParen)
 		return false;
 
 	if (previousNonWSChar == '=' || isCharImmediatelyPostReturn)
@@ -4141,6 +4142,7 @@ int ASFormatter::getNextLineCommentAdjustment()
 	return 0;
 }
 
+// for console build only
 LineEndFormat ASFormatter::getLineEndFormat() const
 {
 	return lineEnd;
@@ -4303,7 +4305,7 @@ bool ASFormatter::addBracketsToStatement()
  *
  * @param line         the line to be searched.
  * @param searchChar   the char to find.
- * @param searchStart  the char to find.
+ * @param searchStart  the start position on the line (default is 0).
  * @return the position on the line or string::npos if not found.
  */
 size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart /*0*/)
@@ -4488,7 +4490,7 @@ void ASFormatter::trimContinuationLine()
 		{
 			if (!isWhiteSpace(currentLine[i]))		// don't delete any text
 			{
-				i = 0;
+				leadingSpaces = i + tabIncrementIn;
 				continuationIncrementIn = tabIncrementIn;
 				break;
 			}

@@ -87,7 +87,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* _version = "1.24";
+const char* _version = "1.25 beta";
 
 
 /**
@@ -1530,6 +1530,8 @@ void ASConsole::getFilePaths(string &filePath)
 		if (excludeHitsVector[ix] == false)
 		{
 			(*_err) << "Unmatched exclude " << excludeVector[ix].c_str() << endl;
+			if (hasWildcard && !isRecursive)
+				(*_err) << "did you intend to use --recursive?"<< endl;
 			excludeErr = true;
 		}
 	}
@@ -1540,7 +1542,11 @@ void ASConsole::getFilePaths(string &filePath)
 #endif
 	// check if files were found (probably an input error if not)
 	if (fileName.size() == 0)
+	{
 		(*_err) << "No file to process " << filePath.c_str() << endl;
+		if (hasWildcard && !isRecursive)
+			(*_err) << "did you intend to use --recursive?"<< endl;
+	}
 }
 
 bool ASConsole::fileNameVectorIsEmpty()
