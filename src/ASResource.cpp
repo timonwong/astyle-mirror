@@ -114,8 +114,6 @@ const string ASResource::AS_ARROW = string("->");
 const string ASResource::AS_AND = string("&&");
 const string ASResource::AS_OR = string("||");
 const string ASResource::AS_COLON_COLON = string("::");
-const string ASResource::AS_PAREN_PAREN = string("()");
-const string ASResource::AS_BLPAREN_BLPAREN = string("[]");
 
 const string ASResource::AS_PLUS = string("+");
 const string ASResource::AS_MINUS = string("-");

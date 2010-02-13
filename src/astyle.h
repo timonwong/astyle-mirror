@@ -192,7 +192,7 @@ class ASResource
 		static const string AS_LS_EQUAL, AS_LS_LS_LS, AS_LS_LS;
 		static const string AS_QUESTION_QUESTION, AS_EQUAL_GR;
 		static const string AS_ARROW, AS_AND, AS_OR;
-		static const string AS_COLON_COLON, AS_PAREN_PAREN, AS_BLPAREN_BLPAREN;
+		static const string AS_COLON_COLON;
 		static const string AS_PLUS, AS_MINUS, AS_MULT, AS_DIV, AS_MOD, AS_GR, AS_LS;
 		static const string AS_NOT, AS_BIT_XOR, AS_BIT_OR, AS_BIT_AND, AS_BIT_NOT;
 		static const string AS_QUESTION, AS_COLON, AS_SEMICOLON, AS_COMMA;
@@ -550,7 +550,7 @@ class ASFormatter : public ASBeautifier
 		char peekNextChar() const;
 		BracketType getBracketType();
 		bool addBracketsToStatement();
-		bool commentAndHeaderFollows() const;
+		bool commentAndHeaderFollows();
 		bool getNextChar();
 		bool getNextLine(bool emptyLineWasDeleted = false);
 		bool isBeforeComment() const;
@@ -558,6 +558,7 @@ class ASFormatter : public ASBeautifier
 		bool isBeforeAnyLineEndComment(int startPos) const;
 		bool isBeforeMultipleLineEndComments(int startPos) const;
 		bool isBracketType(BracketType a, BracketType b) const;
+		bool isClosingHeader(const string* header) const;
 		bool isCurrentBracketBroken() const;
 		bool isDereferenceOrAddressOf() const;
 		bool isExecSQL(string  &line, size_t index) const;
@@ -581,7 +582,7 @@ class ASFormatter : public ASBeautifier
 		void appendSpaceAfter();
 		void breakLine();
 		void buildLanguageVectors();
-		void checkForFollowingHeader(const string& firstLine);
+		void checkForHeaderFollowingComment(const string& firstLine);
 		void convertTabToSpaces();
 		void deleteContainer(vector<BracketType>* &container);
 		void formatArrayRunIn();

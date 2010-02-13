@@ -23,6 +23,10 @@
     <ul>
         <li>Improve formatting of multi-line comments when the number of leading spaces must be changed. </li>
         <li>Improve formatting of embedded SQL when the number of leading spaces must be changed. </li>
+        <li>Fix not recognizing text in quotes when identifying struct access modifiers.</li>
+        <li>Fix --break-blocks and --break-blocks=all not always breaking when --delete-empty-lines is used.</li>
+        <li>Fix --break-blocks not always breaking opening blocks when --delete-empty-lines is used. </li>
+        <li>Fix --delete-empty-lines not always deleting closing blocks when --break-blocks is used. </li>
         <li>Fix incorrectly identifying '*' as pointers in block parens.</li>
     </ul>
 

@@ -1444,23 +1444,6 @@ string ASBeautifier::beautify(const string &originalLine)
 
 			if (newHeader != NULL)
 			{
-				char peekChar = peekNextChar(line, i + newHeader->length() - 1);
-
-				// is not a header if part of a definition
-				if (peekChar == ',' || peekChar == ')')
-					newHeader = NULL;
-				// the following accessor definitions are NOT headers
-				// goto default; is NOT a header
-				// default(int) keyword in C# is NOT a header
-				else if ((newHeader == &AS_GET || newHeader == &AS_SET || newHeader == &AS_DEFAULT)
-				         && (peekChar == ';' ||  peekChar == '('))
-				{
-					newHeader = NULL;
-				}
-			}
-
-			if (newHeader != NULL)
-			{
 				// if we reached here, then this is a header...
 				bool isIndentableHeader = true;
 
@@ -2301,9 +2284,15 @@ const string* ASBeautifier::findHeader(const string &line, int i,
 			return header;
 		if (isLegalNameChar(line[wordEnd]))
 			continue;
-		// is not a header if part of a definition
 		const char peekChar = peekNextChar(line, wordEnd - 1);
+		// is not a header if part of a definition
 		if (peekChar == ',' || peekChar == ')')
+			break;
+		// the following accessor definitions are NOT headers
+		// goto default; is NOT a header
+		// default(int) keyword in C# is NOT a header
+		else if ((header == &AS_GET || header == &AS_SET || header == &AS_DEFAULT)
+		         && (peekChar == ';' ||  peekChar == '('))
 			break;
 		return header;
 	}
@@ -2627,9 +2616,6 @@ int ASBeautifier::getInStatementIndentComma(const string& line, size_t currPos) 
 {
 	assert(line[currPos] == ',');
 
-	if (currPos == 0)
-		return 0;
-
 	// get first word on a line
 	size_t indent = line.find_first_not_of(" \t");
 	if (indent == string::npos || !isLegalNameChar(line[indent]))
@@ -2647,7 +2633,7 @@ int ASBeautifier::getInStatementIndentComma(const string& line, size_t currPos) 
 
 	// point to second word or assignment operator
 	indent = line.find_last_not_of(" \t", indent);
-	if (indent == string::npos || indent >= currPos)
+	if (indent == string::npos || indent >= currPos)			// this should not happen?
 		return 0;
 
 	return indent;
