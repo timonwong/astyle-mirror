@@ -222,6 +222,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	isImmediatelyPostPreprocessor = false;
 	isImmediatelyPostReturn = false;
 	isImmediatelyPostOperator = false;
+	isImmediatelyPostPointerOrReference = false;
 	isCharImmediatelyPostReturn = false;
 	isCharImmediatelyPostOperator = false;
 	isCharImmediatelyPostComment = false;
@@ -230,6 +231,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	isCharImmediatelyPostOpenBlock = false;
 	isCharImmediatelyPostCloseBlock = false;
 	isCharImmediatelyPostTemplate = false;
+	isCharImmediatelyPostPointerOrReference = false;
 	breakCurrentOneLineBlock = false;
 	isInHorstmannRunIn = false;
 	currentLineBeginsWithBracket = false;
@@ -434,6 +436,7 @@ string ASFormatter::nextLine()
 			isCharImmediatelyPostTemplate = false;
 			isCharImmediatelyPostReturn = false;
 			isCharImmediatelyPostOperator = false;
+			isCharImmediatelyPostPointerOrReference = false;
 			isCharImmediatelyPostOpenBlock = false;
 			isCharImmediatelyPostCloseBlock = false;
 		}
@@ -565,6 +568,11 @@ string ASFormatter::nextLine()
 			isImmediatelyPostOperator = false;
 			isCharImmediatelyPostOperator = true;
 		}
+		if (isImmediatelyPostPointerOrReference)
+		{
+			isImmediatelyPostPointerOrReference = false;
+			isCharImmediatelyPostPointerOrReference = true;
+		}
 
 		// reset isImmediatelyPostHeader information
 		if (isImmediatelyPostHeader)
@@ -648,58 +656,9 @@ string ASFormatter::nextLine()
 		}
 
 		// Check if in template declaration, e.g. foo<bar> or foo<bar,fig>
-		// If so, set isInTemplate to true
 		if (!isInTemplate && currentChar == '<')
 		{
-			int maxTemplateDepth = 0;
-			templateDepth = 0;
-			for (size_t i = charNum;
-			        i < currentLine.length();
-			        i++)
-			{
-				char currentChar = currentLine[i];
-
-				if (currentChar == '<')
-				{
-					templateDepth++;
-					maxTemplateDepth++;
-				}
-				else if (currentChar == '>')
-				{
-					templateDepth--;
-					if (templateDepth == 0)
-					{
-						// this is a template!
-						isInTemplate = true;
-						templateDepth = maxTemplateDepth;
-						break;
-					}
-				}
-				else if (currentLine.compare(i, 2, "&&") == 0
-				         || currentLine.compare(i, 2, "||") == 0)
-				{
-					// this is not a template -> leave...
-					isInTemplate = false;
-					break;
-				}
-				else if (currentChar == ','       // comma,     e.g. A<int, char>
-				         || currentChar == '&'    // reference, e.g. A<int&>
-				         || currentChar == '*'    // pointer,   e.g. A<int*>
-				         || currentChar == ':'    // ::,        e.g. std::string
-				         || currentChar == '['    // []         e.g. string[]
-				         || currentChar == ']'    // []         e.g. string[]
-				         || currentChar == '('    // (...)      e.g. function definition
-				         || currentChar == ')')   // (...)      e.g. function definition
-				{
-					continue;
-				}
-				else if (!isLegalNameChar(currentChar) && !isWhiteSpace(currentChar))
-				{
-					// this is not a template -> leave...
-					isInTemplate = false;
-					break;
-				}
-			}
+			checkIfTemplateOpener();
 		}
 
 		// handle parenthesies
@@ -1211,13 +1170,14 @@ string ASFormatter::nextLine()
 		}
 
 		// process pointers and references
-		// check new header to elimnate things like '&&' sequence
+		// check newHeader to elimnate things like '&&' sequence
 		if (isCStyle()
 		        && (newHeader == &AS_MULT || newHeader == &AS_BIT_AND)
 		        && isPointerOrReference()
 		        && !isDereferenceOrAddressOf())
 		{
 			formatPointerOrReference();
+			isImmediatelyPostPointerOrReference = true;
 			continue;
 		}
 
@@ -1250,14 +1210,23 @@ string ASFormatter::nextLine()
 			}
 		}
 
-		if ((shouldPadParensOutside || shouldPadParensInside || shouldUnPadParens)
-		        && (currentChar == '(' || currentChar == ')'))
+		if ((currentChar == '(' || currentChar == ')')
+		        && (shouldPadParensOutside || shouldPadParensInside || shouldUnPadParens))
 		{
 			padParens();
 			continue;
 		}
 
+		// bypass the entire operator
+		if (newHeader != NULL && newHeader->length() > 1)
+		{
+			appendSequence(*newHeader);
+			goForward(newHeader->length() - 1);
+			continue;
+		}
+
 		appendCurrentChar();
+
 	}   // end of while loop  *  end of while loop  *  end of while loop  *  end of while loop
 
 	// return a beautified (i.e. correctly indented) line.
@@ -2055,33 +2024,32 @@ bool ASFormatter::isPointerOrReference() const
 	if (!isCStyle())
 		return false;
 
-	if (currentChar == '&' && previousChar == '&')
+	if ((currentChar == '&' && previousChar == '&')
+	        || isInBlParen
+	        || isCharImmediatelyPostOperator)
 		return false;
 
-	if (isInBlParen)
-		return false;
-
-	if (previousNonWSChar == '=' || isCharImmediatelyPostReturn)
-		return true;
-
-	if (currentHeader == &AS_CATCH)
+	if (previousNonWSChar == '='
+	        || currentHeader == &AS_CATCH
+	        || isCharImmediatelyPostReturn)
 		return true;
 
 	// get the last legal word (may be a number)
 	string lastWord = getPreviousWord(currentLine, charNum);
 	if (lastWord.empty())
-		lastWord[0] = ' ';
+		lastWord = " ";
 	char nextChar = peekNextChar();
 
 	// check for preceding or following numeric values
 	if (isdigit(lastWord[0])
-	        || isdigit(nextChar))
+	        || isdigit(nextChar)
+	        || nextChar == '!')
 		return false;
 
-	// checks on other chars
-	if (isLegalNameChar(lastWord[0])
-	        && isLegalNameChar(nextChar)
-	        && parenStack->back() > 0)
+	// checks on operators in parens
+	if (parenStack->back() > 0
+	        && isLegalNameChar(lastWord[0])
+	        && isLegalNameChar(nextChar))
 	{
 		// if followed by an assignment it is a pointer or reference
 		size_t nextNum = currentLine.find_first_of("=;)", charNum + 1);
@@ -2095,6 +2063,17 @@ bool ASFormatter::isPointerOrReference() const
 		else
 			return false;
 	}
+
+	// checks on operators in parens with following '('
+	if (parenStack->back() > 0
+	        && nextChar == '('
+	        && previousNonWSChar != ','
+	        && previousNonWSChar != '('
+	        && previousNonWSChar != '!'
+	        && previousNonWSChar != '&'
+	        && previousNonWSChar != '*'
+	        && previousNonWSChar != '|')
+		return false;
 
 	if (nextChar == '-'
 	        || nextChar == '+')
@@ -2143,6 +2122,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 	if (previousNonWSChar == '='
 	        || previousNonWSChar == ','
 	        || previousNonWSChar == '.'
+	        || previousNonWSChar == '{'
 	        || previousNonWSChar == '>'
 	        || previousNonWSChar == '<'
 	        || isCharImmediatelyPostReturn)
@@ -2171,12 +2151,16 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 	            || currentLine[nextChar] == ','))
 		return false;
 
+	if (!isBracketType(bracketTypeStack->back(), COMMAND_TYPE)
+	        && parenStack->back() == 0)
+		return false;
+
 	string lastWord = getPreviousWord(currentLine, charNum);
 	if (lastWord == "else" || lastWord == "delete")
 		return true;
 
 	bool isDA = (!(isLegalNameChar(previousNonWSChar) || previousNonWSChar == '>')
-	             || !isLegalNameChar(peekNextChar())
+	             || (!isLegalNameChar(peekNextChar()) && peekNextChar() != '/')
 	             || (ispunct(previousNonWSChar) && previousNonWSChar != '.')
 	             || isCharImmediatelyPostReturn);
 
@@ -2197,6 +2181,7 @@ bool ASFormatter::isPointerOrReferenceCentered() const
 
 	int prNum = charNum;
 	int lineLength = (int) currentLine.length();
+
 	// check space before
 	if (prNum < 1
 	        || currentLine[prNum-1] != ' ')
@@ -2213,7 +2198,7 @@ bool ASFormatter::isPointerOrReferenceCentered() const
 		prNum++;
 
 	// check space after
-	if (prNum + 1 < lineLength
+	if (prNum + 1 <= lineLength
 	        && currentLine[prNum+1] != ' ')
 		return false;
 
@@ -2388,7 +2373,7 @@ bool ASFormatter::isNextWordSharpNonParenHeader(int startChar) const
 {
 	// look ahead to find the next non-comment text
 	string nextText = peekNextText(currentLine.substr(startChar));
-	if (nextText.length() == 0)                // this should not happen?
+	if (nextText.length() == 0)
 		return false;
 	if (nextText[0] == '[')
 		return true;
@@ -2451,7 +2436,10 @@ string ASFormatter::peekNextText(const string& firstLine, bool endOnEmptyLine /*
 		}
 
 		if (nextLine.compare(firstChar, 2, "/*") == 0)
+		{
+			firstChar += 2;
 			isInComment = true;
+		}
 
 		if (isInComment)
 		{
@@ -2547,7 +2535,7 @@ void ASFormatter::appendCharInsideComments(void)
 	// find the previous non space char
 	size_t end = formattedLineCommentNum;
 	size_t beg = formattedLine.find_last_not_of(" \t", end-1);
-	if (beg == string::npos)                // this should not happen?
+	if (beg == string::npos)
 	{
 		appendCurrentChar();                // don't attach
 		return;
@@ -2657,7 +2645,7 @@ void ASFormatter::formatPointerOrReference(void)
 	        && currentLine[charNum+1] == '*')
 	{
 		size_t nextChar = currentLine.find_first_not_of(" \t", charNum+2);
-		if (nextChar == string::npos)			// this should not happen?
+		if (nextChar == string::npos)
 			peekedChar = ' ';
 		else
 			peekedChar = currentLine[nextChar];
@@ -2674,7 +2662,7 @@ void ASFormatter::formatPointerOrReference(void)
 	if (pointerAlignment == ALIGN_TYPE)
 	{
 		size_t prevCh = formattedLine.find_last_not_of(" \t");
-		if (prevCh == string::npos)			// this should not happen?
+		if (prevCh == string::npos)
 			prevCh = 0;
 		if (formattedLine.length() == 0 || prevCh == formattedLine.length() - 1)
 			appendCurrentChar();
@@ -2708,7 +2696,7 @@ void ASFormatter::formatPointerOrReference(void)
 	{
 		// compute current whitespace before
 		size_t wsBefore = currentLine.find_last_not_of(" \t", charNum - 1);
-		if (wsBefore == string::npos)			// this should not happen?
+		if (wsBefore == string::npos)
 			wsBefore = 0;
 		else
 			wsBefore = charNum - wsBefore - 1;
@@ -2719,32 +2707,56 @@ void ASFormatter::formatPointerOrReference(void)
 			sequenceToInsert = "**";
 			goForward(1);
 		}
+		bool isAfterScopeResolution = previousNonWSChar == ':';		// check for ::
 		size_t charNumSave = charNum;
-		// goForward() to convert tabs to spaces, if necessary,
-		// and move following characters to preceding characters
-		// this may not work every time with tab characters
-		for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
+		// if a comment follows don't align, just space pad
+		if (isBeforeAnyComment())
 		{
-			goForward(1);
-			formattedLine.append(1, currentLine[i]);
+			appendSpacePad();
+			formattedLine.append(sequenceToInsert);
+			appendSpaceAfter();
+			return;
 		}
-		// whitespace should be at least 2 chars
+		// if this is not the last thing on the line
+		if ((int) currentLine.find_first_not_of(" \t", charNum + 1) > charNum)
+		{
+			// goForward() to convert tabs to spaces, if necessary,
+			// and move following characters to preceding characters
+			// this may not work every time with tab characters
+			for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
+			{
+				goForward(1);
+				formattedLine.append(1, currentLine[i]);
+			}
+		}
+		// find space padding after
 		size_t wsAfter = currentLine.find_first_not_of(" \t", charNumSave + 1);
-		if (wsAfter == string::npos)			// this should not happen?
+		if (wsAfter == string::npos || isBeforeAnyComment())
 			wsAfter = 0;
 		else
 			wsAfter = wsAfter - charNumSave - 1;
-		if (wsBefore + wsAfter < 2)
+		// don't pad before scope resolution operator, but pad after
+		if (isAfterScopeResolution)
 		{
-			size_t charsToAppend = (2 - (wsBefore + wsAfter));
-			formattedLine.append(charsToAppend, ' ');
-			spacePadNum += charsToAppend;
-			if (wsBefore == 0) wsBefore++;
-			if (wsAfter == 0) wsAfter++;
+			size_t lastText = formattedLine.find_last_not_of(" \t");
+			formattedLine.insert(lastText + 1, sequenceToInsert);
+			appendSpacePad();
 		}
-		// insert the pointer or reference char
-		size_t padAfter = (wsBefore + wsAfter) / 2;
-		formattedLine.insert(formattedLine.length() - padAfter, sequenceToInsert);
+		// whitespace should be at least 2 chars to center
+		else
+		{
+			if (wsBefore + wsAfter < 2)
+			{
+				size_t charsToAppend = (2 - (wsBefore + wsAfter));
+				formattedLine.append(charsToAppend, ' ');
+				spacePadNum += charsToAppend;
+				if (wsBefore == 0) wsBefore++;
+				if (wsAfter == 0) wsAfter++;
+			}
+			// insert the pointer or reference char
+			size_t padAfter = (wsBefore + wsAfter) / 2;
+			formattedLine.insert(formattedLine.length() - padAfter, sequenceToInsert);
+		}
 	}
 	else if (pointerAlignment == ALIGN_NAME)
 	{
@@ -2755,26 +2767,39 @@ void ASFormatter::formatPointerOrReference(void)
 			sequenceToInsert = "**";
 			goForward(1);
 		}
-		// goForward() to convert tabs to spaces, if necessary,
-		// and move following characters to preceding characters
-		// this may not work every time with tab characters
-		for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
+		bool isAfterScopeResolution = previousNonWSChar == ':';		// check for ::
+		// if this is not the last thing on the line
+		if (!isBeforeAnyComment()
+		        &&  (int) currentLine.find_first_not_of(" \t", charNum + 1) > charNum)
 		{
-			goForward(1);
-			formattedLine.append(1, currentLine[i]);
+			// goForward() to convert tabs to spaces, if necessary,
+			// and move following characters to preceding characters
+			// this may not work every time with tab characters
+			for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
+			{
+				goForward(1);
+				formattedLine.append(1, currentLine[i]);
+			}
 		}
-		appendSequence(sequenceToInsert, false);
+		// don't pad before scope resolution operator
+		if (startNum != string::npos && isAfterScopeResolution)
+		{
+			size_t lastText = formattedLine.find_last_not_of(" \t");
+			if (lastText + 1 < formattedLine.length())
+				formattedLine.erase(lastText + 1);
+		}
 		// if no space before * then add one
-		if (startNum != string::npos
-		        && !isWhiteSpace(formattedLine[startNum+1]))
+		else if (!isWhiteSpace(formattedLine[startNum+1]))
 		{
 			formattedLine.insert(startNum+1 , 1, ' ');
 			spacePadNum++;
 		}
+		appendSequence(sequenceToInsert, false);
 		// if old pointer or reference is centered, remove a space
 		if (isOldPRCentered
 		        && formattedLine.length() > startNum+1
-		        && isWhiteSpace(formattedLine[startNum+1]))
+		        && isWhiteSpace(formattedLine[startNum+1])
+		        && !isBeforeAnyComment())
 		{
 			formattedLine.erase(startNum+1, 1);
 			spacePadNum--;
@@ -2812,7 +2837,7 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	}
 	// remove trailing whitespace
 	size_t prevCh = formattedLine.find_last_not_of(" \t");
-	if (prevCh == string::npos)			// this should not happen?
+	if (prevCh == string::npos)
 		prevCh = 0;
 	if (formattedLine.length() > 0 && isWhiteSpace(formattedLine[prevCh+1]))
 	{
@@ -2857,6 +2882,8 @@ void ASFormatter::padParens(void)
 			{
 				// if last char is a bracket the previous whitespace is an indent
 				if (formattedLine[i] == '{')
+					spacesOutsideToDelete = 0;
+				else if (isCharImmediatelyPostPointerOrReference)
 					spacesOutsideToDelete = 0;
 				else
 				{
@@ -2907,7 +2934,7 @@ void ASFormatter::padParens(void)
 			if (shouldPadParensOutside || prevIsParenHeader)
 				spacesOutsideToDelete--;
 			else if (lastChar == '|'          // check for ||
-			         || lastChar == '&'      // check for &&
+			         || lastChar == '&'       // check for &&
 			         || lastChar == ','
 			         || (lastChar == '>' && !foundCastOperator)
 			         || lastChar == '<'
@@ -2917,7 +2944,7 @@ void ASFormatter::padParens(void)
 			         || lastChar == '='
 			         || lastChar == '+'
 			         || lastChar == '-'
-			         || (lastChar == '*' && isInPotentialCalculation)
+			         || lastChar == '*'
 			         || lastChar == '/'
 			         || lastChar == '%')
 				spacesOutsideToDelete--;
@@ -2967,7 +2994,7 @@ void ASFormatter::padParens(void)
 		//if(spacesOutsideToDelete > 0 || spacesInsideToDelete > 0)
 		//    cout << traceLineNumber << " " << spacesOutsideToDelete << '(' << spacesInsideToDelete << endl;
 	}
-	else if (currentChar == ')' /*|| currentChar == ']'*/)
+	else if (currentChar == ')')
 	{
 		spacesOutsideToDelete = 0;
 		spacesInsideToDelete = formattedLine.length();
@@ -3647,6 +3674,8 @@ bool ASFormatter::commentAndHeaderFollows()
 	assert(shouldDeleteEmptyLines && shouldBreakBlocks);
 
 	// is the next line a comment
+	if (!sourceIterator->hasMoreLines())
+		return false;
 	string nextLine = sourceIterator->peekNextLine();
 	size_t firstChar = nextLine.find_first_not_of(" \t");
 	if (firstChar == string::npos
@@ -4096,7 +4125,7 @@ void ASFormatter::formatQuoteOpener()
 int ASFormatter::getNextLineCommentAdjustment()
 {
 	assert(foundClosingHeader && previousNonWSChar == '}');
-	if (charNum < 1)			// this should not happen?
+	if (charNum < 1)			// "else" is in column 1
 		return 0;
 	size_t lastBracket = currentLine.rfind('}', charNum - 1);
 	if (lastBracket != string::npos)
@@ -4120,7 +4149,7 @@ LineEndFormat ASFormatter::getLineEndFormat() const
 int ASFormatter::getCurrentLineCommentAdjustment()
 {
 	assert(foundClosingHeader && previousNonWSChar == '}');
-	if (charNum < 1)			// this should not happen?
+	if (charNum < 1)
 		return 2;
 	size_t lastBracket = currentLine.rfind('}', charNum - 1);
 	if (lastBracket == string::npos)
@@ -4132,7 +4161,7 @@ int ASFormatter::getCurrentLineCommentAdjustment()
  * get the previous word
  * the argument 'end' must point to the search start.
  *
- * @return is the previous word.
+ * @return is the previous word or an empty string if none found.
  */
 string ASFormatter::getPreviousWord(const string& line, int currPos) const
 {
@@ -4508,6 +4537,67 @@ bool ASFormatter::isClosingHeader(const string* header) const
 	return (header == &AS_ELSE
 	        || header == &AS_CATCH
 	        || header == &AS_FINALLY);
+}
+
+/**
+ * Determine if a < is a template definition or instantiation.
+ * Sets the class variables isInTemplate and templateDepth.
+ */
+void ASFormatter::checkIfTemplateOpener()
+{
+	assert(!isInTemplate && currentChar == '<');
+
+	int maxTemplateDepth = 0;
+	templateDepth = 0;
+	for (size_t i = charNum; i < currentLine.length(); i++)
+	{
+		char currentChar = currentLine[i];
+
+		if (isWhiteSpace(currentChar))
+			continue;
+
+		if (currentChar == '<')
+		{
+			templateDepth++;
+			maxTemplateDepth++;
+		}
+		else if (currentChar == '>')
+		{
+			templateDepth--;
+			if (templateDepth == 0)
+			{
+				// this is a template!
+				isInTemplate = true;
+				templateDepth = maxTemplateDepth;
+				return;
+			}
+		}
+		else if (currentLine.compare(i, 2, "&&") == 0
+		         || currentLine.compare(i, 2, "||") == 0)
+		{
+			// this is not a template -> leave...
+			isInTemplate = false;
+			return;
+		}
+		else if (currentChar == ','       // comma,     e.g. A<int, char>
+		         || currentChar == '&'    // reference, e.g. A<int&>
+		         || currentChar == '*'    // pointer,   e.g. A<int*>
+		         || currentChar == ':'    // ::,        e.g. std::string
+		         || currentChar == '='    // assign     e.g. default parameter
+		         || currentChar == '['    // []         e.g. string[]
+		         || currentChar == ']'    // []         e.g. string[]
+		         || currentChar == '('    // (...)      e.g. function definition
+		         || currentChar == ')')   // (...)      e.g. function definition
+		{
+			continue;
+		}
+		else if (!isLegalNameChar(currentChar))
+		{
+			// this is not a template -> leave...
+			isInTemplate = false;
+			return;
+		}
+	}
 }
 
 

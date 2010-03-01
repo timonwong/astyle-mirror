@@ -307,6 +307,7 @@ void ASResource::buildNonAssignmentOperators(vector<const string*>* nonAssignmen
 	nonAssignmentOperators->push_back(&AS_ARROW);
 	nonAssignmentOperators->push_back(&AS_AND);
 	nonAssignmentOperators->push_back(&AS_OR);
+	nonAssignmentOperators->push_back(&AS_EQUAL_GR);
 
 	sort(nonAssignmentOperators->begin(), nonAssignmentOperators->end(), sortOnLength);
 }

@@ -1035,13 +1035,15 @@ isBar = false;
         parens [] are <strong>not</strong> padded. Any end of line comments will remain in the original column, if possible.
         Note that there is no option to unpad. Once padded, they stay padded.</p>
     <div class="code">
-        <pre>if (foo==2)
-    a=bar((b-c)*a,*d--);
+        <pre>
+if (foo==2)
+    a=bar((b-c)*a,d--);
 </pre>
         <p class="code">
             becomes:</p>
-        <pre>if (foo == 2)
-     a = bar((b - c) * a, * d--);
+        <pre>
+if (foo == 2)
+     a = bar((b - c) * a, d--);
 </pre>
     </div>
     <p>
@@ -1124,7 +1126,7 @@ isBar = false;
 </pre>
         <p class="code">
             becomes (with no padding option requested):</p>
-        <pre>if (isFoo(a, b))
+        <pre>if(isFoo(a, b))
     bar(a, b);
 </pre>
     </div>
@@ -1182,7 +1184,7 @@ isBar = false;
 <span class="brace">}</span>
 </pre>
         <p class="code">
-            becomes (with a broken 'else'):</p>
+            becomes (a broken 'else'):</p>
         <pre>void Foo(bool isFoo) <span class="brace">{</span>
     if (isFoo) <span class="brace">{</span>
         bar();

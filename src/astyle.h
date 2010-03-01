@@ -286,8 +286,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		virtual ~ASBeautifier();
 		virtual void init(ASSourceIterator* iter);
 		void init();
-		virtual bool hasMoreLines() const;
-		virtual string nextLine();
 		virtual string beautify(const string &line);
 		void deleteVector(vector<const string*>*& container);
 		void initVector(vector<const string*>*& container);
@@ -583,6 +581,7 @@ class ASFormatter : public ASBeautifier
 		void breakLine();
 		void buildLanguageVectors();
 		void checkForHeaderFollowingComment(const string& firstLine);
+		void checkIfTemplateOpener();
 		void convertTabToSpaces();
 		void deleteContainer(vector<BracketType>* &container);
 		void formatArrayRunIn();
@@ -709,6 +708,7 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostTemplate;
 		bool isCharImmediatelyPostReturn;
 		bool isCharImmediatelyPostOperator;
+		bool isCharImmediatelyPostPointerOrReference;
 		bool breakCurrentOneLineBlock;
 		bool isInHorstmannRunIn;
 		bool currentLineBeginsWithBracket;
@@ -731,6 +731,7 @@ class ASFormatter : public ASBeautifier
 		bool isImmediatelyPostPreprocessor;
 		bool isImmediatelyPostReturn;
 		bool isImmediatelyPostOperator;
+		bool isImmediatelyPostPointerOrReference;
 
 		bool shouldBreakBlocks;
 		bool shouldBreakClosingHeaderBlocks;

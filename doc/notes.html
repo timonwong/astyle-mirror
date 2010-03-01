@@ -24,9 +24,18 @@
         <li>Improve formatting of multi-line comments when the number of leading spaces must be changed. </li>
         <li>Improve formatting of embedded SQL when the number of leading spaces must be changed. </li>
         <li>Fix not recognizing text in quotes when identifying struct access modifiers.</li>
+        <li>Fix --pad-oper to recognize all * and &amp; operators within a function call.</li>
+        <li>Fix --unpad-paren to recognize * and &amp; operators within a function call. </li>
+        <li>Fix --align-pointer to pad or unpad pointers followed by parens or comments.</li>
+        <li>Fix --align-pointer to pad or unpad pointers following a scope resolution operator.</li>
+        <li>Fix --align-pointer to pad or unpad pointers that end the line.</li>
         <li>Fix --break-blocks and --break-blocks=all not always breaking when --delete-empty-lines is used.</li>
-        <li>Fix --break-blocks not always breaking opening blocks when --delete-empty-lines is used. </li>
-        <li>Fix --delete-empty-lines not always deleting closing blocks when --break-blocks is used. </li>
+        <li>Fix --break-blocks to always break opening blocks when --delete-empty-lines is used. </li>
+        <li>Fix --break-blocks used with --delete-empty-lines causing an assert error when end of file is reached. </li>
+        <li>Fix --delete-empty-lines to always delete closing blocks when --break-blocks is used. </li>
+        <li>Fix --pad-oper incorrectly padding a template with a default parameter.</li>
+        <li>Fix ASBeautifier findOperator() method to recognize a C# lambda (=&gt;) operator.</li>
+        <li>Fix ASFormatter nextLine() method to output an entire operator instead of individual characters.</li>
         <li>Fix incorrectly identifying '*' as pointers in block parens.</li>
     </ul>
 

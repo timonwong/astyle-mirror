@@ -691,26 +691,6 @@ bool ASBeautifier::getEmptyLineFill(void)
 }
 
 /**
- * check if there are any indented lines ready to be read by nextLine()
- *
- * @return    are there any indented lines ready?
- */
-bool ASBeautifier::hasMoreLines() const
-{
-	return sourceIterator->hasMoreLines();
-}
-
-/**
- * get the next indented line.
- *
- * @return    indented line.
- */
-string ASBeautifier::nextLine()
-{
-	return beautify(sourceIterator->nextLine());
-}
-
-/**
  * beautify a line of source code.
  * every line of source code in a source code file should be sent
  * one after the other to the beautify method.
@@ -901,8 +881,6 @@ string ASBeautifier::beautify(const string &originalLine)
 		// check if the last char is a backslash
 		if (line.length() > 0)
 			backslashEndsPrevLine = (line[line.length() - 1] == '\\');
-		else
-			backslashEndsPrevLine = false;
 
 		// check if this line ends a multi-line #define
 		// if so, use the #define's cloned beautifier for the line's indentation
@@ -1179,10 +1157,6 @@ string ASBeautifier::beautify(const string &originalLine)
 
 		// if we have reached this far then we are NOT in a comment or string of special character...
 
-		// SQL if formatted in ASEnhancer
-		if (isInBeautifySQL)
-			continue;
-
 		if (probationHeader != NULL)
 		{
 			if (((probationHeader == &AS_STATIC || probationHeader == &AS_CONST) && ch == '{')
@@ -1240,10 +1214,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			{
 				if (--templateDepth <= 0)
 				{
-					if (isInTemplate)
-						ch = ';';
-					else
-						ch = 't';
+					ch = ';';
 					isInTemplate = false;
 					templateDepth = 0;
 				}
@@ -1683,7 +1654,7 @@ string ASBeautifier::beautify(const string &originalLine)
 				inStatementIndentStack->pop_back();
 
 		// handle commas
-		// previous "isInStatement" will be from an assignment operator
+		// previous "isInStatement" will be from an assignment operator or class initializer
 		if (ch == ',' && parenDepth == 0 && !isInStatement && !isNonInStatementArray)
 		{
 			// is comma at end of line
@@ -2633,7 +2604,7 @@ int ASBeautifier::getInStatementIndentComma(const string& line, size_t currPos) 
 
 	// point to second word or assignment operator
 	indent = line.find_last_not_of(" \t", indent);
-	if (indent == string::npos || indent >= currPos)			// this should not happen?
+	if (indent == string::npos || indent >= currPos)
 		return 0;
 
 	return indent;
