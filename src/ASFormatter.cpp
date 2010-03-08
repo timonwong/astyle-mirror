@@ -160,6 +160,8 @@ void ASFormatter::init(ASSourceIterator *si)
 	previousNonWSChar = ' ';
 	quoteChar = '"';
 	charNum = 0;
+	checksumIn = 0;
+	checksumOut = 0;
 	leadingSpaces = 0;
 	formattedLineCommentNum = 0;
 	preprocBracketTypeStackSize = 0;
@@ -413,7 +415,7 @@ string ASFormatter::nextLine()
 		else if (!getNextChar())
 		{
 			breakLine();
-			return beautify(readyFormattedLine);
+			continue;
 		}
 		else // stuff to do when reading a new character...
 		{
@@ -1259,6 +1261,7 @@ string ASFormatter::nextLine()
 	}
 
 	prependEmptyLine = false;
+	assert(computeChecksumOut(beautifiedLine));
 	return beautifiedLine;
 }
 
@@ -1688,7 +1691,10 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		if (appendOpeningBracket)
 			currentLine = "{";		// append bracket that was removed from the previous line
 		else
+		{
 			currentLine = sourceIterator->nextLine(emptyLineWasDeleted);
+			assert(computeChecksumIn(currentLine));
+		}
 		// reset variables for new line
 		inLineNumber++;
 		isInCase = false;
@@ -4280,6 +4286,7 @@ bool ASFormatter::addBracketsToStatement()
 		currentLine.insert(nextSemiColon + 1, " }");
 	// add opening bracket
 	currentLine.insert(charNum, "{ ");
+	assert(computeChecksumIn("{}"));
 	currentChar = '{';
 	// remove extra spaces
 	if (!shouldAddOneLineBrackets)
@@ -4598,6 +4605,59 @@ void ASFormatter::checkIfTemplateOpener()
 			return;
 		}
 	}
+}
+
+/**
+ * Compute the input checksum.
+ * This is called as an assert so it for is debug config only
+ */
+bool ASFormatter::computeChecksumIn(const string &currentLine)
+{
+	for (size_t i = 0; i < currentLine.length(); i++)
+		if (!isWhiteSpace(currentLine[i]))
+			checksumIn += currentLine[i];
+	return true;
+}
+
+/**
+ * get the value of checksumIn
+ *
+ * @return   checksumIn.
+ */
+size_t ASFormatter::getChecksumIn()
+{
+	return checksumIn;
+}
+
+/**
+ * Compute the output checksum.
+ * This is called as an assert so it is for debug config only
+ */
+bool ASFormatter::computeChecksumOut(const string &beautifiedLine)
+{
+	for (size_t i = 0; i < beautifiedLine.length(); i++)
+		if (!isWhiteSpace(beautifiedLine[i]))
+			checksumOut += beautifiedLine[i];
+	return true;
+}
+
+/**
+ * get the value of checksumOut
+ *
+ * @return   checksumOut.
+ */
+size_t ASFormatter::getChecksumOut()
+{
+	return checksumOut;
+}
+
+/**
+ * Return the difference in chacksums.
+ * If zero all is okay.
+ */
+int ASFormatter::getChecksumDiff()
+{
+	return checksumOut - checksumIn;
 }
 
 

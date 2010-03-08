@@ -1000,8 +1000,6 @@ void ASConsole::formatCinToCout(ASFormatter& formatter) const
  */
 void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 {
-	bool isFormatted = false;
-
 	// open input file
 	ifstream in(fileName.c_str(), ios::binary);
 	if (!in)
@@ -1070,19 +1068,6 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 	}
 	in.close();
 
-	// if file has changed, write the new file
-	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
-	{
-		writeOutputFile(fileName, out);
-		isFormatted = true;
-		filesFormatted++;
-	}
-	else
-		filesUnchanged++;
-
-	if (encoding != ENCODING_OK)
-		printBadEncoding(encoding);
-
 	// remove targetDirectory from filename if required by print
 	string displayName;
 	if (hasWildcard)
@@ -1090,13 +1075,23 @@ void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
 	else
 		displayName = fileName;
 
-	if (isFormatted)
+	// if file has changed, write the new file
+	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
+	{
+		writeOutputFile(fileName, out);
 		printMsg("formatted  " + displayName);
+		filesFormatted++;
+	}
 	else
 	{
 		if (!isFormattedOnly || encoding != ENCODING_OK)
 			printMsg("unchanged* " + displayName);
+		filesUnchanged++;
+		if (encoding != ENCODING_OK)
+			printBadEncoding(encoding);
 	}
+
+	assert(formatter.getChecksumDiff() == 0);
 }
 
 // for unit testing
@@ -1185,7 +1180,7 @@ void ASConsole::initializeOutputEOL(LineEndFormat lineEndFormat)
 
 void ASConsole::printBadEncoding(FileEncoding encoding) const
 {
-	string msg = "********** following file unchanged: ";
+	string msg = "********** previous file: ";
 	if (encoding == UTF_16BE)
 		msg += "UTF-16BE encoding";
 	else if (encoding == UTF_16LE)
@@ -1926,7 +1921,6 @@ void ASConsole::processFiles(ASFormatter &formatter)
 	// files are processed, display stats
 	if (isVerbose)
 		printVerboseStats(startTime);
-
 }
 
 // process options from the command line and options file
@@ -2492,7 +2486,7 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	}
 
 	strcpy(pTextOut, out.str().c_str());
-
+	assert(formatter.getChecksumDiff() == 0);
 	return pTextOut;
 }
 

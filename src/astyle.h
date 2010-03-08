@@ -539,6 +539,9 @@ class ASFormatter : public ASBeautifier
 		void setPointerAlignment(PointerAlign alignment);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
+		size_t getChecksumIn();
+		size_t getChecksumOut();
+		int  getChecksumDiff();
 
 	private:  // functions
 		void ASformatter(ASFormatter &copy);           // not to be imlpemented
@@ -647,6 +650,8 @@ class ASFormatter : public ASBeautifier
 		int  templateDepth;
 		int  traceLineNumber;
 		int  horstmannIndentChars;
+		size_t checksumIn;
+		size_t checksumOut;
 		size_t leadingSpaces;
 		size_t formattedLineCommentNum;     // comment location on formattedLine
 		size_t currentLineFirstBracketNum;	// first bracket location on currentLine
@@ -656,6 +661,8 @@ class ASFormatter : public ASBeautifier
 		BracketType previousBracketType;
 		PointerAlign pointerAlignment;
 		LineEndFormat lineEnd;
+		bool computeChecksumIn(const string &currentLine);
+		bool computeChecksumOut(const string &beautifiedLine);
 		bool isVirgin;
 		bool shouldPadOperators;
 		bool shouldPadParensOutside;
