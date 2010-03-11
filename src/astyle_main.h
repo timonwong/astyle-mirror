@@ -31,6 +31,7 @@
 // headers
 //----------------------------------------------------------------------------
 
+#include <sstream>
 #include <ctime>
 #include "astyle.h"
 
@@ -113,6 +114,7 @@ class ASStreamIterator : public ASSourceIterator
 class ASConsole
 {
 	private:	// variables
+		ASFormatter& formatter;				// reference to the ASFormatter object		
 		// command line options
 		bool isRecursive;                   // recursive option
 		string origSuffix;                  // suffix= option
@@ -126,7 +128,7 @@ class ASConsole
 		bool hasWildcard;                   // file name includes a wildcard
 		size_t mainDirectoryLength;         // directory length to be excluded in displays
 		bool filesAreIdentical;				// input and output files are identical
-		bool lineEndsMixed;					// outputhas mixed line ends
+		bool lineEndsMixed;					// output has mixed line ends
 		int  linesOut;                      // number of output lines
 		int  filesFormatted;                // number of files formatted
 		int  filesUnchanged;                // number of files unchanged
@@ -145,7 +147,7 @@ class ASConsole
 		vector<string> fileName;            // files to be processed including path
 
 	public:
-		ASConsole() {
+		ASConsole(ASFormatter& formatterArg) : formatter(formatterArg) {
 			// command line options
 			isRecursive = false;
 			origSuffix = ".orig";
@@ -170,7 +172,7 @@ class ASConsole
 		// functions
 		void convertLineEnds(ostringstream& out, int lineEnd);
 		void error(const char *why, const char* what) const;
-		void formatCinToCout(ASFormatter& formatter) const;
+		void formatCinToCout() const;
 		FileEncoding getFileEncoding(ifstream& in) const;
 		bool fileNameVectorIsEmpty();
 		int  getFilesFormatted();
@@ -185,8 +187,8 @@ class ASConsole
 		bool getOptionsFileRequired();
 		string getOrigSuffix();
 		bool getPreserveDate();
-		void processFiles(ASFormatter &formatter);
-		processReturn processOptions(int argc, char** argv, ASFormatter &formatter);
+		void processFiles();
+		processReturn processOptions(int argc, char** argv);
 		void setIsFormattedOnly(bool state);
 		void setIsQuiet(bool state);
 		void setIsRecursive(bool state);
@@ -209,12 +211,17 @@ class ASConsole
 		vector<string> getFileName();
 
 	private:
+		ASConsole& operator=(ASConsole&);          // not to be implemented
 		void correctMixedLineEnds(ostringstream& out);
-		void formatFile(const string &fileName, ASFormatter &formatter);
+		void formatFile(const string &fileName);
 		string getCurrentDirectory(const string &fileName) const;
 		void getFileNames(const string &directory, const string &wildcard);
 		void getFilePaths(string &filePath);
+		string getParam(const string &arg, const char* op);
 		void initializeOutputEOL(LineEndFormat lineEndFormat);
+		bool isOption(const string& arg, const char *op);
+		bool isOption(const string& arg, const char *op1, const char *op2);
+		bool isParamOption(const string &arg, const char *option);
 		bool isPathExclued(const string &subPath);
 		void printBadEncoding(FileEncoding encoding) const;
 		void printHelp() const;
@@ -230,21 +237,35 @@ class ASConsole
 		void writeOutputFile(const string &fileName, ostringstream &out) const;
 };
 
-
 //----------------------------------------------------------------------------
-// global function declarations
+// ASOptions class for options processing
 // used by both console and library builds
 //----------------------------------------------------------------------------
 
-void importOptions(istream &in, vector<string> &optionsVector);
-void isOptionError(const string &arg, const string &errorInfo);
-bool isParamOption(const string &arg, const char *option);
-bool isParamOption(const string &arg, const char *option1, const char *option2);
-bool parseOption(astyle::ASFormatter &formatter, const string &arg, const string &errorInfo);
+class ASOptions
+{
+	public:
+		ASOptions(ASFormatter& formatterArg) : formatter(formatterArg) {}
+		string getOptionErrors();
+		void importOptions(istream &in, vector<string> &optionsVector);
+		bool parseOptions(vector<string> &optionsVector, const string &errorInfo);
 
-template<typename ITER>
-bool parseOptions(astyle::ASFormatter &formatter, const ITER &optionsBegin,
-                  const ITER &optionsEnd, const string &errorInfo);
+	private:
+		// variables
+		ASFormatter& formatter;			// reference to the ASFormatter object
+		stringstream optionErrors;		// option error messages
+
+		// functions
+		ASOptions& operator=(ASOptions&);          // not to be implemented
+		string getParam(const string &arg, const char* op);
+		string getParam(const string &arg, const char* op1, const char* op2);
+		bool isOption(const string arg, const char *op);
+		bool isOption(const string& arg, const char *op1, const char *op2);
+		void isOptionError(const string &arg, const string &errorInfo);
+		bool isParamOption(const string &arg, const char *option);
+		bool isParamOption(const string &arg, const char *option1, const char *option2);
+		void parseOption(const string &arg, const string &errorInfo);
+};
 
 }   // end of namespace astyle
 

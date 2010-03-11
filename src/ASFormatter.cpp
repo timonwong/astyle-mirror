@@ -4620,7 +4620,7 @@ bool ASFormatter::computeChecksumIn(const string &currentLine)
 }
 
 /**
- * get the value of checksumIn
+ * get the value of checksumIn for unit testing
  *
  * @return   checksumIn.
  */
@@ -4642,7 +4642,7 @@ bool ASFormatter::computeChecksumOut(const string &beautifiedLine)
 }
 
 /**
- * get the value of checksumOut
+ * get the value of checksumOut for unit testing
  *
  * @return   checksumOut.
  */

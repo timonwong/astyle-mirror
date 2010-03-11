@@ -802,8 +802,8 @@ bool sortOnName(const string *a, const string *b);
 // global because they are called externally and are NOT part of the namespace
 //----------------------------------------------------------------------------
 
-typedef void (STDCALL *fpError)(int, char*);       // pointer to callback error handler
-typedef char* (STDCALL *fpAlloc)(unsigned long);   // pointer to callback memory allocation
+typedef void (STDCALL *fpError)(int, const char*);      // pointer to callback error handler
+typedef char* (STDCALL *fpAlloc)(unsigned long);		// pointer to callback memory allocation
 extern "C" EXPORT char* STDCALL AStyleMain(const char*, const char*, fpError, fpAlloc);
 extern "C" EXPORT const char* STDCALL AStyleGetVersion (void);
 

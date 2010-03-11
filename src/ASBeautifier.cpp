@@ -107,16 +107,6 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	headerStack  = new vector<const string*>;
 	*headerStack = *other.headerStack;
 
-	//tempStacks = new vector<vector<const string*>*>;
-	//vector<vector<const string*>*>::iterator iter;
-	//for (iter = other.tempStacks->begin();
-	//        iter != other.tempStacks->end();
-	//        ++iter)
-	//{
-	//	vector<const string*> *newVec = new vector<const string*>;
-	//	*newVec = **iter;
-	//	tempStacks->push_back(newVec);
-	//}
 	tempStacks = copyTempStacks(other);
 
 	blockParenDepthStack = new vector<int>;

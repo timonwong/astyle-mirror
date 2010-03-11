@@ -57,12 +57,6 @@ int _CRT_glob = 0;
 namespace astyle
 {
 
-#define IS_OPTION(arg,op)          ((arg).compare(op)==0)
-#define IS_OPTIONS(arg,a,b)        (IS_OPTION((arg),(a)) || IS_OPTION((arg),(b)))
-
-#define GET_PARAM(arg,op)          ((arg).substr(strlen(op)))
-#define GET_PARAMS(arg,a,b) (isParamOption((arg),(a)) ? GET_PARAM((arg),(a)) : GET_PARAM((arg),(b)))
-
 #ifdef _WIN32
 char g_fileSeparator = '\\';
 bool g_isCaseSensitive = false;
@@ -71,11 +65,8 @@ char g_fileSeparator = '/';
 bool g_isCaseSensitive = true;
 #endif
 
-#ifdef ASTYLE_LIB
-// library build variables
-stringstream* _err = NULL;
-#else
 // console build variables
+#ifndef ASTYLE_LIB
 ostream* _err = &cerr;           // direct error messages to cerr
 ASConsole* g_console = NULL;     // class to encapsulate console variables
 #endif
@@ -88,584 +79,6 @@ jmethodID g_mid;
 #endif
 
 const char* _version = "1.25 beta";
-
-
-/**
- * parse the options vector
- * ITER can be either a fileOptionsVector (options file) or an optionsVector (command line)
- *
- * @return        true if no errors, false if errors
- */
-template<typename ITER>
-bool parseOptions(ASFormatter &formatter,
-                  const ITER &optionsBegin,
-                  const ITER &optionsEnd,
-                  const string &errorInfo)
-{
-	ITER option;
-	bool ok = true;
-	string arg, subArg;
-
-	for (option = optionsBegin; option != optionsEnd; ++option)
-	{
-		arg = *option;
-
-		if (arg.compare(0, 2, "--") == 0)
-			ok &= parseOption(formatter, arg.substr(2), errorInfo);
-		else if (arg[0] == '-')
-		{
-			size_t i;
-
-			for (i = 1; i < arg.length(); ++i)
-			{
-				if (isalpha(arg[i]) && i > 1)
-				{
-					ok &= parseOption(formatter, subArg, errorInfo);
-					subArg = "";
-				}
-				subArg.append(1, arg[i]);
-			}
-			ok &= parseOption(formatter, subArg, errorInfo);
-			subArg = "";
-		}
-		else
-		{
-			ok &= parseOption(formatter, arg, errorInfo);
-			subArg = "";
-		}
-	}
-	return ok;
-}
-
-void importOptions(istream &in, vector<string> &optionsVector)
-{
-	char ch;
-	string currentToken;
-
-	while (in)
-	{
-		currentToken = "";
-		do
-		{
-			in.get(ch);
-			if (in.eof())
-				break;
-			// treat '#' as line comments
-			if (ch == '#')
-				while (in)
-				{
-					in.get(ch);
-					if (ch == '\n')
-						break;
-				}
-
-			// break options on spaces, tabs, commas, or new-lines
-			if (in.eof() || ch == ' ' || ch == '\t' || ch == ',' || ch == '\n')
-				break;
-			else
-				currentToken.append(1, ch);
-
-		}
-		while (in);
-
-		if (currentToken.length() != 0)
-			optionsVector.push_back(currentToken);
-	}
-}
-
-void isOptionError(const string &arg, const string &errorInfo)
-{
-#ifdef ASTYLE_LIB
-	if (_err->str().length() == 0)
-	{
-		(*_err) << errorInfo << endl;   // need main error message
-		(*_err) << arg;                 // output the option in error
-	}
-	else
-		(*_err) << endl << arg;         // put endl after previous option
-#else
-	if (errorInfo.length() > 0)         // to avoid a compiler warning
-		g_console->error("Error in param: ", arg.c_str());
-#endif
-}
-
-
-bool isParamOption(const string &arg, const char *option)
-{
-	bool retVal = arg.compare(0, strlen(option), option) == 0;
-	// if comparing for short option, 2nd char of arg must be numeric
-	if (retVal && strlen(option) == 1 && arg.length() > 1)
-		if (!isdigit(arg[1]))
-			retVal = false;
-	return retVal;
-}
-
-bool isParamOption(const string &arg, const char *option1, const char *option2)
-{
-	return isParamOption(arg, option1) || isParamOption(arg, option2);
-}
-
-bool parseOption(ASFormatter &formatter, const string &arg, const string &errorInfo)
-{
-	if ( IS_OPTION(arg, "style=allman") || IS_OPTION(arg, "style=ansi")  || IS_OPTION(arg, "style=bsd") )
-	{
-		formatter.setFormattingStyle(STYLE_ALLMAN);
-	}
-	else if ( IS_OPTION(arg, "style=java") )
-	{
-		formatter.setFormattingStyle(STYLE_JAVA);
-	}
-	else if ( IS_OPTION(arg, "style=k&r") || IS_OPTION(arg, "style=k/r") )
-	{
-		formatter.setFormattingStyle(STYLE_KandR);
-	}
-	else if ( IS_OPTION(arg, "style=stroustrup") )
-	{
-		formatter.setFormattingStyle(STYLE_STROUSTRUP);
-	}
-	else if ( IS_OPTION(arg, "style=whitesmith") )
-	{
-		formatter.setFormattingStyle(STYLE_WHITESMITH);
-	}
-	else if ( IS_OPTION(arg, "style=banner") )
-	{
-		formatter.setFormattingStyle(STYLE_BANNER);
-	}
-	else if ( IS_OPTION(arg, "style=gnu") )
-	{
-		formatter.setFormattingStyle(STYLE_GNU);
-	}
-	else if ( IS_OPTION(arg, "style=linux") )
-	{
-		formatter.setFormattingStyle(STYLE_LINUX);
-	}
-	else if ( IS_OPTION(arg, "style=horstmann") )
-	{
-		formatter.setFormattingStyle(STYLE_HORSTMANN);
-	}
-	else if ( IS_OPTION(arg, "style=1tbs") || IS_OPTION(arg, "style=otbs") )
-	{
-		formatter.setFormattingStyle(STYLE_1TBS);
-	}
-	else if ( isParamOption(arg, "A") )
-	{
-		int style = 0;
-		string styleParam = GET_PARAM(arg, "A");
-		if (styleParam.length() > 0)
-			style = atoi(styleParam.c_str());
-		if (style < 1 || style > 10)
-			isOptionError(arg, errorInfo);
-		else if (style == 1)
-			formatter.setFormattingStyle(STYLE_ALLMAN);
-		else if (style == 2)
-			formatter.setFormattingStyle(STYLE_JAVA);
-		else if (style == 3)
-			formatter.setFormattingStyle(STYLE_KandR);
-		else if (style == 4)
-			formatter.setFormattingStyle(STYLE_STROUSTRUP);
-		else if (style == 5)
-			formatter.setFormattingStyle(STYLE_WHITESMITH);
-		else if (style == 6)
-			formatter.setFormattingStyle(STYLE_BANNER);
-		else if (style == 7)
-			formatter.setFormattingStyle(STYLE_GNU);
-		else if (style == 8)
-			formatter.setFormattingStyle(STYLE_LINUX);
-		else if (style == 9)
-			formatter.setFormattingStyle(STYLE_HORSTMANN);
-		else if (style == 10)
-			formatter.setFormattingStyle(STYLE_1TBS);
-	}
-	// must check for mode=cs before mode=c !!!
-	else if ( IS_OPTION(arg, "mode=cs") )
-	{
-		formatter.setSharpStyle();
-		formatter.setModeManuallySet(true);
-	}
-	else if ( IS_OPTION(arg, "mode=c") )
-	{
-		formatter.setCStyle();
-		formatter.setModeManuallySet(true);
-	}
-	else if ( IS_OPTION(arg, "mode=java") )
-	{
-		formatter.setJavaStyle();
-		formatter.setModeManuallySet(true);
-	}
-	else if ( isParamOption(arg, "t", "indent=tab=") )
-	{
-		int spaceNum = 4;
-		string spaceNumParam = GET_PARAMS(arg, "t", "indent=tab=");
-		if (spaceNumParam.length() > 0)
-			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 2 || spaceNum > 20)
-			isOptionError(arg, errorInfo);
-		else
-		{
-			formatter.setTabIndentation(spaceNum, false);
-			formatter.setIndentManuallySet(true);
-		}
-	}
-	else if ( IS_OPTION(arg, "indent=tab") )
-	{
-		formatter.setTabIndentation(4);
-		// do NOT call setIndentManuallySet(true);
-	}
-	else if ( isParamOption(arg, "T", "indent=force-tab=") )
-	{
-		int spaceNum = 4;
-		string spaceNumParam = GET_PARAMS(arg, "T", "indent=force-tab=");
-		if (spaceNumParam.length() > 0)
-			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 2 || spaceNum > 20)
-			isOptionError(arg, errorInfo);
-		else
-		{
-			formatter.setTabIndentation(spaceNum, true);
-			formatter.setIndentManuallySet(true);
-		}
-	}
-	else if ( IS_OPTION(arg, "indent=force-tab") )
-	{
-		formatter.setTabIndentation(4, true);
-		// do NOT call setIndentManuallySet(true);
-	}
-	else if ( isParamOption(arg, "s", "indent=spaces=") )
-	{
-		int spaceNum = 4;
-		string spaceNumParam = GET_PARAMS(arg, "s", "indent=spaces=");
-		if (spaceNumParam.length() > 0)
-			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 2 || spaceNum > 20)
-			isOptionError(arg, errorInfo);
-		else
-		{
-			formatter.setSpaceIndentation(spaceNum);
-			formatter.setIndentManuallySet(true);
-		}
-	}
-	else if ( IS_OPTION(arg, "indent=spaces") )
-	{
-		formatter.setSpaceIndentation(4);
-		// do NOT call setIndentManuallySet(true);
-	}
-	else if ( isParamOption(arg, "m", "min-conditional-indent=") )
-	{
-		int minIndent = 8;
-		string minIndentParam = GET_PARAMS(arg, "m", "min-conditional-indent=");
-		if (minIndentParam.length() > 0)
-			minIndent = atoi(minIndentParam.c_str());
-		if (minIndent > 40)
-			isOptionError(arg, errorInfo);
-		else
-		{
-			formatter.setMinConditionalIndentLength(minIndent);
-			formatter.setMinConditionalManuallySet(true);
-		}
-	}
-	else if ( isParamOption(arg, "M", "max-instatement-indent=") )
-	{
-		int maxIndent = 40;
-		string maxIndentParam = GET_PARAMS(arg, "M", "max-instatement-indent=");
-		if (maxIndentParam.length() > 0)
-			maxIndent = atoi(maxIndentParam.c_str());
-		if (maxIndent > 80)
-			isOptionError(arg, errorInfo);
-		else
-			formatter.setMaxInStatementIndentLength(maxIndent);
-	}
-	else if ( IS_OPTIONS(arg, "B", "indent-brackets") )
-	{
-		formatter.setBracketIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "G", "indent-blocks") )
-	{
-		formatter.setBlockIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "N", "indent-namespaces") )
-	{
-		formatter.setNamespaceIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "C", "indent-classes") )
-	{
-		formatter.setClassIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "S", "indent-switches") )
-	{
-		formatter.setSwitchIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "K", "indent-cases") )
-	{
-		formatter.setCaseIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "L", "indent-labels") )
-	{
-		formatter.setLabelIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "y", "break-closing-brackets") )
-	{
-		formatter.setBreakClosingHeaderBracketsMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "b", "brackets=break") )
-	{
-		formatter.setBracketFormatMode(BREAK_MODE);
-	}
-	else if ( IS_OPTIONS(arg, "a", "brackets=attach") )
-	{
-		formatter.setBracketFormatMode(ATTACH_MODE);
-	}
-	else if ( IS_OPTIONS(arg, "l", "brackets=linux") )
-	{
-		formatter.setBracketFormatMode(LINUX_MODE);
-	}
-	else if ( IS_OPTIONS(arg, "u", "brackets=stroustrup") )
-	{
-		formatter.setBracketFormatMode(STROUSTRUP_MODE);
-	}
-	else if ( IS_OPTIONS(arg, "g", "brackets=horstmann") )
-	{
-		formatter.setBracketFormatMode(HORSTMANN_MODE);
-	}
-	else if ( IS_OPTIONS(arg, "O", "keep-one-line-blocks") )
-	{
-		formatter.setBreakOneLineBlocksMode(false);
-	}
-	else if ( IS_OPTIONS(arg, "o", "keep-one-line-statements") )
-	{
-		formatter.setSingleStatementsMode(false);
-	}
-	else if ( IS_OPTIONS(arg, "P", "pad-paren") )
-	{
-		formatter.setParensOutsidePaddingMode(true);
-		formatter.setParensInsidePaddingMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "d", "pad-paren-out") )
-	{
-		formatter.setParensOutsidePaddingMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "D", "pad-paren-in") )
-	{
-		formatter.setParensInsidePaddingMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "H", "pad-header") )
-	{
-		formatter.setParensHeaderPaddingMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "U", "unpad-paren") )
-	{
-		formatter.setParensUnPaddingMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "p", "pad-oper") )
-	{
-		formatter.setOperatorPaddingMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "x", "delete-empty-lines") )
-	{
-		formatter.setDeleteEmptyLinesMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "E", "fill-empty-lines") )
-	{
-		formatter.setEmptyLineFill(true);
-	}
-	else if ( IS_OPTIONS(arg, "w", "indent-preprocessor") )
-	{
-		formatter.setPreprocessorIndent(true);
-	}
-	else if ( IS_OPTIONS(arg, "c", "convert-tabs") )
-	{
-		formatter.setTabSpaceConversionMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "F", "break-blocks=all") )
-	{
-		formatter.setBreakBlocksMode(true);
-		formatter.setBreakClosingHeaderBlocksMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "f", "break-blocks") )
-	{
-		formatter.setBreakBlocksMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "e", "break-elseifs") )
-	{
-		formatter.setBreakElseIfsMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "j", "add-brackets") )
-	{
-		formatter.setAddBracketsMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "J", "add-one-line-brackets") )
-	{
-		formatter.setAddOneLineBracketsMode(true);
-	}
-	else if ( IS_OPTIONS(arg, "Y", "indent-col1-comments") )
-	{
-		formatter.setIndentCol1CommentsMode(true);
-	}
-	else if ( IS_OPTION(arg, "align-pointer=type") )
-	{
-		formatter.setPointerAlignment(ALIGN_TYPE);
-	}
-	else if ( IS_OPTION(arg, "align-pointer=middle") )
-	{
-		formatter.setPointerAlignment(ALIGN_MIDDLE);
-	}
-	else if ( IS_OPTION(arg, "align-pointer=name") )
-	{
-		formatter.setPointerAlignment(ALIGN_NAME);
-	}
-	else if ( isParamOption(arg, "k") )
-	{
-		int align = 0;
-		string styleParam = GET_PARAM(arg, "k");
-		if (styleParam.length() > 0)
-			align = atoi(styleParam.c_str());
-		if (align < 1 || align > 3)
-			isOptionError(arg, errorInfo);
-		else if (align == 1)
-			formatter.setPointerAlignment(ALIGN_TYPE);
-		else if (align == 2)
-			formatter.setPointerAlignment(ALIGN_MIDDLE);
-		else if (align == 3)
-			formatter.setPointerAlignment(ALIGN_NAME);
-	}
-	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
-	// depreciated in release 1.23
-	// removed from documentation in release 1.24
-	// may be removed at an appropriate time
-//	else if ( IS_OPTION(arg, "style=kr") )
-//	{
-//		formatter.setFormattingStyle(STYLE_JAVA);
-//	}
-	else if ( isParamOption(arg, "T", "force-indent=tab=") )
-	{
-		// the 'T' option will already have been processed
-		int spaceNum = 4;
-		string spaceNumParam = GET_PARAMS(arg, "T", "force-indent=tab=");
-		if (spaceNumParam.length() > 0)
-			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 1 || spaceNum > 20)
-			isOptionError(arg, errorInfo);
-		else
-			formatter.setTabIndentation(spaceNum, true);
-	}
-	else if ( IS_OPTION(arg, "brackets=break-closing") )
-	{
-		formatter.setBreakClosingHeaderBracketsMode(true);
-	}
-
-	else if ( IS_OPTION(arg, "one-line=keep-blocks") )
-	{
-		formatter.setBreakOneLineBlocksMode(false);
-	}
-	else if ( IS_OPTION(arg, "one-line=keep-statements") )
-	{
-		formatter.setSingleStatementsMode(false);
-	}
-	else if ( IS_OPTION(arg, "pad=paren") )
-	{
-		formatter.setParensOutsidePaddingMode(true);
-		formatter.setParensInsidePaddingMode(true);
-	}
-	else if ( IS_OPTION(arg, "pad=paren-out") )
-	{
-		formatter.setParensOutsidePaddingMode(true);
-	}
-	else if ( IS_OPTION(arg, "pad=paren-in") )
-	{
-		formatter.setParensInsidePaddingMode(true);
-	}
-	else if ( IS_OPTION(arg, "unpad=paren") )
-	{
-		formatter.setParensUnPaddingMode(true);
-	}
-	else if ( IS_OPTION(arg, "pad=oper") )
-	{
-		formatter.setOperatorPaddingMode(true);
-	}
-	// end depreciated options //////////////////////////////////////////////////////////////////////////////
-#ifdef ASTYLE_LIB
-	// End of options used by GUI
-	else
-		isOptionError(arg, errorInfo);
-#else
-	// Options used by only console
-	else if ( IS_OPTIONS(arg, "n", "suffix=none") )
-	{
-		g_console->setNoBackup(true);
-	}
-	else if ( isParamOption(arg, "suffix=") )
-	{
-		string suffixParam = GET_PARAM(arg, "suffix=");
-		if (suffixParam.length() > 0)
-		{
-			g_console->setOrigSuffix(suffixParam);
-		}
-	}
-	else if ( isParamOption(arg, "exclude=") )
-	{
-		string suffixParam = GET_PARAM(arg, "exclude=");
-		if (suffixParam.length() > 0)
-			g_console->updateExcludeVector(suffixParam);
-	}
-	else if ( IS_OPTIONS(arg, "r", "R") || IS_OPTION(arg, "recursive") )
-	{
-		g_console->setIsRecursive(true);
-	}
-	else if ( IS_OPTIONS(arg, "Z", "preserve-date") )
-	{
-		g_console->setPreserveDate(true);
-	}
-	else if ( IS_OPTIONS(arg, "v", "verbose") )
-	{
-		g_console->setIsVerbose(true);
-	}
-	else if ( IS_OPTIONS(arg, "Q", "formatted") )
-	{
-		g_console->setIsFormattedOnly(true);
-	}
-	else if ( IS_OPTIONS(arg, "q", "quiet") )
-	{
-		g_console->setIsQuiet(true);
-	}
-	else if ( IS_OPTIONS(arg, "X", "errors-to-stdout") )
-	{
-		_err = &cout;
-	}
-	else if ( IS_OPTION(arg, "lineend=windows") )
-	{
-		formatter.setLineEndFormat(LINEEND_WINDOWS);
-	}
-	else if ( IS_OPTION(arg, "lineend=linux") )
-	{
-		formatter.setLineEndFormat(LINEEND_LINUX);
-	}
-	else if ( IS_OPTION(arg, "lineend=macold") )
-	{
-		formatter.setLineEndFormat(LINEEND_MACOLD);
-	}
-	else if ( isParamOption(arg, "z") )
-	{
-		int lineendType = 0;
-		string lineendParam = GET_PARAM(arg, "z");
-		if (lineendParam.length() > 0)
-			lineendType = atoi(lineendParam.c_str());
-		if (lineendType < 1 || lineendType > 3)
-			isOptionError(arg, errorInfo);
-		else if (lineendType == 1)
-			formatter.setLineEndFormat(LINEEND_WINDOWS);
-		else if (lineendType == 2)
-			formatter.setLineEndFormat(LINEEND_LINUX);
-		else if (lineendType == 3)
-			formatter.setLineEndFormat(LINEEND_MACOLD);
-	}
-	else
-	{
-		(*_err) << errorInfo << arg << endl;
-		return false; // invalid option
-	}
-#endif
-// End of parseOption function
-	return true; //o.k.
-}
 
 //--------------------------------------------------------------------------------------
 // ASStreamIterator class
@@ -978,7 +391,7 @@ void ASConsole::error(const char *why, const char* what) const
  * This is used to format text for text editors like TextWrangler (Mac).
  * Do NOT display any console messages when this function is used.
  */
-void ASConsole::formatCinToCout(ASFormatter& formatter) const
+void ASConsole::formatCinToCout() const
 {
 	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
 	formatter.init(&streamIterator);
@@ -998,7 +411,7 @@ void ASConsole::formatCinToCout(ASFormatter& formatter) const
  * @param fileName      The path and name of the file to be processed.
  * @param formatter     The formatter object.
  */
-void ASConsole::formatFile(const string &fileName, ASFormatter &formatter)
+void ASConsole::formatFile(const string &fileName)
 {
 	// open input file
 	ifstream in(fileName.c_str(), ios::binary);
@@ -1152,6 +565,11 @@ vector<string> ASConsole::getOptionsVector()
 
 string ASConsole::getOrigSuffix()
 { return origSuffix; }
+
+string ASConsole::getParam(const string &arg, const char* op)
+{
+	return arg.substr(strlen(op));
+}
 
 bool ASConsole::getPreserveDate()
 { return preserveDate; }
@@ -1549,6 +967,26 @@ bool ASConsole::fileNameVectorIsEmpty()
 	return fileNameVector.empty();
 }
 
+bool ASConsole::isOption(const string& arg, const char *op)
+{
+	return arg.compare(op) == 0;
+}
+
+bool ASConsole::isOption(const string& arg, const char *a, const char *b)
+{
+	return (isOption(arg, a) || isOption(arg, b));
+}
+
+bool ASConsole::isParamOption(const string &arg, const char *option)
+{
+	bool retVal = arg.compare(0, strlen(option), option) == 0;
+	// if comparing for short option, 2nd char of arg must be numeric
+	if (retVal && strlen(option) == 1 && arg.length() > 1)
+		if (!isdigit(arg[1]))
+			retVal = false;
+	return retVal;
+}
+
 // compare a path to the exclude vector
 // used for both directories and filenames
 // updates the g_excludeHitsVector
@@ -1901,7 +1339,7 @@ void ASConsole::printHelp() const
  *
  * @param formatter     The formatter object.
  */
-void ASConsole::processFiles(ASFormatter &formatter)
+void ASConsole::processFiles()
 {
 	if (isVerbose)
 		printVerboseHeader();
@@ -1915,7 +1353,7 @@ void ASConsole::processFiles(ASFormatter &formatter)
 
 		// loop thru fileName vector formatting the files
 		for (size_t j = 0; j < fileName.size(); j++)
-			formatFile(fileName[j], formatter);
+			formatFile(fileName[j]);
 	}
 
 	// files are processed, display stats
@@ -1925,7 +1363,7 @@ void ASConsole::processFiles(ASFormatter &formatter)
 
 // process options from the command line and options file
 // build the vectors fileNameVector, excludeVector, optionsVector, and fileOptionsVector
-processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &formatter)
+processReturn ASConsole::processOptions(int argc, char** argv)
 {
 	string arg;
 	bool ok = true;
@@ -1936,26 +1374,26 @@ processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &form
 	{
 		arg = string(argv[i]);
 
-		if ( IS_OPTION(arg, "--options=none") )
+		if ( isOption(arg, "--options=none") )
 		{
 			shouldParseOptionsFile = false;
 		}
 		else if ( isParamOption(arg, "--options=") )
 		{
-			optionsFileName = GET_PARAM(arg, "--options=");
+			optionsFileName = getParam(arg, "--options=");
 			optionsFileRequired = true;
 			if (optionsFileName.compare("") == 0)
 				setOptionsFileName(" ");
 		}
-		else if ( IS_OPTION(arg, "-h")
-		          || IS_OPTION(arg, "--help")
-		          || IS_OPTION(arg, "-?") )
+		else if ( isOption(arg, "-h")
+		          || isOption(arg, "--help")
+		          || isOption(arg, "-?") )
 		{
 			printHelp();
 			return(END_SUCCESS);
 		}
-		else if ( IS_OPTION(arg, "-V" )
-		          || IS_OPTION(arg, "--version") )
+		else if ( isOption(arg, "-V" )
+		          || isOption(arg, "--version") )
 		{
 			(*_err) << "Artistic Style Version " << _version << endl;
 			return(END_SUCCESS);
@@ -1997,16 +1435,15 @@ processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &form
 	}
 
 	// create the options file vector and parse the options for errors
+	ASOptions options(formatter);
 	if (optionsFileName.compare("") != 0)
 	{
 		ifstream optionsIn(optionsFileName.c_str());
 		if (optionsIn)
 		{
-			importOptions(optionsIn, fileOptionsVector);
-			ok = parseOptions(formatter,
-			                  fileOptionsVector.begin(),
-			                  fileOptionsVector.end(),
-			                  string("Invalid option in default options file: "));
+			options.importOptions(optionsIn, fileOptionsVector);
+			ok = options.parseOptions(fileOptionsVector,
+			                          string("Invalid option file options: "));
 		}
 		else
 		{
@@ -2021,17 +1458,17 @@ processReturn ASConsole::processOptions(int argc, char** argv, ASFormatter &form
 	}
 	if (!ok)
 	{
+		(*_err) << options.getOptionErrors() << endl;
 		(*_err) << "For help on options, type 'astyle -h' " << endl;
 		return(END_FAILURE);
 	}
 
 	// parse the command line options vector for errors
-	ok = parseOptions(formatter,
-	                  optionsVector.begin(),
-	                  optionsVector.end(),
-	                  string("Invalid command line option: "));
+	ok = options.parseOptions(optionsVector,
+	                          string("Invalid command line options: "));
 	if (!ok)
 	{
+		(*_err) << options.getOptionErrors() << endl;
 		(*_err) << "For help on options, type 'astyle -h' \n" << endl;
 		return(END_FAILURE);
 	}
@@ -2338,7 +1775,616 @@ void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) cons
 }
 
 #endif
-// *******************   end of console functions   ***********************************************
+
+//--------------------------------------------------------------------------------------
+// ASOptions class
+// used by both console and library builds
+//--------------------------------------------------------------------------------------
+
+/**
+ * parse the options vector
+ * optionsVector can be either a fileOptionsVector (options file) or an optionsVector (command line)
+ *
+ * @return        true if no errors, false if errors
+ */
+bool ASOptions::parseOptions(vector<string> &optionsVector, const string &errorInfo)
+{
+	vector<string>::iterator option;
+	string arg, subArg;
+	optionErrors.clear();
+
+	for (option = optionsVector.begin(); option != optionsVector.end(); ++option)
+	{
+		arg = *option;
+
+		if (arg.compare(0, 2, "--") == 0)
+			parseOption(arg.substr(2), errorInfo);
+		else if (arg[0] == '-')
+		{
+			size_t i;
+
+			for (i = 1; i < arg.length(); ++i)
+			{
+				if (isalpha(arg[i]) && i > 1)
+				{
+					parseOption(subArg, errorInfo);
+					subArg = "";
+				}
+				subArg.append(1, arg[i]);
+			}
+			parseOption(subArg, errorInfo);
+			subArg = "";
+		}
+		else
+		{
+			parseOption(arg, errorInfo);
+			subArg = "";
+		}
+	}
+	if (optionErrors.str().length() > 0)
+		return false;
+	return true;
+}
+
+void ASOptions::parseOption(const string &arg, const string &errorInfo)
+{
+	if ( isOption(arg, "style=allman") || isOption(arg, "style=ansi")  || isOption(arg, "style=bsd") )
+	{
+		formatter.setFormattingStyle(STYLE_ALLMAN);
+	}
+	else if ( isOption(arg, "style=java") )
+	{
+		formatter.setFormattingStyle(STYLE_JAVA);
+	}
+	else if ( isOption(arg, "style=k&r") || isOption(arg, "style=k/r") )
+	{
+		formatter.setFormattingStyle(STYLE_KandR);
+	}
+	else if ( isOption(arg, "style=stroustrup") )
+	{
+		formatter.setFormattingStyle(STYLE_STROUSTRUP);
+	}
+	else if ( isOption(arg, "style=whitesmith") )
+	{
+		formatter.setFormattingStyle(STYLE_WHITESMITH);
+	}
+	else if ( isOption(arg, "style=banner") )
+	{
+		formatter.setFormattingStyle(STYLE_BANNER);
+	}
+	else if ( isOption(arg, "style=gnu") )
+	{
+		formatter.setFormattingStyle(STYLE_GNU);
+	}
+	else if ( isOption(arg, "style=linux") )
+	{
+		formatter.setFormattingStyle(STYLE_LINUX);
+	}
+	else if ( isOption(arg, "style=horstmann") )
+	{
+		formatter.setFormattingStyle(STYLE_HORSTMANN);
+	}
+	else if ( isOption(arg, "style=1tbs") || isOption(arg, "style=otbs") )
+	{
+		formatter.setFormattingStyle(STYLE_1TBS);
+	}
+	else if ( isParamOption(arg, "A") )
+	{
+		int style = 0;
+		string styleParam = getParam(arg, "A");
+		if (styleParam.length() > 0)
+			style = atoi(styleParam.c_str());
+		if (style < 1 || style > 10)
+			isOptionError(arg, errorInfo);
+		else if (style == 1)
+			formatter.setFormattingStyle(STYLE_ALLMAN);
+		else if (style == 2)
+			formatter.setFormattingStyle(STYLE_JAVA);
+		else if (style == 3)
+			formatter.setFormattingStyle(STYLE_KandR);
+		else if (style == 4)
+			formatter.setFormattingStyle(STYLE_STROUSTRUP);
+		else if (style == 5)
+			formatter.setFormattingStyle(STYLE_WHITESMITH);
+		else if (style == 6)
+			formatter.setFormattingStyle(STYLE_BANNER);
+		else if (style == 7)
+			formatter.setFormattingStyle(STYLE_GNU);
+		else if (style == 8)
+			formatter.setFormattingStyle(STYLE_LINUX);
+		else if (style == 9)
+			formatter.setFormattingStyle(STYLE_HORSTMANN);
+		else if (style == 10)
+			formatter.setFormattingStyle(STYLE_1TBS);
+	}
+	// must check for mode=cs before mode=c !!!
+	else if ( isOption(arg, "mode=cs") )
+	{
+		formatter.setSharpStyle();
+		formatter.setModeManuallySet(true);
+	}
+	else if ( isOption(arg, "mode=c") )
+	{
+		formatter.setCStyle();
+		formatter.setModeManuallySet(true);
+	}
+	else if ( isOption(arg, "mode=java") )
+	{
+		formatter.setJavaStyle();
+		formatter.setModeManuallySet(true);
+	}
+	else if ( isParamOption(arg, "t", "indent=tab=") )
+	{
+		int spaceNum = 4;
+		string spaceNumParam = getParam(arg, "t", "indent=tab=");
+		if (spaceNumParam.length() > 0)
+			spaceNum = atoi(spaceNumParam.c_str());
+		if (spaceNum < 2 || spaceNum > 20)
+			isOptionError(arg, errorInfo);
+		else
+		{
+			formatter.setTabIndentation(spaceNum, false);
+			formatter.setIndentManuallySet(true);
+		}
+	}
+	else if ( isOption(arg, "indent=tab") )
+	{
+		formatter.setTabIndentation(4);
+		// do NOT call setIndentManuallySet(true);
+	}
+	else if ( isParamOption(arg, "T", "indent=force-tab=") )
+	{
+		int spaceNum = 4;
+		string spaceNumParam = getParam(arg, "T", "indent=force-tab=");
+		if (spaceNumParam.length() > 0)
+			spaceNum = atoi(spaceNumParam.c_str());
+		if (spaceNum < 2 || spaceNum > 20)
+			isOptionError(arg, errorInfo);
+		else
+		{
+			formatter.setTabIndentation(spaceNum, true);
+			formatter.setIndentManuallySet(true);
+		}
+	}
+	else if ( isOption(arg, "indent=force-tab") )
+	{
+		formatter.setTabIndentation(4, true);
+		// do NOT call setIndentManuallySet(true);
+	}
+	else if ( isParamOption(arg, "s", "indent=spaces=") )
+	{
+		int spaceNum = 4;
+		string spaceNumParam = getParam(arg, "s", "indent=spaces=");
+		if (spaceNumParam.length() > 0)
+			spaceNum = atoi(spaceNumParam.c_str());
+		if (spaceNum < 2 || spaceNum > 20)
+			isOptionError(arg, errorInfo);
+		else
+		{
+			formatter.setSpaceIndentation(spaceNum);
+			formatter.setIndentManuallySet(true);
+		}
+	}
+	else if ( isOption(arg, "indent=spaces") )
+	{
+		formatter.setSpaceIndentation(4);
+		// do NOT call setIndentManuallySet(true);
+	}
+	else if ( isParamOption(arg, "m", "min-conditional-indent=") )
+	{
+		int minIndent = 8;
+		string minIndentParam = getParam(arg, "m", "min-conditional-indent=");
+		if (minIndentParam.length() > 0)
+			minIndent = atoi(minIndentParam.c_str());
+		if (minIndent > 40)
+			isOptionError(arg, errorInfo);
+		else
+		{
+			formatter.setMinConditionalIndentLength(minIndent);
+			formatter.setMinConditionalManuallySet(true);
+		}
+	}
+	else if ( isParamOption(arg, "M", "max-instatement-indent=") )
+	{
+		int maxIndent = 40;
+		string maxIndentParam = getParam(arg, "M", "max-instatement-indent=");
+		if (maxIndentParam.length() > 0)
+			maxIndent = atoi(maxIndentParam.c_str());
+		if (maxIndent > 80)
+			isOptionError(arg, errorInfo);
+		else
+			formatter.setMaxInStatementIndentLength(maxIndent);
+	}
+	else if ( isOption(arg, "B", "indent-brackets") )
+	{
+		formatter.setBracketIndent(true);
+	}
+	else if ( isOption(arg, "G", "indent-blocks") )
+	{
+		formatter.setBlockIndent(true);
+	}
+	else if ( isOption(arg, "N", "indent-namespaces") )
+	{
+		formatter.setNamespaceIndent(true);
+	}
+	else if ( isOption(arg, "C", "indent-classes") )
+	{
+		formatter.setClassIndent(true);
+	}
+	else if ( isOption(arg, "S", "indent-switches") )
+	{
+		formatter.setSwitchIndent(true);
+	}
+	else if ( isOption(arg, "K", "indent-cases") )
+	{
+		formatter.setCaseIndent(true);
+	}
+	else if ( isOption(arg, "L", "indent-labels") )
+	{
+		formatter.setLabelIndent(true);
+	}
+	else if ( isOption(arg, "y", "break-closing-brackets") )
+	{
+		formatter.setBreakClosingHeaderBracketsMode(true);
+	}
+	else if ( isOption(arg, "b", "brackets=break") )
+	{
+		formatter.setBracketFormatMode(BREAK_MODE);
+	}
+	else if ( isOption(arg, "a", "brackets=attach") )
+	{
+		formatter.setBracketFormatMode(ATTACH_MODE);
+	}
+	else if ( isOption(arg, "l", "brackets=linux") )
+	{
+		formatter.setBracketFormatMode(LINUX_MODE);
+	}
+	else if ( isOption(arg, "u", "brackets=stroustrup") )
+	{
+		formatter.setBracketFormatMode(STROUSTRUP_MODE);
+	}
+	else if ( isOption(arg, "g", "brackets=horstmann") )
+	{
+		formatter.setBracketFormatMode(HORSTMANN_MODE);
+	}
+	else if ( isOption(arg, "O", "keep-one-line-blocks") )
+	{
+		formatter.setBreakOneLineBlocksMode(false);
+	}
+	else if ( isOption(arg, "o", "keep-one-line-statements") )
+	{
+		formatter.setSingleStatementsMode(false);
+	}
+	else if ( isOption(arg, "P", "pad-paren") )
+	{
+		formatter.setParensOutsidePaddingMode(true);
+		formatter.setParensInsidePaddingMode(true);
+	}
+	else if ( isOption(arg, "d", "pad-paren-out") )
+	{
+		formatter.setParensOutsidePaddingMode(true);
+	}
+	else if ( isOption(arg, "D", "pad-paren-in") )
+	{
+		formatter.setParensInsidePaddingMode(true);
+	}
+	else if ( isOption(arg, "H", "pad-header") )
+	{
+		formatter.setParensHeaderPaddingMode(true);
+	}
+	else if ( isOption(arg, "U", "unpad-paren") )
+	{
+		formatter.setParensUnPaddingMode(true);
+	}
+	else if ( isOption(arg, "p", "pad-oper") )
+	{
+		formatter.setOperatorPaddingMode(true);
+	}
+	else if ( isOption(arg, "x", "delete-empty-lines") )
+	{
+		formatter.setDeleteEmptyLinesMode(true);
+	}
+	else if ( isOption(arg, "E", "fill-empty-lines") )
+	{
+		formatter.setEmptyLineFill(true);
+	}
+	else if ( isOption(arg, "w", "indent-preprocessor") )
+	{
+		formatter.setPreprocessorIndent(true);
+	}
+	else if ( isOption(arg, "c", "convert-tabs") )
+	{
+		formatter.setTabSpaceConversionMode(true);
+	}
+	else if ( isOption(arg, "F", "break-blocks=all") )
+	{
+		formatter.setBreakBlocksMode(true);
+		formatter.setBreakClosingHeaderBlocksMode(true);
+	}
+	else if ( isOption(arg, "f", "break-blocks") )
+	{
+		formatter.setBreakBlocksMode(true);
+	}
+	else if ( isOption(arg, "e", "break-elseifs") )
+	{
+		formatter.setBreakElseIfsMode(true);
+	}
+	else if ( isOption(arg, "j", "add-brackets") )
+	{
+		formatter.setAddBracketsMode(true);
+	}
+	else if ( isOption(arg, "J", "add-one-line-brackets") )
+	{
+		formatter.setAddOneLineBracketsMode(true);
+	}
+	else if ( isOption(arg, "Y", "indent-col1-comments") )
+	{
+		formatter.setIndentCol1CommentsMode(true);
+	}
+	else if ( isOption(arg, "align-pointer=type") )
+	{
+		formatter.setPointerAlignment(ALIGN_TYPE);
+	}
+	else if ( isOption(arg, "align-pointer=middle") )
+	{
+		formatter.setPointerAlignment(ALIGN_MIDDLE);
+	}
+	else if ( isOption(arg, "align-pointer=name") )
+	{
+		formatter.setPointerAlignment(ALIGN_NAME);
+	}
+	else if ( isParamOption(arg, "k") )
+	{
+		int align = 0;
+		string styleParam = getParam(arg, "k");
+		if (styleParam.length() > 0)
+			align = atoi(styleParam.c_str());
+		if (align < 1 || align > 3)
+			isOptionError(arg, errorInfo);
+		else if (align == 1)
+			formatter.setPointerAlignment(ALIGN_TYPE);
+		else if (align == 2)
+			formatter.setPointerAlignment(ALIGN_MIDDLE);
+		else if (align == 3)
+			formatter.setPointerAlignment(ALIGN_NAME);
+	}
+	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
+	// depreciated in release 1.23
+	// removed from documentation in release 1.24
+	// may be removed at an appropriate time
+//	else if ( isOption(arg, "style=kr") )
+//	{
+//		formatter.setFormattingStyle(STYLE_JAVA);
+//	}
+	else if ( isParamOption(arg, "T", "force-indent=tab=") )
+	{
+		// the 'T' option will already have been processed
+		int spaceNum = 4;
+		string spaceNumParam = getParam(arg, "T", "force-indent=tab=");
+		if (spaceNumParam.length() > 0)
+			spaceNum = atoi(spaceNumParam.c_str());
+		if (spaceNum < 1 || spaceNum > 20)
+			isOptionError(arg, errorInfo);
+		else
+			formatter.setTabIndentation(spaceNum, true);
+	}
+	else if ( isOption(arg, "brackets=break-closing") )
+	{
+		formatter.setBreakClosingHeaderBracketsMode(true);
+	}
+
+	else if ( isOption(arg, "one-line=keep-blocks") )
+	{
+		formatter.setBreakOneLineBlocksMode(false);
+	}
+	else if ( isOption(arg, "one-line=keep-statements") )
+	{
+		formatter.setSingleStatementsMode(false);
+	}
+	else if ( isOption(arg, "pad=paren") )
+	{
+		formatter.setParensOutsidePaddingMode(true);
+		formatter.setParensInsidePaddingMode(true);
+	}
+	else if ( isOption(arg, "pad=paren-out") )
+	{
+		formatter.setParensOutsidePaddingMode(true);
+	}
+	else if ( isOption(arg, "pad=paren-in") )
+	{
+		formatter.setParensInsidePaddingMode(true);
+	}
+	else if ( isOption(arg, "unpad=paren") )
+	{
+		formatter.setParensUnPaddingMode(true);
+	}
+	else if ( isOption(arg, "pad=oper") )
+	{
+		formatter.setOperatorPaddingMode(true);
+	}
+	// end depreciated options //////////////////////////////////////////////////////////////////////////////
+#ifdef ASTYLE_LIB
+	// End of options used by GUI
+	else
+		isOptionError(arg, errorInfo);
+#else
+	// Options used by only console
+	else if ( isOption(arg, "n", "suffix=none") )
+	{
+		g_console->setNoBackup(true);
+	}
+	else if ( isParamOption(arg, "suffix=") )
+	{
+		string suffixParam = getParam(arg, "suffix=");
+		if (suffixParam.length() > 0)
+		{
+			g_console->setOrigSuffix(suffixParam);
+		}
+	}
+	else if ( isParamOption(arg, "exclude=") )
+	{
+		string suffixParam = getParam(arg, "exclude=");
+		if (suffixParam.length() > 0)
+			g_console->updateExcludeVector(suffixParam);
+	}
+	else if ( isOption(arg, "r", "R") || isOption(arg, "recursive") )
+	{
+		g_console->setIsRecursive(true);
+	}
+	else if ( isOption(arg, "Z", "preserve-date") )
+	{
+		g_console->setPreserveDate(true);
+	}
+	else if ( isOption(arg, "v", "verbose") )
+	{
+		g_console->setIsVerbose(true);
+	}
+	else if ( isOption(arg, "Q", "formatted") )
+	{
+		g_console->setIsFormattedOnly(true);
+	}
+	else if ( isOption(arg, "q", "quiet") )
+	{
+		g_console->setIsQuiet(true);
+	}
+	else if ( isOption(arg, "X", "errors-to-stdout") )
+	{
+		_err = &cout;
+	}
+	else if ( isOption(arg, "lineend=windows") )
+	{
+		formatter.setLineEndFormat(LINEEND_WINDOWS);
+	}
+	else if ( isOption(arg, "lineend=linux") )
+	{
+		formatter.setLineEndFormat(LINEEND_LINUX);
+	}
+	else if ( isOption(arg, "lineend=macold") )
+	{
+		formatter.setLineEndFormat(LINEEND_MACOLD);
+	}
+	else if ( isParamOption(arg, "z") )
+	{
+		int lineendType = 0;
+		string lineendParam = getParam(arg, "z");
+		if (lineendParam.length() > 0)
+			lineendType = atoi(lineendParam.c_str());
+		if (lineendType < 1 || lineendType > 3)
+			isOptionError(arg, errorInfo);
+		else if (lineendType == 1)
+			formatter.setLineEndFormat(LINEEND_WINDOWS);
+		else if (lineendType == 2)
+			formatter.setLineEndFormat(LINEEND_LINUX);
+		else if (lineendType == 3)
+			formatter.setLineEndFormat(LINEEND_MACOLD);
+	}
+	else
+		isOptionError(arg, errorInfo);
+#endif
+// End of parseOption function
+}
+
+void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
+{
+	char ch;
+	string currentToken;
+
+	while (in)
+	{
+		currentToken = "";
+		do
+		{
+			in.get(ch);
+			if (in.eof())
+				break;
+			// treat '#' as line comments
+			if (ch == '#')
+				while (in)
+				{
+					in.get(ch);
+					if (ch == '\n')
+						break;
+				}
+
+			// break options on spaces, tabs, commas, or new-lines
+			if (in.eof() || ch == ' ' || ch == '\t' || ch == ',' || ch == '\n')
+				break;
+			else
+				currentToken.append(1, ch);
+
+		}
+		while (in);
+
+		if (currentToken.length() != 0)
+			optionsVector.push_back(currentToken);
+	}
+}
+
+string ASOptions::getOptionErrors()
+{
+	return optionErrors.str();
+}
+
+string ASOptions::getParam(const string &arg, const char* op)
+{
+	return arg.substr(strlen(op));
+}
+
+string ASOptions::getParam(const string &arg, const char* op1, const char* op2)
+{
+	return isParamOption(arg, op1) ? getParam(arg, op1) : getParam(arg, op2);
+}
+
+bool ASOptions::isOption(const string arg, const char *op)
+{
+	return arg.compare(op) == 0;
+}
+
+bool ASOptions::isOption(const string& arg, const char *op1, const char *op2)
+{
+	return (isOption(arg, op1) || isOption(arg, op2));
+}
+
+//void ASOptions::isOptionError(const string &arg, const string &errorInfo)
+//{
+//#ifdef ASTYLE_LIB
+//	if (_err->str().length() == 0)
+//	{
+//		(*_err) << errorInfo << endl;   // need main error message
+//		(*_err) << arg;                 // output the option in error
+//	}
+//	else
+//		(*_err) << endl << arg;         // put endl after previous option
+//#else
+//	if (errorInfo.length() > 0)         // to avoid a compiler warning
+//		g_console->error("Error in param: ", arg.c_str());
+//#endif
+//}
+
+void ASOptions::isOptionError(const string &arg, const string &errorInfo)
+{
+	if (optionErrors.str().length() == 0)
+		optionErrors << errorInfo << endl;   // need main error message
+	optionErrors << arg << endl;
+}
+
+bool ASOptions::isParamOption(const string &arg, const char *option)
+{
+	bool retVal = arg.compare(0, strlen(option), option) == 0;
+	// if comparing for short option, 2nd char of arg must be numeric
+	if (retVal && strlen(option) == 1 && arg.length() > 1)
+		if (!isdigit(arg[1]))
+			retVal = false;
+	return retVal;
+}
+
+bool ASOptions::isParamOption(const string &arg, const char *option1, const char *option2)
+{
+	return isParamOption(arg, option1) || isParamOption(arg, option2);
+}
+
+
+// *******************   end of ASOptions functions   ***********************************************
 
 }   // end of namespace astyle
 
@@ -2445,24 +2491,19 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	}
 
 	ASFormatter formatter;
+	ASOptions options(formatter);
 
 	vector<string> optionsVector;
 	istringstream opt(pOptions);
-	_err = new stringstream;
 
-	importOptions(opt, optionsVector);
+	options.importOptions(opt, optionsVector);
 
-	parseOptions(formatter,
-	             optionsVector.begin(),
-	             optionsVector.end(),
-	             "Invalid Artistic Style options.\n"
-	             "The following options were not processed:");
+	bool ok = options.parseOptions(optionsVector,
+	                     "Invalid Artistic Style options.\n"
+	                     "The options were not processed:");
 
-	if (_err->str().length() > 0)
-		fpErrorHandler(210, (char*) _err->str().c_str());
-
-	delete _err;
-	_err = NULL;
+	if (!ok)
+		fpErrorHandler(210, options.getOptionErrors().c_str());
 
 	istringstream in(pSourceIn);
 	ASStreamIterator<istringstream> streamIterator(&in);
@@ -2503,11 +2544,11 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 int main(int argc, char** argv)
 {
 	ASFormatter formatter;
-	g_console = new ASConsole;
+	g_console = new ASConsole(formatter);
 
 	// process command line and options file
 	// build the vectors fileNameVector, optionsVector, and fileOptionsVector
-	processReturn returnValue = g_console->processOptions(argc, argv, formatter);
+	processReturn returnValue = g_console->processOptions(argc, argv);
 
 	// check for end of processing
 	if (returnValue == END_SUCCESS)
@@ -2521,12 +2562,12 @@ int main(int argc, char** argv)
 	// if no files have been given, use cin for input and cout for output
 	if (g_console->fileNameVectorIsEmpty())
 	{
-		g_console->formatCinToCout(formatter);
+		g_console->formatCinToCout();
 		return EXIT_SUCCESS;
 	}
 
 	// process entries in the fileNameVector
-	g_console->processFiles(formatter);
+	g_console->processFiles();
 
 	delete g_console;
 	return EXIT_SUCCESS;
