@@ -24,13 +24,33 @@
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
     <p>
+        There has been an important change to the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of
+        using the number of spaces it now uses a code expressed in number of indents. If you are using the default setting
+        of two indents, or a setting of zero indents, there is no change. Otherwise, check the documentation for the new codes.</p>
+    <p>
+        The --style=linux has been changed to always use a minimum conditional indent of one-half the indent length. This
+        is in the style definition and cannot be changed. If you do not want this setting use the K&amp;R style instead.
+    </p>
+    <p>
         &nbsp;</p>
+
     <h4>
         Developers</h4>
 
     <p>
-        On the library build of Artistic Style (#define ASTYLE_LIB), the second argument of the fpError typedef has been
-        changed from "char*" to "const char*".</p>
+        On the library build of Artistic Style, the second argument of the fpError typedef and the javaErrorHandler declaration
+        has been changed from "char*" to "const char*". This could cause a compile error if not changed in your source
+        statements.</p>
+    <p>
+        There has been a change in the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of using number
+        of spaces to indent it now uses a code expressed in number of indents. In the past this option was a problem because
+        it was also affected by changes in indent length. With this release there is &nbsp;only one variable affected.
+        The option is not affected by changes in indent length. The option minimum conditional indent length is computed
+        automatically by ASFormatter after all the options &nbsp;have been processed. Refer to the code in astyle_main.cpp
+        to see how the option is processed.</p>
+    <p>
+        The --style=linux has been changed to always use a minimum conditional indent of one-half the indent length. The
+        option is set in the function fixOptionVariableConflicts.</p>
 
     <h3>
         Artistic Style 1.24&nbsp; (February 2010)</h3>
@@ -45,8 +65,8 @@
         space and aligning brackets. The &quot;Tab and Bracket Options&quot; section in the documentation contains the
         details. To accommodate Hostmann brackets the &quot;none mode&quot; brackets will now allow run-in statements.
         Array formatting has been changed to format run-in statements when required. There have been some general improvements
-        to array formatting. The minimum value for spaces per tab was changed from one to two. The example programs in the &quot;Developer
-        Information&quot; section have been changed to Horstmann brackets.</p>
+        to array formatting. The minimum value for spaces per tab was changed from one to two. The example programs in
+        the &quot;Developer Information&quot; section have been changed to Horstmann brackets.</p>
     <p>
         Two new options, &#8209;&#8209;add&#8209;brackets (-j) and &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets
         (-J), will add brackets to unbracketed one line conditional statements. The &#8209;&#8209;add-brackets will add
@@ -56,8 +76,8 @@
         and will not break single line blocks.
     </p>
     <p>
-        The above options allow two new predefined styles. Horstmann style, &#8209;&#8209;style=horstmann
-        (-A9), uses Horstmann brackets and three spaces per indent. The so called "One True Brace Style", &#8209;&#8209;style=1tbs
+        The above options allow two new predefined styles. Horstmann style, &#8209;&#8209;style=horstmann (-A9), uses
+        Horstmann brackets and three spaces per indent. The so called "One True Brace Style", &#8209;&#8209;style=1tbs
         or &#8209;&#8209;style=otbs (-A10), uses linux brackets and the option &#8209;&#8209;add&#8209;brackets. The basic
         criteria for most predefined styles were obtained from the <a href="http://en.wikipedia.org/wiki/Indent_style">Indent
             Style</a> discussion at Wikipedia. The "Predefined Style Options" section in the documentation contains the
@@ -71,8 +91,8 @@
         'while'...). To remove any unwanted current space padding, use the option &#8209;&#8209;unpad&#8209;paren (&#8209;U).
         If both &#8209;&#8209;pad&#8209;header and &#8209;&#8209;unpad&#8209;paren are used, the headers will be padded
         and the padding will be removed from other parens. This has required a change to the default formatting of paren
-        headers. They will now be left unchanged instead of automatically inserting space padding, unless the
-        new option is requested.</p>
+        headers. They will now be left unchanged instead of automatically inserting space padding, unless the new option
+        is requested.</p>
     <p>
         New options --align-pointer=type (-k1), &#8209;&#8209;align&#8209;pointer=middle (-k2), and &#8209;&#8209;align&#8209;pointer=name
         (-k3) will attach a pointer or reference operator (* or &amp;) to either the operator type (left), operator name
@@ -93,8 +113,8 @@
         Default line end processing has been improved to always output consistent line ends. It will use the line ends
         that are most frequently used in the input.</p>
     <p>
-        The Stroustrup predefined style has been changed to use 5 spaces per indent. This is the indentation used in
-        the book "The C++ Programming Language" by Bjarne Stroustrup.</p>
+        The Stroustrup predefined style has been changed to use 5 spaces per indent. This is the indentation used in the
+        book "The C++ Programming Language" by Bjarne Stroustrup.</p>
     <p>
         The minimum conditional indent for the Linux predefined style has been changed to 4, or one-half the indent-length.
         The previous minimum conditional indent was 16 (2 indents). The new value corresponds to the soft tab in the style
@@ -138,10 +158,10 @@
         The Intel compiler for Linux, release 11.1, has a new procedure for compiles. Read the new &quot;Install Information&quot;
         before using this compiler release.</p>
     <p>
-        There is now a Subversion repository for Artistic Style. A new Subversion web page describes how to check-out the files.
-        The source code is under development and some changes take several weeks to complete. And the intermediate source
-        files have not been through the extensive system tests that are done before each release. Use reasonable precautions
-        when using source code from the repository.</p>
+        There is now a Subversion repository for Artistic Style. A new Subversion web page describes how to check-out
+        the files. The source code is under development and some changes take several weeks to complete. And the intermediate
+        source files have not been through the extensive system tests that are done before each release. Use reasonable
+        precautions when using source code from the repository.</p>
     <p>
         SourceForge recently made changes to their website which caused a few problems. The web page links should be fixed
         with this release. It seems that some bug reports may have been lost. If you have submitted a report that has
@@ -171,15 +191,16 @@
             title="open new window">jimp03.zxq.net</a></p>
     <p>
         The options --lineend=windows&nbsp;(-z1), --lineend=linux&nbsp;(-z2), and --lineend=macold&nbsp;(-z3) apply only
-        to the console build. It was not included in the developer builds because developers usually have their
-        own method for handling line ends.</p>
+        to the console build. It was not included in the developer builds because developers usually have their own method
+        for handling line ends.</p>
     <p>
         The option --break-closing-brackets has been moved from Bracket Options to Formatting Options. It was being mistaken
         for a bracket type, which it is not.</p>
     <p>
-        Rejecting a file for&nbsp; UTF-16 or UTF-32 bit encoding apply only to the console build. Some class libraries, such
-        as wxWidgets (and probably Qt), have the methods to convert the files to UTF-8. The handling for these types of
-        files must be determined by the individual applications. </p>
+        Rejecting a file for&nbsp; UTF-16 or UTF-32 bit encoding apply only to the console build. Some class libraries,
+        such as wxWidgets (and probably Qt), have the methods to convert the files to UTF-8. The handling for these types
+        of files must be determined by the individual applications.
+    </p>
     <p>
         There has been an additional variable, formattingStyle, added to the ASFormatter class. This is now the ONLY option
         that needs to be set to define the style. Setting the individual options is no longer necessary. The individual

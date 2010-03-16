@@ -66,7 +66,8 @@ ASBeautifier::ASBeautifier()
 	isMinConditionalManuallySet = false;
 	isModeManuallySet = false;
 	shouldForceTabIndentation = false;
-	setSpaceIndentation(4);				// also sets minConditionalIndent
+	setSpaceIndentation(4);
+	setMinConditionalIndentOption(MINCOND_TWO);
 	setMaxInStatementIndentLength(40);
 	classInitializerTabs = 1;
 	setClassIndent(false);
@@ -189,6 +190,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	blockCommentNoBeautify = other.blockCommentNoBeautify;
 	previousLineProbationTab = other.previousLineProbationTab;
 	fileType = other.fileType;
+	minConditionalOption = other.minConditionalOption;
 	minConditionalIndent = other.minConditionalIndent;
 	parenDepth = other.parenDepth;
 	indentLength = other.indentLength;
@@ -390,9 +392,6 @@ void ASBeautifier::setTabIndentation(int length, bool forceTabs)
 	indentString = "\t";
 	indentLength = length;
 	shouldForceTabIndentation = forceTabs;
-
-	if (!isMinConditionalManuallySet)
-		minConditionalIndent = indentLength * 2;
 }
 
 /**
@@ -404,9 +403,6 @@ void ASBeautifier::setSpaceIndentation(int length)
 {
 	indentString = string(length, ' ');
 	indentLength = length;
-
-	if (!isMinConditionalManuallySet)
-		minConditionalIndent = indentLength * 2;
 }
 
 /**
@@ -428,21 +424,28 @@ void ASBeautifier::setMaxInStatementIndentLength(int max)
 }
 
 /**
- * set the minimum indentation between two lines in a multi-line condition.
+ * set the minimum conditional indentation option.
  *
- * @param   min     minimal indentation length.
+ * @param   min     minimal indentation option.
  */
-void ASBeautifier::setMinConditionalIndentLength(int min)
+void ASBeautifier::setMinConditionalIndentOption(int min)
 {
-	minConditionalIndent = min;
+	minConditionalOption = min;
 }
 
 /**
- * set min conditional manually set flag
+ * set minConditionalIndent from the minConditionalOption.
  */
-void ASBeautifier::setMinConditionalManuallySet(bool state)
+void ASBeautifier::setMinConditionalIndentLength()
 {
-	isMinConditionalManuallySet = state;
+	if (minConditionalOption == MINCOND_ZERO)
+		minConditionalIndent = 0;
+	else if (minConditionalOption == MINCOND_ONE)
+		minConditionalIndent = indentLength;
+	else if (minConditionalOption == MINCOND_ONEHALF)
+		minConditionalIndent = indentLength / 2;
+	// minConditionalOption = INDENT_TWO
+	else minConditionalIndent = indentLength * 2;
 }
 
 /**
@@ -584,16 +587,6 @@ string ASBeautifier::getIndentString(void)
 bool ASBeautifier::getIndentManuallySet()
 {
 	return isIndentManuallySet;
-}
-
-/**
- * get the state of the isMinConditionalManuallySet flag
- *
- * @return   the state of isMinConditionalManuallySet.
- */
-bool ASBeautifier::getMinConditionalManuallySet()
-{
-	return isMinConditionalManuallySet;
 }
 
 /**

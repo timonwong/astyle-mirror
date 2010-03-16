@@ -114,7 +114,7 @@ class ASStreamIterator : public ASSourceIterator
 class ASConsole
 {
 	private:	// variables
-		ASFormatter& formatter;				// reference to the ASFormatter object		
+		ASFormatter& formatter;				// reference to the ASFormatter object
 		// command line options
 		bool isRecursive;                   // recursive option
 		string origSuffix;                  // suffix= option
@@ -275,7 +275,7 @@ class ASOptions
 //----------------------------------------------------------------------------
 
 #ifdef ASTYLE_JNI
-void  STDCALL javaErrorHandler(int errorNumber, char* errorMessage);
+void  STDCALL javaErrorHandler(int errorNumber, const char* errorMessage);
 char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded);
 // the following function names are constructed from method names in the calling java program
 extern "C"  EXPORT

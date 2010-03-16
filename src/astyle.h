@@ -72,17 +72,17 @@ enum FileType      { C_TYPE=0, JAVA_TYPE=1, SHARP_TYPE=2 };
 /* The enums below are not recognized by 'vectors' in Microsoft Visual C++
    V5 when they are part of a namespace!!!  Use Visual C++ V6 or higher.
 */
-enum FormatStyle   { STYLE_NONE,
-                     STYLE_ALLMAN,
-                     STYLE_JAVA,
-                     STYLE_KandR,
-                     STYLE_STROUSTRUP,
-                     STYLE_WHITESMITH,
-                     STYLE_BANNER,
-                     STYLE_GNU,
-                     STYLE_LINUX,
-                     STYLE_HORSTMANN,
-                     STYLE_1TBS
+enum FormatStyle   { STYLE_NONE = 0,
+                     STYLE_ALLMAN = 1,
+                     STYLE_JAVA = 2,
+                     STYLE_KR = 3,
+                     STYLE_STROUSTRUP = 4,
+                     STYLE_WHITESMITH = 5,
+                     STYLE_BANNER = 6,
+                     STYLE_GNU = 7,
+                     STYLE_LINUX = 8,
+                     STYLE_HORSTMANN = 9,
+                     STYLE_1TBS = 10
                    };
 
 enum BracketMode   { NONE_MODE,
@@ -107,11 +107,18 @@ enum BracketType   { NULL_TYPE = 0,
                      SINGLE_LINE_TYPE = 512
                    };
 
-enum PointerAlign { ALIGN_NONE,
-                    ALIGN_TYPE,
-                    ALIGN_MIDDLE,
-                    ALIGN_NAME
+enum PointerAlign { ALIGN_NONE = 0,
+                    ALIGN_TYPE = 1,
+                    ALIGN_MIDDLE = 2,
+                    ALIGN_NAME = 3
                   };
+
+enum MinConditional { MINCOND_ZERO = 0,
+                      MINCOND_ONE = 1,
+                      MINCOND_TWO = 2,
+                      MINCOND_ONEHALF = 3,
+                      MINCOND_END
+                    };
 
 enum FileEncoding { ENCODING_OK,
                     UTF_16BE,
@@ -292,9 +299,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setTabIndentation(int length = 4, bool forceTabs = false);
 		void setSpaceIndentation(int length = 4);
 		void setMaxInStatementIndentLength(int max);
-		void setMinConditionalIndentLength(int min);
+		void setMinConditionalIndentOption(int min);
+		void setMinConditionalIndentLength();
 		void setIndentManuallySet(bool state);
-		void setMinConditionalManuallySet(bool state);
 		void setModeManuallySet(bool state);
 		void setClassIndent(bool state);
 		void setSwitchIndent(bool state);
@@ -318,7 +325,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getEmptyLineFill(void);
 		bool getForceTabIndentation(void);
 		bool getIndentManuallySet(void);
-		bool getMinConditionalManuallySet(void);
 		bool getModeManuallySet(void);
 		bool getSwitchIndent(void);
 
@@ -429,6 +435,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool blockCommentNoBeautify;
 		bool previousLineProbationTab;
 		int  fileType;
+		int  minConditionalOption;
 		int  minConditionalIndent;
 		int  parenDepth;
 		int  indentLength;

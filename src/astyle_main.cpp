@@ -1836,9 +1836,9 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setFormattingStyle(STYLE_JAVA);
 	}
-	else if ( isOption(arg, "style=k&r") || isOption(arg, "style=k/r") )
+	else if ( isOption(arg, "style=k&r") || isOption(arg, "style=kr") || isOption(arg, "style=k/r") )
 	{
-		formatter.setFormattingStyle(STYLE_KandR);
+		formatter.setFormattingStyle(STYLE_KR);
 	}
 	else if ( isOption(arg, "style=stroustrup") )
 	{
@@ -1881,7 +1881,7 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 		else if (style == 2)
 			formatter.setFormattingStyle(STYLE_JAVA);
 		else if (style == 3)
-			formatter.setFormattingStyle(STYLE_KandR);
+			formatter.setFormattingStyle(STYLE_KR);
 		else if (style == 4)
 			formatter.setFormattingStyle(STYLE_STROUSTRUP);
 		else if (style == 5)
@@ -1972,17 +1972,14 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	}
 	else if ( isParamOption(arg, "m", "min-conditional-indent=") )
 	{
-		int minIndent = 8;
+		int minIndent = MINCOND_TWO;
 		string minIndentParam = getParam(arg, "m", "min-conditional-indent=");
 		if (minIndentParam.length() > 0)
 			minIndent = atoi(minIndentParam.c_str());
-		if (minIndent > 40)
+		if (minIndent >= MINCOND_END)
 			isOptionError(arg, errorInfo);
 		else
-		{
-			formatter.setMinConditionalIndentLength(minIndent);
-			formatter.setMinConditionalManuallySet(true);
-		}
+			formatter.setMinConditionalIndentOption(minIndent);
 	}
 	else if ( isParamOption(arg, "M", "max-instatement-indent=") )
 	{
@@ -2148,67 +2145,17 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 		else if (align == 3)
 			formatter.setPointerAlignment(ALIGN_NAME);
 	}
-	// depreciated options /////////////////////////////////////////////////////////////////////////////////////
+	// depreciated options ////////////////////////////////////////////////////////////////////////
 	// depreciated in release 1.23
 	// removed from documentation in release 1.24
-	// may be removed at an appropriate time
-//	else if ( isOption(arg, "style=kr") )
-//	{
-//		formatter.setFormattingStyle(STYLE_JAVA);
-//	}
-	else if ( isParamOption(arg, "T", "force-indent=tab=") )
-	{
-		// the 'T' option will already have been processed
-		int spaceNum = 4;
-		string spaceNumParam = getParam(arg, "T", "force-indent=tab=");
-		if (spaceNumParam.length() > 0)
-			spaceNum = atoi(spaceNumParam.c_str());
-		if (spaceNum < 1 || spaceNum > 20)
-			isOptionError(arg, errorInfo);
-		else
-			formatter.setTabIndentation(spaceNum, true);
-	}
-	else if ( isOption(arg, "brackets=break-closing") )
-	{
-		formatter.setBreakClosingHeaderBracketsMode(true);
-	}
-
-	else if ( isOption(arg, "one-line=keep-blocks") )
-	{
-		formatter.setBreakOneLineBlocksMode(false);
-	}
-	else if ( isOption(arg, "one-line=keep-statements") )
-	{
-		formatter.setSingleStatementsMode(false);
-	}
-	else if ( isOption(arg, "pad=paren") )
-	{
-		formatter.setParensOutsidePaddingMode(true);
-		formatter.setParensInsidePaddingMode(true);
-	}
-	else if ( isOption(arg, "pad=paren-out") )
-	{
-		formatter.setParensOutsidePaddingMode(true);
-	}
-	else if ( isOption(arg, "pad=paren-in") )
-	{
-		formatter.setParensInsidePaddingMode(true);
-	}
-	else if ( isOption(arg, "unpad=paren") )
-	{
-		formatter.setParensUnPaddingMode(true);
-	}
-	else if ( isOption(arg, "pad=oper") )
-	{
-		formatter.setOperatorPaddingMode(true);
-	}
-	// end depreciated options //////////////////////////////////////////////////////////////////////////////
+	// removed from source in release 1.25
+	// end depreciated options ////////////////////////////////////////////////////////////////////
 #ifdef ASTYLE_LIB
-	// End of options used by GUI
+	// End of options used by GUI /////////////////////////////////////////////////////////////////
 	else
 		isOptionError(arg, errorInfo);
 #else
-	// Options used by only console
+	// Options used by only console ///////////////////////////////////////////////////////////////
 	else if ( isOption(arg, "n", "suffix=none") )
 	{
 		g_console->setNoBackup(true);
@@ -2281,8 +2228,7 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	else
 		isOptionError(arg, errorInfo);
 #endif
-// End of parseOption function
-}
+}	// End of parseOption function
 
 void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
 {
@@ -2344,22 +2290,6 @@ bool ASOptions::isOption(const string& arg, const char *op1, const char *op2)
 {
 	return (isOption(arg, op1) || isOption(arg, op2));
 }
-
-//void ASOptions::isOptionError(const string &arg, const string &errorInfo)
-//{
-//#ifdef ASTYLE_LIB
-//	if (_err->str().length() == 0)
-//	{
-//		(*_err) << errorInfo << endl;   // need main error message
-//		(*_err) << arg;                 // output the option in error
-//	}
-//	else
-//		(*_err) << endl << arg;         // put endl after previous option
-//#else
-//	if (errorInfo.length() > 0)         // to avoid a compiler warning
-//		g_console->error("Error in param: ", arg.c_str());
-//#endif
-//}
 
 void ASOptions::isOptionError(const string &arg, const string &errorInfo)
 {
@@ -2444,7 +2374,7 @@ jstring STDCALL Java_AStyleInterface_AStyleMain(JNIEnv* env,
 }
 
 // Call the Java error handler
-void STDCALL javaErrorHandler(int errorNumber, char* errorMessage)
+void STDCALL javaErrorHandler(int errorNumber, const char* errorMessage)
 {
 	jstring errorMessageJava = g_env->NewStringUTF(errorMessage);
 	g_env->CallVoidMethod(g_obj, g_mid, errorNumber, errorMessageJava);
@@ -2499,8 +2429,8 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	options.importOptions(opt, optionsVector);
 
 	bool ok = options.parseOptions(optionsVector,
-	                     "Invalid Artistic Style options.\n"
-	                     "The options were not processed:");
+	                               "Invalid Artistic Style options.\n"
+	                               "The options were not processed:");
 
 	if (!ok)
 		fpErrorHandler(210, options.getOptionErrors().c_str());

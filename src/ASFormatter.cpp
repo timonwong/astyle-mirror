@@ -297,7 +297,7 @@ void ASFormatter::fixOptionVariableConflicts()
 		setBlockIndent(false);
 		setBracketIndent(false);
 	}
-	else if (formattingStyle == STYLE_KandR)
+	else if (formattingStyle == STYLE_KR)
 	{
 		setBracketFormatMode(LINUX_MODE);
 		setBlockIndent(false);
@@ -357,8 +357,8 @@ void ASFormatter::fixOptionVariableConflicts()
 			else
 				setSpaceIndentation(8);
 		}
-		if (!getMinConditionalManuallySet())
-			setMinConditionalIndentLength(getIndentLength() / 2);
+		// always for Linux style
+		setMinConditionalIndentOption(MINCOND_ONEHALF);
 	}
 	else if (formattingStyle == STYLE_HORSTMANN)
 	{
@@ -382,6 +382,7 @@ void ASFormatter::fixOptionVariableConflicts()
 		setAddBracketsMode(true);
 	}
 
+	setMinConditionalIndentLength();
 	// add-one-line-brackets implies keep-one-line-blocks
 	if (shouldAddOneLineBrackets)
 		setBreakOneLineBlocksMode(false);
