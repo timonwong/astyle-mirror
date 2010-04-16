@@ -52,7 +52,9 @@
 
 // turn off MinGW automatic file globbing
 // this CANNOT be in the astyle namespace
+#ifndef ASTYLE_LIB
 int _CRT_glob = 0;
+#endif
 
 namespace astyle
 {
@@ -78,7 +80,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* _version = "1.25 beta";
+const char* g_version = "1.25 beta";
 
 //--------------------------------------------------------------------------------------
 // ASStreamIterator class
@@ -378,11 +380,18 @@ void ASConsole::correctMixedLineEnds(ostringstream& out)
 	convertLineEnds(out, lineEndFormat);
 }
 
+// error exit without a message
+void ASConsole::error() const
+{
+	(*_err) << "\nArtistic Style has terminated!" << endl;
+	exit(EXIT_FAILURE);
+}
+
+// error exit with a message
 void ASConsole::error(const char *why, const char* what) const
 {
-	(*_err) << why << ' ' << what << '\n' << endl;
-	(*_err) << "Artistic Style has terminated!" << endl;
-	exit(EXIT_FAILURE);
+	(*_err) << why << ' ' << what << endl;
+	error();
 }
 
 /**
@@ -505,6 +514,18 @@ void ASConsole::formatFile(const string &fileName)
 	}
 
 	assert(formatter.getChecksumDiff() == 0);
+}
+
+// build a vector of argv options
+// the program path argv[0] is excluded
+vector<string> ASConsole::getArgvOptions(int argc, char** argv) const
+{
+	vector<string> argvOptions;
+	for (int i = 1; i < argc; i++)
+	{
+		argvOptions.push_back(string(argv[i]));
+	}
+	return argvOptions;
 }
 
 // for unit testing
@@ -691,11 +712,11 @@ string ASConsole::getCurrentDirectory(const string &fileName) const
 void ASConsole::getFileNames(const string &directory, const string &wildcard)
 {
 	vector<string> subDirectory;    // sub directories of directory
-	WIN32_FIND_DATA FindFileData;   // for FindFirstFile and FindNextFile
+	WIN32_FIND_DATA findFileData;   // for FindFirstFile and FindNextFile
 
 	// Find the first file in the directory
 	string firstFile = directory + "\\*";
-	HANDLE hFind = FindFirstFile(firstFile.c_str(), &FindFileData);
+	HANDLE hFind = FindFirstFile(firstFile.c_str(), &findFileData);
 
 	if (hFind == INVALID_HANDLE_VALUE)
 		error("Cannot open directory", directory.c_str());
@@ -704,15 +725,15 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	do
 	{
 		// skip hidden or read only
-		if (FindFileData.cFileName[0] == '.'
-		        || (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
-		        || (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_READONLY))
+		if (findFileData.cFileName[0] == '.'
+		        || (findFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+		        || (findFileData.dwFileAttributes & FILE_ATTRIBUTE_READONLY))
 			continue;
 
 		// if a sub directory and recursive, save sub directory
-		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && isRecursive)
+		if ((findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && isRecursive)
 		{
-			string subDirectoryPath = directory + g_fileSeparator + FindFileData.cFileName;
+			string subDirectoryPath = directory + g_fileSeparator + findFileData.cFileName;
 			if (isPathExclued(subDirectoryPath))
 				printMsg("exclude " + subDirectoryPath.substr(mainDirectoryLength));
 			else
@@ -721,11 +742,11 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 		}
 
 		// save the file name
-		string filePathName = directory + g_fileSeparator + FindFileData.cFileName;
+		string filePathName = directory + g_fileSeparator + findFileData.cFileName;
 		// check exclude before wildcmp to avoid "unmatched exclude" error
 		bool isExcluded = isPathExclued(filePathName);
 		// save file name if wildcard match
-		if (wildcmp(wildcard.c_str(), FindFileData.cFileName))
+		if (wildcmp(wildcard.c_str(), findFileData.cFileName))
 		{
 			if (isExcluded)
 				printMsg("exclude " + filePathName.substr(mainDirectoryLength));
@@ -733,7 +754,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 				fileName.push_back(filePathName);
 		}
 	}
-	while (FindNextFile(hFind, &FindFileData) != 0);
+	while (FindNextFile(hFind, &findFileData) != 0);
 
 	// check for processing error
 	FindClose(hFind);
@@ -943,22 +964,24 @@ void ASConsole::getFilePaths(string &filePath)
 		if (excludeHitsVector[ix] == false)
 		{
 			(*_err) << "Unmatched exclude " << excludeVector[ix].c_str() << endl;
-			if (hasWildcard && !isRecursive)
-				(*_err) << "did you intend to use --recursive?"<< endl;
 			excludeErr = true;
 		}
 	}
-#ifndef ASTYLECON_LIB
-	// abort if not a test
+
 	if (excludeErr)
-		exit(EXIT_FAILURE);
-#endif
+	{
+		if (hasWildcard && !isRecursive)
+			(*_err) << "Did you intend to use --recursive?"<< endl;
+		error();
+	}
+
 	// check if files were found (probably an input error if not)
 	if (fileName.size() == 0)
 	{
 		(*_err) << "No file to process " << filePath.c_str() << endl;
 		if (hasWildcard && !isRecursive)
-			(*_err) << "did you intend to use --recursive?"<< endl;
+			(*_err) << "Did you intend to use --recursive?"<< endl;
+		error();
 	}
 }
 
@@ -1035,7 +1058,7 @@ bool ASConsole::isPathExclued(const string &subPath)
 void ASConsole::printHelp() const
 {
 	(*_err) << endl;
-	(*_err) << "                            Artistic Style " << _version << endl;
+	(*_err) << "                            Artistic Style " << g_version << endl;
 	(*_err) << "                         Maintained by: Jim Pattee\n";
 	(*_err) << "                       Original Author: Tal Davidson\n";
 	(*_err) << endl;
@@ -1363,16 +1386,16 @@ void ASConsole::processFiles()
 
 // process options from the command line and options file
 // build the vectors fileNameVector, excludeVector, optionsVector, and fileOptionsVector
-processReturn ASConsole::processOptions(int argc, char** argv)
+void ASConsole::processOptions(vector<string>& argvOptions)
 {
 	string arg;
 	bool ok = true;
 	bool shouldParseOptionsFile = true;
 
 	// get command line options
-	for (int i = 1; i < argc; i++)
+	for (size_t i = 0; i < argvOptions.size(); i++)
 	{
-		arg = string(argv[i]);
+		arg = argvOptions[i];
 
 		if ( isOption(arg, "--options=none") )
 		{
@@ -1390,13 +1413,13 @@ processReturn ASConsole::processOptions(int argc, char** argv)
 		          || isOption(arg, "-?") )
 		{
 			printHelp();
-			return(END_SUCCESS);
+			exit(EXIT_SUCCESS);
 		}
 		else if ( isOption(arg, "-V" )
 		          || isOption(arg, "--version") )
 		{
-			(*_err) << "Artistic Style Version " << _version << endl;
-			return(END_SUCCESS);
+			(*_err) << "Artistic Style Version " << g_version << endl;
+			exit(EXIT_SUCCESS);
 		}
 		else if (arg[0] == '-')
 		{
@@ -1450,7 +1473,7 @@ processReturn ASConsole::processOptions(int argc, char** argv)
 			if (optionsFileRequired)
 			{
 				(*_err) << "Could not open options file: " << optionsFileName.c_str() << endl;
-				return (END_FAILURE);
+				error();
 			}
 			optionsFileName.clear();
 		}
@@ -1460,7 +1483,7 @@ processReturn ASConsole::processOptions(int argc, char** argv)
 	{
 		(*_err) << options.getOptionErrors() << endl;
 		(*_err) << "For help on options, type 'astyle -h' " << endl;
-		return(END_FAILURE);
+		error();
 	}
 
 	// parse the command line options vector for errors
@@ -1470,9 +1493,8 @@ processReturn ASConsole::processOptions(int argc, char** argv)
 	{
 		(*_err) << options.getOptionErrors() << endl;
 		(*_err) << "For help on options, type 'astyle -h' \n" << endl;
-		return(END_FAILURE);
+		error();
 	}
-	return(CONTINUE);
 }
 
 // remove a file and check for an error
@@ -1585,7 +1607,7 @@ void ASConsole::printVerboseHeader() const
 	assert(isVerbose);
 	if (isQuiet)
 		return;
-	cout << "Artistic Style " << _version << endl;
+	cout << "Artistic Style " << g_version << endl;
 	if (optionsFileName.compare("") != 0)
 		cout << "Using default options file " << optionsFileName << endl;
 }
@@ -1757,6 +1779,7 @@ void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) cons
 	fout.close();
 
 	// change date modified to original file date
+	// Embarcadero must be linked with cw32mt not cw32
 	if (preserveDate)
 	{
 		if (!statErr)
@@ -1770,7 +1793,10 @@ void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) cons
 				statErr = true;
 		}
 		if (statErr)
-			(*_err) << "*********  could not preserve following file date" << endl;
+		{
+			perror("errno message");
+			(*_err) << "*********  could not preserve file date" << endl;
+		}
 	}
 }
 
@@ -2314,7 +2340,7 @@ bool ASOptions::isParamOption(const string &arg, const char *option1, const char
 }
 
 
-// *******************   end of ASOptions functions   ***********************************************
+// *******************   end of ASOptions functions   *********************************************
 
 }   // end of namespace astyle
 
@@ -2323,13 +2349,13 @@ bool ASOptions::isParamOption(const string &arg, const char *option1, const char
 using namespace astyle;
 
 #ifdef ASTYLE_JNI
-// *************************   JNI functions   *****************************************************
+// *************************   JNI functions   ****************************************************
 // called by a java program to get the version number
 // the function name is constructed from method names in the calling java program
 extern "C"  EXPORT
 jstring STDCALL Java_AStyleInterface_AStyleGetVersion(JNIEnv* env, jclass)
 {
-	return env->NewStringUTF(_version);
+	return env->NewStringUTF(g_version);
 }
 
 // called by a java program to format the source code
@@ -2463,13 +2489,13 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 
 extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 {
-	return _version;
+	return g_version;
 }
 
 // ASTYLECON_LIB is defined to exclude "main" from the test programs
 #elif !defined(ASTYLECON_LIB)
 
-// **************************   main function   ***************************************************
+// *************************   main function   ****************************************************
 
 int main(int argc, char** argv)
 {
@@ -2478,16 +2504,9 @@ int main(int argc, char** argv)
 
 	// process command line and options file
 	// build the vectors fileNameVector, optionsVector, and fileOptionsVector
-	processReturn returnValue = g_console->processOptions(argc, argv);
-
-	// check for end of processing
-	if (returnValue == END_SUCCESS)
-		return EXIT_SUCCESS;
-	if (returnValue == END_FAILURE)
-	{
-		(*_err) << "Artistic Style has terminated!" << endl;
-		return EXIT_FAILURE;
-	}
+	vector<string> argvOptions;
+	argvOptions = g_console->getArgvOptions(argc, argv);
+	g_console->processOptions(argvOptions);
 
 	// if no files have been given, use cin for input and cout for output
 	if (g_console->fileNameVectorIsEmpty())

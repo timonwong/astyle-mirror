@@ -44,6 +44,7 @@
         <li>Refactor:<ul>
             <li>Remove template definition for parseOptions() by using a vector reference instead of iterators.&nbsp;</li>
             <li>New ASOptions class to encapsulate global functions used by both the console and library builds. </li>
+            <li>Replace argc and argv in processOptions() function with a vector to simplify test cases.</li>
             <li>Replace IS_OPTION and IS_OPTIONS macros with ASOptions methods. </li>
             <li>Replace GET_PARAM and GET_PARAMS macros with ASOptions methods. </li>
             <li>Extract ASFormatter methods checkIfTemplateOpener() and isClosingHeader().</li>

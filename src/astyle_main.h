@@ -65,9 +65,6 @@
 namespace astyle
 {
 
-// return values for ASConsole
-enum processReturn { CONTINUE, END_SUCCESS, END_FAILURE };
-
 //----------------------------------------------------------------------------
 // ASStreamIterator class
 // typename will be istringstream for GUI and istream otherwise
@@ -171,8 +168,10 @@ class ASConsole
 
 		// functions
 		void convertLineEnds(ostringstream& out, int lineEnd);
+		void error() const;
 		void error(const char *why, const char* what) const;
 		void formatCinToCout() const;
+		vector<string> getArgvOptions(int argc, char** argv) const;
 		FileEncoding getFileEncoding(ifstream& in) const;
 		bool fileNameVectorIsEmpty();
 		int  getFilesFormatted();
@@ -188,7 +187,7 @@ class ASConsole
 		string getOrigSuffix();
 		bool getPreserveDate();
 		void processFiles();
-		processReturn processOptions(int argc, char** argv);
+		void processOptions(vector<string>& argvOptions);
 		void setIsFormattedOnly(bool state);
 		void setIsQuiet(bool state);
 		void setIsRecursive(bool state);
