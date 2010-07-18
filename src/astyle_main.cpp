@@ -82,10 +82,10 @@ jmethodID g_mid;
 
 const char* g_version = "1.25 beta";
 
-//--------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // ASStreamIterator class
 // typename will be istringstream for GUI and istream otherwise
-//--------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 template<typename T>
 ASStreamIterator<T>::ASStreamIterator(T *in)
@@ -279,10 +279,10 @@ bool ASStreamIterator<T>::getLineEndChange(int lineEndFormat) const
 }
 
 #ifndef ASTYLE_LIB
-//--------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // ASConsole class
 // main function will be included only in the console build
-//--------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 // rewrite a stringstream converting the line ends
 void ASConsole::convertLineEnds(ostringstream& out, int lineEnd)
@@ -425,7 +425,7 @@ void ASConsole::formatFile(const string &fileName)
 	// open input file
 	ifstream in(fileName.c_str(), ios::binary);
 	if (!in)
-		error("Could not open input file", fileName.c_str());
+		error("Cannot open input file", fileName.c_str());
 
 	ostringstream out;
 
@@ -715,6 +715,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	WIN32_FIND_DATA findFileData;   // for FindFirstFile and FindNextFile
 
 	// Find the first file in the directory
+	// Find will get at least "." and "..".
 	string firstFile = directory + "\\*";
 	HANDLE hFind = FindFirstFile(firstFile.c_str(), &findFileData);
 
@@ -940,6 +941,17 @@ void ASConsole::getFilePaths(string &filePath)
 	// clear exclude hits vector
 	for (size_t ix = 0; ix < excludeHitsVector.size(); ix++)
 		excludeHitsVector[ix] = false;
+
+	// If the filename is not quoted on Linux, bash will replace the
+	// wildcard instead of passing it to the program.
+	if (isRecursive && !hasWildcard)
+	{
+		(*_err) << "Recursive option with no wildcard." << endl;
+#ifndef _WIN32
+		(*_err) << "Did you intend quote the filename?" << endl;
+#endif
+		error();
+	}
 
 	// display directory name for wildcard processing
 	if (hasWildcard)
@@ -1472,7 +1484,7 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 		{
 			if (optionsFileRequired)
 			{
-				(*_err) << "Could not open options file: " << optionsFileName.c_str() << endl;
+				(*_err) << "Cannot open options file: " << optionsFileName.c_str() << endl;
 				error();
 			}
 			optionsFileName.clear();
@@ -1684,7 +1696,7 @@ int ASConsole::waitForRemove(const char* newFileName) const
 	struct stat stBuf;
 	int seconds;
 	// sleep a max of 20 seconds for the remove
-	for (seconds = 0; seconds < 20; seconds++)
+	for (seconds = 1; seconds <= 20; seconds++)
 	{
 		sleep(1);
 		if (stat(newFileName, &stBuf) != 0)
@@ -1767,14 +1779,14 @@ void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) cons
 	if (!noBackup)
 	{
 		string origFileName = fileName + origSuffix;
-		removeFile(origFileName.c_str(), "Could not remove pre-existing backup file");
-		renameFile(fileName.c_str(), origFileName.c_str(), "Could not create backup file");
+		removeFile(origFileName.c_str(), "Cannot remove pre-existing backup file");
+		renameFile(fileName.c_str(), origFileName.c_str(), "Cannot create backup file");
 	}
 
 	// write the output file
 	ofstream fout(fileName.c_str(), ios::binary | ios::trunc);
 	if (!fout)
-		error("Could not open output file", fileName.c_str());
+		error("Cannot open output file", fileName.c_str());
 	fout << out.str();
 	fout.close();
 
@@ -1795,17 +1807,17 @@ void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) cons
 		if (statErr)
 		{
 			perror("errno message");
-			(*_err) << "*********  could not preserve file date" << endl;
+			(*_err) << "*********  Cannot preserve file date" << endl;
 		}
 	}
 }
 
 #endif
 
-//--------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // ASOptions class
 // used by both console and library builds
-//--------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 /**
  * parse the options vector
@@ -2432,17 +2444,17 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 
 	if (pSourceIn == NULL)
 	{
-		fpErrorHandler(101, (char*)"No pointer to source input.");
+		fpErrorHandler(101, "No pointer to source input.");
 		return NULL;
 	}
 	if (pOptions == NULL)
 	{
-		fpErrorHandler(102, (char*)"No pointer to AStyle options.");
+		fpErrorHandler(102, "No pointer to AStyle options.");
 		return NULL;
 	}
 	if (fpMemoryAlloc == NULL)
 	{
-		fpErrorHandler(103, (char*)"No pointer to memory allocation function.");
+		fpErrorHandler(103, "No pointer to memory allocation function.");
 		return NULL;
 	}
 
@@ -2455,8 +2467,7 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	options.importOptions(opt, optionsVector);
 
 	bool ok = options.parseOptions(optionsVector,
-	                               "Invalid Artistic Style options.\n"
-	                               "The options were not processed:");
+	                               "Invalid Artistic Style options:");
 
 	if (!ok)
 		fpErrorHandler(210, options.getOptionErrors().c_str());
@@ -2478,7 +2489,7 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 //    pTextOut = NULL;           // for testing
 	if (pTextOut == NULL)
 	{
-		fpErrorHandler(110, (char*)"Allocation failure on output.");
+		fpErrorHandler(110, "Allocation failure on output.");
 		return NULL;
 	}
 
@@ -2499,6 +2510,13 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 
 int main(int argc, char** argv)
 {
+	// Make the native locale global.
+	setlocale(LC_ALL, "chinese-simplified");
+	cout.imbue(locale("chinese-simplified"));
+//	cout << setlocale(LC_ALL, NULL) << endl;
+//	cout << 12345 << endl;
+//	printf("%d\n", 12345);
+
 	ASFormatter formatter;
 	g_console = new ASConsole(formatter);
 

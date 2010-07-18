@@ -1349,7 +1349,7 @@ string ASBeautifier::beautify(const string &originalLine)
 					        && (*headerStack).back() == &AS_CLASS)
 					{
 						int nextChar = getNextProgramCharDistance(line, i);
-						if (line[nextChar] == '}')
+						if ((int)line.length() > nextChar && line[nextChar] == '}')
 							tabCount--;
 					}
 				}

@@ -21,7 +21,7 @@
 			OutputDirectory="$(SolutionDir)debug"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			CharacterSet="2"
+			CharacterSet="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Java\jdk1.6.0_17\include&quot;;&quot;C:\Program Files\Java\jdk1.6.0_17\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\Java\jdk1.6.0_15\include&quot;;&quot;C:\Program Files\Java\jdk1.6.0_15\include\win32&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ASTYLE_JNI"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -100,7 +100,7 @@
 			OutputDirectory="$(SolutionDir)bin"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			CharacterSet="2"
+			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -122,7 +122,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="&quot;C:\Program Files\Java\jdk1.6.0_17\include&quot;;&quot;C:\Program Files\Java\jdk1.6.0_17\include\win32&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Program Files\Java\jdk1.6.0_15\include&quot;;&quot;C:\Program Files\Java\jdk1.6.0_15\include\win32&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ASTYLE_JNI"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="false"

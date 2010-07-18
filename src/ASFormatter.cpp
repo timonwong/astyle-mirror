@@ -537,7 +537,7 @@ string ASFormatter::nextLine()
 		{
 			isInPreprocessor = true;
 			// check for horstmann run-in
-			if (formattedLine[0] == '{')
+			if (formattedLine.length() > 0 && formattedLine[0] == '{')
 			{
 				isInLineBreak = true;
 				isInHorstmannRunIn = false;
@@ -2648,7 +2648,7 @@ void ASFormatter::formatPointerOrReference(void)
 	// check for cast
 	char peekedChar = peekNextChar();
 	if (currentChar == '*'
-	        && (int) currentLine.length() > charNum
+	        && (int) currentLine.length() > charNum + 1
 	        && currentLine[charNum+1] == '*')
 	{
 		size_t nextChar = currentLine.find_first_not_of(" \t", charNum+2);
@@ -2796,7 +2796,8 @@ void ASFormatter::formatPointerOrReference(void)
 				formattedLine.erase(lastText + 1);
 		}
 		// if no space before * then add one
-		else if (!isWhiteSpace(formattedLine[startNum+1]))
+		else if (formattedLine.length() <= startNum + 1
+			|| !isWhiteSpace(formattedLine[startNum+1]))
 		{
 			formattedLine.insert(startNum+1 , 1, ' ');
 			spacePadNum++;
@@ -2846,7 +2847,8 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	size_t prevCh = formattedLine.find_last_not_of(" \t");
 	if (prevCh == string::npos)
 		prevCh = 0;
-	if (formattedLine.length() > 0 && isWhiteSpace(formattedLine[prevCh+1]))
+	if (prevCh + 1 < formattedLine.length()
+		&& isWhiteSpace(formattedLine[prevCh+1]))
 	{
 		spacePadNum -= (formattedLine.length() - 1 - prevCh);
 		formattedLine.erase(prevCh+1);
@@ -2986,7 +2988,7 @@ void ASFormatter::padParens(void)
 			}
 			// convert tab to space if requested
 			if (shouldConvertTabs
-			        && (int)currentLine.length() > charNum
+			        && (int)currentLine.length() > charNum + 1
 			        && currentLine[charNum+1] == '\t')
 				currentLine[charNum+1] = ' ';
 
@@ -3929,7 +3931,8 @@ void ASFormatter::formatLineCommentOpener()
 {
 	assert(isSequenceReached("//"));
 
-	if (currentLine[charNum+2] == '\xf2')       // check for windows line marker
+	if ((int)currentLine.length() > charNum + 2
+		&& currentLine[charNum+2] == '\xf2')       // check for windows line marker
 		isAppendPostBlockEmptyLineRequested = false;
 
 	isInLineComment = true;
@@ -4321,6 +4324,8 @@ size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart 
 			if (endComment == string::npos)
 				return string::npos;
 			i = endComment + 2;
+			if (i >= line.length())
+				return string::npos;
 		}
 		if (line[i] == '\'' || line[i] == '\"')
 		{

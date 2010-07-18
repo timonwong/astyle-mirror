@@ -137,13 +137,13 @@ enum LineEndFormat { LINEEND_DEFAULT,	// Use line break that matches most of the
                    };
 
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Class ASSourceIterator
 // A pure virtual class is used by ASFormatter and ASBeautifier instead of
 // ASStreamIterator. This allows programs using AStyle as a plugin to define
 // their own ASStreamIterator. The ASStreamIterator class must inherit
 // this class.
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class ASSourceIterator
 {
@@ -156,9 +156,9 @@ class ASSourceIterator
 		virtual void peekReset() = 0;
 };
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Class ASResource
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class ASResource
 {
@@ -210,9 +210,9 @@ class ASResource
 		static const string AS_CONST_CAST, AS_DYNAMIC_CAST, AS_REINTERPRET_CAST, AS_STATIC_CAST;
 };  // Class ASResource
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Class ASBase
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class ASBase
 {
@@ -282,9 +282,9 @@ class ASBase
 		}
 };  // Class ASBase
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Class ASBeautifier
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class ASBeautifier : protected ASResource, protected ASBase
 {
@@ -453,9 +453,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 		char prevNonLegalCh;
 };  // Class ASBeautifier
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Class ASEnhancer
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class ASEnhancer : protected ASBase
 {
@@ -513,9 +513,9 @@ class ASEnhancer : protected ASBase
 		int     unindentLine(string  &line, int unindent) const;
 };  // Class ASEnhancer
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Class ASFormatter
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 class ASFormatter : public ASBeautifier
 {
@@ -792,9 +792,9 @@ class ASFormatter : public ASBeautifier
 };  // Class ASFormatter
 
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // astyle namespace global declarations
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // sort comparison functions for ASResource
 bool sortOnLength(const string *a, const string *b);
 bool sortOnName(const string *a, const string *b);
@@ -804,10 +804,10 @@ bool sortOnName(const string *a, const string *b);
 // end of astyle namespace  --------------------------------------------------
 
 
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // declarations for library build
 // global because they are called externally and are NOT part of the namespace
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 typedef void (STDCALL *fpError)(int, const char*);      // pointer to callback error handler
 typedef char* (STDCALL *fpAlloc)(unsigned long);		// pointer to callback memory allocation

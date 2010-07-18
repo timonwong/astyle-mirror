@@ -217,19 +217,24 @@ void ASEnhancer::enhance(string &line, bool isInSQL)
 
 		bool isPotentialKeyword = isCharPotentialHeader(line, i);
 
-		// ----------------  process event tables  --------------------------------------
+		// ----------------  wxWidgets and MFC macros  ----------------------------------
 
 		if (isPotentialKeyword)
 		{
 			if (findKeyword(line, i, "BEGIN_EVENT_TABLE")
-			        || findKeyword(line, i, "BEGIN_MESSAGE_MAP"))
+			        || findKeyword(line, i, "BEGIN_DISPATCH_MAP")
+			        || findKeyword(line, i, "BEGIN_EVENT_MAP")
+			        || findKeyword(line, i, "BEGIN_MESSAGE_MAP")
+			        || findKeyword(line, i, "BEGIN_PROPPAGEIDS"))
 			{
 				nextLineIsEventIndent = true;
 				break;
 			}
-
 			if (findKeyword(line, i, "END_EVENT_TABLE")
-			        || findKeyword(line, i, "END_MESSAGE_MAP"))
+			        || findKeyword(line, i, "END_DISPATCH_MAP")
+			        || findKeyword(line, i, "END_EVENT_MAP")
+			        || findKeyword(line, i, "END_MESSAGE_MAP")
+			        || findKeyword(line, i, "END_PROPPAGEIDS"))
 			{
 				isInEventTable = false;
 				break;
@@ -278,7 +283,7 @@ void ASEnhancer::enhance(string &line, bool isInSQL)
 
 	if (isInEventTable || isInDeclareSection)
 	{
-		if (line[0] != '#')
+		if (line.length() == 0 || line[0] != '#')
 			indentLine(line, 1);
 	}
 
