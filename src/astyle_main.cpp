@@ -2511,11 +2511,8 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 int main(int argc, char** argv)
 {
 	// Make the native locale global.
-	setlocale(LC_ALL, "chinese-simplified");
-	cout.imbue(locale("chinese-simplified"));
-//	cout << setlocale(LC_ALL, NULL) << endl;
-//	cout << 12345 << endl;
-//	printf("%d\n", 12345);
+	setlocale(LC_ALL, "");
+	cout.imbue(locale(""));
 
 	ASFormatter formatter;
 	g_console = new ASConsole(formatter);
