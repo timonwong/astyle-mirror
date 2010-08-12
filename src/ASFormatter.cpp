@@ -2797,7 +2797,7 @@ void ASFormatter::formatPointerOrReference(void)
 		}
 		// if no space before * then add one
 		else if (formattedLine.length() <= startNum + 1
-			|| !isWhiteSpace(formattedLine[startNum+1]))
+		         || !isWhiteSpace(formattedLine[startNum+1]))
 		{
 			formattedLine.insert(startNum+1 , 1, ' ');
 			spacePadNum++;
@@ -2848,7 +2848,7 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	if (prevCh == string::npos)
 		prevCh = 0;
 	if (prevCh + 1 < formattedLine.length()
-		&& isWhiteSpace(formattedLine[prevCh+1]))
+	        && isWhiteSpace(formattedLine[prevCh+1]))
 	{
 		spacePadNum -= (formattedLine.length() - 1 - prevCh);
 		formattedLine.erase(prevCh+1);
@@ -3932,7 +3932,7 @@ void ASFormatter::formatLineCommentOpener()
 	assert(isSequenceReached("//"));
 
 	if ((int)currentLine.length() > charNum + 2
-		&& currentLine[charNum+2] == '\xf2')       // check for windows line marker
+	        && currentLine[charNum+2] == '\xf2')       // check for windows line marker
 		isAppendPostBlockEmptyLineRequested = false;
 
 	isInLineComment = true;

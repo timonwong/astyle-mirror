@@ -32,6 +32,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <errno.h>
+#include <locale.h> // needed by some compilers (digital mars)
 
 // includes for recursive getFileNames() function
 #ifdef _WIN32
@@ -686,6 +687,28 @@ void ASConsole::setOutputEOL(LineEndFormat lineEndFormat, const char* currentEOL
 #ifdef _WIN32  // Windows specific
 
 /**
+ * WINDOWS function to display the last system error.
+ */
+void ASConsole::displayLastError()
+{
+	LPSTR msgBuf;
+	DWORD lastError = GetLastError();
+	FormatMessage(
+	    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+	    NULL,
+	    lastError,
+	    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  // Default language
+	    (LPSTR) &msgBuf,
+	    0,
+	    NULL
+	);
+	// Display the string.
+	(*_err) << "Error (" << lastError << ") " << msgBuf << endl;
+	// Free the buffer.
+	LocalFree(msgBuf);
+}
+
+/**
  * WINDOWS function to get the current directory.
  * NOTE: getenv("CD") does not work for Windows Vista.
  *        The Windows function GetCurrentDirectory is used instead.
@@ -707,7 +730,6 @@ string ASConsole::getCurrentDirectory(const string &fileName) const
  *
  * @param directory     The path of the directory to be processed.
  * @param wildcard      The wildcard to be processed (e.g. *.cpp).
- * @param fileName      An empty vector which will be filled with the path and names of files to process.
  */
 void ASConsole::getFileNames(const string &directory, const string &wildcard)
 {
@@ -720,7 +742,13 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	HANDLE hFind = FindFirstFile(firstFile.c_str(), &findFileData);
 
 	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		// Error (3) The system cannot find the path specified.
+		// Error (123) The filename, directory name, or volume label syntax is incorrect.
+		// ::FindClose(hFind); before exiting
+		displayLastError();
 		error("Cannot open directory", directory.c_str());
+	}
 
 	// save files and sub directories
 	do
@@ -758,7 +786,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	while (FindNextFile(hFind, &findFileData) != 0);
 
 	// check for processing error
-	FindClose(hFind);
+	::FindClose(hFind);
 	DWORD dwError = GetLastError();
 	if (dwError != ERROR_NO_MORE_FILES)
 		error("Error processing directory", directory.c_str());
@@ -766,11 +794,53 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	// recurse into sub directories
 	// if not doing recursive subDirectory is empty
 	for (unsigned i = 0; i < subDirectory.size(); i++)
-	{
 		getFileNames(subDirectory[i], wildcard);
-	}
 
 	return;
+}
+
+/**
+ * WINDOWS function to format a number according to the current locale.
+ * This formats positive integers only, no float.
+ *
+ * @param num		The number to be formatted.
+ * @param lcid		The LCID of the locale to be used for testing.
+ * @return			The formatted number.
+ */
+string ASConsole::getNumberFormat(int num, size_t lcid) const
+{
+	// Compilers that don't support C++ locales should still support this assert.
+	// The C locale should be set but not the C++.
+	// This function is not necessary if the C++ locale is set.
+	assert(locale().name() == "C");
+	// convert num to a string
+	stringstream alphaNum;
+	alphaNum << num;
+	string number = alphaNum.str();
+
+	// format the number using the Windows API
+	if (lcid == 0)
+		lcid = LOCALE_USER_DEFAULT;
+	int outSize = ::GetNumberFormat(lcid, 0, number.c_str(), NULL, NULL, 0);
+	char* outBuf = new(nothrow) char[outSize];
+	if (outBuf == NULL)
+		return number;
+	::GetNumberFormat(lcid, 0, number.c_str(), NULL, outBuf, outSize);
+
+	// remove the decimal
+	string formattedNum(outBuf);
+	int decSize = ::GetLocaleInfo(lcid, LOCALE_SDECIMAL, NULL, 0);
+	char* decBuf = new(nothrow) char[decSize];
+	if (decBuf == NULL)
+		return number;
+	::GetLocaleInfo(lcid, LOCALE_SDECIMAL, decBuf, decSize);
+	size_t i = formattedNum.rfind(decBuf);
+	if (i != string::npos)
+		formattedNum.erase(i);
+
+	delete [] outBuf;
+	delete [] decBuf;
+	return formattedNum;
 }
 
 #else  // not _WIN32
@@ -797,7 +867,6 @@ string ASConsole::getCurrentDirectory(const string &fileName) const
  *
  * @param directory     The path of the directory to be processed.
  * @param wildcard      The wildcard to be processed (e.g. *.cpp).
- * @param fileName      An empty vector which will be filled with the path and names of files to process.
  */
 void ASConsole::getFileNames(const string &directory, const string &wildcard)
 {
@@ -881,6 +950,76 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
 	return;
 }
 
+/**
+ * LINUX function to get locale information and call getNumberFormat.
+ * This formats positive integers only, no float.
+ *
+ * @param num		The number to be formatted.
+ * @param			For compatability with the Windows function.
+ * @return			The formatted number.
+ */
+string ASConsole::getNumberFormat(int num, size_t) const
+{
+	// Compilers that don't support C++ locales should still support this assert.
+	// The C locale should be set but not the C++.
+	// This function is not necessary if the C++ locale is set.
+	assert(locale().name() == "C");
+
+	// get the locale info
+	struct lconv* lc;
+	lc = localeconv();
+
+	// format the number
+	return getNumberFormat(num, lc->grouping, lc->thousands_sep);
+}
+
+/**
+ * LINUX function to format a number according to the current locale.
+ * This formats positive integers only, no float.
+ *
+ * @param num			The number to be formatted.
+ * @param groupingArg   The grouping string from the locale.
+ * @param  separator	The thousands group separator from the locale.
+ * @return				The formatted number.
+ */
+string ASConsole::getNumberFormat(int num, const char* groupingArg, const char* separator) const
+{
+	// convert num to a string
+	stringstream alphaNum;
+	alphaNum << num;
+	string number = alphaNum.str();
+	// format the number from right to left
+	string formattedNum;
+	size_t ig = 0;	// grouping index
+	int grouping = groupingArg[ig];
+	int i = number.length();
+	// check for no grouping
+	if (grouping == 0)
+		grouping = number.length();
+	while (i > 0)
+	{
+		// extract a group of numbers
+		string group;
+		if (i < grouping)
+			group = number.substr(0);
+		else
+			group = number.substr(i - grouping);
+		// update formatted number
+		formattedNum.insert(0, group);
+		i -= grouping;
+		if (i < 0)
+			i = 0;
+		if (i > 0)
+			formattedNum.insert(0, separator);
+		number.erase(i);
+		// update grouping
+		if (groupingArg[ig] != '\0'
+		        && groupingArg[ig+1] != '\0')
+			grouping = groupingArg[++ig];
+	}
+	return formattedNum;
+}
+
 #endif  // _WIN32
 
 // check files for 16 or 32 bit encoding
@@ -956,7 +1095,7 @@ void ASConsole::getFilePaths(string &filePath)
 	// display directory name for wildcard processing
 	if (hasWildcard)
 	{
-		printMsg("--------------------------------------------------");
+		printSeparatingLine();
 		printMsg("directory " + targetDirectory + g_fileSeparator + targetFilename);
 	}
 
@@ -967,7 +1106,7 @@ void ASConsole::getFilePaths(string &filePath)
 		fileName.push_back(targetDirectory + g_fileSeparator + targetFilename);
 
 	if (hasWildcard)
-		printMsg("--------------------------------------------------");
+		printSeparatingLine();
 
 	// check for unprocessed excludes
 	bool excludeErr = false;
@@ -1611,7 +1750,15 @@ void ASConsole::printMsg(const string &msg) const
 {
 	if (isQuiet)
 		return;
-	cout << msg << endl;
+	printf("%s\n", msg.c_str());
+}
+
+void ASConsole::printSeparatingLine() const
+{
+	string line;
+	for (size_t i = 0; i < 60; i++)
+		line.append("-");
+	printMsg(line);
 }
 
 void ASConsole::printVerboseHeader() const
@@ -1619,9 +1766,9 @@ void ASConsole::printVerboseHeader() const
 	assert(isVerbose);
 	if (isQuiet)
 		return;
-	cout << "Artistic Style " << g_version << endl;
-	if (optionsFileName.compare("") != 0)
-		cout << "Using default options file " << optionsFileName << endl;
+	printf("Artistic Style %s\n", g_version);
+	if (!optionsFileName.empty())
+		printf("Using default options file %s\n", optionsFileName.c_str());
 }
 
 void ASConsole::printVerboseStats(clock_t startTime) const
@@ -1630,21 +1777,23 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 	if (isQuiet)
 		return;
 	if (hasWildcard)
-		cout << "--------------------------------------------------" << endl;
-	cout << filesFormatted << " formatted, ";
-	cout << filesUnchanged << " unchanged, ";
+		printSeparatingLine();
+	string formatted = getNumberFormat(filesFormatted);
+	string unchanged = getNumberFormat(filesUnchanged);
+	printf(" %s formatted;  %s unchanged;  ", formatted.c_str(), unchanged.c_str());
 
 	// show processing time
 	clock_t stopTime = clock();
-	float secs = float ((stopTime - startTime) / CLOCKS_PER_SEC);
+	float secs = (stopTime - startTime) / float (CLOCKS_PER_SEC);
 	if (secs < 60)
 	{
-		// show tenths of a second if time is less than 20 seconds
-		cout.precision(2);
-		if (secs >= 10 && secs < 20)
-			cout.precision(3);
-		cout << secs << " seconds, ";
-		cout.precision(0);
+		if (secs < 2)
+			printf("%.2f", secs);
+		else if (secs < 20)
+			printf("%.1f", secs);
+		else
+			printf("%.0f", secs);
+		printf("%s", " seconds;  ");
 	}
 	else
 	{
@@ -1652,10 +1801,11 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 		int min = (int) secs / 60;
 		secs -= min * 60;
 		int minsec = int (secs + .5);
-		cout << min << " min " << minsec << " sec, ";
+		printf("%d min %d sec;  ", min, minsec);
 	}
 
-	cout << linesOut << " lines" << endl;
+	string lines = getNumberFormat(linesOut);
+	printf("%s lines\n", lines.c_str());
 }
 
 bool ASConsole::stringEndsWith(const string &str, const string &suffix) const
@@ -1812,7 +1962,7 @@ void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) cons
 	}
 }
 
-#endif
+#endif	// ASConsole:
 
 //-----------------------------------------------------------------------------
 // ASOptions class
@@ -2510,10 +2660,16 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 
 int main(int argc, char** argv)
 {
-	// Make the native locale global.
-	setlocale(LC_ALL, "");
-	cout.imbue(locale(""));
+	// Set the locale.
+	// Not all compilers support the C++ function locale::global(locale(""));
+	// For testing on Windows change the "Region and Language" settings.
+	// Changing setlocale will NOT work since ::GetNumberFormat uses the LCID.
+	// For testing on Linux change the following setlocale: "fr_FR.UTF-8", "de_DE.UTF-8".
+	char* localeName = setlocale(LC_ALL, "");
+	if (localeName == NULL)
+		cout << "Cannot set native locale" << endl;
 
+	// create objects
 	ASFormatter formatter;
 	g_console = new ASConsole(formatter);
 
@@ -2537,4 +2693,4 @@ int main(int argc, char** argv)
 	return EXIT_SUCCESS;
 }
 
-#endif
+#endif	// ASTYLE_LIB

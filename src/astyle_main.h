@@ -188,6 +188,8 @@ class ASConsole
 		bool getIsVerbose();
 		bool getLineEndsMixed();
 		bool getNoBackup();
+		string getNumberFormat(int num, size_t=0) const ;
+		string getNumberFormat(int num, const char* groupingArg, const char* separator) const;
 		string getOptionsFileName();
 		bool getOptionsFileRequired();
 		string getOrigSuffix();
@@ -203,6 +205,7 @@ class ASConsole
 		void setOptionsFileRequired(bool state);
 		void setOrigSuffix(string suffix);
 		void setPreserveDate(bool state);
+		void setProgramLocale();
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
 		bool stringEndsWith(const string &str, const string &suffix) const;
 		void updateExcludeVector(string suffixParam);
@@ -231,6 +234,7 @@ class ASConsole
 		void printBadEncoding(FileEncoding encoding) const;
 		void printHelp() const;
 		void printMsg(const string &msg) const;
+		void printSeparatingLine() const;
 		void printVerboseHeader() const;
 		void printVerboseStats(clock_t startTime) const;
 		void removeFile(const char* fileName, const char* errMsg) const;
@@ -240,6 +244,9 @@ class ASConsole
 		int  waitForRemove(const char* oldFileName) const;
 		int  wildcmp(const char *wild, const char *data) const;
 		void writeOutputFile(const string &fileName, ostringstream &out) const;
+#ifdef _WIN32
+		void displayLastError();
+#endif
 };
 
 //----------------------------------------------------------------------------
