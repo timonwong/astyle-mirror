@@ -18,22 +18,40 @@
         &nbsp;</p>
 
     <h3>
-        Artistic Style 1.25&nbsp; (pending)</h3>
+        Artistic Style 2.01&nbsp; (pending)</h3>
 
     <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
     <p>
-        There has been an important change to the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of
-        using the number of spaces it now uses a code expressed in number of indents. If you are using the default setting
-        of two indents, or a setting of zero indents, there is no change. Otherwise, check the documentation for the new codes.</p>
+        A new feature at SourceForge is download maps available from the top menu at "Develop &gt; Download Stats (Beta)".
+        Clicking on the "top country" area shows a chart of downloads by country. The list of downloads shows about 75%
+        of Artistic Style downloads are from non English speaking countries. This release is a major release (2.01) that
+        marks the start of the internationalization of Artistic Style.</p>
     <p>
-        The --style=linux has been changed to always use a minimum conditional indent of one-half the indent length. This
-        is in the style definition and cannot be changed. If you do not want this setting use the K&amp;R style instead.
+        Artistic Style now sets the native local so that characters from the user&#8217;s native language will be recognized
+        in directory names and file names. For Linux systems using UTF-8 locales, characters from any language will be
+        recognized and any combination of languages can be used. For Windows, only languages recognized by the native
+        codepage can be used. For example, the English locale (codepage 1252) also has French, German, Italian, Portuguese,
+        Spanish, plus several other languages. Other locals, such as Chinese and Japanese, only support one language.
+        The Windows locale in use can be changed thru the &#8220;Control Panel &gt; Region and Language&#8221; dialog.
+        Both the&#8221; Formats&#8221; and &#8220;System Locale&#8221; should be changed.
     </p>
     <p>
-        This release uses Unicode and a newer version of some compilers may be needed. If you have problems compiling
-        check your compiler for the latest version. MinGW must be at least version 4.
+        The main reason Unicode was not used for Windows is the varying degree of support by different compilers. Some
+        compilers (Visual C) have good support while others (MinGW) do not. I have tried to accommodate as many compilers
+        as possible even though compromises had to be made. MinGW is used by many open source projects and I did not want
+        to exclude it from being used.</p>
+    <p>
+        The locale setting also affects the way numbers are displayed. Language translations may be provided in a future
+        release.</p>
+    <p>
+        There has been a change to the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of using the number
+        of spaces it now uses a code expressed in number of indents. If you are using the default setting of two indents,
+        or a setting of zero indents, there is no change. Otherwise, check the documentation for the new codes.</p>
+    <p>
+        The --style=linux has been changed to ALWAYS use a minimum conditional indent of one-half the indent length. This
+        is in the style definition and cannot be changed. If you do not want this setting use the K&amp;R style instead.
     </p>
     <p>
         &nbsp;</p>
@@ -53,8 +71,10 @@
         automatically by ASFormatter after all the options &nbsp;have been processed. Refer to the code in astyle_main.cpp
         to see how the option is processed.</p>
     <p>
-        The --style=linux has been changed to always use a minimum conditional indent of one-half the indent length. The
+        The --style=linux has been changed to ALWAYS use a minimum conditional indent of one-half the indent length. The
         option is set in the function fixOptionVariableConflicts.</p>
+    <p>
+        The use of locales affects only the command line build.</p>
 
     <h3>
         Artistic Style 1.24&nbsp; (February 2010)</h3>

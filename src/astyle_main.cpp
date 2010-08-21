@@ -81,7 +81,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* g_version = "1.25 beta";
+const char* g_version = "2.01 beta";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -2336,7 +2336,7 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	// depreciated options ////////////////////////////////////////////////////////////////////////
 	// depreciated in release 1.23
 	// removed from documentation in release 1.24
-	// removed from source in release 1.25
+	// removed from source in release 2.01 (1.25)
 	// end depreciated options ////////////////////////////////////////////////////////////////////
 #ifdef ASTYLE_LIB
 	// End of options used by GUI /////////////////////////////////////////////////////////////////

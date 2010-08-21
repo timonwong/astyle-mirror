@@ -30,7 +30,7 @@
     <!-- CUT HERE FOR INSERTION INTO SOURCEFORGE DOC MANAGER -->
 
     <h1>
-        Artistic Style 1.25</h1>
+        Artistic Style 2.01</h1>
 
     <h2>
         A Free, Fast and Small Automatic Formatter<br />
@@ -173,13 +173,12 @@
         hanging indent format is used. If the "exec sql" statement is indented more than the following statements, the
         SQL will be aligned in a single column.</p>
     <p>
-        Files encoded as UTF&#8209;16 or UTF&#8209;32 can NOT be formatted. These are left unchanged and a warning message
-        is displayed. Some compilers, such as MinGW, do not support these encodings. Other compilers, such as Embarcadero
-        (Borland), must have a Byte-Order-Mark (BOM) to recognize the encoding. Files can be converted to the preferred UTF&#8209;8 encoding with the program iconv. There
+        Files encoded as UTF&#8209;16 or UTF&#8209;32 will NOT be formatted. These are left unchanged and a warning message
+        is displayed. Some compilers do not support these encodings. Other compilers must have a Byte-Order-Mark (BOM) to recognize the encoding. To use Artistic Style the files can be converted to the newer UTF&#8209;8 encoding with the program iconv. There
         are Linux and Windows versions available. A sample command line is "iconv &#8209;f &nbsp;UTF&#8209;16 &#8209;t
         UTF&#8209;8 filein.cpp &gt;fileout.cpp. Visual Studio can convert the files from the "File &gt; Advanced Save
-        Options" menu. Select encoding "Unicode (UTF&#8209;8 with signature) - Codepage 65001". There are also text editors,
-        such as SciTE, that can convert to UTF&#8209;8.
+        Options" menu. Select encoding "Unicode (UTF&#8209;8 with signature) - Codepage 65001". There are other development environments and text editors,
+        such as SciTE, that can convert files to UTF&#8209;8.
     </p>
     <p>
         Embedded statements that are multiple-line and are NOT in a C type format, such as Python, are usually mal-formatted.
