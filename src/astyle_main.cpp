@@ -202,7 +202,7 @@ template<typename T>
 string ASStreamIterator<T>::peekNextLine()
 {
 	assert (hasMoreLines());
-	string nextLine;
+	string nextLine_;
 	char ch;
 
 	if (peekStart == 0)
@@ -212,13 +212,13 @@ string ASStreamIterator<T>::peekNextLine()
 	inStream->get(ch);
 	while (!inStream->eof() && ch != '\n' && ch != '\r')
 	{
-		nextLine.append(1, ch);
+		nextLine_.append(1, ch);
 		inStream->get(ch);
 	}
 
 	if (inStream->eof())
 	{
-		return nextLine;
+		return nextLine_;
 	}
 
 	int peekCh = inStream->peek();
@@ -230,7 +230,7 @@ string ASStreamIterator<T>::peekNextLine()
 			inStream->get();
 	}
 
-	return nextLine;
+	return nextLine_;
 }
 
 // reset current position and EOF for peekNextLine()
@@ -418,15 +418,15 @@ void ASConsole::formatCinToCout() const
 /**
  * Open input file, format it, and close the output.
  *
- * @param fileName      The path and name of the file to be processed.
+ * @param fileName_     The path and name of the file to be processed.
  * @param formatter     The formatter object.
  */
-void ASConsole::formatFile(const string &fileName)
+void ASConsole::formatFile(const string &fileName_)
 {
 	// open input file
-	ifstream in(fileName.c_str(), ios::binary);
+	ifstream in(fileName_.c_str(), ios::binary);
 	if (!in)
-		error("Cannot open input file", fileName.c_str());
+		error("Cannot open input file", fileName_.c_str());
 
 	ostringstream out;
 
@@ -434,9 +434,9 @@ void ASConsole::formatFile(const string &fileName)
 	// according to the file's suffix.
 	if (!formatter.getModeManuallySet())
 	{
-		if (stringEndsWith(fileName, string(".java")))
+		if (stringEndsWith(fileName_, string(".java")))
 			formatter.setJavaStyle();
-		else if (stringEndsWith(fileName, string(".cs")))
+		else if (stringEndsWith(fileName_, string(".cs")))
 			formatter.setSharpStyle();
 		else
 			formatter.setCStyle();
@@ -494,14 +494,14 @@ void ASConsole::formatFile(const string &fileName)
 	// remove targetDirectory from filename if required by print
 	string displayName;
 	if (hasWildcard)
-		displayName = fileName.substr(targetDirectory.length() + 1);
+		displayName = fileName_.substr(targetDirectory.length() + 1);
 	else
-		displayName = fileName;
+		displayName = fileName_;
 
 	// if file has changed, write the new file
 	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
 	{
-		writeOutputFile(fileName, out);
+		writeOutputFile(fileName_, out);
 		printMsg("formatted  " + displayName);
 		filesFormatted++;
 	}
@@ -715,12 +715,12 @@ void ASConsole::displayLastError()
  *
  * @return              The path of the current directory
  */
-string ASConsole::getCurrentDirectory(const string &fileName) const
+string ASConsole::getCurrentDirectory(const string &fileName_) const
 {
 	char currdir[MAX_PATH];
 	currdir[0] = '\0';
 	if (!GetCurrentDirectory(sizeof(currdir), currdir))
-		error("Cannot find file", fileName.c_str());
+		error("Cannot find file", fileName_.c_str());
 	return string(currdir);
 }
 
@@ -850,14 +850,14 @@ string ASConsole::getNumberFormat(int num, size_t lcid) const
  * This is done if the fileName does not contain a path.
  * It is probably from an editor sending a single file.
  *
- * @param fileName      The filename is used only for  the error message.
+ * @param fileName_     The filename is used only for  the error message.
  * @return              The path of the current directory
  */
-string ASConsole::getCurrentDirectory(const string &fileName) const
+string ASConsole::getCurrentDirectory(const string &fileName_) const
 {
 	char *currdir = getenv("PWD");
 	if (currdir == NULL)
-		error("Cannot find file", fileName.c_str());
+		error("Cannot find file", fileName_.c_str());
 	return string(currdir);
 }
 
@@ -1649,15 +1649,15 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 }
 
 // remove a file and check for an error
-void ASConsole::removeFile(const char* fileName, const char* errMsg) const
+void ASConsole::removeFile(const char* fileName_, const char* errMsg) const
 {
-	remove(fileName);
+	remove(fileName_);
 	if (errno == ENOENT)        // no file is OK
 		errno = 0;
 	if (errno)
 	{
 		perror("errno message");
-		error(errMsg, fileName);
+		error(errMsg, fileName_);
 	}
 }
 
@@ -1917,26 +1917,26 @@ int ASConsole::wildcmp(const char *wild, const char *data) const
 	return !*wild;
 }
 
-void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) const
+void ASConsole::writeOutputFile(const string &fileName_, ostringstream &out) const
 {
 	// save date accessed and date modified of original file
 	struct stat stBuf;
 	bool statErr = false;
-	if (stat(fileName.c_str(), &stBuf) == -1)
+	if (stat(fileName_.c_str(), &stBuf) == -1)
 		statErr = true;
 
 	// create a backup
 	if (!noBackup)
 	{
-		string origFileName = fileName + origSuffix;
+		string origFileName = fileName_ + origSuffix;
 		removeFile(origFileName.c_str(), "Cannot remove pre-existing backup file");
-		renameFile(fileName.c_str(), origFileName.c_str(), "Cannot create backup file");
+		renameFile(fileName_.c_str(), origFileName.c_str(), "Cannot create backup file");
 	}
 
 	// write the output file
-	ofstream fout(fileName.c_str(), ios::binary | ios::trunc);
+	ofstream fout(fileName_.c_str(), ios::binary | ios::trunc);
 	if (!fout)
-		error("Cannot open output file", fileName.c_str());
+		error("Cannot open output file", fileName_.c_str());
 	fout << out.str();
 	fout.close();
 
@@ -1951,7 +1951,7 @@ void ASConsole::writeOutputFile(const string &fileName, ostringstream &out) cons
 			// add ticks so 'make' will recoginze a change
 			// Visual Studio 2008 needs more than 1
 			outBuf.modtime = stBuf.st_mtime + 10;
-			if (utime(fileName.c_str(), &outBuf) == -1)
+			if (utime(fileName_.c_str(), &outBuf) == -1)
 				statErr = true;
 		}
 		if (statErr)

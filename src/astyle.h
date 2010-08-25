@@ -163,6 +163,8 @@ class ASSourceIterator
 class ASResource
 {
 	public:
+        ASResource() {}
+        virtual ~ASResource() {}
 		void buildAssignmentOperators(vector<const string*>* assignmentOperators);
 		void buildCastOperators(vector<const string*>* castOperators);
 		void buildHeaders(vector<const string*>* headers, int fileType, bool beautifier=false);
@@ -221,8 +223,8 @@ class ASBase
 		int baseFileType;      // a value from enum FileType
 
 	protected:
-		ASBase() { baseFileType = C_TYPE; }
-		~ASBase() {}
+		ASBase() : baseFileType(C_TYPE) { }
+		virtual ~ASBase() {}
 
 		// functions definitions are at the end of ASResource.cpp
 		bool findKeyword(const string &line, int i, const string &keyword) const;
@@ -461,7 +463,7 @@ class ASEnhancer : protected ASBase
 {
 	public:  // functions
 		ASEnhancer();
-		~ASEnhancer();
+		virtual ~ASEnhancer();
 		void init(int, int, string, bool, bool);
 		void enhance(string &line, bool isInSQL);
 
@@ -551,8 +553,8 @@ class ASFormatter : public ASBeautifier
 		int  getChecksumDiff();
 
 	private:  // functions
-		void ASformatter(ASFormatter &copy);           // not to be imlpemented
-		ASFormatter& operator=(ASFormatter&);          // not to be implemented
+		ASFormatter(const ASFormatter &copy);       // copy constructor not to be imlpemented
+		ASFormatter& operator=(ASFormatter&);       // assignment operator not to be implemented
 		template<typename T> void deleteContainer(T &container);
 		template<typename T> void initContainer(T &container, T value);
 		char peekNextChar() const;
@@ -668,7 +670,7 @@ class ASFormatter : public ASBeautifier
 		BracketType previousBracketType;
 		PointerAlign pointerAlignment;
 		LineEndFormat lineEnd;
-		bool computeChecksumIn(const string &currentLine);
+		bool computeChecksumIn(const string &currentLine_);
 		bool computeChecksumOut(const string &beautifiedLine);
 		bool isVirgin;
 		bool shouldPadOperators;
@@ -781,13 +783,13 @@ class ASFormatter : public ASBeautifier
 		}
 
 		// call ASBase::findHeader for the current character
-		const string *findHeader(const vector<const string*>* headers) {
-			return ASBeautifier::findHeader(currentLine, charNum, headers);
+		const string *findHeader(const vector<const string*>* headers_) {
+			return ASBeautifier::findHeader(currentLine, charNum, headers_);
 		}
 
 		// call ASBase::findOperator for the current character
-		const string *findOperator(const vector<const string*>* headers) {
-			return ASBeautifier::findOperator(currentLine, charNum, headers);
+		const string *findOperator(const vector<const string*>* headers_) {
+			return ASBeautifier::findOperator(currentLine, charNum, headers_);
 		}
 };  // Class ASFormatter
 

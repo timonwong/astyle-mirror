@@ -2307,21 +2307,21 @@ bool ASFormatter::isOneLineBlockReached(string& line, int startChar) const
 {
 	assert(line[startChar] == '{');
 
-	bool isInComment = false;
-	bool isInQuote = false;
+	bool isInComment_ = false;
+	bool isInQuote_ = false;
 	int bracketCount = 1;
 	int lineLength = line.length();
-	char quoteChar = ' ';
+	char quoteChar_ = ' ';
 
 	for (int i = startChar + 1; i < lineLength; ++i)
 	{
 		char ch = line[i];
 
-		if (isInComment)
+		if (isInComment_)
 		{
 			if (line.compare(i, 2, "*/") == 0)
 			{
-				isInComment = false;
+				isInComment_ = false;
 				++i;
 			}
 			continue;
@@ -2333,17 +2333,17 @@ bool ASFormatter::isOneLineBlockReached(string& line, int startChar) const
 			continue;
 		}
 
-		if (isInQuote)
+		if (isInQuote_)
 		{
-			if (ch == quoteChar)
-				isInQuote = false;
+			if (ch == quoteChar_)
+				isInQuote_ = false;
 			continue;
 		}
 
 		if (ch == '"' || ch == '\'')
 		{
-			isInQuote = true;
-			quoteChar = ch;
+			isInQuote_ = true;
+			quoteChar_ = ch;
 			continue;
 		}
 
@@ -2352,7 +2352,7 @@ bool ASFormatter::isOneLineBlockReached(string& line, int startChar) const
 
 		if (line.compare(i, 2, "/*") == 0)
 		{
-			isInComment = true;
+			isInComment_ = true;
 			++i;
 			continue;
 		}
@@ -2419,48 +2419,48 @@ string ASFormatter::peekNextText(const string& firstLine, bool endOnEmptyLine /*
 {
 	bool isFirstLine = true;
 	bool needReset = false;
-	string nextLine = firstLine;
+	string nextLine_ = firstLine;
 	size_t firstChar= string::npos;
 
 	// find the first non-blank text, bypassing all comments.
-	bool isInComment = false;
+	bool isInComment_ = false;
 	while (sourceIterator->hasMoreLines())
 	{
 		if (isFirstLine)
 			isFirstLine = false;
 		else
 		{
-			nextLine = sourceIterator->peekNextLine();
+			nextLine_ = sourceIterator->peekNextLine();
 			needReset = true;
 		}
 
-		firstChar = nextLine.find_first_not_of(" \t");
+		firstChar = nextLine_.find_first_not_of(" \t");
 		if (firstChar == string::npos)
 		{
-			if (endOnEmptyLine && !isInComment)
+			if (endOnEmptyLine && !isInComment_)
 				break;
 			continue;
 		}
 
-		if (nextLine.compare(firstChar, 2, "/*") == 0)
+		if (nextLine_.compare(firstChar, 2, "/*") == 0)
 		{
 			firstChar += 2;
-			isInComment = true;
+			isInComment_ = true;
 		}
 
-		if (isInComment)
+		if (isInComment_)
 		{
-			firstChar = nextLine.find("*/", firstChar);
+			firstChar = nextLine_.find("*/", firstChar);
 			if (firstChar == string::npos)
 				continue;
 			firstChar += 2;
-			isInComment = false;
-			firstChar = nextLine.find_first_not_of(" \t", firstChar);
+			isInComment_ = false;
+			firstChar = nextLine_.find_first_not_of(" \t", firstChar);
 			if (firstChar == string::npos)
 				continue;
 		}
 
-		if (nextLine.compare(firstChar, 2, "//") == 0)
+		if (nextLine_.compare(firstChar, 2, "//") == 0)
 			continue;
 
 		// found the next text
@@ -2470,10 +2470,10 @@ string ASFormatter::peekNextText(const string& firstLine, bool endOnEmptyLine /*
 	if (needReset)
 		sourceIterator->peekReset();
 	if (firstChar == string::npos)
-		nextLine = "";
+		nextLine_ = "";
 	else
-		nextLine = nextLine.substr(firstChar);
-	return nextLine;
+		nextLine_ = nextLine_.substr(firstChar);
+	return nextLine_;
 }
 
 /**
@@ -3685,18 +3685,18 @@ bool ASFormatter::commentAndHeaderFollows()
 	// is the next line a comment
 	if (!sourceIterator->hasMoreLines())
 		return false;
-	string nextLine = sourceIterator->peekNextLine();
-	size_t firstChar = nextLine.find_first_not_of(" \t");
+	string nextLine_ = sourceIterator->peekNextLine();
+	size_t firstChar = nextLine_.find_first_not_of(" \t");
 	if (firstChar == string::npos
-	        || !(nextLine.compare(firstChar, 2, "//") == 0
-	             || nextLine.compare(firstChar, 2, "/*") == 0))
+	        || !(nextLine_.compare(firstChar, 2, "//") == 0
+	             || nextLine_.compare(firstChar, 2, "/*") == 0))
 	{
 		sourceIterator->peekReset();
 		return false;
 	}
 
 	// find the next non-comment text
-	string nextText = peekNextText(nextLine);
+	string nextText = peekNextText(nextLine_);
 	if (nextText.length() == 0 || !isCharPotentialHeader(nextText, 0))
 		return false;
 
@@ -3810,7 +3810,10 @@ void ASFormatter::formatCommentBody()
 		        && previousCommandChar != ';'
 		        && !isBracketType(bracketTypeStack->back(),  ARRAY_TYPE)
 		        && isOkToBreakBlock(bracketTypeStack->back()))
-			breakLine();
+		{
+			isInLineBreak = true;
+			shouldBreakLineAtNextChar = true;
+		}
 	}
 	else
 	{
@@ -4372,65 +4375,65 @@ bool ASFormatter::isStructAccessModified(string  &firstLine, size_t index) const
 	bool isFirstLine = true;
 	bool needReset = false;
 	size_t bracketCount = 1;
-	string nextLine = firstLine.substr(index + 1);
+	string nextLine_ = firstLine.substr(index + 1);
 
 	// find the first non-blank text, bypassing all comments and quotes.
-	bool isInComment = false;
-	bool isInQuote = false;
-	char quoteChar = ' ';
+	bool isInComment_ = false;
+	bool isInQuote_ = false;
+	char quoteChar_ = ' ';
 	while (sourceIterator->hasMoreLines())
 	{
 		if (isFirstLine)
 			isFirstLine = false;
 		else
 		{
-			nextLine = sourceIterator->peekNextLine();
+			nextLine_ = sourceIterator->peekNextLine();
 			needReset = true;
 		}
 		// parse the line
-		for (size_t i = 0; i < nextLine.length(); i++)
+		for (size_t i = 0; i < nextLine_.length(); i++)
 		{
-			if (isWhiteSpace(nextLine[i]))
+			if (isWhiteSpace(nextLine_[i]))
 				continue;
-			if (nextLine.compare(i, 2, "/*") == 0)
-				isInComment = true;
-			if (isInComment)
+			if (nextLine_.compare(i, 2, "/*") == 0)
+				isInComment_ = true;
+			if (isInComment_)
 			{
-				if (nextLine.compare(i, 2, "*/") == 0)
+				if (nextLine_.compare(i, 2, "*/") == 0)
 				{
-					isInComment = false;
+					isInComment_ = false;
 					++i;
 				}
 				continue;
 			}
-			if (nextLine[i] == '\\')
+			if (nextLine_[i] == '\\')
 			{
 				++i;
 				continue;
 			}
 
-			if (isInQuote)
+			if (isInQuote_)
 			{
-				if (nextLine[i] == quoteChar)
-					isInQuote = false;
+				if (nextLine_[i] == quoteChar_)
+					isInQuote_ = false;
 				continue;
 			}
 
-			if (nextLine[i] == '"' || nextLine[i] == '\'')
+			if (nextLine_[i] == '"' || nextLine_[i] == '\'')
 			{
-				isInQuote = true;
-				quoteChar = nextLine[i];
+				isInQuote_ = true;
+				quoteChar_ = nextLine_[i];
 				continue;
 			}
-			if (nextLine.compare(i, 2, "//") == 0)
+			if (nextLine_.compare(i, 2, "//") == 0)
 			{
-				i = nextLine.length();
+				i = nextLine_.length();
 				continue;
 			}
 			// handle brackets
-			if (nextLine[i] == '{')
+			if (nextLine_[i] == '{')
 				++bracketCount;
-			if (nextLine[i] == '}')
+			if (nextLine_[i] == '}')
 				--bracketCount;
 			if (bracketCount == 0)
 			{
@@ -4439,17 +4442,17 @@ bool ASFormatter::isStructAccessModified(string  &firstLine, size_t index) const
 				return false;
 			}
 			// check for access modifiers
-			if (isCharPotentialHeader(nextLine, i))
+			if (isCharPotentialHeader(nextLine_, i))
 			{
-				if (findKeyword(nextLine, i, AS_PUBLIC)
-				        || findKeyword(nextLine, i, AS_PRIVATE)
-				        || findKeyword(nextLine, i, AS_PROTECTED))
+				if (findKeyword(nextLine_, i, AS_PUBLIC)
+				        || findKeyword(nextLine_, i, AS_PRIVATE)
+				        || findKeyword(nextLine_, i, AS_PROTECTED))
 				{
 					if (needReset)
 						sourceIterator->peekReset();
 					return true;
 				}
-				string name = getCurrentWord(nextLine, i);
+				string name = getCurrentWord(nextLine_, i);
 				i += name.length() - 1;
 			}
 		}	// end of for loop
@@ -4564,17 +4567,17 @@ void ASFormatter::checkIfTemplateOpener()
 	templateDepth = 0;
 	for (size_t i = charNum; i < currentLine.length(); i++)
 	{
-		char currentChar = currentLine[i];
+		char currentChar_ = currentLine[i];
 
-		if (isWhiteSpace(currentChar))
+		if (isWhiteSpace(currentChar_))
 			continue;
 
-		if (currentChar == '<')
+		if (currentChar_ == '<')
 		{
 			templateDepth++;
 			maxTemplateDepth++;
 		}
-		else if (currentChar == '>')
+		else if (currentChar_ == '>')
 		{
 			templateDepth--;
 			if (templateDepth == 0)
@@ -4592,19 +4595,19 @@ void ASFormatter::checkIfTemplateOpener()
 			isInTemplate = false;
 			return;
 		}
-		else if (currentChar == ','       // comma,     e.g. A<int, char>
-		         || currentChar == '&'    // reference, e.g. A<int&>
-		         || currentChar == '*'    // pointer,   e.g. A<int*>
-		         || currentChar == ':'    // ::,        e.g. std::string
-		         || currentChar == '='    // assign     e.g. default parameter
-		         || currentChar == '['    // []         e.g. string[]
-		         || currentChar == ']'    // []         e.g. string[]
-		         || currentChar == '('    // (...)      e.g. function definition
-		         || currentChar == ')')   // (...)      e.g. function definition
+		else if (currentChar_ == ','       // comma,     e.g. A<int, char>
+		         || currentChar_ == '&'    // reference, e.g. A<int&>
+		         || currentChar_ == '*'    // pointer,   e.g. A<int*>
+		         || currentChar_ == ':'    // ::,        e.g. std::string
+		         || currentChar_ == '='    // assign     e.g. default parameter
+		         || currentChar_ == '['    // []         e.g. string[]
+		         || currentChar_ == ']'    // []         e.g. string[]
+		         || currentChar_ == '('    // (...)      e.g. function definition
+		         || currentChar_ == ')')   // (...)      e.g. function definition
 		{
 			continue;
 		}
-		else if (!isLegalNameChar(currentChar))
+		else if (!isLegalNameChar(currentChar_))
 		{
 			// this is not a template -> leave...
 			isInTemplate = false;
@@ -4617,11 +4620,11 @@ void ASFormatter::checkIfTemplateOpener()
  * Compute the input checksum.
  * This is called as an assert so it for is debug config only
  */
-bool ASFormatter::computeChecksumIn(const string &currentLine)
+bool ASFormatter::computeChecksumIn(const string &currentLine_)
 {
-	for (size_t i = 0; i < currentLine.length(); i++)
-		if (!isWhiteSpace(currentLine[i]))
-			checksumIn += currentLine[i];
+	for (size_t i = 0; i < currentLine_.length(); i++)
+		if (!isWhiteSpace(currentLine_[i]))
+			checksumIn += currentLine_[i];
 	return true;
 }
 

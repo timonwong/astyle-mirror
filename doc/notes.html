@@ -26,11 +26,14 @@
         <li>Add checksum verification to source file output. </li>
         <li>Add formatting of MFC macros "BEGIN_DISPATCH_MAP, BEGIN_EVENT_MAP, and BEGIN_PROPPAGEIDS.</li>
 		<li>Add error message if --recursive is used without a wildcard in the file name.</li>
+        <li>Add private (unusable) copy constructors for classes with dynamic allocation.</li>
         <li>Improve formatting of multi-line comments when the number of leading spaces must be changed. </li>
         <li>Improve formatting of embedded SQL when the number of leading spaces must be changed. </li>
         <li>Change --style=linux to always use a minimum conditional indent of one-half the indent length.</li>
         <li>Change to display all (instead of one) option errors before abort.&nbsp;</li>
         <li>Change the second argument of the fpError typedef&nbsp; from "char*" to "const char*".&nbsp;</li>
+        <li>Change all destructors to virtual.</li>
+        <li>Fix deleting the previous line when a closing bracket follows a comment close.</li>
         <li>Fix not recognizing text in quotes when identifying struct access modifiers.</li>
         <li>Fix --pad-oper to recognize all * and &amp; operators within a function call.</li>
         <li>Fix --unpad-paren to recognize * and &amp; operators within a function call. </li>
@@ -45,6 +48,7 @@
         <li>Fix ASBeautifier findOperator() method to recognize a C# lambda (=&gt;) operator.</li>
         <li>Fix ASFormatter nextLine() method to output an entire operator instead of individual characters.</li>
         <li>Fix incorrectly identifying '*' as pointers in block parens.</li>
+        <li>Fix MinGW -Wshadow warnings.</li>
         <li>Fix VS2010 "string subscript out of range" on line comments when "//" ends the line. </li>
         <li>Fix VS2010 "string subscript out of range" when checking for cast operators. </li>
         <li>Fix VS2010 "string subscript out of range" when checking for horstmann bracket run-in. </li>
