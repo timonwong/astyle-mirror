@@ -411,6 +411,15 @@ void ASConsole::formatCinToCout() const
 		cout << formatter.nextLine();
 		if (formatter.hasMoreLines())
 			cout << streamIterator.getOutputEOL();
+		else
+		{
+			// this can happen if the file if missing a closing bracket and break-blocks is requested
+			if (formatter.getIsLineReady())
+			{
+				cout << streamIterator.getOutputEOL();
+				cout << formatter.nextLine();
+			}
+		}
 	}
 	cout.flush();
 }
@@ -469,7 +478,19 @@ void ASConsole::formatFile(const string &fileName_)
 			out << outputEOL;
 		}
 		else
+		{
 			streamIterator.saveLastInputLine();     // to compare the last input line
+			// this can happen if the file if missing a closing bracket and break-blocks is requested
+			if (formatter.getIsLineReady())
+			{
+				setOutputEOL(lineEndFormat, streamIterator.getOutputEOL());
+				out << outputEOL;
+				nextLine = formatter.nextLine();
+				out << nextLine;
+				linesOut++;
+				streamIterator.saveLastInputLine();
+			}
+		}
 
 		if (filesAreIdentical)
 		{
@@ -2632,6 +2653,15 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 		out << formatter.nextLine();
 		if (formatter.hasMoreLines())
 			out << streamIterator.getOutputEOL();
+		else
+		{
+			// this can happen if the file if missing a closing bracket and break-blocks is requested
+			if (formatter.getIsLineReady())
+			{
+				out << streamIterator.getOutputEOL();
+				out << formatter.nextLine();
+			}
+		}
 	}
 
 	unsigned long textSizeOut = out.str().length();

@@ -1706,9 +1706,7 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		previousChar = ' ';
 
 		if (currentLine.length() == 0)
-		{
 			currentLine = string(" ");        // a null is inserted if this is not done
-		}
 
 		// unless reading in the first line of the file, break a new line.
 		if (!isVirgin)
@@ -1726,8 +1724,9 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		if (passedSemicolon)
 			isInExecSQL = false;
 		initNewLine();
+
 		currentChar = currentLine[charNum];
-		if (isInHorstmannRunIn && previousNonWSChar == '{')
+		if (isInHorstmannRunIn && previousNonWSChar == '{' && !isInComment)
 			isInLineBreak = false;
 		isInHorstmannRunIn = false;
 
@@ -1992,7 +1991,13 @@ BracketType ASFormatter::getBracketType()
 			returnVal = (isCommandType ? COMMAND_TYPE : ARRAY_TYPE);
 	}
 
-	if (isOneLineBlockReached(currentLine, charNum))
+	int foundOneLineBlock = isOneLineBlockReached(currentLine, charNum);
+	// this assumes each array definition is on a single line
+	// (foundOneLineBlock == 2) is a one line block followed by a comma
+	if (foundOneLineBlock == 2 && returnVal == COMMAND_TYPE)
+		returnVal = ARRAY_TYPE;
+
+	if (foundOneLineBlock > 0)		// found one line block
 		returnVal = (BracketType)(returnVal | SINGLE_LINE_TYPE);
 
 	if (isBracketType(returnVal, ARRAY_TYPE) && isNonInStatementArrayBracket())
@@ -2301,9 +2306,11 @@ bool ASFormatter::isNonInStatementArrayBracket() const
  * i.e. if the currently reached '{' character is closed
  * with a complimentry '}' elsewhere on the current line,
  *.
- * @return        has a one-line bracket been reached?
+ * @return     0 = one-line bracket has not been reached.
+ *             1 = one-line bracket has been reached.
+ *             2 = one-line bracket has been reached and is followed by a comma.
  */
-bool ASFormatter::isOneLineBlockReached(string& line, int startChar) const
+int ASFormatter::isOneLineBlockReached(string& line, int startChar) const
 {
 	assert(line[startChar] == '{');
 
@@ -2363,10 +2370,15 @@ bool ASFormatter::isOneLineBlockReached(string& line, int startChar) const
 			--bracketCount;
 
 		if (bracketCount == 0)
-			return true;
+		{
+			size_t peekNum = currentLine.find_first_not_of(" \t", i + 1);
+			if (peekNum != string::npos && line[peekNum] == ',')
+				return 2;
+			return 1;
+		}
 	}
 
-	return false;
+	return 0;
 }
 
 /**
@@ -2415,10 +2427,10 @@ bool ASFormatter::isNextCharOpeningBracket(int startChar) const
  * @param   the first line to check
  * @return  the next non-whitespace substring.
  */
-string ASFormatter::peekNextText(const string& firstLine, bool endOnEmptyLine /*false*/) const
+string ASFormatter::peekNextText(const string& firstLine, bool endOnEmptyLine /*false*/, bool shouldReset /*false*/) const
 {
 	bool isFirstLine = true;
-	bool needReset = false;
+	bool needReset = shouldReset;
 	string nextLine_ = firstLine;
 	size_t firstChar= string::npos;
 
@@ -2626,7 +2638,7 @@ void ASFormatter::padOperators(const string *newOperator)
 	        && !(currentLine.compare(charNum + 1, 1,  ";") == 0)
 	        && !(currentLine.compare(charNum + 1, 2, "::") == 0)
 	        && !(newOperator == &AS_QUESTION && isSharpStyle() // check for C# nullable type (e.g. int?)
-	             && currentLine[charNum+1] == '[')
+	             && peekNextChar() == '[')
 	   )
 		appendSpaceAfter();
 
@@ -3203,8 +3215,8 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 		isImmediatelyPostEmptyBlock = true;
 
 	if ((!(previousCommandChar == '{' && isPreviousBracketBlockRelated))    // this '{' does not close an empty block
-	        && isOkToBreakBlock(bracketType)                                // astyle is allowed to break on line blocks
-	        && !isImmediatelyPostEmptyBlock)                                // this '}' does not immediately follow an empty block
+	        && isOkToBreakBlock(bracketType))                               // astyle is allowed to break on line blocks
+//	        && !isImmediatelyPostEmptyBlock)    /* removed 9/5/10 */        // this '}' does not immediately follow an empty block
 	{
 		breakLine();
 		appendCurrentChar();
@@ -3256,10 +3268,9 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				}
 				else if (isCharImmediatelyPostComment)
 				{
-					// TODO: attach bracket to line-end comment
 					appendCurrentChar();                // don't attach
 				}
-				else if (isCharImmediatelyPostLineComment)
+				else if (isCharImmediatelyPostLineComment && !isBracketType(bracketType, SINGLE_LINE_TYPE))
 				{
 					appendCharInsideComments();
 				}
@@ -3272,7 +3283,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 					{
 						// if bracket is broken or not an assignment
 						if (currentLineBeginsWithBracket 	// lineBeginsWith('{')
-						        && !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE))
+						        && !isBracketType(bracketType, SINGLE_LINE_TYPE))
 						{
 							appendSpacePad();
 							appendCurrentChar(false);       // OK to attach
@@ -3308,7 +3319,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 
 				if (currentLineBeginsWithBracket
 				        && (int)currentLineFirstBracketNum == charNum
-				        && !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE))
+				        && !isBracketType(bracketType, SINGLE_LINE_TYPE))
 					shouldBreakLineAtNextChar = true;
 			}
 			else if (bracketFormatMode == HORSTMANN_MODE)
@@ -3695,8 +3706,8 @@ bool ASFormatter::commentAndHeaderFollows()
 		return false;
 	}
 
-	// find the next non-comment text
-	string nextText = peekNextText(nextLine_);
+	// find the next non-comment text, and reset
+	string nextText = peekNextText(nextLine_, false, true);
 	if (nextText.length() == 0 || !isCharPotentialHeader(nextText, 0))
 		return false;
 
@@ -4241,12 +4252,12 @@ void ASFormatter::isLineBreakBeforeClosingHeader()
 			// if a blank line does not preceed this
 			// or last line is not a one line block, attach header
 			bool previousLineIsEmpty = isEmptyLine(formattedLine);
-			bool previousLineIsOneLineBlock = false;
+			int previousLineIsOneLineBlock = 0;
 			size_t firstBracket = findNextChar(formattedLine, '{');
 			if (firstBracket != string::npos)
 				previousLineIsOneLineBlock = isOneLineBlockReached(formattedLine, firstBracket);
 			if (!previousLineIsEmpty
-			        && !previousLineIsOneLineBlock)
+			        && previousLineIsOneLineBlock == 0)
 			{
 				isInLineBreak = false;
 				appendSpacePad();
@@ -4536,6 +4547,8 @@ void ASFormatter::trimContinuationLine()
 			newLine.append(currentLine, i, len-i);
 			currentLine = newLine;
 			charNum = leadingChars;
+			if (currentLine.length() == 0)
+				currentLine = string(" ");        // a null is inserted if this is not done
 		}
 		if (i >= len)
 			charNum = 0;
@@ -4633,7 +4646,7 @@ bool ASFormatter::computeChecksumIn(const string &currentLine_)
  *
  * @return   checksumIn.
  */
-size_t ASFormatter::getChecksumIn()
+size_t ASFormatter::getChecksumIn() const
 {
 	return checksumIn;
 }
@@ -4651,11 +4664,19 @@ bool ASFormatter::computeChecksumOut(const string &beautifiedLine)
 }
 
 /**
+ * Return isLineReady for the final check at end of file.
+ */
+bool ASFormatter::getIsLineReady() const
+{
+	return isLineReady;
+}
+
+/**
  * get the value of checksumOut for unit testing
  *
  * @return   checksumOut.
  */
-size_t ASFormatter::getChecksumOut()
+size_t ASFormatter::getChecksumOut() const
 {
 	return checksumOut;
 }
@@ -4664,7 +4685,7 @@ size_t ASFormatter::getChecksumOut()
  * Return the difference in chacksums.
  * If zero all is okay.
  */
-int ASFormatter::getChecksumDiff()
+int ASFormatter::getChecksumDiff() const
 {
 	return checksumOut - checksumIn;
 }

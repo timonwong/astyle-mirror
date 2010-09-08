@@ -163,8 +163,8 @@ class ASSourceIterator
 class ASResource
 {
 	public:
-        ASResource() {}
-        virtual ~ASResource() {}
+		ASResource() {}
+		virtual ~ASResource() {}
 		void buildAssignmentOperators(vector<const string*>* assignmentOperators);
 		void buildCastOperators(vector<const string*>* castOperators);
 		void buildHeaders(vector<const string*>* headers, int fileType, bool beautifier=false);
@@ -528,6 +528,7 @@ class ASFormatter : public ASBeautifier
 		virtual bool hasMoreLines() const;
 		virtual string nextLine();
 		LineEndFormat getLineEndFormat() const;
+		bool getIsLineReady() const;
 		void setFormattingStyle(FormatStyle style);
 		void setAddBracketsMode(bool state);
 		void setAddOneLineBracketsMode(bool state);
@@ -548,9 +549,9 @@ class ASFormatter : public ASBeautifier
 		void setPointerAlignment(PointerAlign alignment);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
-		size_t getChecksumIn();
-		size_t getChecksumOut();
-		int  getChecksumDiff();
+		size_t getChecksumIn() const;
+		size_t getChecksumOut() const;
+		int  getChecksumDiff() const;
 
 	private:  // functions
 		ASFormatter(const ASFormatter &copy);       // copy constructor not to be imlpemented
@@ -581,9 +582,9 @@ class ASFormatter : public ASBeautifier
 		bool isStructAccessModified(string  &firstLine, size_t index) const;
 		bool isUnaryOperator() const;
 		bool isInExponent() const;
-		bool isOneLineBlockReached(string& line, int startChar) const;
 		bool isNextCharOpeningBracket(int startChar) const;
 		bool isOkToBreakBlock(BracketType bracketType) const;
+		int  isOneLineBlockReached(string& line, int startChar) const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
 		void appendCharInsideComments();
@@ -622,7 +623,7 @@ class ASFormatter : public ASBeautifier
 		void trimContinuationLine();
 		size_t findNextChar(string& line, char searchChar, int searchStart = 0);
 		string getPreviousWord(const string& line, int currPos) const;
-		string peekNextText(const string& firstLine, bool endOnEmptyLine=false) const;
+		string peekNextText(const string& firstLine, bool endOnEmptyLine=false, bool shouldReset=false) const;
 
 	private:  // variables
 		static int formatterFileType;
