@@ -58,6 +58,7 @@ void ASEnhancer::init(int fileType,
                       int _indentLength,
                       string _indentString,
                       bool _caseIndent,
+                      bool _preprocessorIndent,
                       bool _emptyLineFill)
 {
 	// formatting variables from ASFormatter and ASBeautifier
@@ -69,6 +70,7 @@ void ASEnhancer::init(int fileType,
 		useTabs = false;
 
 	caseIndent    = _caseIndent;
+	preprocessorIndent = _preprocessorIndent;
 	emptyLineFill = _emptyLineFill;
 	quoteChar = '\'';
 
@@ -85,7 +87,7 @@ void ASEnhancer::init(int fileType,
 	sw.switchBracketCount = 0;
 	sw.unindentDepth = 0;
 	sw.unindentCase = false;
-	swVector.clear();
+	switchStack.clear();
 
 	// other variables
 	nextLineIsEventIndent = false;
@@ -103,7 +105,7 @@ void ASEnhancer::init(int fileType,
  *
  * @param line       the original formatted line will be updated if necessary.
  */
-void ASEnhancer::enhance(string &line, bool isInSQL)
+void ASEnhancer::enhance(string &line, bool isInPreprocessor, bool isInSQL)
 {
 	bool isSpecialChar = false;			// is a backslash escape character
 
@@ -257,7 +259,7 @@ void ASEnhancer::enhance(string &line, bool isInSQL)
 		if (isPotentialKeyword && findKeyword(line, i, "switch"))
 		{
 			switchDepth++;
-			swVector.push_back(sw);                         // save current variables
+			switchStack.push_back(sw);                      // save current variables
 			sw.switchBracketCount = 0;
 			sw.unindentCase = false;                        // don't clear case until end of switch
 			i += 5;                                         // bypass switch statement
@@ -266,7 +268,9 @@ void ASEnhancer::enhance(string &line, bool isInSQL)
 
 		// just want unindented switch statements from this point
 
-		if (caseIndent || switchDepth == 0)
+		if (caseIndent
+		        || switchDepth == 0
+		        || (isInPreprocessor && !preprocessorIndent))
 		{
 			// bypass the entire word
 			if (isPotentialKeyword)
@@ -475,7 +479,7 @@ bool ASEnhancer::isEndDeclareSectionSQL(string  &line, size_t index) const
  * @param index         the current line index.
  * @return              the new line index.
  */
-size_t ASEnhancer::processSwitchBlock(string  &line, size_t index)
+size_t ASEnhancer::processSwitchBlock(string &line, size_t index)
 {
 	size_t i = index;
 	bool isPotentialKeyword = isCharPotentialHeader(line, i);
@@ -498,9 +502,9 @@ size_t ASEnhancer::processSwitchBlock(string  &line, size_t index)
 		sw.switchBracketCount--;
 		if (sw.switchBracketCount == 0)                 // if end of switch statement
 		{
-			switchDepth--;                              // one less switch
-			sw = swVector.back();                       // restore sw struct
-			swVector.pop_back();                        // remove last entry from stack
+			switchDepth--;
+			sw = switchStack.back();
+			switchStack.pop_back();
 		}
 		return i;
 	}

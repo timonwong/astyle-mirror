@@ -1531,8 +1531,6 @@ void ASConsole::printHelp() const
 
 /**
  * Process files in the fileNameVector.
- *
- * @param formatter     The formatter object.
  */
 void ASConsole::processFiles()
 {

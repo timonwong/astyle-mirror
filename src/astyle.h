@@ -58,7 +58,7 @@
 
 #ifdef __INTEL_COMPILER
 #pragma warning(disable:  383)  // value copied to temporary, reference to temporary used
-#pragma warning(disable:  444)  // destructor for base class is not virtual
+// #pragma warning(disable:  444)  // destructor for base class is not virtual
 #pragma warning(disable:  981)  // operands are evaluated in unspecified order
 #endif
 
@@ -328,6 +328,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getForceTabIndentation(void);
 		bool getIndentManuallySet(void);
 		bool getModeManuallySet(void);
+		bool getPreprocessorIndent(void);
 		bool getSwitchIndent(void);
 
 	protected:
@@ -464,14 +465,15 @@ class ASEnhancer : protected ASBase
 	public:  // functions
 		ASEnhancer();
 		virtual ~ASEnhancer();
-		void init(int, int, string, bool, bool);
-		void enhance(string &line, bool isInSQL);
+		void init(int, int, string, bool, bool, bool);
+		void enhance(string &line, bool isInPreprocessor, bool isInSQL);
 
 	private:
 		// options from command line or options file
 		int  indentLength;
 		bool useTabs;
 		bool caseIndent;
+		bool preprocessorIndent;
 		bool emptyLineFill;
 
 		// parsing variables
@@ -495,7 +497,7 @@ class ASEnhancer : protected ASBase
 		};
 
 		switchVariables sw;                      // switch variables struct
-		vector<switchVariables>  swVector;       // stack vector of switch variables
+		vector<switchVariables> switchStack;     // stack vector of switch variables
 
 		// event table variables
 		bool nextLineIsEventIndent;             // begin event table indent is reached
@@ -685,6 +687,7 @@ class ASFormatter : public ASBeautifier
 		bool isInComment;
 		bool noTrimCommentContinuation;
 		bool isInPreprocessor;
+		bool isInPreprocessorBeautify;
 		bool isInTemplate;
 		bool doesLineStartComment;
 		bool lineEndsInCommentOnly;

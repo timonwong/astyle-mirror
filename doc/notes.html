@@ -36,8 +36,14 @@
         <li>Change all destructors to virtual.</li>
         <li>Fix crash when --break-blocks is used and there is no closing bracket.</li>
         <li>Fix deleting the previous line when a closing bracket follows a comment close.</li>
+        <li>Fix --brackets=attach inserting a bracket inside comments following a preprocessor statement.</li>
         <li>Fix not recognizing text in quotes when identifying struct access modifiers.</li>
+		<li>Fix not popping the paren stack when a bracket preceeds an end of line comment.</li>
         <li>Fix not breaking a closing bracket when empty parens are enclosed in a single line block.</li>
+        <li>Fix not always clearing isNonInStatementArray flag.</li>
+        <li>Fix indenting "case" statements in a preprocessor definition when --indent-preprocessor is not requested.</li>
+        <li>Fix indenting Java abstract methods when "new" starts the line and brackets are broken.</li>
+        <li>Fix breaking single line blocks blocks for C# abstract methods.</li>
         <li>Fix --brackets=attach attaching an array bracket from a one line block to the previous line.</li>
         <li>Fix --brackets=horstmann not breaking a comment line when the comment ends the line with a bracket.</li>
         <li>Fix --pad-oper to recognize all * and &amp; operators within a function call.</li>
@@ -45,28 +51,22 @@
         <li>Fix --align-pointer to pad or unpad pointers followed by parens or comments.</li>
         <li>Fix --align-pointer to pad or unpad pointers following a scope resolution operator.</li>
         <li>Fix --align-pointer to pad or unpad pointers that end the line.</li>
+        <li>Fix --align-pointer used with --pad-parens-out causing a space to be padded for each run. </li>
+        <li>Fix --pad-paren used with --delete-empty-lines causing a space to be added at end of line in some cases. </li>
         <li>Fix --break-blocks used with --delete-empty-lines causing an assert error when end of file is reached. </li>
-        <li>Fix --break-blocks used with --delete-empty-lines causing an assert error for certain combinations of comment
+        <li>Fix --break-blocks used with --delete-empty-lines causing an assert error for some combinations of comment
             lines.</li>
-        <li>Fix --break-blocks used with --delete-empty-lines causing a duplicate line in certain cases. </li>
+        <li>Fix --break-blocks used with --delete-empty-lines causing a duplicate line in some cases. </li>
         <li>Fix --break-blocks used with --delete-empty-lines not always breaking opening blocks. </li>
         <li>Fix --break-blocks used with --delete-empty-lines not always deleteing empty lines for closing blocks. </li>
+        <li>Fix --break-blocks used with --fill-empty-lines not always correctly filling empty lines in a switch statement.
+        </li>
         <li>Fix --pad-oper incorrectly padding a template with a default parameter.</li>
         <li>Fix ASBeautifier findOperator() method to recognize a C# lambda (=&gt;) operator.</li>
         <li>Fix ASFormatter nextLine() method to output an entire operator instead of individual characters.</li>
         <li>Fix incorrectly identifying '*' as pointers in block parens.</li>
         <li>Fix MinGW -Wshadow warnings.</li>
-        <li>Fix VS2010 "string subscript out of range" on line comments when "//" ends the line. </li>
-        <li>Fix VS2010 "string subscript out of range" when checking for cast operators. </li>
-        <li>Fix VS2010 "string subscript out of range" when checking for horstmann bracket run-in. </li>
-        <li>Fix VS2010 "string subscript out of range" when checking for an empty class. </li>
-        <li>Fix VS2010 "string subscript out of range" when checking for preprocessor directive within a macro indent. </li>
-        <li>Fix VS2010 "string subscript out of range" when checking for pointer or reference cast. </li>
-        <li>Fix VS2010 "string subscript out of range" when findNextChar ends with a comment. </li>
-        <li>Fix VS2010 "string subscript out of range" when unpad&#8209;paren is used with convert-tabs and an opening paren ends the
-            line. </li>
-        <li>Fix VS2010 "string subscript out of range" when a no-indent line comment is enclosed in a comment. </li>
-        <li>Fix VS2010 "string subscript out of range" when pad-oper is used for a C# nullable type (e.g. int?). </li>
+        <li>Fix VS2010 "string subscript out of range" asserts. </li>
         <li>Refactor:<ul>
             <li>Remove template definition for parseOptions() by using a vector reference instead of iterators as function arguments.&nbsp;</li>
             <li>New ASOptions class to encapsulate global functions used by both the console and library builds. </li>

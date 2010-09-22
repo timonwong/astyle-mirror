@@ -674,6 +674,18 @@ bool ASBeautifier::getEmptyLineFill(void)
 }
 
 /**
+ * get the state of the preprocessor indentation option.
+ * If true, preprocessor "define" lines will be indented.
+ * If false, preprocessor "define" lines will be unchanged.
+ *
+ * @return   state of preprocessorIndent option.
+ */
+bool ASBeautifier::getPreprocessorIndent(void)
+{
+	return preprocessorIndent;
+}
+
+/**
  * beautify a line of source code.
  * every line of source code in a source code file should be sent
  * one after the other to the beautify method.
@@ -771,11 +783,12 @@ string ASBeautifier::beautify(const string &originalLine)
 	// except C# region and endregion
 
 	if (!isInComment
+	        && line.length() > 0
 	        && (line[0] == '#' || backslashEndsPrevLine)
 	        && line.compare(0, 7, "#region") != 0
 	        && line.compare(0, 10, "#endregion") != 0)
 	{
-		if (line[0] == '#')
+		if (line.length() > 0 && line[0] == '#')
 		{
 			string preproc = trim(string(line.c_str() + 1));
 
@@ -966,6 +979,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && headerStack->size() >= 2
 	        && (*headerStack)[headerStack->size()-2] == &AS_CLASS
 	        && (*headerStack)[headerStack->size()-1] == &AS_OPEN_BRACKET
+	        && line.length() > 0
 	        && line[0] == '}'
 	        && bracketBlockStateStack->back() == true)
 		--tabCount;
@@ -976,6 +990,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	         && headerStack->size() >= 2
 	         && (*headerStack)[headerStack->size()-2] == &AS_SWITCH
 	         && (*headerStack)[headerStack->size()-1] == &AS_OPEN_BRACKET
+	         && line.length() > 0
 	         && line[0] == '}')
 		--tabCount;
 
@@ -1847,8 +1862,11 @@ string ASBeautifier::beautify(const string &originalLine)
 			// "new" operator is a pointer, not a calculation
 			if (findKeyword(line, i, AS_NEW))
 			{
-				if (prevNonSpaceCh == '=' && isInStatement && !inStatementIndentStack->empty())
-					inStatementIndentStack->back() = 0;
+				if (isInStatement && !inStatementIndentStack->empty())
+				{
+					if (prevNonSpaceCh == '=' && isInStatement && !inStatementIndentStack->empty())
+						inStatementIndentStack->back() = 0;
+				}
 			}
 
 			if (isCStyle())
@@ -2027,7 +2045,7 @@ string ASBeautifier::beautify(const string &originalLine)
 
 	if (isInDefine)
 	{
-		if (outBuffer[0] == '#')
+		if (outBuffer.length() > 0 && outBuffer[0] == '#')
 		{
 			string preproc = trim(string(outBuffer.c_str() + 1));
 			if (preproc.compare(0, 6, "define") == 0)
@@ -2595,4 +2613,3 @@ int ASBeautifier::getInStatementIndentComma(const string& line, size_t currPos) 
 
 
 }   // end namespace astyle
-
