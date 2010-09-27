@@ -4324,7 +4324,9 @@ bool ASFormatter::addBracketsToStatement()
 			return false;
 
 	// find the next semi-colon
-	size_t nextSemiColon = findNextChar(currentLine, ';', charNum+1);
+	size_t nextSemiColon = charNum;
+	if (currentChar != ';')
+		nextSemiColon = findNextChar(currentLine, ';', charNum+1);
 	if (nextSemiColon == string::npos)
 		return false;
 
@@ -4607,6 +4609,7 @@ void ASFormatter::checkIfTemplateOpener()
 {
 	assert(!isInTemplate && currentChar == '<');
 
+	int parenDepth = 0;
 	int maxTemplateDepth = 0;
 	templateDepth = 0;
 	for (size_t i = charNum; i < currentLine.length(); i++)
@@ -4626,11 +4629,22 @@ void ASFormatter::checkIfTemplateOpener()
 			templateDepth--;
 			if (templateDepth == 0)
 			{
-				// this is a template!
-				isInTemplate = true;
-				templateDepth = maxTemplateDepth;
+				if (parenDepth == 0)
+				{
+					// this is a template!
+					isInTemplate = true;
+					templateDepth = maxTemplateDepth;
+				}
 				return;
 			}
+		}
+		else if (currentChar_ == '(' || currentChar_ == ')')
+		{
+			if (currentChar_ == '(')
+				parenDepth++;
+			else
+				parenDepth--;
+			continue;
 		}
 		else if (currentLine.compare(i, 2, "&&") == 0
 		         || currentLine.compare(i, 2, "||") == 0)

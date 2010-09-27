@@ -936,6 +936,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			        || (*headerStack)[i] == &AS_STRUCT
 			        || (*headerStack)[i] == &AS_UNION
 			        || (*headerStack)[i] == &AS_CONST
+			        || (*headerStack)[i] == &AS_VOLATILE
 			        || (*headerStack)[i] == &AS_INTERFACE
 			        || (*headerStack)[i] == &AS_THROWS
 			        || (*headerStack)[i] == &AS_STATIC))
@@ -1157,7 +1158,9 @@ string ASBeautifier::beautify(const string &originalLine)
 
 		if (probationHeader != NULL)
 		{
-			if (((probationHeader == &AS_STATIC || probationHeader == &AS_CONST) && ch == '{')
+			if (((probationHeader == &AS_STATIC
+			        || probationHeader == &AS_CONST
+			        || probationHeader == &AS_VOLATILE) && ch == '{')
 			        || (probationHeader == &AS_SYNCHRONIZED && ch == '('))
 			{
 				// insert the probation header as a new header
@@ -1172,7 +1175,9 @@ string ASBeautifier::beautify(const string &originalLine)
 				if (previousLineProbation
 				        && ch == '{'
 				        && !(blockIndent
-				             && (probationHeader == &AS_CONST || probationHeader == &AS_STATIC)))
+				             && (probationHeader == &AS_CONST
+				                 || probationHeader == &AS_VOLATILE
+				                 || probationHeader == &AS_STATIC)))
 				{
 					tabCount++;
 					previousLineProbationTab = true;
@@ -1522,12 +1527,14 @@ string ASBeautifier::beautify(const string &originalLine)
 				}
 				else if (newHeader == &AS_STATIC
 				         || newHeader == &AS_SYNCHRONIZED
-				         || (newHeader == &AS_CONST && isCStyle()))
+				         || (newHeader == &AS_CONST && isCStyle())
+				         || (newHeader == &AS_VOLATILE && isCStyle()))
 				{
 					if (!headerStack->empty() &&
 					        (headerStack->back() == &AS_STATIC
 					         || headerStack->back() == &AS_SYNCHRONIZED
-					         || headerStack->back() == &AS_CONST))
+					         || headerStack->back() == &AS_CONST
+					         || headerStack->back() == &AS_VOLATILE))
 					{
 						isIndentableHeader = false;
 					}

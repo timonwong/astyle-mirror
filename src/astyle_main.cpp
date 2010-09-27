@@ -403,6 +403,7 @@ void ASConsole::error(const char *why, const char* what) const
  */
 void ASConsole::formatCinToCout() const
 {
+	verifyCinPeek();
 	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
 	formatter.init(&streamIterator);
 
@@ -422,6 +423,21 @@ void ASConsole::formatCinToCout() const
 		}
 	}
 	cout.flush();
+}
+
+/**
+ * Verify that tellg() works with cin.
+ * This will fail if cin is piped to AStyle "cat txt.cpp | ./astyled".
+ * But is OK for redirection "./astyled < txt.cpp".
+ */
+void ASConsole::verifyCinPeek() const
+{
+	streamoff currPos = cin.tellg();
+	if (currPos == -1)
+	{
+		(*_err) << "Cannot process the input stream." << endl;
+		error();
+	}
 }
 
 /**

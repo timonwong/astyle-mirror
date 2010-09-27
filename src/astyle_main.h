@@ -211,6 +211,7 @@ class ASConsole
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
 		bool stringEndsWith(const string &str, const string &suffix) const;
 		void updateExcludeVector(string suffixParam);
+		void verifyCinPeek() const;
 
 		// for unit testing
 		vector<string> getExcludeVector();

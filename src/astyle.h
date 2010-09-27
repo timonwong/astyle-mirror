@@ -185,8 +185,8 @@ class ASResource
 		static const string AS_PUBLIC, AS_PROTECTED, AS_PRIVATE;
 		static const string AS_CLASS, AS_STRUCT, AS_UNION, AS_INTERFACE, AS_NAMESPACE;
 		static const string AS_EXTERN, AS_ENUM;
-		static const string AS_STATIC, AS_CONST, AS_WHERE, AS_NEW;
-		static const string AS_SYNCHRONIZED;
+		static const string AS_STATIC, AS_CONST, AS_VOLATILE, AS_NEW;
+		static const string AS_WHERE, AS_SYNCHRONIZED;
 		static const string AS_OPERATOR, AS_TEMPLATE;
 		static const string AS_OPEN_BRACKET, AS_CLOSE_BRACKET;
 		static const string AS_OPEN_LINE_COMMENT, AS_OPEN_COMMENT, AS_CLOSE_COMMENT;

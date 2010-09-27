@@ -39,6 +39,7 @@ const string ASResource::AS_SWITCH = string("switch");
 const string ASResource::AS_CASE = string("case");
 const string ASResource::AS_DEFAULT = string("default");
 const string ASResource::AS_CLASS = string("class");
+const string ASResource::AS_VOLATILE = string("volatile");
 const string ASResource::AS_STRUCT = string("struct");
 const string ASResource::AS_UNION = string("union");
 const string ASResource::AS_INTERFACE = string("interface");
@@ -260,6 +261,7 @@ void ASResource::buildHeaders(vector<const string*>* headers, int fileType, bool
 		{
 			headers->push_back(&AS_CONST);
 			headers->push_back(&AS_TEMPLATE);
+			headers->push_back(&AS_VOLATILE);
 		}
 
 		if (fileType == JAVA_TYPE)
@@ -348,6 +350,7 @@ void ASResource::buildNonParenHeaders(vector<const string*>* nonParenHeaders, in
 		{
 			nonParenHeaders->push_back(&AS_CONST);
 			nonParenHeaders->push_back(&AS_TEMPLATE);
+			nonParenHeaders->push_back(&AS_VOLATILE);
 		}
 		if (fileType == JAVA_TYPE)
 		{
