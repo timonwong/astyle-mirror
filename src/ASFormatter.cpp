@@ -217,7 +217,8 @@ void ASFormatter::init(ASSourceIterator *si)
 	shouldBreakLineAtNextChar = false;
 	passedSemicolon = false;
 	passedColon = false;
-	clearNonInStatement = false;
+	isImmediatelyPostNonInStmt = false;
+	isCharImmediatelyPostNonInStmt = false;
 	isInTemplate = false;
 	isInBlParen = false;
 	isImmediatelyPostComment = false;
@@ -427,11 +428,6 @@ string ASFormatter::nextLine()
 			        && currentLineBeginsWithBracket	// lineBeginsWith('{')
 			        && previousCommandChar == ' ')
 				previousCommandChar = '{';
-			if (clearNonInStatement)
-			{
-				isNonInStatementArray = false;
-				clearNonInStatement = false;
-			}
 			if (isInHorstmannRunIn)
 				isInLineBreak = false;
 			if (!isWhiteSpace(currentChar))
@@ -717,6 +713,7 @@ string ASFormatter::nextLine()
 				foundPreCommandHeader = false;
 				isInPotentialCalculation = false;
 				isJavaStaticConstructor = false;
+				isCharImmediatelyPostNonInStmt = false;
 				needHeaderOpeningBracket = false;
 
 				isPreviousBracketBlockRelated = !isBracketType(newBracketType, ARRAY_TYPE);
@@ -782,9 +779,10 @@ string ASFormatter::nextLine()
 				else
 					isInIndentableStruct = false;
 
-				if ((isBracketType(bracketType, ARRAY_NIS_TYPE) && !isBracketType(bracketType, SINGLE_LINE_TYPE))
-				        || peekNextChar() == ';')		// check for "};" added V2.01
-					clearNonInStatement = true;
+				if (isNonInStatementArray
+				        && (!isBracketType(bracketTypeStack->back(), ARRAY_TYPE)	// check previous bracket
+				            || peekNextChar() == ';'))								// check for "};" added V2.01
+					isImmediatelyPostNonInStmt = true;
 			}
 
 			// format brackets
@@ -813,7 +811,8 @@ string ASFormatter::nextLine()
 		            && !isBracketType(bracketTypeStack->back(),  DEFINITION_TYPE)))
 		        && isOkToBreakBlock(bracketTypeStack->back()))
 		        // check for array
-		        || (isBracketType(bracketTypeStack->back(), ARRAY_TYPE)
+		        || (previousCommandChar == '{'			// added 9/30/2010
+		            && isBracketType(bracketTypeStack->back(), ARRAY_TYPE)
 		            && !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE)
 		            && isNonInStatementArray))
 		{
@@ -1261,9 +1260,14 @@ string ASFormatter::nextLine()
 			enhancer->enhance(beautifiedLine, isInPreprocessorBeautify, isInBeautifySQL);
 		horstmannIndentChars = 0;
 		lineCommentNoBeautify = lineCommentNoIndent;
-		isInPreprocessorBeautify = isInPreprocessor;
 		lineCommentNoIndent = false;
-		isInBeautifySQL = isInExecSQL;
+		if (isCharImmediatelyPostNonInStmt)
+		{
+			isNonInStatementArray = false;
+			isCharImmediatelyPostNonInStmt = false;
+		}
+		isInPreprocessorBeautify = isInPreprocessor;	// used by ASEnhancer
+		isInBeautifySQL = isInExecSQL;					// used by ASEnhancer
 	}
 
 	prependEmptyLine = false;
@@ -1719,6 +1723,12 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		else
 			isVirgin = false;
 
+		if (isImmediatelyPostNonInStmt)
+		{
+			isCharImmediatelyPostNonInStmt = true;
+			isImmediatelyPostNonInStmt = false;
+		}
+
 		// check if is in preprocessor before line trimming
 		// a blank line after a \ will remove the flag
 		isImmediatelyPostPreprocessor = isInPreprocessor;
@@ -1924,7 +1934,6 @@ void ASFormatter::breakLine()
 	// queue an empty line prepend request if one exists
 	prependEmptyLine = isPrependPostBlockEmptyLineRequested;
 
-	readyFormattedLine =  formattedLine;
 	if (isAppendPostBlockEmptyLineRequested)
 	{
 		isAppendPostBlockEmptyLineRequested = false;
@@ -1935,6 +1944,7 @@ void ASFormatter::breakLine()
 		isPrependPostBlockEmptyLineRequested = false;
 	}
 
+	readyFormattedLine =  formattedLine;
 	formattedLine = "";
 }
 
@@ -3429,6 +3439,7 @@ void ASFormatter::formatRunIn()
 	if (!isOkToBreakBlock(bracketTypeStack->back()))
 		return; // true;
 
+	// make sure the line begins with a bracket
 	size_t lastText = formattedLine.find_last_not_of(" \t");
 	if (lastText == string::npos || formattedLine[lastText] != '{')
 		return; // false;
@@ -3765,7 +3776,7 @@ bool ASFormatter::commentAndHeaderFollows()
  */
 bool ASFormatter::isCurrentBracketBroken() const
 {
-	assert(bracketTypeStack->size() > 0);
+	assert(bracketTypeStack->size() > 1);
 
 	bool breakBracket = false;
 	size_t bracketTypeStackEnd = bracketTypeStack->size()-1;
@@ -4213,8 +4224,8 @@ int ASFormatter::getCurrentLineCommentAdjustment()
 }
 
 /**
- * get the previous word
- * the argument 'end' must point to the search start.
+ * get the previous word on a line
+ * the argument 'currPos' must point to the current position.
  *
  * @return is the previous word or an empty string if none found.
  */

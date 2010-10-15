@@ -1312,6 +1312,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			                      || isSharpAccessor
 			                      || isSharpDelegate
 			                      || isInExtern
+			                      || getnextWord(line, i) == "new"
 			                      || (isInDefine &&
 			                          (prevNonSpaceCh == '('
 			                           || isLegalNameChar(prevNonSpaceCh))));
@@ -1755,6 +1756,8 @@ string ASBeautifier::beautify(const string &originalLine)
 
 				closingBracketReached = true;
 				isInAsmOneLine = false;
+				if (i == 0)
+					spaceTabCount = 0;
 
 				// added for release 1.24
 				// TODO: remove at the appropriate time
@@ -2616,6 +2619,33 @@ int ASBeautifier::getInStatementIndentComma(const string& line, size_t currPos) 
 		return 0;
 
 	return indent;
+}
+
+/**
+ * get the next word on a line
+ * the argument 'currPos' must point to the current position.
+ *
+ * @return is the previous word or an empty string if none found.
+ */
+string ASBeautifier::getnextWord(const string& line, int currPos) const
+{
+	int lineLength = line.length();
+	// get the last legal word (may be a number)
+	if (currPos == lineLength - 1)
+		return string();
+
+	size_t start = line.find_first_not_of(" \t", currPos+1);
+	if (start == string::npos || !isLegalNameChar(line[start]))
+		return string();
+
+	int end;          // end of the current word
+	for (end = start+1; end <= lineLength; end++)
+	{
+		if (!isLegalNameChar(line[end]) || line[end] == '.')
+			break;
+	}
+
+	return line.substr(start, end-start);
 }
 
 

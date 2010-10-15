@@ -320,6 +320,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  getFileType();
 		int  getIndentLength(void);
 		string getIndentString(void);
+		string getnextWord(const string& line, int currPos) const;
 		bool getBracketIndent(void);
 		bool getBlockIndent(void);
 		bool getCaseIndent(void);
@@ -744,7 +745,8 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakLineAtNextChar;
 		bool passedSemicolon;
 		bool passedColon;
-		bool clearNonInStatement;
+		bool isImmediatelyPostNonInStmt;
+		bool isCharImmediatelyPostNonInStmt;
 		bool isImmediatelyPostComment;
 		bool isImmediatelyPostLineComment;
 		bool isImmediatelyPostEmptyBlock;
