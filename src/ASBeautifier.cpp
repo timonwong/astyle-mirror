@@ -1583,7 +1583,7 @@ string ASBeautifier::beautify(const string &originalLine)
 		if (ch == '?')
 			isInQuestion = true;
 
-		// special handling of 'case' statements
+		// special handling of colons
 		if (ch == ':')
 		{
 			if ((int) line.length() > i + 1 && line[i+1] == ':') // look for ::
@@ -1626,6 +1626,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			else if (isCStyle() && prevNonSpaceCh == ')' && !isInCase)
 			{
 				isInClassInitializer = true;
+				isInStatement = false;			// so an inStatement indent will register
 				if (i == 0)
 					tabCount += classInitializerTabs;
 			}
@@ -2614,7 +2615,7 @@ int ASBeautifier::getInStatementIndentComma(const string& line, size_t currPos) 
 		return 0;
 
 	// point to second word or assignment operator
-	indent = line.find_last_not_of(" \t", indent);
+	indent = line.find_first_not_of(" \t", indent);
 	if (indent == string::npos || indent >= currPos)
 		return 0;
 

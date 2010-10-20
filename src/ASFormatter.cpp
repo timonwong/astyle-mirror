@@ -220,7 +220,7 @@ void ASFormatter::init(ASSourceIterator *si)
 	isImmediatelyPostNonInStmt = false;
 	isCharImmediatelyPostNonInStmt = false;
 	isInTemplate = false;
-	isInBlParen = false;
+//	isInBlParen = false;
 	isImmediatelyPostComment = false;
 	isImmediatelyPostLineComment = false;
 	isImmediatelyPostEmptyBlock = false;
@@ -666,8 +666,8 @@ string ASFormatter::nextLine()
 		if (currentChar == '(' || currentChar == '[' || (isInTemplate && currentChar == '<'))
 		{
 			parenStack->back()++;
-			if (currentChar == '[')
-				isInBlParen = true;
+//			if (currentChar == '[')
+//				isInBlParen = true;
 		}
 		else if (currentChar == ')' || currentChar == ']' || (isInTemplate && currentChar == '>'))
 		{
@@ -688,8 +688,8 @@ string ASFormatter::nextLine()
 				isInHeader = false;
 				isImmediatelyPostHeader = true;
 			}
-			if (currentChar == ']')
-				isInBlParen = false;
+//			if (currentChar == ']')
+//				isInBlParen = false;
 			if (currentChar == ')')
 			{
 				foundCastOperator = false;
@@ -2052,11 +2052,13 @@ bool ASFormatter::isPointerOrReference() const
 		return false;
 
 	if ((currentChar == '&' && previousChar == '&')
-	        || isInBlParen
+//	        || isInBlParen
 	        || isCharImmediatelyPostOperator)
 		return false;
 
 	if (previousNonWSChar == '='
+	        || previousNonWSChar == '('
+	        || previousNonWSChar == '['
 	        || currentHeader == &AS_CATCH
 	        || isCharImmediatelyPostReturn)
 		return true;
@@ -2079,7 +2081,7 @@ bool ASFormatter::isPointerOrReference() const
 	        && isLegalNameChar(nextChar))
 	{
 		// if followed by an assignment it is a pointer or reference
-		size_t nextNum = currentLine.find_first_of("=;)", charNum + 1);
+		size_t nextNum = currentLine.find_first_of("=;)]", charNum + 1);
 		if (nextNum != string::npos && currentLine[nextNum] == '=')
 			return true;
 
@@ -2623,6 +2625,7 @@ void ASFormatter::padOperators(const string *newOperator)
 	                  && !(newOperator == &AS_MINUS && isInExponent())
 	                  && !((newOperator == &AS_PLUS || newOperator == &AS_MINUS)  // check for unary plus or minus
 	                       && (previousNonWSChar == '('
+	                           || previousNonWSChar == '['
 	                           || previousNonWSChar == '='
 	                           || previousNonWSChar == ','))
 	                  && !(newOperator == &AS_PLUS && isInExponent())
@@ -2645,7 +2648,7 @@ void ASFormatter::padOperators(const string *newOperator)
 
 	// pad before operator
 	if (shouldPad
-	        && !isInBlParen
+//	        && !isInBlParen
 	        && !(newOperator == &AS_COLON && !foundQuestionMark)
 	        && !(newOperator == &AS_QUESTION && isSharpStyle() // check for C# nullable type (e.g. int?)
 	             && currentLine.find(':', charNum+1) == string::npos)
@@ -2658,7 +2661,7 @@ void ASFormatter::padOperators(const string *newOperator)
 	// pad after operator
 	// but do not pad after a '-' that is a unary-minus.
 	if (shouldPad
-	        && !isInBlParen
+//	        && !isInBlParen
 	        && !isBeforeAnyComment()
 	        && !(newOperator == &AS_PLUS && isUnaryOperator())
 	        && !(newOperator == &AS_MINUS && isUnaryOperator())
@@ -2991,6 +2994,7 @@ void ASFormatter::padParens(void)
 			else if (lastChar == '|'          // check for ||
 			         || lastChar == '&'       // check for &&
 			         || lastChar == ','
+			         || (lastChar == '(' && shouldPadParensInside)
 			         || (lastChar == '>' && !foundCastOperator)
 			         || lastChar == '<'
 			         || lastChar == '?'
@@ -3099,7 +3103,8 @@ void ASFormatter::padParens(void)
 			if (peekedCharOutside != ';'
 			        && peekedCharOutside != ','
 			        && peekedCharOutside != '.'
-			        && peekedCharOutside != '-')    // check for ->
+			        && peekedCharOutside != '-'     // check for ->
+			        && peekedCharOutside != ']')
 				appendSpaceAfter();
 
 		// trace
