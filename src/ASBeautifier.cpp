@@ -824,9 +824,12 @@ string ASBeautifier::beautify(const string &originalLine)
 				// push a new beautifier into the stack
 				waitingBeautifierStackLengthStack->push_back(waitingBeautifierStack->size());
 				activeBeautifierStackLengthStack->push_back(activeBeautifierStack->size());
-				waitingBeautifierStack->push_back(new ASBeautifier(*this));
+				if (activeBeautifierStackLengthStack->back() == 0)
+					waitingBeautifierStack->push_back(new ASBeautifier(*this));
+				else
+					waitingBeautifierStack->push_back(new ASBeautifier(*activeBeautifierStack->back()));
 			}
-			else if (preproc.compare(0, 4/*2*/, "else") == 0)
+			else if (preproc.compare(0, 4, "else") == 0)
 			{
 				if (waitingBeautifierStack && !waitingBeautifierStack->empty())
 				{
