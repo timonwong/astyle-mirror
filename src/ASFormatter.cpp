@@ -130,7 +130,7 @@ ASFormatter::~ASFormatter()
  *
  * @param sourceIterator     a pointer to the ASSourceIterator or ASStreamIterator object.
  */
-void ASFormatter::init(ASSourceIterator *si)
+void ASFormatter::init(ASSourceIterator* si)
 {
 	buildLanguageVectors();
 	fixOptionVariableConflicts();
@@ -402,7 +402,7 @@ void ASFormatter::fixOptionVariableConflicts()
 
 string ASFormatter::nextLine()
 {
-	const string *newHeader;
+	const string* newHeader;
 	bool isInVirginLine = isVirgin;
 	isCharImmediatelyPostComment = false;
 	isPreviousCharPostComment = false;
@@ -865,7 +865,7 @@ string ASFormatter::nextLine()
 
 			if (newHeader != NULL)
 			{
-				const string *previousHeader;
+				const string* previousHeader;
 
 				// recognize closing headers of do..while, if..else, try..catch..finally
 				if ((newHeader == &AS_ELSE && currentHeader == &AS_IF)
@@ -1885,7 +1885,7 @@ void ASFormatter::initNewLine()
  * @param sequence         the sequence to append.
  * @param canBreakLine     if true, a registered line-break
  */
-void ASFormatter::appendSequence(const string &sequence, bool canBreakLine)
+void ASFormatter::appendSequence(const string& sequence, bool canBreakLine)
 {
 	if (canBreakLine && isInLineBreak)
 		breakLine();
@@ -2030,7 +2030,7 @@ BracketType ASFormatter::getBracketType()
  *
  * @return        whether line is empty
  */
-bool ASFormatter::isEmptyLine(const string &line) const
+bool ASFormatter::isEmptyLine(const string& line) const
 {
 	return line.find_first_not_of(" \t") == string::npos;
 }
@@ -2612,7 +2612,7 @@ void ASFormatter::appendCharInsideComments(void)
  *
  * @param *newOperator     the operator to be padded
  */
-void ASFormatter::padOperators(const string *newOperator)
+void ASFormatter::padOperators(const string* newOperator)
 {
 	assert(newOperator != NULL);
 
@@ -3579,7 +3579,7 @@ void ASFormatter::deleteContainer(vector<BracketType>* &container)
  * used for all vectors except bracketTypeStack
  */
 template<typename T>
-void ASFormatter::deleteContainer(T &container)
+void ASFormatter::deleteContainer(T& container)
 {
 	if (container != NULL)
 	{
@@ -3606,7 +3606,7 @@ void ASFormatter::initContainer(vector<BracketType>* &container, vector<BracketT
  * used for all vectors except bracketTypeStack
  */
 template<typename T>
-void ASFormatter::initContainer(T &container, T value)
+void ASFormatter::initContainer(T& container, T value)
 {
 	// since the ASFormatter object is never deleted,
 	// the existing vectors must be deleted before creating new ones
@@ -4427,7 +4427,7 @@ size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart 
  * @param index         the current line index.
  * @return              true if the struct has access modifiers.
  */
-bool ASFormatter::isStructAccessModified(string  &firstLine, size_t index) const
+bool ASFormatter::isStructAccessModified(string&  firstLine, size_t index) const
 {
 	assert(firstLine[index] == '{');
 	assert(isCStyle());
@@ -4530,7 +4530,7 @@ bool ASFormatter::isStructAccessModified(string  &firstLine, size_t index) const
  * @param index         the current line index.
  * @return              true if the statement is EXEC SQL.
  */
-bool ASFormatter::isExecSQL(string  &line, size_t index) const
+bool ASFormatter::isExecSQL(string&  line, size_t index) const
 {
 	if (line[index] != 'e' && line[index] != 'E')	// quick check to reject most
 		return false;
@@ -4694,7 +4694,7 @@ void ASFormatter::checkIfTemplateOpener()
  * Compute the input checksum.
  * This is called as an assert so it for is debug config only
  */
-bool ASFormatter::computeChecksumIn(const string &currentLine_)
+bool ASFormatter::computeChecksumIn(const string& currentLine_)
 {
 	for (size_t i = 0; i < currentLine_.length(); i++)
 		if (!isWhiteSpace(currentLine_[i]))
@@ -4716,7 +4716,7 @@ size_t ASFormatter::getChecksumIn() const
  * Compute the output checksum.
  * This is called as an assert so it is for debug config only
  */
-bool ASFormatter::computeChecksumOut(const string &beautifiedLine)
+bool ASFormatter::computeChecksumOut(const string& beautifiedLine)
 {
 	for (size_t i = 0; i < beautifiedLine.length(); i++)
 		if (!isWhiteSpace(beautifiedLine[i]))

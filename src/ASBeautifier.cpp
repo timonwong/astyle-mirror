@@ -95,7 +95,7 @@ ASBeautifier::ASBeautifier()
  * ASBeautifier's copy constructor
  * must explicitly call the base class copy constructor
  */
-ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
+ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 {
 	// these don't need to copy the stack
 	waitingBeautifierStack = NULL;
@@ -238,7 +238,7 @@ ASBeautifier::~ASBeautifier()
  *
  * @param iter     a pointer to the ASSourceIterator or ASStreamIterator object.
  */
-void ASBeautifier::init(ASSourceIterator *iter)
+void ASBeautifier::init(ASSourceIterator* iter)
 {
 	sourceIterator = iter;
 	init();
@@ -693,7 +693,7 @@ bool ASBeautifier::getPreprocessorIndent(void)
  * @return      the indented line.
  * @param originalLine       the original unindented line.
  */
-string ASBeautifier::beautify(const string &originalLine)
+string ASBeautifier::beautify(const string& originalLine)
 {
 	string line;
 	bool isInLineComment = false;
@@ -720,7 +720,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	int i;
 	int iPrelim;
 	string outBuffer; // the newly idented line is buffered here
-	const string *lastLineHeader = NULL;
+	const string* lastLineHeader = NULL;
 
 	currentHeader = NULL;
 	lineStartsInComment = isInComment;
@@ -803,7 +803,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			{
 				if (!isInDefineDefinition)
 				{
-					ASBeautifier *defineBeautifier;
+					ASBeautifier* defineBeautifier;
 
 					// this is the original beautifier
 					isInDefineDefinition = true;
@@ -849,7 +849,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			else if (preproc.compare(0, 5, "endif") == 0)
 			{
 				int stackLength;
-				ASBeautifier *beautifier;
+				ASBeautifier* beautifier;
 
 				if (waitingBeautifierStackLengthStack && !waitingBeautifierStackLengthStack->empty())
 				{
@@ -887,7 +887,7 @@ string ASBeautifier::beautify(const string &originalLine)
 		if (!backslashEndsPrevLine && isInDefineDefinition && !isInDefine)
 		{
 			string beautifiedLine;
-			ASBeautifier *defineBeautifier;
+			ASBeautifier* defineBeautifier;
 
 			isInDefineDefinition = false;
 			defineBeautifier = activeBeautifierStack->back();
@@ -1418,7 +1418,7 @@ string ASBeautifier::beautify(const string &originalLine)
 
 		if (isPotentialHeader)
 		{
-			const string *newHeader = findHeader(line, i, headers);
+			const string* newHeader = findHeader(line, i, headers);
 
 			if (newHeader != NULL)
 			{
@@ -1774,7 +1774,7 @@ string ASBeautifier::beautify(const string &originalLine)
 				int headerPlace = indexOf(*headerStack, &AS_OPEN_BRACKET);
 				if (headerPlace != -1)
 				{
-					const string *popped = headerStack->back();
+					const string* popped = headerStack->back();
 					while (popped != &AS_OPEN_BRACKET)
 					{
 						headerStack->pop_back();
@@ -1834,7 +1834,7 @@ string ASBeautifier::beautify(const string &originalLine)
 			// (otherwise 'struct XXX' statements would be wrongly interpreted...)
 			if (!isInTemplate && !(isCStyle() && parenDepth > 0))
 			{
-				const string *newHeader = findHeader(line, i, preBlockStatements);
+				const string* newHeader = findHeader(line, i, preBlockStatements);
 				if (newHeader != NULL
 				        && !(isCStyle() && newHeader == &AS_CLASS && isInEnum))	// is it 'enum class'
 				{
@@ -1855,7 +1855,7 @@ string ASBeautifier::beautify(const string &originalLine)
 					continue;
 				}
 			}
-			const string *foundIndentableHeader = findHeader(line, i, indentableHeaders);
+			const string* foundIndentableHeader = findHeader(line, i, indentableHeaders);
 
 			if (foundIndentableHeader != NULL)
 			{
@@ -1919,8 +1919,8 @@ string ASBeautifier::beautify(const string &originalLine)
 		if (isPotentialOperator)
 		{
 			// Check if an operator has been reached.
-			const string *foundAssignmentOp = findOperator(line, i, assignmentOperators);
-			const string *foundNonAssignmentOp = findOperator(line, i, nonAssignmentOperators);
+			const string* foundAssignmentOp = findOperator(line, i, assignmentOperators);
+			const string* foundNonAssignmentOp = findOperator(line, i, nonAssignmentOperators);
 
 			// Since findHeader's boundry checking was not used above, it is possible
 			// that both an assignment op and a non-assignment op where found,
@@ -2141,7 +2141,7 @@ bool ASBeautifier::isClassAccessModifier(string& line) const
 /**
  * register an in-statement indent.
  */
-void ASBeautifier::registerInStatementIndent(const string &line, int i, int spaceTabCount,
+void ASBeautifier::registerInStatementIndent(const string& line, int i, int spaceTabCount,
         int tabIncrementIn, int minIndent, bool updateParenStack)
 {
 	int inStatementIndent;
@@ -2209,7 +2209,7 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
  * get distance to the next non-white space, non-comment character in the line.
  * if no such character exists, return the length remaining to the end of the line.
  */
-int ASBeautifier::getNextProgramCharDistance(const string &line, int i) const
+int ASBeautifier::getNextProgramCharDistance(const string& line, int i) const
 {
 	bool inComment = false;
 	int  remainingCharNum = line.length() - i;
@@ -2248,7 +2248,7 @@ int ASBeautifier::getNextProgramCharDistance(const string &line, int i) const
 }
 
 // check if a specific line position contains a header.
-const string* ASBeautifier::findHeader(const string &line, int i,
+const string* ASBeautifier::findHeader(const string& line, int i,
                                        const vector<const string*>* possibleHeaders) const
 {
 	assert(isCharPotentialHeader(line, i));
@@ -2286,7 +2286,7 @@ const string* ASBeautifier::findHeader(const string &line, int i,
 }
 
 // check if a specific line position contains an operator.
-const string* ASBeautifier::findOperator(const string &line, int i,
+const string* ASBeautifier::findOperator(const string& line, int i,
         const vector<const string*>* possibleOperators) const
 {
 	assert(isCharPotentialOperator(line[i]));
@@ -2312,7 +2312,7 @@ const string* ASBeautifier::findOperator(const string &line, int i,
  * @param container     a vector of strings.
  * @param element       the element to find .
  */
-int ASBeautifier::indexOf(vector<const string*> &container, const string *element)
+int ASBeautifier::indexOf(vector<const string*> &container, const string* element)
 {
 	vector<const string*>::const_iterator where;
 
@@ -2341,7 +2341,7 @@ int ASBeautifier::convertTabToSpaces(int i, int tabIncrementIn) const
  * @return          the trimmed line.
  * @param str       the line to trim.
  */
-string ASBeautifier::trim(const string &str)
+string ASBeautifier::trim(const string& str)
 {
 
 	int start = 0;
@@ -2361,7 +2361,7 @@ string ASBeautifier::trim(const string &str)
  * Copy tempStacks for the copy constructor.
  * The value of the vectors must also be copied.
  */
-vector<vector<const string*>*>* ASBeautifier::copyTempStacks(const ASBeautifier &other) const
+vector<vector<const string*>*>* ASBeautifier::copyTempStacks(const ASBeautifier& other) const
 {
 	vector<vector<const string*>*> *tempStacksNew = new vector<vector<const string*>*>;
 	vector<vector<const string*>*>::iterator iter;
@@ -2396,7 +2396,7 @@ void ASBeautifier::deleteStaticVectors()
  * used for all vectors except tempStacks
  */
 template<typename T>
-void ASBeautifier::deleteContainer(T &container)
+void ASBeautifier::deleteContainer(T& container)
 {
 	if (container != NULL)
 	{
@@ -2442,7 +2442,7 @@ void ASBeautifier::deleteVector(vector<const string*>*& container)
  * used for all vectors
  */
 template<typename T>
-void ASBeautifier::initContainer(T &container, T value)
+void ASBeautifier::initContainer(T& container, T value)
 {
 	// since the ASFormatter object is never deleted,
 	// the existing vectors must be deleted before creating new ones
@@ -2467,7 +2467,7 @@ void ASBeautifier::initVector(vector<const string*>*& container)
  *
  * @return  true if line ends with a comma, otherwise false.
  */
-bool ASBeautifier::statementEndsWithComma(string &line, int index)
+bool ASBeautifier::statementEndsWithComma(string& line, int index)
 {
 	assert(line[index] == '=');
 

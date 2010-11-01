@@ -157,7 +157,7 @@ const string ASResource::AS_STATIC_CAST = string("static_cast");
  *
  * @params the string pointers to be compared.
  */
-bool sortOnLength(const string *a, const string *b)
+bool sortOnLength(const string* a, const string* b)
 {
 	return (*a).length() > (*b).length();
 }
@@ -168,7 +168,7 @@ bool sortOnLength(const string *a, const string *b)
  *
  * @params the string pointers to be compared.
  */
-bool sortOnName(const string *a, const string *b)
+bool sortOnName(const string* a, const string* b)
 {
 	return *a < *b;
 }
@@ -509,7 +509,7 @@ void ASResource::buildPreDefinitionHeaders(vector<const string*>* preDefinitionH
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // check if a specific line position contains a keyword.
-bool ASBase::findKeyword(const string &line, int i, const string &keyword) const
+bool ASBase::findKeyword(const string& line, int i, const string& keyword) const
 {
 	assert(isCharPotentialHeader(line, i));
 	// check the word

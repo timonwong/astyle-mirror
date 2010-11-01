@@ -22,7 +22,10 @@ endif
 ifndef prefix
     prefix=/usr
 endif
-SYSCONF_PATH=$(prefix)/share/astyle
+SYSCONF_PATH=$(prefix)/share/doc/astyle
+# the path was changed in release 2.01
+# SYSCONF_PATH_OLD may be removed at the appropriate time
+SYSCONF_PATH_OLD=$(prefix)/share/astyle
 
 # define macros
 bindir = bin
@@ -164,11 +167,18 @@ install:
 	@$(INSTALL) -m 755 $(bindir)/astyle  $(ipath)
 
 	$(INSTALL) -m 755 -d $(SYSCONF_PATH)
+	@mkdir -p $(SYSCONF_PATH)/html;
 	@for files in ../../doc/*.html  ../../doc/*.css; \
 	do \
-		$(INSTALL)  -m 644  $$files  $(SYSCONF_PATH); \
+		$(INSTALL)  -m 644  $$files  $(SYSCONF_PATH)/html; \
 	done
+	@if [ -d $(SYSCONF_PATH_OLD) ];  then \
+		rm -rf $(SYSCONF_PATH_OLD); \
+	fi
 
 uninstall:
 	rm -f $(ipath)/astyle
 	rm -rf $(SYSCONF_PATH)
+	@if [ -d $(SYSCONF_PATH_OLD) ];  then \
+		rm -rf $(SYSCONF_PATH_OLD); \
+	fi

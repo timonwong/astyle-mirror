@@ -30,15 +30,14 @@
         marks the start of the internationalization of Artistic Style.</p>
     <p>
         Artistic Style now sets the native local so that characters from the user&#8217;s native language will be recognized
-        in directory names and file names. For Linux systems using UTF-8 locales, characters from any language will be
+        in directory names and file names. Artistic Style for Windows has also been changed to use the native locale.
+        For Linux systems using UTF-8 locales, characters from any language will be
         recognized and any combination of languages can be used. For Windows, only languages recognized by the native
         codepage can be used. For example, the English locale (codepage 1252) also has French, German, Italian, Portuguese,
         Spanish, plus several other languages. Other locals, such as Chinese and Japanese, only support one language.
-        The Windows locale in use can be changed thru the &#8220;Control Panel &gt; Region and Language&#8221; dialog.
-        Both the&#8221; Formats&#8221; and &#8220;System Locale&#8221; should be changed.
     </p>
     <p>
-        The reason Unicode was not used for Windows is the varying degree of support by different compilers for console
+        Unicode was not used for Windows due to the varying degree of support by different compilers for console
         applications. Some
         compilers (Visual C) have good support while others (MinGW) do not. I have tried to accommodate as many compilers
         as possible even though compromises had to be made. MinGW is used by many open source projects and I did not want
@@ -49,13 +48,20 @@
     <p>
         There has been a change to the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of using the number
         of spaces it now uses a code expressed in number of indents. If you are using the default setting of two indents,
-        or a setting of zero indents, there is no change. Otherwise, check the documentation for the new codes.</p>
+        or a setting of zero indents, there is no change necessary to the input. Otherwise, check the documentation for the new codes.</p>
     <p>
         The --style=linux has been changed to ALWAYS use a minimum conditional indent of one-half the indent length. This
         is in the style definition and cannot be changed. If you do not want this setting use the K&amp;R style instead.
     </p>
     <p>
-        Thanks to Matthew Woehlke and Chris Schwarz for their contributions.</p>
+        The MFC macros BEGIN_DISPATCH_MAP, BEGIN_EVENT_MAP, and BEGIN_PROPPAGEIDS are now formatted.
+    </p>
+    <p>
+        A checksum verification has been added to source file output that will help assure that no code has been duplicated
+        or omitted.This is effevtive only in the debug configuration used for testing.</p>
+    <p>
+        Thanks to Matthew Woehlke, Chris Schwarz, and Chang Jiang (<span dojoattachpoint="shortHeaderNode"><span class="from address"
+            userinputform="cj7421@163.com">&#23567;&#21608;) </span></span>for their contributions.</p>
     <p>
         &nbsp;</p>
 
@@ -70,7 +76,7 @@
         There has been a change in the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of using number
         of spaces to indent it now uses a code expressed in number of indents. In the past this option was a problem because
         it was also affected by changes in indent length. With this release there is &nbsp;only one variable affected.
-        The option is not affected by changes in indent length. The option minimum conditional indent length is computed
+        The option is not affected by changes in indent length. The&nbsp; minimum conditional indent length is computed
         automatically by ASFormatter after all the options &nbsp;have been processed. Refer to the code in astyle_main.cpp
         to see how the option is processed.</p>
     <p>

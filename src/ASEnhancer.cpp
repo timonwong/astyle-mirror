@@ -105,7 +105,7 @@ void ASEnhancer::init(int fileType,
  *
  * @param line       the original formatted line will be updated if necessary.
  */
-void ASEnhancer::enhance(string &line, bool isInPreprocessor, bool isInSQL)
+void ASEnhancer::enhance(string& line, bool isInPreprocessor, bool isInSQL)
 {
 	bool isSpecialChar = false;			// is a backslash escape character
 
@@ -302,7 +302,7 @@ void ASEnhancer::enhance(string &line, bool isInPreprocessor, bool isInSQL)
  * @param i             the line index of the case statement.
  * @return              the line index of the colon.
  */
-size_t ASEnhancer::findCaseColon(string  &line, size_t caseIndex) const
+size_t ASEnhancer::findCaseColon(string&  line, size_t caseIndex) const
 {
 	size_t i = caseIndex;
 	bool isInQuote_ = false;
@@ -352,7 +352,7 @@ size_t ASEnhancer::findCaseColon(string  &line, size_t caseIndex) const
  * @param unindent      the number of tabsets to insert.
  * @return              the number of characters inserted.
  */
-int ASEnhancer::indentLine(string  &line, int indent) const
+int ASEnhancer::indentLine(string&  line, int indent) const
 {
 	if (line.length() == 0
 	        && ! emptyLineFill)
@@ -382,7 +382,7 @@ int ASEnhancer::indentLine(string  &line, int indent) const
  * @param index         the current line index.
  * @return              true if a hit.
  */
-bool ASEnhancer::isBeginDeclareSectionSQL(string  &line, size_t index) const
+bool ASEnhancer::isBeginDeclareSectionSQL(string&  line, size_t index) const
 {
 	string word;
 	size_t hits = 0;
@@ -431,7 +431,7 @@ bool ASEnhancer::isBeginDeclareSectionSQL(string  &line, size_t index) const
  * @param index         the current line index.
  * @return              true if a hit.
  */
-bool ASEnhancer::isEndDeclareSectionSQL(string  &line, size_t index) const
+bool ASEnhancer::isEndDeclareSectionSQL(string&  line, size_t index) const
 {
 	string word;
 	size_t hits = 0;
@@ -479,7 +479,7 @@ bool ASEnhancer::isEndDeclareSectionSQL(string  &line, size_t index) const
  * @param index         the current line index.
  * @return              the new line index.
  */
-size_t ASEnhancer::processSwitchBlock(string &line, size_t index)
+size_t ASEnhancer::processSwitchBlock(string& line, size_t index)
 {
 	size_t i = index;
 	bool isPotentialKeyword = isCharPotentialHeader(line, i);
@@ -555,7 +555,7 @@ size_t ASEnhancer::processSwitchBlock(string &line, size_t index)
  * @param unindent      the number of tabsets to erase.
  * @return              the number of characters erased.
  */
-int ASEnhancer::unindentLine(string  &line, int unindent) const
+int ASEnhancer::unindentLine(string&  line, int unindent) const
 {
 	size_t whitespace = line.find_first_not_of(" \t");
 
