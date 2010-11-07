@@ -15,7 +15,7 @@ vpath %.h   ../../src
 # NOTE for java compiles the environment variable $JAVA_HOME must be set
 # example: export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.00
 ifndef JAVA_HOME
-    JAVA_HOME = /usr/lib/jvm/java-6-sun-1.6.0.16
+    JAVA_HOME = /usr/lib/jvm/default-java
 endif
 
 # set prefix if not defined on the command line
@@ -39,14 +39,28 @@ INSTALL=install -o $(USER) -g $(USER)
 ##################################################
 
 # define compile options for each build
-CFLAGS   = -DNDEBUG -O3 $(CBASEFLAGS)
-CFLAGSd  = -g $(CBASEFLAGS)
-CFLAGSs  = -DNDEBUG -DASTYLE_LIB -O3 -fpic $(CBASEFLAGS)
-CFLAGSsd = -DASTYLE_LIB -g -fpic $(CBASEFLAGS)
-CFLAGSa  = -DNDEBUG -DASTYLE_LIB -O3 $(CBASEFLAGS)
-CFLAGSad = -DASTYLE_LIB -g $(CBASEFLAGS)
-CFLAGSsj  = -DNDEBUG -DASTYLE_JNI -O3 -fpic $(CBASEFLAGS) $(JAVAINCS)
-CFLAGSsjd = -DASTYLE_JNI -g -fpic $(CBASEFLAGS) $(JAVAINCS)
+ifdef CFLAGS
+    CFLAGSr   = -DNDEBUG $(CBASEFLAGS) $(CFLAGS)
+    CFLAGSd   = -g $(CBASEFLAGS) $(CFLAGS)
+else 
+    CFLAGSr   = -DNDEBUG -O3 $(CBASEFLAGS)
+    CFLAGSd   = -g $(CBASEFLAGS)
+endif
+CFLAGSs   = -DASTYLE_LIB -fpic $(CFLAGSr)
+CFLAGSsd  = -DASTYLE_LIB -fpic $(CFLAGSd)
+CFLAGSa   = -DASTYLE_LIB $(CFLAGSr)
+CFLAGSad  = -DASTYLE_LIB $(CFLAGSd)
+CFLAGSsj  = -DASTYLE_JNI -fpic $(CFLAGSr) $(JAVAINCS)
+CFLAGSsjd = -DASTYLE_JNI -fpic $(CFLAGSd) $(JAVAINCS)
+
+# define link options
+ifdef LDFLAGS
+    LDFLAGSr   = $(LDFLAGS)
+    LDFLAGSd   = $(LDFLAGS)
+else
+    LDFLAGSr   = -s
+    LDFLAGSd   =
+endif
 
 # object files are built from the source list $(SRC)
 # a suffix is added for each build
@@ -64,7 +78,7 @@ OBJsjd = $(patsubst %.cpp,$(objdir)/%_sjd.o,$(SRC))
 # OBJ
 $(objdir)/%.o:  %.cpp  astyle.h  astyle_main.h
 	@ mkdir -p $(objdir)
-	$(CXX) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(CFLAGSr) -c -o $@ $<
 
 # OBJd
 $(objdir)/%_d.o:  %.cpp  astyle.h  astyle_main.h
@@ -107,25 +121,25 @@ $(objdir)/%_sjd.o:  %.cpp  astyle.h
 release:  astyle
 astyle:  $(OBJ)
 	@ mkdir -p $(bindir)
-	$(CXX) -s -o $(bindir)/$@ $^
+	$(CXX) $(LDFLAGSr) -o $(bindir)/$@ $^
 	@ echo
 
 debug:  astyled
 astyled:  $(OBJd)
 	@ mkdir -p $(bindir)
-	$(CXX) -o $(bindir)/$@ $^
+	$(CXX) $(LDFLAGSd) -o $(bindir)/$@ $^
 	@ echo
 
 shared:  libastyle.so
 libastyle.so:  $(OBJs)
 	@ mkdir -p $(bindir)
-	$(CXX) -shared -s -o $(bindir)/$@ $^
+	$(CXX) -shared $(LDFLAGSr) -o $(bindir)/$@ $^
 	@ echo
 
 shareddebug:  libastyled.so
 libastyled.so:  $(OBJsd)
 	@ mkdir -p $(bindir)
-	$(CXX) -shared -o $(bindir)/$@ $^
+	$(CXX) -shared $(LDFLAGSd) -o $(bindir)/$@ $^
 	@ echo
 
 static:  libastyle.a
@@ -143,13 +157,13 @@ libastyled.a:  $(OBJad)
 java:  libastylej.so
 libastylej.so:  $(OBJsj)
 	@ mkdir -p $(bindir)
-	$(CXX) -shared -s -o $(bindir)/$@ $^
+	$(CXX) -shared $(LDFLAGSr) -o $(bindir)/$@ $^
 	@ echo
 
 javadebug:  libastylejd.so
 libastylejd.so:  $(OBJsjd)
 	@ mkdir -p $(bindir)
-	$(CXX) -shared -o $(bindir)/$@ $^
+	$(CXX) -shared $(LDFLAGSd) -o $(bindir)/$@ $^
 	@ echo
 
 all:  release debug shared shareddebug static staticdebug
@@ -161,7 +175,7 @@ clean:
 
 cleanobj:
 	rm -f $(objdir)/*.o
-	
+
 install:
 	$(INSTALL) -m 755 -d $(ipath)
 	@$(INSTALL) -m 755 $(bindir)/astyle  $(ipath)

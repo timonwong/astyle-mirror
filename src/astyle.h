@@ -320,7 +320,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  getFileType();
 		int  getIndentLength(void);
 		string getIndentString(void);
-		string getnextWord(const string& line, int currPos) const;
+		string getNextWord(const string& line, size_t currPos) const;
 		bool getBracketIndent(void);
 		bool getBlockIndent(void);
 		bool getCaseIndent(void);
@@ -389,6 +389,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  getInStatementIndentAssign(const string& line, size_t currPos) const;
 		int  getInStatementIndentComma(const string& line, size_t currPos) const;
 		bool isClassAccessModifier(string& line) const;
+		bool isIndentedPreprocessor(const string& line, size_t currPos) const;
 		bool isLineEndComment(string& line, int startPos) const;
 		bool statementEndsWithComma(string& line, int index);
 		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier& other) const;

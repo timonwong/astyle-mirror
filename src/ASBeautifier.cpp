@@ -781,12 +781,10 @@ string ASBeautifier::beautify(const string& originalLine)
 
 	// handle preprocessor commands
 	// except C# region and endregion
-
 	if (!isInComment
 	        && line.length() > 0
-	        && (line[0] == '#' || backslashEndsPrevLine)
-	        && line.compare(0, 7, "#region") != 0
-	        && line.compare(0, 10, "#endregion") != 0)
+	        && ((line[0] == '#' && !isIndentedPreprocessor(line, 0))
+	            || backslashEndsPrevLine))
 	{
 		if (line.length() > 0 && line[0] == '#')
 		{
@@ -1141,9 +1139,8 @@ string ASBeautifier::beautify(const string& originalLine)
 			blockCommentNoIndent = false;           // ok to indent next comment
 			continue;
 		}
-		// treat C# '#region' and '#endregion' statements as a line comment
-		else if (isSharpStyle() &&
-		         (line.compare(i, 7, "#region") == 0 || line.compare(i, 10, "#endregion") == 0))
+		// treat indented preprocessor lines as a line comment
+		else if (line[0] == '#' && isIndentedPreprocessor(line, i))
 		{
 			isInLineComment = true;
 		}
@@ -1315,7 +1312,7 @@ string ASBeautifier::beautify(const string& originalLine)
 			                      || isSharpAccessor
 			                      || isSharpDelegate
 			                      || isInExtern
-			                      || getnextWord(line, i) == "new"
+			                      || getNextWord(line, i) == "new"
 			                      || (isInDefine &&
 			                          (prevNonSpaceCh == '('
 			                           || isLegalNameChar(prevNonSpaceCh))));
@@ -2631,9 +2628,9 @@ int ASBeautifier::getInStatementIndentComma(const string& line, size_t currPos) 
  *
  * @return is the previous word or an empty string if none found.
  */
-string ASBeautifier::getnextWord(const string& line, int currPos) const
+string ASBeautifier::getNextWord(const string& line, size_t currPos) const
 {
-	int lineLength = line.length();
+	size_t lineLength = line.length();
 	// get the last legal word (may be a number)
 	if (currPos == lineLength - 1)
 		return string();
@@ -2642,7 +2639,7 @@ string ASBeautifier::getnextWord(const string& line, int currPos) const
 	if (start == string::npos || !isLegalNameChar(line[start]))
 		return string();
 
-	int end;          // end of the current word
+	size_t end;			// end of the current word
 	for (end = start+1; end <= lineLength; end++)
 	{
 		if (!isLegalNameChar(line[end]) || line[end] == '.')
@@ -2650,6 +2647,54 @@ string ASBeautifier::getnextWord(const string& line, int currPos) const
 	}
 
 	return line.substr(start, end-start);
+}
+
+/**
+ * Check if a preprocessor directive is always indented.
+ * C# "region" and "endregion" are always indented.
+ * C/C++ "pragma omp" is always indented.
+ *
+ * @return is true or false.
+ */
+bool ASBeautifier::isIndentedPreprocessor(const string& line, size_t currPos) const
+{
+	assert(line[0] == '#');
+	string nextWord = getNextWord(line, currPos);
+	if (nextWord == "region" || nextWord == "endregion")
+		return true;
+	// is it #pragma omp
+	if (nextWord == "pragma")
+	{
+		// find pragma
+		size_t start = line.find("pragma");
+		if (start == string::npos || !isLegalNameChar(line[start]))
+			return false;
+		// bypass pragma
+		for (; start < line.length(); start++)
+		{
+			if (!isLegalNameChar(line[start]))
+				break;
+		}
+		start++;
+		if (start >= line.length())
+			return false;
+		// point to start of second word
+		start = line.find_first_not_of(" \t", start);
+		if (start == string::npos)
+			return false;
+		// point to end of second word
+		size_t end;
+		for (end = start; end < line.length(); end++)
+		{
+			if (!isLegalNameChar(line[end]))
+				break;
+		}
+		// check for "pragma omp"
+		string word = line.substr(start, end - start);
+		if (word == "omp")
+			return true;
+	}
+	return false;
 }
 
 

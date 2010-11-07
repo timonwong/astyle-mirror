@@ -114,23 +114,22 @@
         or higher the file iccvars.sh should also be copied to /usr/sbin. These files are located in the installed directories
         of the compiler.</p>
     <p>
-        Beginning with compiler release 11.1 there are environment variables that should be set before the make. The script
-        file, make.sh, will set the variables by calling iccvars.sh before running the make. The script assumes the
-        intel64 compiler. If the intel64 compiler is not used the script will need to be changed. Instructions for the options are
+        Beginning with compiler release 11.1 there are environment variables that should be set before the make. To set
+        the variables enter "source iccvars.sh <em>arg</em>" where <em>arg</em> is ia32, intel64, or ia64. If this is
+        not done the make will display an error message "*** No rule to make target `obj/astyle_main.o', needed by `astyle'."
+        Instructions for the options are
         in the compiler documentation file "getting_started_c.pdf" in the section "Starting the Compiler from the Command
-        Line". Instead of using <strong>make</strong> in the following instructions use <strong>make.sh</strong>. The
-        options are the same for make and make.sh. The make.sh can also be used for compiler releases prior to 11.1. In
-        this case the make will be run without calling the iccvars.sh file.</p>
-    <p>
-        To build the Artistic Style configurations use the makefile or make.sh script located in the astyle/build/intel
+        Line". To build the Artistic Style configurations use the makefile llocated in the astyle/build/intel
         directory. The executables will be in the astyle/build/intel/bin directory. To build the command line configuration
         enter the following:</p>
-    <pre>cd astyle/build/intel<br />./make.sh  (or optionally "make" with compiler versions before 11.1)</pre>
+    <pre>
+cd astyle/build/intel<br />make</pre>
     <p>
         To build the other astyle configurations you can enter the file name or a symbolic name. The configuration names
         for Intel are the same as for the <a href="#_GCC_Compiler">GCC compiler</a>. More than one configuration can be
         built at the same time. For example, to build all of the debug configurations enter:</p>
-    <pre>cd astyle/build/intel<br />./make.sh debug shareddebug staticdebug</pre>
+    <pre>
+cd astyle/build/intel<br />make debug shareddebug staticdebug</pre>
 
     <h4 id="_Other_Makefile_Options">
         Other Makefile Options</h4>
