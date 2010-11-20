@@ -918,7 +918,7 @@ string ASFormatter::nextLine()
 				// in C# 'catch' can be either a paren or non-paren header
 				if (shouldPadHeader
 				        && (!isNonParenHeader || (currentHeader == &AS_CATCH && peekNextChar() == '('))
-				        && charNum < (int) currentLine.length() && !isWhiteSpace(currentLine[charNum+1]))
+				        && charNum < (int) currentLine.length() - 1 && !isWhiteSpace(currentLine[charNum+1]))
 					appendSpacePad();
 
 				// Signal that a header has been reached
@@ -4575,7 +4575,8 @@ void ASFormatter::trimContinuationLine()
 		{
 			if (!isWhiteSpace(currentLine[i]))		// don't delete any text
 			{
-				leadingSpaces = i + tabIncrementIn;
+				if (i < continuationIncrementIn)
+					leadingSpaces = i + tabIncrementIn;
 				continuationIncrementIn = tabIncrementIn;
 				break;
 			}
@@ -4625,7 +4626,7 @@ void ASFormatter::checkIfTemplateOpener()
 {
 	assert(!isInTemplate && currentChar == '<');
 
-	int parenDepth = 0;
+	int parenDepth_ = 0;
 	int maxTemplateDepth = 0;
 	templateDepth = 0;
 	for (size_t i = charNum; i < currentLine.length(); i++)
@@ -4645,7 +4646,7 @@ void ASFormatter::checkIfTemplateOpener()
 			templateDepth--;
 			if (templateDepth == 0)
 			{
-				if (parenDepth == 0)
+				if (parenDepth_ == 0)
 				{
 					// this is a template!
 					isInTemplate = true;
@@ -4657,9 +4658,9 @@ void ASFormatter::checkIfTemplateOpener()
 		else if (currentChar_ == '(' || currentChar_ == ')')
 		{
 			if (currentChar_ == '(')
-				parenDepth++;
+				parenDepth_++;
 			else
-				parenDepth--;
+				parenDepth_--;
 			continue;
 		}
 		else if (currentLine.compare(i, 2, "&&") == 0
