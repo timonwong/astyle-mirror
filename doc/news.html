@@ -31,24 +31,20 @@
     <p>
         Artistic Style now sets the native local so that characters from the user&#8217;s native language will be recognized
         in directory names and file names. Artistic Style for Windows has also been changed to use the native locale.
-        For Linux systems using UTF-8 locales, characters from any language will be
-        recognized and any combination of languages can be used. For Windows, only languages recognized by the native
-        codepage can be used. For example, the English locale (codepage 1252) also has French, German, Italian, Portuguese,
-        Spanish, plus several other languages. Other locals, such as Chinese and Japanese, only support one language.
-    </p>
-    <p>
-        Unicode was not used for Windows due to the varying degree of support by different compilers for console
-        applications. Some
-        compilers (Visual C) have good support while others (MinGW) do not. I have tried to accommodate as many compilers
-        as possible even though compromises had to be made. MinGW is used by many open source projects and I did not want
-        to exclude it from being used.</p>
+        For Linux systems using UTF-8 locales, characters from any language will be recognized and any combination of
+        languages can be used. For Windows, only languages recognized by the native codepage can be used. For example,
+        the English locale (codepage 1252) also has French, German, Italian, Portuguese, Spanish, plus several other languages.
+        Other locals, such as Chinese and Japanese, only support one language.
+        Unicode was not used due to the varying degree of support by different compilers for console applications.</p>
     <p>
         The locale setting also affects the way numbers are displayed. Language translations may be provided in a future
-        release.</p>
+        release.&nbsp;
+    </p>
     <p>
         There has been a change to the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of using the number
-        of spaces it now uses a code expressed in number of indents. If you are using the default setting of two indents,
-        or a setting of zero indents, there is no change necessary to the input. Otherwise, check the documentation for the new codes.</p>
+        of spaces it now uses a code expressed in number of indents. This will allow the option to be set independently
+        of the spaces per indent. If you are using the default setting of two indents, or a setting of zero indents, there
+        is no change necessary to the input. Otherwise, check the documentation for the new codes.</p>
     <p>
         The --style=linux has been changed to ALWAYS use a minimum conditional indent of one-half the indent length. This
         is in the style definition and cannot be changed. If you do not want this setting use the K&amp;R style instead.
@@ -58,10 +54,20 @@
     </p>
     <p>
         A checksum verification has been added to source file output that will help assure that no code has been duplicated
-        or omitted.This is effevtive only in the debug configuration used for testing.</p>
+        or omitted. This is effective only in the debug configuration used for testing.</p>
     <p>
-        Thanks to Matthew Woehlke, Chris Schwarz, Chang Jiang, and Arseny Solokha<span dojoattachpoint="shortHeaderNode"><span class="from address"
-            userinputform="cj7421@163.com"> </span></span>for their contributions.</p>
+        The test framework has been changed from UnitTest++ to <a href="http://code.google.com/p/googletest/" target="_blank"
+            title="open new window">Google Test</a>, which is actively maintained, has a mock object framework (<a href="http://code.google.com/p/googlemock/"
+                target="_blank" title="open new window">Google Mock</a>), and good documentation. Regression and system
+        testing have been automated with Python scripts. Python has also been used for class verification checks and other
+        repetitive procedures.</p>
+    <p>
+        If you use Visual Studio C++ Express the 2010 release has the ability to create x64 code. But you must use Vista
+        or Windows 7 and need to install
+        the .NET Framework SDK. I have created a brief instruction page <a href="vsinstall.html"
+            target="_blank" title="open new window">here</a>.</p>
+    <p>
+        Thanks to Matthew Woehlke, Chris Schwarz, Chang Jiang, and Arseny Solokha for their contributions.</p>
 
     <h4>
         Developers</h4>
@@ -73,10 +79,10 @@
     <p>
         There has been a change in the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of using number
         of spaces to indent it now uses a code expressed in number of indents. In the past this option was a problem because
-        it was also affected by changes in indent length. With this release there is &nbsp;only one variable affected.
-        The option is not affected by changes in indent length. The&nbsp; minimum conditional indent length is computed
-        automatically by ASFormatter after all the options &nbsp;have been processed. Refer to the code in astyle_main.cpp
-        to see how the option is processed.</p>
+        it was also affected by changes in indent length. With this release there is only one variable affected. The option
+        is not affected by changes in indent length. The minimum conditional indent length is computed automatically by
+        ASFormatter after all the options have been processed. Refer to the code in astyle_main.cpp to see how the option
+        is processed.</p>
     <p>
         The --style=linux has been changed to ALWAYS use a minimum conditional indent of one-half the indent length. The
         option is set in the function fixOptionVariableConflicts.</p>
@@ -475,7 +481,7 @@
         there have been over 80 items removed from the bug report. There have been many more fixes which were not reported
         but were discovered while testing. The new options in this release exposed many unreported formatting problems.
         I will try to fix the ones remaining in the next two or three releases. Some of them will be difficult to fix.
-        See the <a href="notes.html#_1.22">Release Notes</a> for a complete list of changes.</p>
+        See the Release Notes for a complete list of changes.</p>
     <p>
         Starting with this release, if a file is <b>not</b> changed by Artistic Style a new file and a backup file are
         not created. A "make" will not recompile the unchanged file and it will not be committed to a revision control
@@ -504,8 +510,7 @@
     <p>
         When processing directories recursively it is sometimes necessary to exclude certain files or directories. This
         can be done using a new exclude (&#8209;&#8209;exclude=file&#8209;or&#8209;directory) option. There is no short
-        option. Multiple exclude statements are allowed. The <a href="astyle.html#_Other_Options">Other Options</a> section
-        of the documentation contains the details.</p>
+        option. Multiple exclude statements are allowed. The Other Options section of the documentation contains the details.</p>
     <p>
         It is always a good idea to create a backup for files that have been formatted. This can cause a problem in that
         it creates a lot of excess files in your source directories. There are now new script files available that will
@@ -513,19 +518,18 @@
         is a batch file for Windows and a shell script for everyone else. They are available in the <a href="scripts.html">
             Scripts</a> section of the home page.</p>
     <p>
-        There is a new <a href="links.html">Links</a> page that lists programs using Artistic Style. In general, they
-        seem to be good quality software.</p>
+        There is a new Links page that lists programs using Artistic Style. In general, they seem to be good quality software.</p>
     <p>
-        If you are using a development environment to compile Artistic Style, be sure to read the <a href="install.html#_Compiler_Options">
-            Compiler Options</a> section in the Install Information. In particular, you should define NDEBUG in the Release
-        compile to remove the assert statements. There are quite a few of these and they will slow down processing if
-        NDEBUG is not used. The assert statements are necessary due to the nature of the program. Also, when reporting
-        bugs it is a good idea to log in first. Occasionally, more information is needed on a problem. If the poster did
-        not log in there is no way to contact them.</p>
+        If you are using a development environment to compile Artistic Style, be sure to read the Compiler Options section
+        in the Install Information. In particular, you should define NDEBUG in the Release compile to remove the assert
+        statements. There are quite a few of these and they will slow down processing if NDEBUG is not used. The assert
+        statements are necessary due to the nature of the program. Also, when reporting bugs it is a good idea to log
+        in first. Occasionally, more information is needed on a problem. If the poster did not log in there is no way
+        to contact them.</p>
     <p>
         A Java Native Interface has been added for Java developers. This will allow an Artistic Style shared library (DLL)
         to be called from a Java program. A shared library (Dll) using the Java interface can still be called from C,
-        C++, or C# programs. There is a sample program in the <a href="http://astyle.sourceforge.net/develop/">Developer Information</a>.</p>
+        C++, or C# programs. There is a sample program in the Developer Information.</p>
     <p>
         <strong>Developers using Artistic Style in another project</strong> should be aware that there are two new functions
         that have been added to the ASStreamIterator class (peekNextLine() and peekReset()). These will have to be coded
@@ -555,7 +559,7 @@
         will be broken from lines with comments without bringing the comments with them. All comments will remain in their
         original column, if possible. The formatting of empty blocks was fixed. The BracketType definition was expanded
         and the bracket types are now correctly identified. There are several formatting fixes for Java files. See the
-        <a href="notes.html#_1.21">Release Notes</a> for a complete list of changes.</p>
+        Release Notes for a complete list of changes.</p>
     <p>
         A new option, --preserve-date (-Z), has been added. This will retain the date modified of the original file in
         the new formatted file. Otherwise the new file will contain the current date.</p>
@@ -576,8 +580,8 @@
         platform. The main difference in platforms is the build directory and the line endings. The source code and documentation
         are the same for all packages.</p>
     <p>
-        There are new instructions about optimizing compiler options in the <a href="install.html">Install Instructions</a>.
-        If you are compiling using a development environment you may want to read them.</p>
+        There are new instructions about optimizing compiler options in the Install Instructions. If you are compiling
+        using a development environment you may want to read them.</p>
     <p>
         If you have broken brackets with comments attached to the opening bracket instead of the previous line, do the
         following <b>before formatting</b> again with broken brackets. Use the current Artistic Style release (1.21).

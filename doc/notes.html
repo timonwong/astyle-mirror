@@ -21,13 +21,13 @@
         Artistic Style 2.01&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add recognition of language characters supproted by the native locale.</li>
+        <li>Add recognition of language characters supported by the native locale.</li>
         <li>Add formatting of numbers according to the native locale.</li>
         <li>Add checksum verification to source file output. </li>
         <li>Add formatting of MFC macros BEGIN_DISPATCH_MAP, BEGIN_EVENT_MAP, and BEGIN_PROPPAGEIDS.</li>
 		<li>Add error message if --recursive is used without a wildcard in the file name.</li>
         <li>Add private (unusable) copy constructors for classes with dynamic allocation.</li>
-        <li>Add error message if the "cin" stream cannot be processed because a pipe is used.&nbsp;</li>
+        <li>Add error message if the "cin" stream cannot be processed because a pipe is used.</li>
         <li>Improve recognition of ARRAY_TYPE brackets.</li>
         <li>Improve formatting of multi-line comments when the number of leading spaces must be changed. </li>
         <li>Improve formatting of embedded SQL when the number of leading spaces must be changed. </li>
@@ -35,21 +35,23 @@
         <li>Change --style=linux to always use a minimum conditional indent of one-half the indent length.</li>
         <li>Change --pad-oper to pad operators in block parens.</li>
         <li>Change to indent OpenMP pragmas with the code.</li>
-        <li>Change to display all (instead of one) option errors before abort.&nbsp;</li>
-        <li>Change the second argument of the fpError typedef&nbsp; from "char*" to "const char*".&nbsp;</li>
-        <li>Change Linux Makefiles to allow external values for CFLAGS ans LDFLAGS.</li>
+        <li>Change to display all (instead of one) option errors before abort.</li>
+        <li>Change the second argument of the fpError typedef from "char*" to "const char*".</li>
+        <li>Change Linux Makefiles to allow external values for CFLAGS and LDFLAGS.</li>
         <li>Change all destructors to virtual.</li>
         <li>Fix crash when --break-blocks is used and there is no closing bracket.</li>
         <li>Fix deleting the previous line when a closing bracket follows a comment close.</li>
         <li>Fix not recognizing text in quotes when identifying struct access modifiers.</li>
-		<li>Fix not popping the paren stack when a bracket preceeds an end of line comment.</li>
+		<li>Fix not popping the paren stack when a bracket preceds an end of line comment.</li>
         <li>Fix not breaking a closing bracket when empty parens are enclosed in a single line block.</li>
-        <li>Fix indenting of C# ananymous statement closing bracket . </li>
+        <li><span style="font-size: 12pt; line-height: 115%; font-family: 'Times New Roman','serif'; mso-fareast-font-family: 'Times New Roman';
+            mso-ansi-language: EN-US; mso-fareast-language: ZH-CN; mso-bidi-language: HI">Fix indenting of C# anonymous statement
+            closing bracket.</span> </li>
         <li>Fix recognition of C# non in-statement arrays.</li>
-        <li>Fix breaking single line blocks blocks for C# abstract methods. </li>
+        <li>Fix breaking single line blocks for C# abstract methods. </li>
         <li>Fix not always clearing isNonInStatementArray flag.</li>
         <li>Fix indenting "case" statements in a preprocessor definition when --indent-preprocessor is not requested.</li>
-        <li>Fix not recognizing the "volatile"&nbsp; type qualifier as a keyword.</li>
+        <li>Fix not recognizing the "volatile" type qualifier as a keyword.</li>
         <li>Fix class initializers not being recognized as an in-statement indent.</li>
         <li>Fix indenting Java abstract methods when "new" starts the line and brackets are broken.</li>
         <li>Fix broken initializer lines (ending with comma) when there is more than one space after the type.</li>
@@ -58,9 +60,9 @@
         <li>Fix --brackets=horstmann not breaking a comment line when the comment ends the line with a bracket.</li>
         <li>Fix --pad-oper to recognize all * and &amp; operators within a function call.</li>
         <li>Fix --unpad-paren to recognize * and &amp; operators within a function call.</li>
-        <li>Fix --pad-paren used with --delete-empty-lines causing a space to be added at end of line in some cases.&nbsp;</li>
-        <li>Fix --pad-paren padding a closing paren followed by a block paren.&nbsp; </li>
-        <li>Fix --add-brackets when a header is followed by a semi-colon.&nbsp;</li>
+        <li>Fix --pad-paren used with --delete-empty-lines causing a space to be added at end of line in some cases.</li>
+        <li>Fix --pad-paren padding a closing paren followed by a block paren.</li>
+        <li>Fix --add-brackets when a header is followed by a semi-colon.</li>
         <li>Fix --align-pointer to pad or unpad pointers followed by parens or comments.</li>
         <li>Fix --align-pointer to pad or unpad pointers following a scope resolution operator.</li>
         <li>Fix --align-pointer to pad or unpad pointers that end the line.</li>
@@ -70,7 +72,7 @@
             lines.</li>
         <li>Fix --break-blocks used with --delete-empty-lines causing a duplicate line in some cases. </li>
         <li>Fix --break-blocks used with --delete-empty-lines not always breaking opening blocks. </li>
-        <li>Fix --break-blocks used with --delete-empty-lines not always deleteing empty lines for closing blocks. </li>
+        <li>Fix --break-blocks used with --delete-empty-lines not always deleting empty lines for closing blocks. </li>
         <li>Fix --break-blocks used with --fill-empty-lines not always correctly filling empty lines in a switch statement.
         </li>
         <li>Fix --unpad-paren used with --pad-paren-in not padding between opening parens when multiple parens are used.</li>
@@ -81,7 +83,7 @@
         <li>Fix MinGW -Wshadow warnings.</li>
         <li>Fix VS2010 "string subscript out of range" asserts. </li>
         <li>Refactor:<ul>
-            <li>Remove template definition for parseOptions() by using a vector reference instead of iterators as function arguments.&nbsp;</li>
+            <li>Remove template definition for parseOptions() by using a vector reference instead of iterators as function arguments.</li>
             <li>New ASOptions class to encapsulate global functions used by both the console and library builds. </li>
             <li>Replace argc and argv in processOptions() with a vector to simplify test cases.</li>
             <li>Replace IS_OPTION and IS_OPTIONS macros with ASOptions methods. </li>
