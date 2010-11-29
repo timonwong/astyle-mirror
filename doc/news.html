@@ -7,6 +7,18 @@
     <meta http-equiv="Content-Language" content="en-us" />
     <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
     <link href="styles.css" rel="stylesheet" type="text/css" />
+
+    <!-- the following styles are temporary for the survey -->
+
+    <style type="text/css">
+h3.survey { color:#FF0000; margin-top:0.4in; margin-left:-0.4in; }
+a.survey:link, a.survey:visited { color:#FF0000; text-decoration:underline; }
+a.survey:hover { color:#0000A0; text-decoration:underline; }
+
+    </style>
+
+    <!-- end of survey -->
+
 </head>
 
 <body>
@@ -17,29 +29,52 @@
     <p>
         &nbsp;</p>
 
+    <h3 class="survey">
+        Artistic Style Survey</h3>
+
+    <p>
+        This release has a survey that will be used to determine how Artistic Style is used and to set priorities for
+        future enhancements. It consists of less than 25 questions, most of which are multiple choice. To take the survey
+        you should have used Artistic Style long enough to be familiar with the options.</p>
+    <p>
+        The survey contains general questions about your programming environment and your use of Artistic Style and its
+        various options. At the end are questions about changes you would like to see and complaints you may have. No
+        personal information is asked for or collected.</p>
+    <p>
+        Please <a class="survey" href="http://astyle.sourceforge.net/redirect.html" target="survey" title="open new window">
+            take the survey</a> to help determine the priorities for Artistic Style. Survey results will be posted on
+        this website at the end of the survey.</p>
+
     <h3>
-        Artistic Style 2.01&nbsp; (pending)</h3>
+        <p>
+            Artistic Style 2.01&nbsp; (November 2010)</p>
+    </h3>
 
     <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
     <p>
-        A new feature at SourceForge is download maps available from the top menu at "Develop &gt; Download Stats (Beta)".
-        Clicking on the "top country" area shows a chart of downloads by country. The list of downloads shows about 75%
-        of Artistic Style downloads are from non English speaking countries. This release is a major release (2.01) that
-        marks the start of the internationalization of Artistic Style.</p>
+        A new feature at SourceForge is download maps that show a list of downloads by country. It is available from the
+        top menu at Develop &gt; Download Stats (Beta), and clicking on the "top country" area. The list of downloads
+        shows about 75% of Artistic Style downloads are from non English speaking countries. This release is the start of the internationalization of Artistic Style.</p>
     <p>
         Artistic Style now sets the native local so that characters from the user&#8217;s native language will be recognized
         in directory names and file names. Artistic Style for Windows has also been changed to use the native locale.
         For Linux systems using UTF-8 locales, characters from any language will be recognized and any combination of
         languages can be used. For Windows, only languages recognized by the native codepage can be used. For example,
         the English locale (codepage 1252) also has French, German, Italian, Portuguese, Spanish, plus several other languages.
-        Other locals, such as Chinese and Japanese, only support one language.
-        Unicode was not used due to the varying degree of support by different compilers for console applications.</p>
+        Other locals, such as Chinese and Japanese, only support one language. Unicode was not used due to the varying
+        degree of support by different compilers for console applications.</p>
     <p>
         The locale setting also affects the way numbers are displayed. Language translations may be provided in a future
         release.&nbsp;
     </p>
+    <p>
+        This is a major release (2.01) because of the internationalization and changes that will occur in the next couple
+        of releases. Future releases will contain a major change to the bracket options and a rewrite of the file access
+        method. Some of the requested changes require looking at blocks of code instead of single lines. The current program
+        has been patched to do this but a rewrite of the file input is needed. These are both major changes but with the
+        new test framework in place they should be manageable.</p>
     <p>
         There has been a change to the &#8209;&#8209;min&#8209;conditional&#8209;indent option. Instead of using the number
         of spaces it now uses a code expressed in number of indents. This will allow the option to be set independently
@@ -53,7 +88,7 @@
         The MFC macros BEGIN_DISPATCH_MAP, BEGIN_EVENT_MAP, and BEGIN_PROPPAGEIDS are now formatted.
     </p>
     <p>
-        A checksum verification has been added to source file output that will help assure that no code has been duplicated
+        Checksum verification has been added to source file output that will help assure that no code has been duplicated
         or omitted. This is effective only in the debug configuration used for testing.</p>
     <p>
         The test framework has been changed from UnitTest++ to <a href="http://code.google.com/p/googletest/" target="_blank"
@@ -63,8 +98,7 @@
         repetitive procedures.</p>
     <p>
         If you use Visual Studio C++ Express the 2010 release has the ability to create x64 code. But you must use Vista
-        or Windows 7 and need to install
-        the .NET Framework SDK. I have created a brief instruction page <a href="vsinstall.html"
+        or Windows 7 and need to install the .NET Framework SDK. I have created a brief instruction page <a href="vsinstall.html"
             target="_blank" title="open new window">here</a>.</p>
     <p>
         Thanks to Matthew Woehlke, Chris Schwarz, Chang Jiang, and Arseny Solokha for their contributions.</p>

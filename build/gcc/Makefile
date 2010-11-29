@@ -32,7 +32,7 @@ bindir = bin
 objdir = obj
 ipath=$(prefix)/bin
 CBASEFLAGS = -W -Wall -fno-rtti -fno-exceptions
-JAVAINCS   = -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+JAVAINCS   = -I$(JAVA_HOME)/include
 CXX = g++
 INSTALL=install -o $(USER) -g $(USER)
 

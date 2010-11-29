@@ -46,7 +46,7 @@ ipath=$(prefix)/bin
 # -no-multibyte-chars is a temporary compiler bug work-around, http://software.intel.com/en-us/forums/intel-c-compiler/topic/56258
 # if the intel compiler version doesn't support the current GCC headers use -gxx-name=g++-4.x where x is a previous GCC compiler 
 CBASEFLAGS = -w2 -Wall -fno-rtti -fno-exceptions -vec-report0 -no-multibyte-chars
-JAVAINCS   = -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+JAVAINCS   = -I$(JAVA_HOME)/include
 CXX = icpc
 INSTALL=install -o $(USER) -g $(USER)
 

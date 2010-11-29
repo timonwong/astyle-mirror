@@ -160,8 +160,7 @@
         be named <code><em>SourceFile.cpp</em></code>, while the original pre-indented file will be renamed to <code><em>SourceFile.cpp.orig</em></code>.</p>
 
     <h4>
-        Other
-        Considerations</h4>
+        Other Considerations</h4>
 
     <p>
         Artistic Style can format standard class library statements such as Open GL, wxWidgets, QT, and MFC.</p>
@@ -174,11 +173,12 @@
         SQL will be aligned in a single column.</p>
     <p>
         Files encoded as UTF&#8209;16 or UTF&#8209;32 will NOT be formatted. These are left unchanged and a warning message
-        is displayed. Some compilers do not support these encodings. Other compilers must have a Byte-Order-Mark (BOM) to recognize the encoding. To use Artistic Style the files can be converted to the newer UTF&#8209;8 encoding with the program iconv. There
-        are Linux and Windows versions available. A sample command line is "iconv &#8209;f &nbsp;UTF&#8209;16 &#8209;t
-        UTF&#8209;8 filein.cpp &gt;fileout.cpp. Visual Studio can convert the files from the "File &gt; Advanced Save
-        Options" menu. Select encoding "Unicode (UTF&#8209;8 with signature) - Codepage 65001". There are other development environments and text editors,
-        such as SciTE, that can convert files to UTF&#8209;8.
+        is displayed. Some compilers do not support these encodings. Other compilers must have a Byte-Order-Mark (BOM)
+        to recognize the encoding. To use Artistic Style the files can be converted to the newer UTF&#8209;8 encoding
+        with the program iconv. There are Linux and Windows versions available. A sample command line is "iconv &#8209;f
+        &nbsp;UTF&#8209;16 &#8209;t UTF&#8209;8 filein.cpp &gt;fileout.cpp. Visual Studio can convert the files from the
+        "File &gt; Advanced Save Options" menu. Select encoding "Unicode (UTF&#8209;8 with signature) - Codepage 65001".
+        There are other development environments and text editors, such as SciTE, that can convert files to UTF&#8209;8.
     </p>
     <p>
         Embedded statements that are multiple-line and are NOT in a C type format, such as Python, are usually mal-formatted.
@@ -859,8 +859,8 @@ error:
     <p id="_indent-preprocessor">
         <code class="title">--indent-preprocessor / -w</code><br />
         Indent multi-line preprocessor definitions ending with a backslash. Should be used with --convert-tabs for proper
-        results. Does a pretty good job, but can not perform miracles in obfuscated preprocessor definitions. Without
-        this option the preprocessor statements remain unchanged.</p>
+        results. Does a pretty good job, but cannot perform miracles in obfuscated preprocessor definitions. Without this
+        option the preprocessor statements remain unchanged.</p>
     <div class="code">
         <pre>#define Is_Bar(arg,a,b) \
 (Is_Foo((arg), (a)) \
@@ -902,10 +902,11 @@ error:
         &nbsp;</p>
     <p id="_max-instatement-indent">
         <code class="title">--max-instatement-indent=<span class="option">#</span> / -M<span class="option">#</span></code><br />
-        Set the &nbsp;maximum of <span class="option">#</span> spaces to indent a continuation line. The &nbsp;<span class="option">#</span> indicates
-        a number of columns and must be less than <strong>80</strong>. If no <span class="option">#</span> is set, the
-        default value of <strong>40</strong> will be used. A maximum of less than two indent lengths will be ignored.
-        This option will prevent continuation lines from extending too far to the right. Setting a larger value will allow the code to be extended further to the right.</p>
+        Set the &nbsp;maximum of <span class="option">#</span> spaces to indent a continuation line. The &nbsp;<span class="option">#</span>
+        indicates a number of columns and must be less than <strong>80</strong>. If no <span class="option">#</span> is
+        set, the default value of <strong>40</strong> will be used. A maximum of less than two indent lengths will be
+        ignored. This option will prevent continuation lines from extending too far to the right. Setting a larger value
+        will allow the code to be extended further to the right.</p>
     <div class="code">
         <pre>fooArray[] = <span class="brace">{</span> red,
          green,
@@ -931,15 +932,15 @@ fooFunction(barArg1,
     <p id="_min-conditional-indent">
         <code class="title">--min-conditional-indent=<span class="option">#</span> / -m<span class="option">#</span></code><br />
         Set the minimal indent that is added when a header is built of multiple lines. This indent helps to easily separate
-        the header from the command statements that follow. The values for <span class="option">#</span> indicate a <strong>
+        the header from the command statements that follow. The value for <span class="option">#</span> indicates a <strong>
             number of indents</strong> and is a minimum value. The indent may be greater to align with the data on the
         previous line.<br />
         The valid values are:<br />
-        0 - no minimal indent. The lines will be aligned with the the paren on the preceeding line.<br />
+        0 - no minimal indent. The lines will be aligned with the paren on the preceding line.<br />
         1 - indent at least one additional indent.<br />
         2 - indent at least two additional indents.<br />
         3 - indent at least one-half an additional indent. This is intended for large indents (e.g. 8).<br />
-        The default vaule is <strong>2</strong>, two additional indents.
+        The default value is <strong>2</strong>, two additional indents.
     </p>
     <div class="code">
         <pre><span class="comment">// default setting makes this non-bracketed code clear</span>
@@ -1036,9 +1037,8 @@ isBar = false;
         &nbsp;</p>
     <p id="_pad-oper">
         <code class="title">--pad-oper / -p </code><br />
-        Insert space padding around operators. Any end
-        of line comments will remain in the original column, if possible. Note that there is no option to unpad. Once
-        padded, they stay padded.</p>
+        Insert space padding around operators. Any end of line comments will remain in the original column, if possible.
+        Note that there is no option to unpad. Once padded, they stay padded.</p>
     <div class="code">
         <pre>if (foo==2)
     a=bar((b-c)*a,d--);
@@ -1117,7 +1117,7 @@ isBar = false;
         &nbsp;</p>
     <p id="_unpad-paren">
         <code class="title">--unpad-paren / -U </code><br />
-        Remove extra space padding around parenthesis on the inside and outside. &nbsp;Any end of line comments will remain
+        Remove extra space padding around parenthesis on the inside and outside. Any end of line comments will remain
         in the original column, if possible. This option can be used in combination with the paren padding options <code>pad&#8209;paren</code>,
         <code>pad&#8209;paren&#8209;out</code>, <code>pad&#8209;paren&#8209;in</code>, and <code>pad&#8209;header</code>
         above. Only padding that has not been requested by other options will be removed.</p>
@@ -1384,11 +1384,10 @@ else
     <p>
         Specific files may be excluded in the same manner. An exclude option of "default.cpp" will exclude ALL files named
         "default.cpp". An exclude option of "python/default.cpp" will exclude ALL files named "default.cpp" contained
-        in a "python" subdirectory.&nbsp; You may proceed backwards in the directory tree to exclude only the required
-        files.</p>
+        in a "python" subdirectory. You may proceed backwards in the directory tree to exclude only the required files.</p>
     <p>
-        Wildcards are NOT allowed.&nbsp; There may be more than one exclude statement. The filepath and name may be placed
-        in double quotes (e.g. &#8209;&#8209;exclude="foo&nbsp;bar.cpp").</p>
+        Wildcards are NOT allowed. There may be more than one exclude statement. The filepath and name may be placed in
+        double quotes (e.g. &#8209;&#8209;exclude="foo&nbsp;bar.cpp").</p>
     <p id="_errors-to-stdout">
         <code class="title">--errors-to-stdout / -X</code><br />
         Print errors to standard-output rather than to standard-error.<br />
