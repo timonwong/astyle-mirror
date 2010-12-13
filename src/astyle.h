@@ -359,6 +359,9 @@ class ASBeautifier : protected ASResource, protected ASBase
 		ASBeautifier& operator=(ASBeautifier&);        // not to be implemented
 
 		void initStatic();
+		void computePreliminaryIndentation();
+		void parseCurrentLine(const string& line);
+		void processProcessor(string& line);
 		void registerInStatementIndent(const string& line, int i, int spaceTabCount,
 		                               int tabIncrementIn, int minIndent, bool updateParenStack);
 		string preLineWS(int spaceTabCount, int tabCount);
@@ -388,10 +391,10 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  convertTabToSpaces(int i, int tabIncrementIn) const;
 		int  getInStatementIndentAssign(const string& line, size_t currPos) const;
 		int  getInStatementIndentComma(const string& line, size_t currPos) const;
-		bool isClassAccessModifier(string& line) const;
+		bool isClassAccessModifier(const string& line) const;
 		bool isIndentedPreprocessor(const string& line, size_t currPos) const;
-		bool isLineEndComment(string& line, int startPos) const;
-		bool statementEndsWithComma(string& line, int index);
+		bool isLineEndComment(const string& line, int startPos) const;
+		bool statementEndsWithComma(const string& line, int index) const;
 		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier& other) const;
 		template<typename T> void deleteContainer(T& container);
 		void deleteContainer(vector<vector<const string*>*>* &container);
@@ -402,6 +405,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		const string* currentHeader;
 		const string* previousLastLineHeader;
 		const string* probationHeader;
+		const string* lastLineHeader;
 		bool isInQuote;
 		bool isInVerbatimQuote;
 		bool haveLineContinuationChar;
@@ -439,6 +443,14 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool blockCommentNoIndent;
 		bool blockCommentNoBeautify;
 		bool previousLineProbationTab;
+		bool lineBeginsWithBracket;
+		bool shouldIndentBrackettedLine;
+		bool isInClass;
+		bool isInSwitch;
+		int  tabCount;
+		int  spaceTabCount;
+		int  lineOpeningBlocksNum;
+		int  lineClosingBlocksNum;
 		int  fileType;
 		int  minConditionalOption;
 		int  minConditionalIndent;

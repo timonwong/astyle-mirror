@@ -114,16 +114,20 @@
 
     <p>
         There is no autoconf dependency. To use the Intel makefile the files icc and icpc should be copied to /usr/sbin.
-        If the compiler release is 11.1 or higher the file iccvars.sh should also be copied to /usr/sbin. These files
-        are located in the installed directories of the compiler.</p>
+        If the compiler release is 11.1 or higher the file iccvars.sh, or compilervars.sh for C++ Composer XE, should
+        also be copied to /usr/sbin. These files are located in the installed directories of the compiler.</p>
     <p>
-        Beginning with compiler release 11.1 there are environment variables that should be set before the make. To set
-        the variables enter "source iccvars.sh <em>arg</em>" where <em>arg</em> is ia32, intel64, or ia64. If this is
-        not done the make will display an error message "*** No rule to make target `obj/astyle_main.o', needed by `astyle'."
-        Instructions for the options are in the compiler documentation file "getting_started_c.pdf" in the section "Starting
-        the Compiler from the Command Line". To build the Artistic Style configurations use the makefile located in the
-        astyle/build/intel directory. The executables will be in the astyle/build/intel/bin directory. To build the command
-        line configuration enter the following:</p>
+        Beginning with compiler release 11.1 there are environment variables that should be set before running the make. If this
+        has not been done already, enter:</p>
+    <pre>source iccvars.sh <em>arg </em>   or    source compilervars.sh <em>arg</em>  (for C++ Composer XE)</pre>
+    <p>
+        where <em>arg</em> is ia32, intel64, or ia64. If this is not done the make will display an error message "***
+        No rule to make target `obj/astyle_main.o', needed by `astyle'." Instructions for the options are in the compiler
+        documentation file "getting_started_c.pdf" in the section "Starting the Compiler from the Command Line".
+    </p>
+    <p>
+        To build the Artistic Style configurations use the makefile located in the astyle/build/intel directory. The executables
+        will be in the astyle/build/intel/bin directory. To build the command line configuration enter the following:</p>
     <pre>cd astyle/build/intel<br />make</pre>
     <p>
         To build the other astyle configurations you can enter the file name or a symbolic name. The configuration names

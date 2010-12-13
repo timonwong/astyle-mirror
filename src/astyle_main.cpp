@@ -81,7 +81,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* g_version = "2.01";
+const char* g_version = "2.02 beta";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -1140,7 +1140,14 @@ void ASConsole::getFilePaths(string& filePath)
 	if (hasWildcard || isRecursive)
 		getFileNames(targetDirectory, targetFilename);
 	else
-		fileName.push_back(targetDirectory + g_fileSeparator + targetFilename);
+	{
+		// verify a single file is not a directory (needed on Linux)
+		string entryFilepath = targetDirectory + g_fileSeparator + targetFilename;
+		struct stat statbuf;
+		if (stat(entryFilepath.c_str(), &statbuf) == 0 && !(statbuf.st_mode & S_IFREG))
+			error("Entry is not a file:", targetFilename.c_str());
+		fileName.push_back(entryFilepath);
+	}
 
 	if (hasWildcard)
 		printSeparatingLine();
@@ -1822,9 +1829,9 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 	float secs = (stopTime - startTime) / float (CLOCKS_PER_SEC);
 	if (secs < 60)
 	{
-		if (secs < 2)
+		if (secs < 2.0)
 			printf("%.2f", secs);
-		else if (secs < 20)
+		else if (secs < 20.0)
 			printf("%.1f", secs);
 		else
 			printf("%.0f", secs);
