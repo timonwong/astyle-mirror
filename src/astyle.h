@@ -120,11 +120,9 @@ enum MinConditional { MINCOND_ZERO = 0,
                       MINCOND_END
                     };
 
-enum FileEncoding { ENCODING_OK,
+enum FileEncoding { ENCODING_8BIT,
                     UTF_16BE,
-                    UTF_16LE,
-                    UTF_32BE,
-                    UTF_32LE
+                    UTF_16LE
                   };
 
 enum LineEndFormat { LINEEND_DEFAULT,	// Use line break that matches most of the file
@@ -236,6 +234,12 @@ class ASBase
 		bool isCStyle() const { return (baseFileType == C_TYPE); }
 		bool isJavaStyle() const { return (baseFileType == JAVA_TYPE); }
 		bool isSharpStyle() const { return (baseFileType == SHARP_TYPE); }
+
+		// check if a specific character is a digit
+		// NOTE: Visual C isdigit() gives assert error if char > 256
+		bool isDigit(char ch) const {
+			return (ch >= '0' && ch <= '9');
+		}
 
 		// check if a specific character can be used in a legal variable/method/class name
 		bool isLegalNameChar(char ch) const {
@@ -364,7 +368,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void processProcessor(string& line);
 		void registerInStatementIndent(const string& line, int i, int spaceTabCount,
 		                               int tabIncrementIn, int minIndent, bool updateParenStack);
-		string preLineWS(int spaceTabCount, int tabCount);
+		string preLineWS(int spaceTabCount_, int tabCount_);
 
 		static int beautifierFileType;
 		static vector<const string*>* headers;

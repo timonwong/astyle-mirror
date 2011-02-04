@@ -54,6 +54,10 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
     <p>
+        Artistic Style can now format UTF-16 encoded files, both little and big endian. This is the default format for
+        Visual Studio unicode. The file is formatted by converting to UTF&#8209;8 to format, then back to UTF&#8209;16. The conversion process does not add a significant amount of time to the formatting. The
+        file must be encoded with a byte-order-mark (BOM) to be recognized. Again, this is the Visual Studio default.</p>
+    <p>
 
         <h3>
             <p>

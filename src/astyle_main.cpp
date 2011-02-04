@@ -381,6 +381,25 @@ void ASConsole::correctMixedLineEnds(ostringstream& out)
 	convertLineEnds(out, lineEndFormat);
 }
 
+// check files for 16 or 32 bit encoding
+// the file must have a Byte Order Mark (BOM)
+// NOTE: some string functions don't work with NULLs (e.g. length())
+FileEncoding ASConsole::detectEncoding(const char* data, size_t dataSize, const string& fileName_) const
+{
+	FileEncoding encoding = ENCODING_8BIT;
+
+	if (dataSize >= 4 && memcmp(data, "\x00\x00\xFE\xFF", 4) == 0)
+		error("Cannot process UTF-32 BE encoding", fileName_.c_str());
+	else if (dataSize >= 4 && memcmp(data, "\xFF\xFE\x00\x00", 4) == 0)
+		error("Cannot process UTF-32 LE encoding", fileName_.c_str());
+	else if (dataSize >= 2 && memcmp(data, "\xFE\xFF", 2) == 0)
+		encoding = UTF_16BE;
+	else if (dataSize >= 2 && memcmp(data, "\xFF\xFE", 2) == 0)
+		encoding = UTF_16LE;
+
+	return encoding;
+}
+
 // error exit without a message
 void ASConsole::error() const
 {
@@ -448,12 +467,11 @@ void ASConsole::verifyCinPeek() const
  */
 void ASConsole::formatFile(const string& fileName_)
 {
-	// open input file
-	ifstream in(fileName_.c_str(), ios::binary);
-	if (!in)
-		error("Cannot open input file", fileName_.c_str());
-
+	stringstream in;
 	ostringstream out;
+	FileEncoding encoding = readFile(fileName_, in);
+	ASStreamIterator<istream> streamIterator(&in);
+	formatter.init(&streamIterator);
 
 	// Unless a specific language mode has been set, set the language mode
 	// according to the file's suffix.
@@ -466,15 +484,6 @@ void ASConsole::formatFile(const string& fileName_)
 		else
 			formatter.setCStyle();
 	}
-
-	ASStreamIterator<istream> streamIterator(&in);
-	formatter.init(&streamIterator);
-
-	// make sure encoding is 8 bit
-	// if not set the eofbit so the file is not formatted
-	FileEncoding encoding = getFileEncoding(in);
-	if (encoding != ENCODING_OK)
-		in.setstate(ios::eofbit);
 
 	// set line end format
 	string nextLine;				// next output line
@@ -526,7 +535,6 @@ void ASConsole::formatFile(const string& fileName_)
 		correctMixedLineEnds(out);
 		filesAreIdentical = false;
 	}
-	in.close();
 
 	// remove targetDirectory from filename if required by print
 	string displayName;
@@ -538,17 +546,15 @@ void ASConsole::formatFile(const string& fileName_)
 	// if file has changed, write the new file
 	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
 	{
-		writeOutputFile(fileName_, out);
+		writeFile(fileName_, encoding, out);
 		printMsg("formatted  " + displayName);
 		filesFormatted++;
 	}
 	else
 	{
-		if (!isFormattedOnly || encoding != ENCODING_OK)
+		if (!isFormattedOnly)
 			printMsg("unchanged* " + displayName);
 		filesUnchanged++;
-		if (encoding != ENCODING_OK)
-			printBadEncoding(encoding);
 	}
 
 	assert(formatter.getChecksumDiff() == 0);
@@ -655,20 +661,42 @@ void ASConsole::initializeOutputEOL(LineEndFormat lineEndFormat)
 		outputEOL[0] = '\0';
 }
 
-void ASConsole::printBadEncoding(FileEncoding encoding) const
+
+FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) const
 {
-	string msg = "********** previous file: ";
-	if (encoding == UTF_16BE)
-		msg += "UTF-16BE encoding";
-	else if (encoding == UTF_16LE)
-		msg += "UTF-16LE encoding";
-	else if (encoding == UTF_32BE)
-		msg += "UTF-32BE encoding";
-	else if (encoding == UTF_32LE)
-		msg += "UTF-32LE encoding";
-	else
-		msg += "???????? encoding";
-	printMsg(msg);
+	const int blockSize = 131072;	// 128 KB
+	ifstream fin(fileName_.c_str(), ios::binary);
+	if (!fin)
+		error("Cannot open input file", fileName_.c_str());
+	char data[blockSize];
+	fin.read(data, sizeof(data));
+	if (fin.bad())
+		error("Cannot read input file", fileName_.c_str());
+	size_t dataSize = static_cast<size_t>(fin.gcount());
+	FileEncoding encoding = detectEncoding(data, dataSize, fileName_);
+	bool firstBlock = true;
+	while (dataSize)
+	{
+		if (encoding == UTF_16LE || encoding == UTF_16BE)
+		{
+			// convert utf-16 to utf-8
+			size_t utf8Size = Utf8Length(data, dataSize, encoding);
+			char* utf8Out = new char[utf8Size];
+			size_t utf8Len = Utf16ToUtf8(data, dataSize, encoding, firstBlock, utf8Out);
+			assert(utf8Len == utf8Size);
+			in << string(utf8Out, utf8Len);
+			delete []utf8Out;
+		}
+		else
+			in << string(data, dataSize);
+		fin.read(data, sizeof(data));
+		if (fin.bad())
+			error("Cannot read input file", fileName_.c_str());
+		dataSize = static_cast<size_t>(fin.gcount());
+		firstBlock = false;
+	}
+	fin.close();
+	return encoding;
 }
 
 void ASConsole::setIsFormattedOnly(bool state)
@@ -796,9 +824,12 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		        || (findFileData.dwFileAttributes & FILE_ATTRIBUTE_READONLY))
 			continue;
 
-		// if a sub directory and recursive, save sub directory
-		if ((findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) && isRecursive)
+		// is this a sub directory
+		if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
+			if (!isRecursive)
+				continue;
+			// if a sub directory and recursive, save sub directory
 			string subDirectoryPath = directory + g_fileSeparator + findFileData.cFileName;
 			if (isPathExclued(subDirectoryPath))
 				printMsg("exclude " + subDirectoryPath.substr(mainDirectoryLength));
@@ -1059,30 +1090,6 @@ string ASConsole::getNumberFormat(int num, const char* groupingArg, const char* 
 
 #endif  // _WIN32
 
-// check files for 16 or 32 bit encoding
-// the file must have a Byte Order Mark (BOM)
-// NOTE: some string functions don't work with NULLs (e.g. length())
-FileEncoding ASConsole::getFileEncoding(ifstream& in) const
-{
-	// BOM max is 4 bytes
-	char buff[4] = {'\0'};
-	in.read(buff, 4);
-	in.seekg(0);
-
-	FileEncoding encoding = ENCODING_OK;
-
-	if (memcmp(buff, "\x00\x00\xFE\xFF", 4) == 0)
-		encoding = UTF_32BE;
-	else if (memcmp(buff, "\xFF\xFE\x00\x00", 4) == 0)
-		encoding = UTF_32LE;
-	else if (memcmp(buff, "\xFE\xFF", 2) == 0)
-		encoding = UTF_16BE;
-	else if (memcmp(buff, "\xFF\xFE", 2) == 0)
-		encoding = UTF_16LE;
-
-	return encoding;
-}
-
 // get individual file names from the command-line file path
 void ASConsole::getFilePaths(string& filePath)
 {
@@ -1144,9 +1151,8 @@ void ASConsole::getFilePaths(string& filePath)
 		// verify a single file is not a directory (needed on Linux)
 		string entryFilepath = targetDirectory + g_fileSeparator + targetFilename;
 		struct stat statbuf;
-		if (stat(entryFilepath.c_str(), &statbuf) == 0 && !(statbuf.st_mode & S_IFREG))
-			error("Entry is not a file:", targetFilename.c_str());
-		fileName.push_back(entryFilepath);
+		if (stat(entryFilepath.c_str(), &statbuf) == 0 && (statbuf.st_mode & S_IFREG))
+			fileName.push_back(entryFilepath);
 	}
 
 	if (hasWildcard)
@@ -1850,6 +1856,13 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 	printf("%s lines\n", lines.c_str());
 }
 
+void ASConsole::sleep(int seconds) const
+{
+	clock_t endwait;
+	endwait = clock_t (clock () + seconds * CLOCKS_PER_SEC);
+	while (clock() < endwait) {}
+}
+
 bool ASConsole::stringEndsWith(const string& str, const string& suffix) const
 {
 	int strIndex = (int) str.length() - 1;
@@ -1869,6 +1882,19 @@ bool ASConsole::stringEndsWith(const string& str, const string& suffix) const
 	return true;
 }
 
+// Swap the two low order bytes of an integer value
+// and convert 8 bit encoding to 16 bit.
+int ASConsole::swap8to16bit(int value) const
+{
+	return ( ((value & 0xFF) << 8) + (value >> 8) );
+}
+
+// Swap the two low order bytes of a 16 bit integer value.
+int ASConsole::swap16bit(int value) const
+{
+	return ( ((value & 0xff) << 8) | ((value & 0xff00) >> 8) );
+}
+
 void ASConsole::updateExcludeVector(string suffixParam)
 {
 	excludeVector.push_back(suffixParam);
@@ -1876,11 +1902,272 @@ void ASConsole::updateExcludeVector(string suffixParam)
 	excludeHitsVector.push_back(false);
 }
 
-void ASConsole::sleep(int seconds) const
+// Adapted from SciTE UniConversion.cxx.
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// The SciTe License.txt file describes the license conditions.
+// Modified for Artistic Style by Jim Pattee.
+//
+// Compute the length of an output utf-8 file given a utf-16 file.
+// Input tlen is the size in BYTES (not wchar_t).
+size_t ASConsole::Utf8Length(const char* data, size_t tlen, FileEncoding encoding) const
 {
-	clock_t endwait;
-	endwait = clock_t (clock () + seconds * CLOCKS_PER_SEC);
-	while (clock() < endwait) {}
+	enum { SURROGATE_LEAD_FIRST = 0xD800 };
+	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
+
+	size_t len = 0;
+	size_t wcharLen = tlen / 2;
+	const short* uptr = reinterpret_cast<const short*>(data);
+	for (size_t i = 0; i < wcharLen && uptr[i];)
+	{
+		size_t uch = encoding == UTF_16BE ? swap16bit(uptr[i]) : uptr[i];
+		if (uch < 0x80)
+		{
+			len++;
+		}
+		else if (uch < 0x800)
+		{
+			len += 2;
+		}
+		else if ((uch >= SURROGATE_LEAD_FIRST) && (uch <= SURROGATE_TRAIL_LAST))
+		{
+			len += 4;
+			i++;
+		}
+		else
+		{
+			len += 3;
+		}
+		i++;
+	}
+	return len;
+}
+
+// Adapted from SciTE Utf8_16.cxx.
+// Copyright (C) 2002 Scott Kirkwood.
+// The SciTe License.txt file describes the license conditions.
+// Modified for Artistic Style by Jim Pattee.
+size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding, char* utf16Out) const
+{
+	typedef unsigned short utf16;	// 16 bits
+	typedef unsigned char  ubyte;	// 8 bits
+	enum { SURROGATE_LEAD_FIRST = 0xD800 };
+	enum { SURROGATE_LEAD_LAST = 0xDBFF };
+	enum { SURROGATE_TRAIL_FIRST = 0xDC00 };
+	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
+	enum { SURROGATE_FIRST_VALUE = 0x10000 };
+	enum eState { eStart, eSecondOf4Bytes, ePenultimate, eFinal };
+
+	int nCur = 0;
+	ubyte* pRead = reinterpret_cast<ubyte*>(utf8In);
+	utf16* pCur = reinterpret_cast<utf16*>(utf16Out);
+	const ubyte* pEnd = pRead + inLen;
+	const utf16* pCurStart = pCur;
+	eState eState = eStart;
+
+	// the BOM will automaticallt be converted to utf-16
+	while (pRead < pEnd)
+	{
+		switch (eState)
+		{
+		case eStart:
+			if ((0xF0 & *pRead) == 0xF0)
+			{
+				nCur = (0x7 & *pRead) << 18;
+				eState = eSecondOf4Bytes;
+			}
+			else if ((0xE0 & *pRead) == 0xE0)
+			{
+				nCur = (~0xE0 & *pRead) << 12;
+				eState = ePenultimate;
+			}
+			else if ((0xC0 & *pRead) == 0xC0)
+			{
+				nCur = (~0xC0 & *pRead) << 6;
+				eState = eFinal;
+			}
+			else
+			{
+				nCur = *pRead;
+				eState = eStart;
+			}
+			break;
+		case eSecondOf4Bytes:
+			nCur |= (0x3F & *pRead) << 12;
+			eState = ePenultimate;
+			break;
+		case ePenultimate:
+			nCur |= (0x3F & *pRead) << 6;
+			eState = eFinal;
+			break;
+		case eFinal:
+			nCur |= (0x3F & *pRead);
+			eState = eStart;
+			break;
+		default:
+			error("Bad eState value", "Utf8ToUtf16()");
+		}
+		++pRead;
+
+		if (eState == eStart)
+		{
+			int codePoint = nCur;
+			if (codePoint >= SURROGATE_FIRST_VALUE)
+			{
+				codePoint -= SURROGATE_FIRST_VALUE;
+				int lead = (codePoint >> 10) + SURROGATE_LEAD_FIRST;
+				*pCur++ = static_cast<utf16>((encoding == UTF_16BE) ?
+				                             swap8to16bit(lead) : lead);
+				int trail = (codePoint & 0x3ff) + SURROGATE_TRAIL_FIRST;
+				*pCur++ = static_cast<utf16>((encoding == UTF_16BE) ?
+				                             swap8to16bit(trail) : trail);
+			}
+			else
+			{
+				*pCur++ = static_cast<utf16>((encoding == UTF_16BE) ?
+				                             swap8to16bit(codePoint) : codePoint);
+			}
+		}
+	}
+	// return value is the output length in BYTES (not wchar_t)
+	return (pCur - pCurStart) * 2;
+}
+
+// Adapted from SciTE UniConversion.cxx.
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// The SciTe License.txt file describes the license conditions.
+// Modified for Artistic Style by Jim Pattee.
+//
+// Compute the length of an output utf-16 file given a utf-8 file.
+// Return value is the size in BYTES (not wchar_t).
+size_t ASConsole::Utf16Length(const char* data, size_t len) const
+{
+	size_t ulen = 0;
+	size_t charLen;
+	for (size_t i = 0; i < len;)
+	{
+		unsigned char ch = static_cast<unsigned char>(data[i]);
+		if (ch < 0x80)
+			charLen = 1;
+		else if (ch < 0x80 + 0x40 + 0x20)
+			charLen = 2;
+		else if (ch < 0x80 + 0x40 + 0x20 + 0x10)
+			charLen = 3;
+		else
+		{
+			charLen = 4;
+			ulen++;
+		}
+		i += charLen;
+		ulen++;
+	}
+	// return value is the length in bytes (not wchar_t)
+	return ulen * 2;
+}
+
+// Adapted from SciTE Utf8_16.cxx.
+// Copyright (C) 2002 Scott Kirkwood.
+// The SciTe License.txt file describes the license conditions.
+// Modified for Artistic Style by Jim Pattee.
+size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding,
+                              bool firstBlock, char* utf8Out) const
+{
+	typedef unsigned short utf16;	// 16 bits
+	typedef unsigned char  ubyte;	// 8 bits
+	enum { SURROGATE_LEAD_FIRST = 0xD800 };
+	enum { SURROGATE_LEAD_LAST = 0xDBFF };
+	enum { SURROGATE_TRAIL_FIRST = 0xDC00 };
+	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
+	enum { SURROGATE_FIRST_VALUE = 0x10000 };
+	enum eState { eStart, eSecondOf4Bytes, ePenultimate, eFinal };
+
+	int nCur16 = 0;
+	int nCur = 0;
+	ubyte* pRead = reinterpret_cast<ubyte*>(utf16In);
+	ubyte* pCur = reinterpret_cast<ubyte*>(utf8Out);
+	const ubyte* pEnd = pRead + inLen;
+	const ubyte* pCurStart = pCur;
+	static eState eState = eStart;	// eState is retained for subsequent blocks
+	if (firstBlock)
+		eState = eStart;
+
+	// the BOM will automaticallt be converted to utf-8
+	while (pRead < pEnd)
+	{
+		switch (eState)
+		{
+		case eStart:
+			if (pRead >= pEnd)
+			{
+				++pRead;
+				break;
+			}
+			if (encoding == UTF_16LE)
+			{
+				nCur16 = *pRead++;
+				nCur16 |= static_cast<utf16>(*pRead << 8);
+			}
+			else
+			{
+				nCur16 = static_cast<utf16>(*pRead++ << 8);
+				nCur16 |= *pRead;
+			}
+			if (nCur16 >= SURROGATE_LEAD_FIRST && nCur16 <= SURROGATE_LEAD_LAST)
+			{
+				++pRead;
+				int trail;
+				if (encoding == UTF_16LE)
+				{
+					trail = *pRead++;
+					trail |= static_cast<utf16>(*pRead << 8);
+				}
+				else
+				{
+					trail = static_cast<utf16>(*pRead++ << 8);
+					trail |= *pRead;
+				}
+				nCur16 = (((nCur16 & 0x3ff) << 10) | (trail & 0x3ff)) + SURROGATE_FIRST_VALUE;
+			}
+			++pRead;
+
+			if (nCur16 < 0x80)
+			{
+				nCur = static_cast<ubyte>(nCur16 & 0xFF);
+				eState = eStart;
+			}
+			else if (nCur16 < 0x800)
+			{
+				nCur = static_cast<ubyte>(0xC0 | (nCur16 >> 6));
+				eState = eFinal;
+			}
+			else if (nCur16 < SURROGATE_FIRST_VALUE)
+			{
+				nCur = static_cast<ubyte>(0xE0 | (nCur16 >> 12));
+				eState = ePenultimate;
+			}
+			else
+			{
+				nCur = static_cast<ubyte>(0xF0 | (nCur16 >> 18));
+				eState = eSecondOf4Bytes;
+			}
+			break;
+		case eSecondOf4Bytes:
+			nCur = static_cast<ubyte>(0x80 | ((nCur16 >> 12) & 0x3F));
+			eState = ePenultimate;
+			break;
+		case ePenultimate:
+			nCur = static_cast<ubyte>(0x80 | ((nCur16 >> 6) & 0x3F));
+			eState = eFinal;
+			break;
+		case eFinal:
+			nCur = static_cast<ubyte>(0x80 | (nCur16 & 0x3F));
+			eState = eStart;
+			break;
+		default:
+			error("Bad eState value", "Utf16ToUtf8()");
+		}
+		*pCur++ = static_cast<ubyte>(nCur);
+	}
+	return pCur - pCurStart;
 }
 
 int ASConsole::waitForRemove(const char* newFileName) const
@@ -1959,7 +2246,7 @@ int ASConsole::wildcmp(const char* wild, const char* data) const
 	return !*wild;
 }
 
-void ASConsole::writeOutputFile(const string& fileName_, ostringstream& out) const
+void ASConsole::writeFile(const string& fileName_, FileEncoding encoding, ostringstream& out) const
 {
 	// save date accessed and date modified of original file
 	struct stat stBuf;
@@ -1979,7 +2266,19 @@ void ASConsole::writeOutputFile(const string& fileName_, ostringstream& out) con
 	ofstream fout(fileName_.c_str(), ios::binary | ios::trunc);
 	if (!fout)
 		error("Cannot open output file", fileName_.c_str());
-	fout << out.str();
+	if (encoding == UTF_16LE || encoding == UTF_16BE)
+	{
+		// convert utf-8 to utf-16
+		size_t utf16Size = Utf16Length(out.str().c_str(), out.str().length());
+		char* utf16Out = new char[utf16Size];
+		size_t utf16Len = Utf8ToUtf16(const_cast<char*>(out.str().c_str()), out.str().length(), encoding, utf16Out);
+		assert(utf16Len == utf16Size);
+		fout << string(utf16Out, utf16Len);
+		delete []utf16Out;
+	}
+	else
+		fout << out.str();
+
 	fout.close();
 
 	// change date modified to original file date

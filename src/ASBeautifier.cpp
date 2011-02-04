@@ -1024,14 +1024,14 @@ string ASBeautifier::beautify(const string& originalLine)
 }
 
 
-string ASBeautifier::preLineWS(int spaceTabCount, int tabCount)
+string ASBeautifier::preLineWS(int spaceTabCount_, int tabCount_)
 {
 	string ws;
 
-	for (int i = 0; i < tabCount; i++)
+	for (int i = 0; i < tabCount_; i++)
 		ws += indentString;
 
-	while ((spaceTabCount--) > 0)
+	while ((spaceTabCount_--) > 0)
 		ws += string(" ");
 
 	return ws;
@@ -1060,7 +1060,7 @@ bool ASBeautifier::isClassAccessModifier(const string& line) const
 /**
  * register an in-statement indent.
  */
-void ASBeautifier::registerInStatementIndent(const string& line, int i, int spaceTabCount,
+void ASBeautifier::registerInStatementIndent(const string& line, int i, int spaceTabCount_,
         int tabIncrementIn, int minIndent, bool updateParenStack)
 {
 	int inStatementIndent;
@@ -1070,13 +1070,13 @@ void ASBeautifier::registerInStatementIndent(const string& line, int i, int spac
 	// if indent is around the last char in the line, indent instead one indent from the previous indent
 	if (nextNonWSChar == remainingCharNum)
 	{
-		int previousIndent = spaceTabCount;
+		int previousIndent = spaceTabCount_;
 		if (!inStatementIndentStack->empty())
 			previousIndent = inStatementIndentStack->back();
 		int currIndent = /*2*/ indentLength + previousIndent;
 		if (currIndent > maxInStatementIndent
 		        && line[i] != '{')
-			currIndent = indentLength * 2 + spaceTabCount;
+			currIndent = indentLength * 2 + spaceTabCount_;
 		inStatementIndentStack->push_back(currIndent);
 		if (updateParenStack)
 			parenIndentStack->push_back(previousIndent);
@@ -1084,7 +1084,7 @@ void ASBeautifier::registerInStatementIndent(const string& line, int i, int spac
 	}
 
 	if (updateParenStack)
-		parenIndentStack->push_back(i + spaceTabCount - horstmannIndentInStatement);
+		parenIndentStack->push_back(i + spaceTabCount_ - horstmannIndentInStatement);
 
 	int tabIncrement = tabIncrementIn;
 
@@ -1095,23 +1095,23 @@ void ASBeautifier::registerInStatementIndent(const string& line, int i, int spac
 			tabIncrement += convertTabToSpaces(j, tabIncrement);
 	}
 
-	inStatementIndent = i + nextNonWSChar + spaceTabCount + tabIncrement;
+	inStatementIndent = i + nextNonWSChar + spaceTabCount_ + tabIncrement;
 
 	// check for run-in statement
 	if (i > 0 && line[0] == '{')
 		inStatementIndent -= indentLength;
 
 //	if (i + nextNonWSChar < minIndent)
-//		inStatementIndent = minIndent + spaceTabCount;
+//		inStatementIndent = minIndent + spaceTabCount_;
 
 	if (inStatementIndent < minIndent)
-		inStatementIndent = minIndent + spaceTabCount;
+		inStatementIndent = minIndent + spaceTabCount_;
 
 //	if (i + nextNonWSChar > maxInStatementIndent)
-//		inStatementIndent =  indentLength * 2 + spaceTabCount;
+//		inStatementIndent =  indentLength * 2 + spaceTabCount_;
 
 	if (inStatementIndent > maxInStatementIndent)
-		inStatementIndent = indentLength * 2 + spaceTabCount;
+		inStatementIndent = indentLength * 2 + spaceTabCount_;
 
 	if (!inStatementIndentStack->empty() &&
 	        inStatementIndent < inStatementIndentStack->back())
@@ -2343,7 +2343,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 				// do nothing special
 			}
 
-			else if (isCStyle() && isdigit(peekNextChar(line, i)))
+			else if (isCStyle() && isDigit(peekNextChar(line, i)))
 			{
 				// found a bit field
 				// so do nothing special

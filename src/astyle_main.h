@@ -176,11 +176,11 @@ class ASConsole
 
 		// functions
 		void convertLineEnds(ostringstream& out, int lineEnd);
+		FileEncoding detectEncoding(const char* data, size_t dataSize, const string& fileName) const;
 		void error() const;
 		void error(const char* why, const char* what) const;
 		void formatCinToCout() const;
 		vector<string> getArgvOptions(int argc, char** argv) const;
-		FileEncoding getFileEncoding(ifstream& in) const;
 		bool fileNameVectorIsEmpty();
 		int  getFilesFormatted();
 		int  getFilesUnchanged();
@@ -211,6 +211,10 @@ class ASConsole
 		void standardizePath(string& path, bool removeBeginningSeparator=false) const;
 		bool stringEndsWith(const string& str, const string& suffix) const;
 		void updateExcludeVector(string suffixParam);
+		size_t Utf8Length(const char* data, size_t len, FileEncoding encoding) const;
+		size_t Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding, char* utf16Out) const;
+		size_t Utf16Length(const char* data, size_t len) const;
+		size_t Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding, bool firstBlock, char* utf8Out) const;
 		void verifyCinPeek() const;
 
 		// for unit testing
@@ -234,19 +238,21 @@ class ASConsole
 		bool isOption(const string& arg, const char* op1, const char* op2);
 		bool isParamOption(const string& arg, const char* option);
 		bool isPathExclued(const string& subPath);
-		void printBadEncoding(FileEncoding encoding) const;
 		void printHelp() const;
 		void printMsg(const string& msg) const;
 		void printSeparatingLine() const;
 		void printVerboseHeader() const;
 		void printVerboseStats(clock_t startTime) const;
+		FileEncoding readFile(const string& fileName, stringstream& in) const;
 		void removeFile(const char* fileName_, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;
 		void setOutputEOL(LineEndFormat lineEndFormat, const char* currentEOL);
 		void sleep(int seconds) const;
+		int  swap8to16bit(int value) const;
+		int  swap16bit(int value) const;
 		int  waitForRemove(const char* oldFileName) const;
 		int  wildcmp(const char* wild, const char* data) const;
-		void writeOutputFile(const string& fileName_, ostringstream& out) const;
+		void writeFile(const string& fileName_, FileEncoding encoding, ostringstream& out) const;
 #ifdef _WIN32
 		void displayLastError();
 #endif

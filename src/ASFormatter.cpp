@@ -1067,7 +1067,7 @@ string ASFormatter::nextLine()
 			         && previousCommandChar != ')'  // not immediately after closing paren of a method header, e.g. ASFormatter::ASFormatter(...) : ASBeautifier(...)
 			         && previousChar != ':'         // not part of '::'
 			         && peekNextChar() != ':'       // not part of '::'
-			         && !isdigit(peekNextChar())    // not a bit field
+			         && !isDigit(peekNextChar())    // not a bit field
 			         && !isInAsm                    // not in extended assembler
 			         && !isInAsmOneLine             // not in extended assembler
 			         && !isInAsmBlock)              // not in extended assembler
@@ -1790,7 +1790,7 @@ void ASFormatter::initNewLine()
 	{
 		// replace leading tabs with spaces
 		// so that continuation indent will be spaces
-		size_t tabCount = 0;
+		size_t tabCount_ = 0;
 		size_t i;
 		for (i = 0; i < currentLine.length(); i++)
 		{
@@ -1798,9 +1798,9 @@ void ASFormatter::initNewLine()
 				break;
 			if (currentLine[i] == '\t')
 			{
-				size_t numSpaces = indent - ((tabCount + i) % indent);
+				size_t numSpaces = indent - ((tabCount_ + i) % indent);
 				currentLine.replace(i, 1, numSpaces, ' ');
-				tabCount++;
+				tabCount_++;
 				i += indent - 1;
 			}
 		}
@@ -2070,8 +2070,8 @@ bool ASFormatter::isPointerOrReference() const
 	char nextChar = peekNextChar();
 
 	// check for preceding or following numeric values
-	if (isdigit(lastWord[0])
-	        || isdigit(nextChar)
+	if (isDigit(lastWord[0])
+	        || isDigit(nextChar)
 	        || nextChar == '!')
 		return false;
 
@@ -2283,7 +2283,7 @@ bool ASFormatter::isInExponent() const
 		char prevFormattedChar = formattedLine[formattedLineLength - 1];
 
 		return ((prevFormattedChar == 'e' || prevFormattedChar == 'E')
-		        && (prevPrevFormattedChar == '.' || isdigit(prevPrevFormattedChar)));
+		        && (prevPrevFormattedChar == '.' || isDigit(prevPrevFormattedChar)));
 	}
 	else
 		return false;

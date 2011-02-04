@@ -21,7 +21,11 @@
         Artistic Style 2.02&nbsp; (pending)</h3>
 
     <ul>
-        <li>Fix Linux infinite loop when a directory name is entered instead of a file name.&nbsp;</li>
+        <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16.</li>
+        <li>Add isDigit() function to avoid the assert statements in Visual C.</li>
+        <li>Change to abort if UTF-32 files are detected.</li>
+        <li>Fix Linux infinite loop when a directory name is entered instead of a file name.&nbsp; </li>
+        <li>Fix trying to process directories as files when a wildcard is used without recursive.&nbsp;</li>
         <li>Refactor to aid debugging, improve speed, and improve the design and decomposition:
             <ul>
                 <li>Extract method processProcessor() from beautify() in ASBeautifier. </li>

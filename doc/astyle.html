@@ -172,11 +172,12 @@
         hanging indent format is used. If the "exec sql" statement is indented more than the following statements, the
         SQL will be aligned in a single column.</p>
     <p>
-        Files encoded as UTF&#8209;16 or UTF&#8209;32 will NOT be formatted. These are left unchanged and a warning message
-        is displayed. Some compilers do not support these encodings. Other compilers must have a Byte-Order-Mark (BOM)
-        to recognize the encoding. To use Artistic Style the files can be converted to the newer UTF&#8209;8 encoding
-        with the program iconv. There are Linux and Windows versions available. A sample command line is "iconv &#8209;f
-        &nbsp;UTF&#8209;16 &#8209;t UTF&#8209;8 filein.cpp &gt;fileout.cpp. Visual Studio can convert the files from the
+        Unicode files encoded as UTF&#8209;16, both big and little endian, will be formatted. The files must begin with
+        a byte order mark (BOM)
+        to be recognized.
+        Files encoded as UTF&#8209;32 will be rejected. Some compilers do not support these encodings. These files can be converted to UTF&#8209;8 encoding
+        with the program iconv. There are Linux and Windows versions available (the Windows version does not seem to work for all encodings). A sample command line is "iconv &#8209;f
+        &nbsp;UTF&#8209;16 &#8209;t UTF&#8209;8 &lt; filein.cpp &gt; fileout.cpp. Visual Studio can convert the files from the
         "File &gt; Advanced Save Options" menu. Select encoding "Unicode (UTF&#8209;8 with signature) - Codepage 65001".
         There are other development environments and text editors, such as SciTE, that can convert files to UTF&#8209;8.
     </p>
