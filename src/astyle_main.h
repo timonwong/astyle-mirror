@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   astyle_main.h
  *
  *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
@@ -176,7 +177,7 @@ class ASConsole
 
 		// functions
 		void convertLineEnds(ostringstream& out, int lineEnd);
-		FileEncoding detectEncoding(const char* data, size_t dataSize, const string& fileName) const;
+		FileEncoding detectEncoding(const char* data, size_t dataSize) const;
 		void error() const;
 		void error(const char* why, const char* what) const;
 		void formatCinToCout() const;

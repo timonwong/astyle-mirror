@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   astyle_main.cpp
  *
  *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
@@ -32,7 +33,9 @@
 #include <sstream>
 #include <cstdlib>
 #include <errno.h>
-#include <locale.h> // needed by some compilers (digital mars)
+#ifdef __DMC__
+#include <locale.h>
+#endif
 
 // includes for recursive getFileNames() function
 #ifdef _WIN32
@@ -384,14 +387,14 @@ void ASConsole::correctMixedLineEnds(ostringstream& out)
 // check files for 16 or 32 bit encoding
 // the file must have a Byte Order Mark (BOM)
 // NOTE: some string functions don't work with NULLs (e.g. length())
-FileEncoding ASConsole::detectEncoding(const char* data, size_t dataSize, const string& fileName_) const
+FileEncoding ASConsole::detectEncoding(const char* data, size_t dataSize) const
 {
 	FileEncoding encoding = ENCODING_8BIT;
 
 	if (dataSize >= 4 && memcmp(data, "\x00\x00\xFE\xFF", 4) == 0)
-		error("Cannot process UTF-32 BE encoding", fileName_.c_str());
+		encoding = UTF_32BE;
 	else if (dataSize >= 4 && memcmp(data, "\xFF\xFE\x00\x00", 4) == 0)
-		error("Cannot process UTF-32 LE encoding", fileName_.c_str());
+		encoding = UTF_32LE;
 	else if (dataSize >= 2 && memcmp(data, "\xFE\xFF", 2) == 0)
 		encoding = UTF_16BE;
 	else if (dataSize >= 2 && memcmp(data, "\xFF\xFE", 2) == 0)
@@ -451,8 +454,8 @@ void ASConsole::formatCinToCout() const
  */
 void ASConsole::verifyCinPeek() const
 {
-	streamoff currPos = cin.tellg();
-	if (currPos == -1)
+	size_t currPos = cin.tellg();
+	if ((int)currPos == -1)
 	{
 		(*_err) << "Cannot process the input stream." << endl;
 		error();
@@ -470,8 +473,6 @@ void ASConsole::formatFile(const string& fileName_)
 	stringstream in;
 	ostringstream out;
 	FileEncoding encoding = readFile(fileName_, in);
-	ASStreamIterator<istream> streamIterator(&in);
-	formatter.init(&streamIterator);
 
 	// Unless a specific language mode has been set, set the language mode
 	// according to the file's suffix.
@@ -490,6 +491,9 @@ void ASConsole::formatFile(const string& fileName_)
 	filesAreIdentical = true;		// input and output files are identical
 	LineEndFormat lineEndFormat = formatter.getLineEndFormat();
 	initializeOutputEOL(lineEndFormat);
+	// do this AFTER setting the file mode
+	ASStreamIterator<stringstream> streamIterator(&in);
+	formatter.init(&streamIterator);
 
 	// format the file
 	while (formatter.hasMoreLines())
@@ -673,7 +677,9 @@ FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) cons
 	if (fin.bad())
 		error("Cannot read input file", fileName_.c_str());
 	size_t dataSize = static_cast<size_t>(fin.gcount());
-	FileEncoding encoding = detectEncoding(data, dataSize, fileName_);
+	FileEncoding encoding = detectEncoding(data, dataSize);
+	if (encoding ==  UTF_32BE || encoding ==  UTF_32LE)
+		error("Cannot process UTF-32 encoding", fileName_.c_str());
 	bool firstBlock = true;
 	while (dataSize)
 	{

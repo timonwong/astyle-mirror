@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   ASFormatter.cpp
  *
  *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
@@ -33,16 +34,6 @@
 
 namespace astyle
 {
-// static member variables
-int ASFormatter::formatterFileType = 9;		// initialized with an invalid type
-vector<const string*>* ASFormatter::headers = NULL;
-vector<const string*>* ASFormatter::nonParenHeaders = NULL;
-vector<const string*>* ASFormatter::preDefinitionHeaders = NULL;
-vector<const string*>* ASFormatter::preCommandHeaders = NULL;
-vector<const string*>* ASFormatter::operators = NULL;
-vector<const string*>* ASFormatter::assignmentOperators = NULL;
-vector<const string*>* ASFormatter::castOperators = NULL;
-
 /**
  * Constructor of ASFormatter
  */
@@ -76,15 +67,15 @@ ASFormatter::ASFormatter()
 	shouldAddBrackets = false;
 	shouldAddOneLineBrackets = false;
 
-	// initialize ASFormatter static member vectors
+	// initialize ASFormatter member vectors
 	formatterFileType = 9;		// reset to an invalid type
-	initVector(headers);
-	initVector(nonParenHeaders);
-	initVector(preDefinitionHeaders);
-	initVector(preCommandHeaders);
-	initVector(operators);
-	initVector(assignmentOperators);
-	initVector(castOperators);
+	headers = new vector<const string*>;
+	nonParenHeaders = new vector<const string*>;
+	preDefinitionHeaders = new vector<const string*>;
+	preCommandHeaders = new vector<const string*>;
+	operators = new vector<const string*>;
+	assignmentOperators = new vector<const string*>;
+	castOperators = new vector<const string*>;
 
 	// the following prevents warning messages with cppcheck
 	// it will NOT compile if activated
@@ -102,20 +93,19 @@ ASFormatter::~ASFormatter()
 	deleteContainer(parenStack);
 	deleteContainer(structStack);
 
-	// delete static member vectors using swap to eliminate memory leak reporting
-	// delete ASFormatter static member vectors
+	// delete ASFormatter member vectors
 	formatterFileType = 9;		// reset to an invalid type
-	deleteVector(headers);
-	deleteVector(nonParenHeaders);
-	deleteVector(preDefinitionHeaders);
-	deleteVector(preCommandHeaders);
-	deleteVector(operators);
-	deleteVector(assignmentOperators);
-	deleteVector(castOperators);
+	delete headers;
+	delete nonParenHeaders;
+	delete preDefinitionHeaders;
+	delete preCommandHeaders;
+	delete operators;
+	delete assignmentOperators;
+	delete castOperators;
 
-	// delete ASBeautifier static member vectors
+	// delete ASBeautifier member vectors
 	// must be done when the ASFormatter object is deleted (not ASBeautifier)
-	ASBeautifier::deleteStaticVectors();
+	ASBeautifier::deleteBeautifierVectors();
 
 	delete enhancer;
 }
@@ -4751,6 +4741,10 @@ int ASFormatter::getChecksumDiff() const
 {
 	return checksumOut - checksumIn;
 }
+
+// for unit testing
+int ASFormatter::getFormatterFileType() const
+{ return formatterFileType; }
 
 
 }   // end namespace astyle

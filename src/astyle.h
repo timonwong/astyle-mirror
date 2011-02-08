@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   astyle.h
  *
  *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
@@ -122,8 +123,10 @@ enum MinConditional { MINCOND_ZERO = 0,
 
 enum FileEncoding { ENCODING_8BIT,
                     UTF_16BE,
-                    UTF_16LE
-                  };
+                    UTF_16LE,
+                    UTF_32BE,
+                    UTF_32LE
+};
 
 enum LineEndFormat { LINEEND_DEFAULT,	// Use line break that matches most of the file
                      LINEEND_WINDOWS,
@@ -300,8 +303,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		virtual void init(ASSourceIterator* iter);
 		void init();
 		virtual string beautify(const string& line);
-		void deleteVector(vector<const string*>*& container);
-		void initVector(vector<const string*>*& container);
 		void setTabIndentation(int length = 4, bool forceTabs = false);
 		void setSpaceIndentation(int length = 4);
 		void setMaxInStatementIndentLength(int max);
@@ -321,6 +322,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setSharpStyle();
 		void setEmptyLineFill(bool state);
 		void setPreprocessorIndent(bool state);
+		int  getBeautifierFileType() const;
 		int  getFileType();
 		int  getIndentLength(void);
 		string getIndentString(void);
@@ -337,7 +339,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getSwitchIndent(void);
 
 	protected:
-		void deleteStaticVectors();
+		void deleteBeautifierVectors();
 		const string* findHeader(const string& line, int i,
 		                         const vector<const string*>* possibleHeaders) const;
 		const string* findOperator(const string& line, int i,
@@ -362,36 +364,13 @@ class ASBeautifier : protected ASResource, protected ASBase
 		ASBeautifier(const ASBeautifier& copy);
 		ASBeautifier& operator=(ASBeautifier&);        // not to be implemented
 
-		void initStatic();
 		void computePreliminaryIndentation();
 		void parseCurrentLine(const string& line);
 		void processProcessor(string& line);
 		void registerInStatementIndent(const string& line, int i, int spaceTabCount,
 		                               int tabIncrementIn, int minIndent, bool updateParenStack);
+		void initVectors();
 		string preLineWS(int spaceTabCount_, int tabCount_);
-
-		static int beautifierFileType;
-		static vector<const string*>* headers;
-		static vector<const string*>* nonParenHeaders;
-		static vector<const string*>* preBlockStatements;
-		static vector<const string*>* assignmentOperators;
-		static vector<const string*>* nonAssignmentOperators;
-		static vector<const string*>* indentableHeaders;
-
-		ASSourceIterator* sourceIterator;
-		vector<ASBeautifier*> *waitingBeautifierStack;
-		vector<ASBeautifier*> *activeBeautifierStack;
-		vector<int> *waitingBeautifierStackLengthStack;
-		vector<int> *activeBeautifierStackLengthStack;
-		vector<const string*> *headerStack;
-		vector< vector<const string*>* > *tempStacks;
-		vector<int> *blockParenDepthStack;
-		vector<bool> *blockStatementStack;
-		vector<bool> *parenStatementStack;
-		vector<bool> *bracketBlockStateStack;
-		vector<int> *inStatementIndentStack;
-		vector<int> *inStatementIndentStackSizeStack;
-		vector<int> *parenIndentStack;
 		int  convertTabToSpaces(int i, int tabIncrementIn) const;
 		int  getInStatementIndentAssign(const string& line, size_t currPos) const;
 		int  getInStatementIndentComma(const string& line, size_t currPos) const;
@@ -405,11 +384,35 @@ class ASBeautifier : protected ASResource, protected ASBase
 		template<typename T> void initContainer(T& container, T value);
 
 	private:  // variables
-		string indentString;
+
+		int beautifierFileType;
+		vector<const string*>* headers;
+		vector<const string*>* nonParenHeaders;
+		vector<const string*>* preBlockStatements;
+		vector<const string*>* assignmentOperators;
+		vector<const string*>* nonAssignmentOperators;
+		vector<const string*>* indentableHeaders;
+
+		vector<ASBeautifier*> *waitingBeautifierStack;
+		vector<ASBeautifier*> *activeBeautifierStack;
+		vector<int> *waitingBeautifierStackLengthStack;
+		vector<int> *activeBeautifierStackLengthStack;
+		vector<const string*> *headerStack;
+		vector< vector<const string*>* > *tempStacks;
+		vector<int> *blockParenDepthStack;
+		vector<bool> *blockStatementStack;
+		vector<bool> *parenStatementStack;
+		vector<bool> *bracketBlockStateStack;
+		vector<int> *inStatementIndentStack;
+		vector<int> *inStatementIndentStackSizeStack;
+		vector<int> *parenIndentStack;
+
+		ASSourceIterator* sourceIterator;
 		const string* currentHeader;
 		const string* previousLastLineHeader;
 		const string* probationHeader;
 		const string* lastLineHeader;
+		string indentString;
 		bool isInQuote;
 		bool isInVerbatimQuote;
 		bool haveLineContinuationChar;
@@ -572,6 +575,7 @@ class ASFormatter : public ASBeautifier
 		size_t getChecksumIn() const;
 		size_t getChecksumOut() const;
 		int  getChecksumDiff() const;
+		int  getFormatterFileType() const;
 
 	private:  // functions
 		ASFormatter(const ASFormatter& copy);       // copy constructor not to be imlpemented
@@ -646,14 +650,14 @@ class ASFormatter : public ASBeautifier
 		string peekNextText(const string& firstLine, bool endOnEmptyLine=false, bool shouldReset=false) const;
 
 	private:  // variables
-		static int formatterFileType;
-		static vector<const string*>* headers;
-		static vector<const string*>* nonParenHeaders;
-		static vector<const string*>* preDefinitionHeaders;
-		static vector<const string*>* preCommandHeaders;
-		static vector<const string*>* operators;
-		static vector<const string*>* assignmentOperators;
-		static vector<const string*>* castOperators;
+		int formatterFileType;
+		vector<const string*>* headers;
+		vector<const string*>* nonParenHeaders;
+		vector<const string*>* preDefinitionHeaders;
+		vector<const string*>* preCommandHeaders;
+		vector<const string*>* operators;
+		vector<const string*>* assignmentOperators;
+		vector<const string*>* castOperators;
 
 		ASSourceIterator* sourceIterator;
 		ASEnhancer* enhancer;

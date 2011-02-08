@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *   ASBeautifier.cpp
  *
  *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
@@ -32,15 +33,6 @@
 
 namespace astyle
 {
-// static member variables
-int ASBeautifier::beautifierFileType = 9;		// initialized with an invalid type
-vector<const string*>* ASBeautifier::headers = NULL;
-vector<const string*>* ASBeautifier::nonParenHeaders = NULL;
-vector<const string*>* ASBeautifier::preBlockStatements;
-vector<const string*>* ASBeautifier::assignmentOperators = NULL;
-vector<const string*>* ASBeautifier::nonAssignmentOperators;
-vector<const string*>* ASBeautifier::indentableHeaders;
-
 
 /**
  * ASBeautifier's constructor
@@ -81,14 +73,14 @@ ASBeautifier::ASBeautifier()
 	setCStyle();
 	setPreprocessorIndent(false);
 
-	// initialize ASBeautifier static member vectors
+	// initialize ASBeautifier member vectors
 	beautifierFileType = 9;		// reset to an invalid type
-	initVector(headers);
-	initVector(nonParenHeaders);
-	initVector(assignmentOperators);
-	initVector(nonAssignmentOperators);
-	initVector(preBlockStatements);
-	initVector(indentableHeaders);
+	headers = new vector<const string*>;
+	nonParenHeaders = new vector<const string*>;
+	assignmentOperators = new vector<const string*>;
+	nonAssignmentOperators = new vector<const string*>;
+	preBlockStatements = new vector<const string*>;
+	indentableHeaders = new vector<const string*>;
 }
 
 /**
@@ -97,6 +89,11 @@ ASBeautifier::ASBeautifier()
  */
 ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 {
+	// Copy the vector objects to vectors in the new ASBeautifier 
+	// object so the new object can be destroyed without deleting
+	// the vector objects in the copied vector.
+	// This is the reason a copy constructor is needed.
+
 	// these don't need to copy the stack
 	waitingBeautifierStack = NULL;
 	activeBeautifierStack = NULL;
@@ -131,7 +128,16 @@ ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 	parenIndentStack = new vector<int>;
 	*parenIndentStack = *other.parenIndentStack;
 
-	sourceIterator = other.sourceIterator;
+	// Copy the pointers to vectors.
+	// This is ok because the original ASBeautifier object
+	// is not deleted until end of job.
+	beautifierFileType = other.beautifierFileType;
+	headers = other.headers;
+	nonParenHeaders = other.nonParenHeaders;
+	assignmentOperators = other.assignmentOperators;
+	nonAssignmentOperators = other.nonAssignmentOperators;
+	preBlockStatements = other.preBlockStatements;
+	indentableHeaders = other.indentableHeaders;
 
 	// protected variables
 	// variables set by ASFormatter
@@ -148,11 +154,12 @@ ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 	isInIndentableStruct = other.isInIndentableStruct;
 
 	// private variables
-	indentString = other.indentString;
+	sourceIterator = other.sourceIterator;
 	currentHeader = other.currentHeader;
 	previousLastLineHeader = other.previousLastLineHeader;
 	probationHeader = other.probationHeader;
 	lastLineHeader = other.lastLineHeader;
+	indentString = other.indentString;
 	isInQuote = other.isInQuote;
 	isInVerbatimQuote = other.isInVerbatimQuote;
 	haveLineContinuationChar = other.haveLineContinuationChar;
@@ -258,7 +265,7 @@ void ASBeautifier::init(ASSourceIterator* iter)
  */
 void ASBeautifier::init()
 {
-	initStatic();
+	initVectors();
 	ASBase::init(getFileType());
 
 	initContainer(waitingBeautifierStack, new vector<ASBeautifier*>);
@@ -346,9 +353,9 @@ void ASBeautifier::init()
 }
 
 /*
- * initialize the static vars
+ * initialize the vectors
  */
-void ASBeautifier::initStatic()
+void ASBeautifier::initVectors()
 {
 	if (fileType == beautifierFileType)    // don't build unless necessary
 		return;
@@ -1296,17 +1303,17 @@ vector<vector<const string*>*>* ASBeautifier::copyTempStacks(const ASBeautifier&
 }
 
 /**
- * delete a static member vector to eliminate memory leak reporting for the vector
+ * delete a member vectors to eliminate memory leak reporting
  */
-void ASBeautifier::deleteStaticVectors()
+void ASBeautifier::deleteBeautifierVectors()
 {
 	beautifierFileType = 9;		// reset to an invalid type
-	deleteVector(headers);
-	deleteVector(nonParenHeaders);
-	deleteVector(preBlockStatements);
-	deleteVector(assignmentOperators);
-	deleteVector(nonAssignmentOperators);
-	deleteVector(indentableHeaders);
+	delete headers;
+	delete nonParenHeaders;
+	delete preBlockStatements;
+	delete assignmentOperators;
+	delete nonAssignmentOperators;
+	delete indentableHeaders;
 }
 
 /**
@@ -1346,16 +1353,6 @@ void ASBeautifier::deleteContainer(vector<vector<const string*>*>* &container)
 }
 
 /**
- * delete a vector<const string*>* object
- */
-void ASBeautifier::deleteVector(vector<const string*>*& container)
-{
-	assert(container != NULL);
-	delete container;
-	container = NULL;
-}
-
-/**
  * initialize a vector object
  * T is the type of vector
  * used for all vectors
@@ -1368,15 +1365,6 @@ void ASBeautifier::initContainer(T& container, T value)
 	if (container != NULL )
 		deleteContainer(container);
 	container = value;
-}
-
-/**
- * initialize a vector<const string*>* object
- */
-void ASBeautifier::initVector(vector<const string*>*& container)
-{
-	assert(container == NULL);
-	container = new vector<const string*>;
 }
 
 /**
@@ -1618,6 +1606,10 @@ bool ASBeautifier::isIndentedPreprocessor(const string& line, size_t currPos) co
 	}
 	return false;
 }
+
+// for unit testing
+int ASBeautifier::getBeautifierFileType() const
+{ return beautifierFileType; }
 
 /**
  * Process preprocessor statements and update the beautifier stacks.
