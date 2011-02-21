@@ -190,9 +190,9 @@ string ASStreamIterator<T>::nextLine(bool emptyLineWasDeleted)
 			strcpy(outputEOL, "\r");    // MacOld (CR)
 	}
 	else if (eolLinux >= eolMacOld)
-		strcpy(outputEOL, "\n");    // Linux (LF)
+		strcpy(outputEOL, "\n");		// Linux (LF)
 	else
-		strcpy(outputEOL, "\r");    // MacOld (CR)
+		strcpy(outputEOL, "\r");		// MacOld (CR)
 
 	return buffer;
 }
@@ -454,8 +454,8 @@ void ASConsole::formatCinToCout() const
  */
 void ASConsole::verifyCinPeek() const
 {
-	size_t currPos = cin.tellg();
-	if ((int)currPos == -1)
+	int currPos = static_cast<int>(cin.tellg());
+	if (currPos == -1)
 	{
 		(*_err) << "Cannot process the input stream." << endl;
 		error();
@@ -1323,16 +1323,22 @@ void ASConsole::printHelp() const
 	(*_err) << "    Broken brackets, indented blocks, indent is 2 spaces.\n";
 	(*_err) << endl;
 	(*_err) << "    --style=linux  OR  -A8\n";
-	(*_err) << "    GNU style formatting/indenting.\n";
-	(*_err) << "    Linux brackets, indent is 8 spaces.\n";
+	(*_err) << "    Linux style formatting/indenting.\n";
+	(*_err) << "    Linux brackets, minimum conditional indent is one-half\n";
+	(*_err) << "    indent, and indent is 8 spaces.\n";
 	(*_err) << endl;
 	(*_err) << "    --style=horstmann  OR  -A9\n";
 	(*_err) << "    Horstmann style formatting/indenting.\n";
-	(*_err) << "    Horstmann brackets, indented switches, indent is 3 spaces.\n";
+	(*_err) << "    Run-in brackets, indented switches, indent is 3 spaces.\n";
 	(*_err) << endl;
 	(*_err) << "    --style=1tbs  OR  --style=otbs  OR  -A10\n";
 	(*_err) << "    One True Brace Style formatting/indenting.\n";
 	(*_err) << "    Linux brackets, add brackets to all conditionals.\n";
+	(*_err) << endl;
+	(*_err) << "    --style=pico  OR  -A11\n";
+	(*_err) << "    Pico style formatting/indenting.\n";
+	(*_err) << "    Run-in opening brackets and attached closing brackets.\n";
+	(*_err) << "    Uses keep one line blocks and keep one line statements.\n";
 	(*_err) << endl;
 	(*_err) << "Tab and Bracket Options:\n";
 	(*_err) << "------------------------\n";
@@ -1371,9 +1377,13 @@ void ASConsole::printHelp() const
 	(*_err) << "    --brackets=stroustrup  OR  -u\n";
 	(*_err) << "    Attach all brackets except function definition brackets.\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=horstmann  OR  -g\n";
+	(*_err) << "    --brackets=run-in  OR  -g\n";
 	(*_err) << "    Break brackets from pre-block code, but allow following\n";
 	(*_err) << "    run-in statements on the same line as an opening bracket.\n";
+	(*_err) << endl;
+	(*_err) << "    --brackets=horstmann\n";
+	(*_err) << "    THIS IS NO LONGER A VALID OPTION.\n";
+	(*_err) << "    Use style=horstmann or brackets=run-in instead.\n";
 	(*_err) << endl;
 	(*_err) << "Indentation options:\n";
 	(*_err) << "--------------------\n";
@@ -1391,10 +1401,12 @@ void ASConsole::printHelp() const
 	(*_err) << "    Case statements not enclosed in blocks are NOT indented.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent-brackets  OR  -B\n";
-	(*_err) << "    Add extra indentation to '{' and '}' block brackets.\n";
+	(*_err) << "    THIS IS NO LONGER A VALID OPTION.\n";
+	(*_err) << "    Use style=whitesmith or style=banner instead.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent-blocks  OR  -G\n";
-	(*_err) << "    Add extra indentation entire blocks (including brackets).\n";
+	(*_err) << "    THIS IS NO LONGER A VALID OPTION.\n";
+	(*_err) << "    Use style=gnu instead.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent-namespaces  OR  -N\n";
 	(*_err) << "    Indent the contents of namespace blocks.\n";
@@ -2363,11 +2375,12 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string& errorI
 
 void ASOptions::parseOption(const string& arg, const string& errorInfo)
 {
-	if ( isOption(arg, "style=allman") || isOption(arg, "style=ansi")  || isOption(arg, "style=bsd") )
+	if ( isOption(arg, "style=allman") || isOption(arg, "style=ansi")  
+			|| isOption(arg, "style=bsd") || isOption(arg, "style=break") )
 	{
 		formatter.setFormattingStyle(STYLE_ALLMAN);
 	}
-	else if ( isOption(arg, "style=java") )
+	else if ( isOption(arg, "style=java") || isOption(arg, "style=attach") )
 	{
 		formatter.setFormattingStyle(STYLE_JAVA);
 	}
@@ -2403,15 +2416,17 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		formatter.setFormattingStyle(STYLE_1TBS);
 	}
+	else if ( isOption(arg, "style=pico") )
+	{
+		formatter.setFormattingStyle(STYLE_PICO);
+	}
 	else if ( isParamOption(arg, "A") )
 	{
 		int style = 0;
 		string styleParam = getParam(arg, "A");
 		if (styleParam.length() > 0)
 			style = atoi(styleParam.c_str());
-		if (style < 1 || style > 10)
-			isOptionError(arg, errorInfo);
-		else if (style == 1)
+		if (style == 1)
 			formatter.setFormattingStyle(STYLE_ALLMAN);
 		else if (style == 2)
 			formatter.setFormattingStyle(STYLE_JAVA);
@@ -2431,6 +2446,9 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 			formatter.setFormattingStyle(STYLE_HORSTMANN);
 		else if (style == 10)
 			formatter.setFormattingStyle(STYLE_1TBS);
+		else if (style == 11)
+			formatter.setFormattingStyle(STYLE_PICO);
+		else isOptionError(arg, errorInfo);
 	}
 	// must check for mode=cs before mode=c !!!
 	else if ( isOption(arg, "mode=cs") )
@@ -2459,13 +2477,11 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 		else
 		{
 			formatter.setTabIndentation(spaceNum, false);
-			formatter.setIndentManuallySet(true);
 		}
 	}
 	else if ( isOption(arg, "indent=tab") )
 	{
 		formatter.setTabIndentation(4);
-		// do NOT call setIndentManuallySet(true);
 	}
 	else if ( isParamOption(arg, "T", "indent=force-tab=") )
 	{
@@ -2478,13 +2494,11 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 		else
 		{
 			formatter.setTabIndentation(spaceNum, true);
-			formatter.setIndentManuallySet(true);
 		}
 	}
 	else if ( isOption(arg, "indent=force-tab") )
 	{
 		formatter.setTabIndentation(4, true);
-		// do NOT call setIndentManuallySet(true);
 	}
 	else if ( isParamOption(arg, "s", "indent=spaces=") )
 	{
@@ -2497,13 +2511,11 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 		else
 		{
 			formatter.setSpaceIndentation(spaceNum);
-			formatter.setIndentManuallySet(true);
 		}
 	}
 	else if ( isOption(arg, "indent=spaces") )
 	{
 		formatter.setSpaceIndentation(4);
-		// do NOT call setIndentManuallySet(true);
 	}
 	else if ( isParamOption(arg, "m", "min-conditional-indent=") )
 	{
@@ -2526,14 +2538,6 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 			isOptionError(arg, errorInfo);
 		else
 			formatter.setMaxInStatementIndentLength(maxIndent);
-	}
-	else if ( isOption(arg, "B", "indent-brackets") )
-	{
-		formatter.setBracketIndent(true);
-	}
-	else if ( isOption(arg, "G", "indent-blocks") )
-	{
-		formatter.setBlockIndent(true);
 	}
 	else if ( isOption(arg, "N", "indent-namespaces") )
 	{
@@ -2575,9 +2579,9 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		formatter.setBracketFormatMode(STROUSTRUP_MODE);
 	}
-	else if ( isOption(arg, "g", "brackets=horstmann") )
+	else if ( isOption(arg, "g", "brackets=run-in") )
 	{
-		formatter.setBracketFormatMode(HORSTMANN_MODE);
+		formatter.setBracketFormatMode(RUN_IN_MODE);
 	}
 	else if ( isOption(arg, "O", "keep-one-line-blocks") )
 	{
@@ -2681,9 +2685,21 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 			formatter.setPointerAlignment(ALIGN_NAME);
 	}
 	// depreciated options ////////////////////////////////////////////////////////////////////////
-	// depreciated in release 1.23
-	// removed from documentation in release 1.24
-	// removed from source in release 2.01 (1.25)
+	// removed in release 2.02 ////////////////////////////////////////////////////////////////////
+	else if ( isOption(arg, "brackets=horstmann") )
+	{
+		isOptionError(arg, errorInfo);
+	}
+	else if ( isOption(arg, "B", "indent-brackets") )
+	{
+		isOptionError(arg, errorInfo);
+	}
+	else if ( isOption(arg, "G", "indent-blocks") )
+	{
+		isOptionError(arg, errorInfo);
+	}
+	// depreciated in release 2.02 ////////////////////////////////////////////////////////////////
+
 	// end depreciated options ////////////////////////////////////////////////////////////////////
 #ifdef ASTYLE_LIB
 	// End of options used by GUI /////////////////////////////////////////////////////////////////

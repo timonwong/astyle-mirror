@@ -46,24 +46,62 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         this website at the end of the survey.</p>
 
     <h3>
-        <p>
-            Artistic Style 2.02&nbsp; (pending)</p>
-    </h3>
+        Artistic Style 2.02&nbsp; (pending)</h3>
 
     <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
+
+    <h4>
+        Bracket Styles</h4>
     <p>
-        Artistic Style can now format UTF-16 encoded files, both little and big endian. This is the default format for
-        Visual Studio unicode. The file is formatted by converting to UTF&#8209;8 to format, then back to UTF&#8209;16. The conversion process does not add a significant amount of time to the formatting. The
+        Since release 1.22 (April 2008) the predefined styles have increased from 5 to11 and the bracket types have increased
+        from 4 to 6. Having two different ways of defining bracket styles has resulted in unnecessary
+        duplication and difficulty in desiging graphical interfaces. This release starts a redesign of the bracket definitions
+        to simplify the user interface and to combine the predefined styles and bracket types into a single option category.
+    </p>
+    <p>
+        The "Predefined Style" options have been renamed as "Bracket Styles" options. The "Bracket Options" have been
+        depreciated and will be removed in a future release.</p>
+    <p>
+        The Bracket Styles always default to 4 spaces per indent. If you are using a default indent other than 4, you
+        will need to add one of the Tab Options to maintain the same indentation. The styles which were used with indents
+        other than 4 were:</p>
+    <ul>
+        <li>Stroustrup - 5 spaces per indent. </li>
+        <li>Gnu - 2 spaces per indent. </li>
+        <li>Linux - 8 spaces per indent. </li>
+        <li>Horstmann - 3 spaces per indent.</li>
+    </ul>
+    <p>
+        There is a new Bracket Style Option "style=pico". It uses run-in brackets, like Horstmann style, and attaches
+        the closing bracket to the last line in the block. It also sets the options "keep one line blocks" and "keep one
+        line statements". This is a very compact style this is a good style for small monitors.</p>
+    <p>
+        The option "brackets=horstmann" has been removed. Instead use "style=horstmann". The short
+        option "g" is now equivalent to "brackets=run-in". Run-in brackets are used for both Horstmann and Pico styles.</p>
+    <p>
+        The option "indent-brackets" and short option "B" have been removed. Instead use "style=whitesmith" or "style=banner".</p>
+    <p>
+        The option "indent-blocks"&nbsp; and short option "G" have been removed. Instead use "style=gnu".</p>
+    <p>
+        Two new options, "style=break" and "style=attach", have been added for Allman and Java style brackets respectively.</p>
+
+    <h4>
+        Other Changes</h4>
+    <p>
+        Artistic Style can now format UTF-16 encoded files, both little and big endian. This format is the default format
+        for the Visual Studio unicode files. The file is formatted by converting it to UTF&#8209;8 and then back back to UTF&#8209;16. The conversion process does not add a significant amount of time to the formatting. The
         file must be encoded with a byte-order-mark (BOM) to be recognized. Again, this is the Visual Studio default.</p>
     <p>
         Thanks to Milian Wolff&nbsp; for his contribution.</p>
+
+    <h4>
+        Survey Results</h4>
     <p>
 
         <h3>
-            <p>
-                Artistic Style 2.01&nbsp; (November 2010)</p>
+            Artistic Style 2.01&nbsp; (November 2010)
         </h3>
 
         <p>
@@ -741,6 +779,7 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
 
         <p>
             &nbsp;</p>
+            
 </body>
 
 </html>

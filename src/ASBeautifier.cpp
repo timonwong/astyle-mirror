@@ -54,7 +54,6 @@ ASBeautifier::ASBeautifier()
 	inStatementIndentStackSizeStack = NULL;
 	parenIndentStack = NULL;
 	sourceIterator = NULL;
-	isIndentManuallySet = false;
 	isMinConditionalManuallySet = false;
 	isModeManuallySet = false;
 	shouldForceTabIndentation = false;
@@ -89,7 +88,7 @@ ASBeautifier::ASBeautifier()
  */
 ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 {
-	// Copy the vector objects to vectors in the new ASBeautifier 
+	// Copy the vector objects to vectors in the new ASBeautifier
 	// object so the new object can be destroyed without deleting
 	// the vector objects in the copied vector.
 	// This is the reason a copy constructor is needed.
@@ -187,7 +186,6 @@ ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 	labelIndent = other.labelIndent;
 	preprocessorIndent = other.preprocessorIndent;
 	isInConditional = other.isInConditional;
-	isIndentManuallySet = other.isIndentManuallySet;
 	isMinConditionalManuallySet = other.isMinConditionalManuallySet;
 	isModeManuallySet = other.isModeManuallySet;
 	shouldForceTabIndentation = other.shouldForceTabIndentation;
@@ -431,14 +429,6 @@ void ASBeautifier::setSpaceIndentation(int length)
 }
 
 /**
- * set indent manually set flag
- */
-void ASBeautifier::setIndentManuallySet(bool state)
-{
-	isIndentManuallySet = state;
-}
-
-/**
  * set the maximum indentation between two lines in a multi-line statement.
  *
  * @param   max     maximum indentation length.
@@ -604,14 +594,6 @@ int ASBeautifier::getIndentLength(void)
 string ASBeautifier::getIndentString(void)
 {
 	return indentString;
-}
-
-/**
- * get indent manually set flag
- */
-bool ASBeautifier::getIndentManuallySet()
-{
-	return isIndentManuallySet;
 }
 
 /**
@@ -904,15 +886,24 @@ string ASBeautifier::beautify(const string& originalLine)
 	        && classIndent
 	        && isInHorstmannComment
 	        && !lineOpensComment
-	        && headerStack->size() >= 2
+	        && headerStack->size() > 1
 	        && (*headerStack)[headerStack->size()-2] == &AS_CLASS)
 		--tabCount;
+
+	// Flag an indented header in case this line is a one-line block.
+	// The header in the header stack will be deleted by a one-line block.
+	bool isInExtraHeaderIndent = false;
+	if (headerStack->size() > 1
+	        && line.length() > 0
+	        && line[0] == '{'
+	        && (headerStack->back() != &AS_OPEN_BRACKET
+	            || probationHeader != NULL))
+		isInExtraHeaderIndent = true;
 
 	if (isInConditional)
 	{
 		--tabCount;
 	}
-
 
 	// parse characters in the current line.
 	// increment tabCount and spaceTabCount for the current line
@@ -920,18 +911,29 @@ string ASBeautifier::beautify(const string& originalLine)
 
 	// handle special cases of unindentation:
 
+	// unindent a one-line statement in a header indent
+	if (!lineStartsInComment
+	        && !blockIndent
+	        && line.length() > 0
+	        && line[0] == '{'
+	        && headerStack->size() < iPrelim
+	        && isInExtraHeaderIndent
+	        && (lineOpeningBlocksNum > 0 && lineOpeningBlocksNum <= lineClosingBlocksNum)
+	        && shouldIndentBrackettedLine)
+		--tabCount;
+
 	/*
 	 * if '{' doesn't follow an immediately previous '{' in the headerStack
 	 * (but rather another header such as "for" or "if", then unindent it
 	 * by one indentation relative to its block.
 	 */
-	if (!lineStartsInComment
-	        && !blockIndent
-	        && line.length() > 0
-	        && line[0] == '{'
-	        && !(lineOpeningBlocksNum > 0 && lineOpeningBlocksNum == lineClosingBlocksNum)
-	        && !(headerStack->size() > 1 && (*headerStack)[headerStack->size()-2] == &AS_OPEN_BRACKET)
-	        && shouldIndentBrackettedLine)
+	else if (!lineStartsInComment
+	         && !blockIndent
+	         && line.length() > 0
+	         && line[0] == '{'
+	         && !(lineOpeningBlocksNum > 0 && lineOpeningBlocksNum <= lineClosingBlocksNum)
+	         && (headerStack->size() > 1 && (*headerStack)[headerStack->size()-2] != &AS_OPEN_BRACKET)
+	         && shouldIndentBrackettedLine)
 		--tabCount;
 
 	// must check one less in headerStack if more than one header on a line (allow-addins)...
@@ -940,8 +942,8 @@ string ASBeautifier::beautify(const string& originalLine)
 	         && !blockIndent
 	         && line.length() > 0
 	         && line[0] == '{'
-	         && !(lineOpeningBlocksNum > 0 && lineOpeningBlocksNum == lineClosingBlocksNum)
-	         && !(headerStack->size() > 2 && (*headerStack)[headerStack->size()-3] == &AS_OPEN_BRACKET)
+	         && !(lineOpeningBlocksNum > 0 && lineOpeningBlocksNum <= lineClosingBlocksNum)
+	         && (headerStack->size() > 2 && (*headerStack)[headerStack->size()-3] != &AS_OPEN_BRACKET)
 	         && shouldIndentBrackettedLine)
 		--tabCount;
 
@@ -958,7 +960,7 @@ string ASBeautifier::beautify(const string& originalLine)
 	         && lineOpeningBlocksNum > 0
 	         && lineOpeningBlocksNum == lineClosingBlocksNum
 	         && previousLineProbationTab)
-		--tabCount; //lineOpeningBlocksNum - (blockIndent ? 1 : 0);
+		--tabCount;
 
 	// correctly indent class continuation lines...
 	else if (!lineStartsInComment
@@ -2516,9 +2518,8 @@ void ASBeautifier::parseCurrentLine(const string& line)
 					}
 				}
 
-
 				ch = ' '; // needed due to cases such as '}else{', so that headers ('else' tn tih case) will be identified...
-			}
+			}	// ch == '}'
 
 			/*
 			 * Create a temporary snapshot of the current block's header-list in the

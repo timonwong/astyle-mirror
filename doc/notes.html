@@ -21,9 +21,16 @@
         Artistic Style 2.02&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16.</li>
+        <li>Add new bracket style, "style=pico".</li>
+        <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16. </li>
         <li>Add isDigit() function to avoid the assert statements in Visual C.</li>
+        <li>New option "style=break" for Allman style brackets.</li>
+        <li>New option "style=attach" for Java style brackets.</li>
+        <li>Remove "indent-brackets" and "indent-blocks" from the valid options.</li>
+        <li>Change "brackets=horstman" to "brackets=run-in", used for both Horstmann and Pico styles.</li>
+        <li>Change functions setting&nbsp; the "indent-brackets" and "indent-blocks" variables from public to protected.</li>
         <li>Change to abort if UTF-32 files are detected.</li>
+        <li>Fix indentation of a one-line block that follows a header.</li>
         <li>Fix Linux infinite loop when a directory name is entered instead of a file name.&nbsp; </li>
         <li>Fix trying to process directories as files when a wildcard is used without recursive.&nbsp;</li>
         <li>Refactor to aid debugging, improve speed, and improve the design and decomposition:

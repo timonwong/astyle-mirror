@@ -26,12 +26,10 @@
  */
 
 #include "astyle.h"
-
+#include <iostream>		// for cout
 
 namespace astyle
 {
-
-// ---------------------------- functions for ASEnhancer Class -------------------------------------
 
 /**
  * ASEnhancer constructor
@@ -83,6 +81,7 @@ void ASEnhancer::init(int fileType,
 	switchDepth = 0;
 	lookingForCaseBracket = false;
 	unindentNextLine = false;
+	shouldIndentLine = false;
 
 	// switch struct and vector
 	sw.switchBracketCount = 0;
@@ -109,7 +108,7 @@ void ASEnhancer::init(int fileType,
 void ASEnhancer::enhance(string& line, bool isInPreprocessor, bool isInSQL)
 {
 	bool isSpecialChar = false;			// is a backslash escape character
-
+	shouldIndentLine = true;
 	lineNumber++;
 
 	// check for beginning of event table
@@ -292,7 +291,7 @@ void ASEnhancer::enhance(string& line, bool isInPreprocessor, bool isInSQL)
 			indentLine(line, 1);
 	}
 
-	if (sw.unindentDepth > 0)
+	if (shouldIndentLine && sw.unindentDepth > 0)
 		unindentLine(line, sw.unindentDepth);
 }
 
@@ -359,17 +358,17 @@ int ASEnhancer::indentLine(string&  line, int indent) const
 	        && ! emptyLineFill)
 		return 0;
 
-	size_t charsToInsert;                       // number of chars to insert
+	size_t charsToInsert;
 
-	if (useTabs)                                // if formatted with tabs
+	if (useTabs)
 	{
-		charsToInsert = indent;                 // tabs to insert
-		line.insert(0U, charsToInsert, '\t');    // insert the tabs
+		charsToInsert = indent;
+		line.insert(0U, charsToInsert, '\t');
 	}
 	else
 	{
-		charsToInsert = indent * indentLength;  // compute chars to insert
-		line.insert(0U, charsToInsert, ' ');     // insert the spaces
+		charsToInsert = indent * indentLength;
+		line.insert(0U, charsToInsert, ' ');
 	}
 
 	return charsToInsert;
@@ -474,6 +473,85 @@ bool ASEnhancer::isEndDeclareSectionSQL(string&  line, size_t index) const
 }
 
 /**
+ * check if a one-line bracket has been reached,
+ * i.e. if the currently reached '{' character is closed
+ * with a complimentry '}' elsewhere on the current line,
+ *.
+ * @return     false = one-line bracket has not been reached.
+ *             true  = one-line bracket has been reached.
+ */
+bool ASEnhancer::isOneLineBlockReached(string& line, int startChar) const
+{
+	assert(line[startChar] == '{');
+
+	bool isInComment_ = false;
+	bool isInQuote_ = false;
+	int bracketCount = 1;
+	int lineLength = line.length();
+	char quoteChar_ = ' ';
+	char ch = ' ';
+	char prevCh = ' ';
+
+	for (int i = startChar + 1; i < lineLength; ++i)
+	{
+		ch = line[i];
+
+		if (isInComment_)
+		{
+			if (line.compare(i, 2, "*/") == 0)
+			{
+				isInComment_ = false;
+				++i;
+			}
+			continue;
+		}
+
+		if (ch == '\\')
+		{
+			++i;
+			continue;
+		}
+
+		if (isInQuote_)
+		{
+			if (ch == quoteChar_)
+				isInQuote_ = false;
+			continue;
+		}
+
+		if (ch == '"' || ch == '\'')
+		{
+			isInQuote_ = true;
+			quoteChar_ = ch;
+			continue;
+		}
+
+		if (line.compare(i, 2, "//") == 0)
+			break;
+
+		if (line.compare(i, 2, "/*") == 0)
+		{
+			isInComment_ = true;
+			++i;
+			continue;
+		}
+
+		if (ch == '{')
+			++bracketCount;
+		else if (ch == '}')
+			--bracketCount;
+
+		if (bracketCount == 0)
+			return true;
+
+		if (!isWhiteSpace(ch))
+			prevCh = ch;
+	}
+
+	return false;
+}
+
+/**
  * process the character at the current index in a switch block.
  *
  * @param line          a reference to the line to indent.
@@ -501,8 +579,19 @@ size_t ASEnhancer::processSwitchBlock(string& line, size_t index)
 	if (line[i] == '}')                                 // if close bracket
 	{
 		sw.switchBracketCount--;
+		assert(sw.switchBracketCount <= bracketCount);
 		if (sw.switchBracketCount == 0)                 // if end of switch statement
 		{
+			int lineUnindent = sw.unindentDepth;
+			if (line.find_first_not_of(" \t") == i
+			        && switchStack.size() > 0)
+				lineUnindent = switchStack[switchStack.size()-1].unindentDepth;
+			if (shouldIndentLine)
+			{
+				if (lineUnindent > 0)
+					i -= unindentLine(line, lineUnindent);
+				shouldIndentLine = false;
+			}
 			switchDepth--;
 			sw = switchStack.back();
 			switchStack.pop_back();
@@ -513,16 +602,16 @@ size_t ASEnhancer::processSwitchBlock(string& line, size_t index)
 	if (isPotentialKeyword
 	        && (findKeyword(line, i, "case") || findKeyword(line, i, "default")))
 	{
-		if (sw.unindentCase)                            // if unindented last case
+		if (sw.unindentCase)					// if unindented last case
 		{
-			sw.unindentCase = false;                    // stop unindenting previous case
-			sw.unindentDepth--;                         // reduce depth
+			sw.unindentCase = false;			// stop unindenting previous case
+			sw.unindentDepth--;
 		}
 
 		i = findCaseColon(line, i);
 
 		i++;
-		for (; i < line.length(); i++)                  // bypass whitespace
+		for (; i < line.length(); i++)			// bypass whitespace
 		{
 			if (!isWhiteSpace(line[i]))
 				break;
@@ -531,13 +620,15 @@ size_t ASEnhancer::processSwitchBlock(string& line, size_t index)
 		{
 			if (line[i] == '{')
 			{
+				bracketCount++;					
 				sw.switchBracketCount++;
-				unindentNextLine = true;
+				if (!isOneLineBlockReached(line, i))
+					unindentNextLine = true;	
 				return i;
 			}
 		}
-		lookingForCaseBracket = true;                   // bracket must be on next line
-		i--;                                            // need to check for comments
+		lookingForCaseBracket = true;
+		i--;									// need to process this char
 		return i;
 	}
 	if (isPotentialKeyword)
