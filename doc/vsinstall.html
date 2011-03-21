@@ -20,9 +20,9 @@
     <p>
         &nbsp;</p>
 
-    <h4>
-        Following are instructions for installing the .NET Framework SDK and adding x64 platforms to an existing project
-        in a manner similar to the more expensive Visual Studio 2010 editions.</h4>
+    <p>
+        Following are instructions for installing the .NET Framework SDK in Visual Studio 2010 Express and adding x64 platforms to an existing project
+        in a manner similar to the more expensive Visual Studio editions.</p>
 
     <h4>
         Installing .NET Framework SDK</h4>
@@ -52,23 +52,24 @@
     </p>
     <p>
         Open the Properties from the Project menu. There is a new configuration property that needs to be set for the
-        linker to find the system libraries. Be sure the x64 platform is selected and change "Properties &gt; General
+        linker to find the system libraries. Be sure the x64 platform is selected and change "Configuration Properties
+        &gt; General
         &gt; Platform Toolset<strong>"</strong>, to <strong>Windows7.1SDK</strong>. Otherwise you will get linker errors
         such as "LINK : fatal error LNK1104: cannot open file 'kernel32.lib'". This setting can also optionally be used
         for the Win32 platform.</p>
     <p>
         The x64 configuration can now be compiled, but the compiles will place the files in the same directories as the
-        Win32 compiles. To correct this the x64 compiles should be placed in an x64 directory using the <strong>$(Platform)</strong>
+        Win32 compiles. To correct this the x64 compiles should be placed in an x64 directory using the <strong>$(PlatformName)</strong>
         macro.</p>
     <p>
         Add the $(Platform) macro to &#8220;Configuration Properties &gt; General &gt; Output directory&#8221; so the
-        entry becomes $(SolutionDir)<strong>$(Platform)\</strong>$(Configuration)\.</p>
+        entry becomes $(SolutionDir)<strong>$(PlatformName)\</strong>$(Configuration)\.</p>
     <p>
         Add the $(Platform) macro to &#8220;Configuration Properties&nbsp; &gt; General&gt; Intermediate Directory&#8221;
-        so the entry becomes <strong>$(Platform)\</strong>$(Configuration)\.</p>
+        so the entry becomes <strong>$(PlatformName)\</strong>$(Configuration)\.</p>
     <p>
         Check the x64 &#8220;Configuration Properties &gt; Linker &gt; Debugging &gt; Generate Program Database File&#8221;
-        for $(ProjectDir)<strong>$(PlatformName)\</strong>$(ConfigurationName)\$(TargetName)d.pdb<strong>.</strong></p>
+        for $(ProjectDir)<strong>$(PlatformName)\</strong>$(ConfigurationName)\$(TargetName).pdb<strong>.</strong></p>
     <p>
         Compile the project. If there are compile errors you may need to add the <strong>$(PlatformName)</strong> macro
         &nbsp;to other settings as well. For example, if there are user library files the macro may need to be added to

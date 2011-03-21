@@ -72,7 +72,7 @@
         <a class="contents" href="#_indent=force-tab">indent=force&#8209;tab</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
-        <a class="contents" href="#_Bracket_Options">Bracket&nbsp;Options (<em>depreciated</em>)</a></p>
+        <a class="contents" href="#_Bracket_Options">Old&nbsp;Bracket&nbsp;Options (<em>depreciated</em>)</a></p>
     <p class="contents2">
         <a class="contents" href="#_brackets=break">brackets=break</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_brackets=attach">brackets=attach</a>&nbsp;&nbsp;&nbsp;
@@ -89,10 +89,10 @@
             <a class="contents" href="#_indent-cases">indent&#8209;cases</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-namespaces">indent&#8209;namespaces</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-labels">indent&#8209;labels</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_indent-preprocessor">
-            indent&#8209;preprocessor</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_indent-col1-comments">indent&#8209;col1&#8209;comments</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_max-instatement-indent">max&#8209;instatement&#8209;indent</a>&nbsp;&nbsp;&nbsp; <a
-            class="contents" href="#_min-conditional-indent">min&#8209;conditional&#8209;indent</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_indent-preprocessor">indent&#8209;preprocessor</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_indent-col1-comments">indent&#8209;col1&#8209;comments</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_min-conditional-indent">min&#8209;conditional&#8209;indent</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_max-instatement-indent">max&#8209;instatement&#8209;indent</a>&nbsp;&nbsp;&nbsp; 
     </p>
     <p class="contents1">
         <a class="contents" href="#_Padding_Options">Padding&nbsp;Options</a></p>
@@ -334,7 +334,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_default_bracket_style">
         <code class="title">default bracket style</code><br />
-        If no bracket style option is set, the brackets will not be changed.</p>
+        If no bracket style option is set, the opening brackets will not be changed and closing brackets will be broken
+        from the preceeding line.</p>
     <p>
         &nbsp;</p>
     <p id="_style=allman">
@@ -472,10 +473,10 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_style=linux">
         <code class="title">--style=linux / -A8</code><br />
         Linux style formatting/indenting uses linux style brackets. Brackets are broken from namespace, class, and function
-        definitions. Brackets are attached to statements within a function.&nbsp; This style frequently is used with an
-        indent of 8 spaces.
-        <strong>Minimum conditional indent</strong> is one-half indent, typically 4 spaces. If you want to change the spaces per indent for this style it will be easier to use the K&amp;R style
-        instead.</p>
+        definitions. Brackets are attached to statements within a function. <strong>Minimum conditional indent</strong>
+        is one-half indent. If you want a different minimum conditional indent use the K&amp;R style instead. This style
+        works best with a large indent. It frequently is used with an indent of 8 spaces.
+    </p>
     <p>
         Also known as Kernel Normal Form (KNF) style, this is the style used in the Linux kernel.</p>
     <div class="code">
@@ -493,7 +494,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=horstmann">
         <code class="title">--style=horstmann / -A9</code><br />
-        Horstmann style formatting/indenting uses run-in style brackets, brackets are broken with run-in statements. Switches
+        Horstmann style formatting/indenting uses run-in style brackets, brackets are broken and allow run-in statements. Switches
         are indented to allow a run-in to the opening switch block. This style frequently is used with an indent of 3 spaces.</p>
     <div class="code">
         <pre>int Foo(bool isBar)
@@ -528,10 +529,10 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="P1">
         <code class="title">--style=pico / -A11</code><br />
-        Pico style formatting/indenting uses run-in style brackets, brackets are broken with run-in statements. The closing
+        Pico style formatting/indenting uses run-in style brackets, brackets are broken and allow run-in statements. The closing
         bracket is attached to the last line in the block. Switches are indented to allow a run-in to the opening switch
         block. The style impiles&nbsp; keep-one-line-blocks and keep-one-line-statements. This style frequently is used
-        with an indent of 2 spaces. If add-brackets is used they will be one-line brackets.</p>
+        with an indent of 2 spaces. If add-brackets is used they will be added as one-line brackets.</p>
     <div class="code">
         <pre>int Foo(bool isBar)
 <span class="brace">{</span>  if (isBar)
@@ -579,8 +580,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         Old Bracket Options (<em>depreciated</em>)</h3>
 
     <p>
-        <b>All of the following bracket options have been depreciated and will be removed in a future release.<br />
-            Use the above Bracket Style Options instead.</b></p>
+        <b><big>The following bracket options have been depreciated and will be removed in a future release.<br />
+            Use the above Bracket Style Options instead.</big></b></p>
     <p id="_brackets=break">
         <code class="title">--brackets=break / -b</code><br />
         Break brackets from their pre-block statements ( e.g. Allman / ANSI style ).</p>
@@ -897,35 +898,6 @@ error:
     </div>
     <p>
         &nbsp;</p>
-    <p id="_max-instatement-indent">
-        <code class="title">--max-instatement-indent=<span class="option">#</span> / -M<span class="option">#</span></code><br />
-        Set the &nbsp;maximum of <span class="option">#</span> spaces to indent a continuation line. The &nbsp;<span class="option">#</span>
-        indicates a number of columns and must be less than <strong>80</strong>. If no <span class="option">#</span> is
-        set, the default value of <strong>40</strong> will be used. A maximum of less than two indent lengths will be
-        ignored. This option will prevent continuation lines from extending too far to the right. Setting a larger value
-        will allow the code to be extended further to the right.</p>
-    <div class="code">
-        <pre>fooArray[] = <span class="brace">{</span> red,
-         green,
-         blue <span class="brace">}</span>;
-
-fooFunction(barArg1,
-         barArg2,
-         barArg3);
-</pre>
-        <p class="code">
-            becomes (with larger value):</p>
-        <pre>fooArray[] = <span class="brace">{</span> red,
-               green,
-               blue <span class="brace">}</span>;
-
-fooFunction(barArg1,
-            barArg2,
-            barArg3);
-</pre>
-    </div>
-    <p>
-        &nbsp;</p>
     <p id="_min-conditional-indent">
         <code class="title">--min-conditional-indent=<span class="option">#</span> / -m<span class="option">#</span></code><br />
         Set the minimal indent that is added when a header is built of multiple lines. This indent helps to easily separate
@@ -965,6 +937,35 @@ if (a &lt; b
 <span class="brace">{</span>
     foo++;
 <span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_max-instatement-indent">
+        <code class="title">--max-instatement-indent=<span class="option">#</span> / -M<span class="option">#</span></code><br />
+        Set the &nbsp;maximum of <span class="option">#</span> spaces to indent a continuation line. The &nbsp;<span class="option">#</span>
+        indicates a number of columns and must be less than <strong>80</strong>. If no <span class="option">#</span> is
+        set, the default value of <strong>40</strong> will be used. A maximum of less than two indent lengths will be
+        ignored. This option will prevent continuation lines from extending too far to the right. Setting a larger value
+        will allow the code to be extended further to the right.</p>
+    <div class="code">
+        <pre>fooArray[] = <span class="brace">{</span> red,
+         green,
+         blue <span class="brace">}</span>;
+
+fooFunction(barArg1,
+         barArg2,
+         barArg3);
+</pre>
+        <p class="code">
+            becomes (with larger value):</p>
+        <pre>fooArray[] = <span class="brace">{</span> red,
+               green,
+               blue <span class="brace">}</span>;
+
+fooFunction(barArg1,
+            barArg2,
+            barArg3);
 </pre>
     </div>
     <p>

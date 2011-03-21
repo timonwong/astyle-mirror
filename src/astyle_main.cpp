@@ -1290,13 +1290,14 @@ void ASConsole::printHelp() const
 	(*_err) << "    Short options (starting with '-') may be appended together.\n";
 	(*_err) << "    Thus, -bps4 is the same as -b -p -s4.\n";
 	(*_err) << endl;
-	(*_err) << "Predefined Style Options:\n";
-	(*_err) << "-------------------------\n";
-	(*_err) << "    --style=allman  OR  --style=ansi  OR  --style=bsd  OR  -A1\n";
+	(*_err) << "Bracket Style Options:\n";
+	(*_err) << "----------------------\n";
+	(*_err) << "    --style=allman  OR  --style=ansi  OR  --style=bsd\n";
+	(*_err) << "	    OR  --style=break  OR  -A1\n";
 	(*_err) << "    Allman style formatting/indenting.\n";
 	(*_err) << "    Broken brackets.\n";
 	(*_err) << endl;
-	(*_err) << "    --style=java  OR  -A2\n";
+	(*_err) << "    --style=java  OR  --style=attach  OR  -A2\n";
 	(*_err) << "    Java style formatting/indenting.\n";
 	(*_err) << "    Attached brackets.\n";
 	(*_err) << endl;
@@ -1320,16 +1321,15 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --style=gnu  OR  -A7\n";
 	(*_err) << "    GNU style formatting/indenting.\n";
-	(*_err) << "    Broken brackets, indented blocks, indent is 2 spaces.\n";
+	(*_err) << "    Broken brackets, indented blocks.\n";
 	(*_err) << endl;
 	(*_err) << "    --style=linux  OR  -A8\n";
 	(*_err) << "    Linux style formatting/indenting.\n";
-	(*_err) << "    Linux brackets, minimum conditional indent is one-half\n";
-	(*_err) << "    indent, and indent is 8 spaces.\n";
+	(*_err) << "    Linux brackets, minimum conditional indent is one-half indent.\n";
 	(*_err) << endl;
 	(*_err) << "    --style=horstmann  OR  -A9\n";
 	(*_err) << "    Horstmann style formatting/indenting.\n";
-	(*_err) << "    Run-in brackets, indented switches, indent is 3 spaces.\n";
+	(*_err) << "    Run-in brackets, indented switches.\n";
 	(*_err) << endl;
 	(*_err) << "    --style=1tbs  OR  --style=otbs  OR  -A10\n";
 	(*_err) << "    One True Brace Style formatting/indenting.\n";
@@ -1340,8 +1340,8 @@ void ASConsole::printHelp() const
 	(*_err) << "    Run-in opening brackets and attached closing brackets.\n";
 	(*_err) << "    Uses keep one line blocks and keep one line statements.\n";
 	(*_err) << endl;
-	(*_err) << "Tab and Bracket Options:\n";
-	(*_err) << "------------------------\n";
+	(*_err) << "Tab Options:\n";
+	(*_err) << "------------\n";
 	(*_err) << "    default indent option\n";
 	(*_err) << "    If no indentation option is set,\n";
 	(*_err) << "    the default option of 4 spaces will be used.\n";
@@ -1359,6 +1359,12 @@ void ASConsole::printHelp() const
 	(*_err) << "    Indent using tab characters, assuming that each\n";
 	(*_err) << "    tab is # spaces long. Force tabs to be used in areas\n";
 	(*_err) << "    Astyle would prefer to use spaces.\n";
+	(*_err) << endl;
+	(*_err) << "Old Bracket Options (deprectaied):\n";
+	(*_err) << "----------------------------------\n";
+	(*_err) << "The following bracket options have been depreciated and\n";
+	(*_err) << "will be removed in a future release.\n";
+	(*_err) << "Use the above Bracket Style Options instead.\n";
 	(*_err) << endl;
 	(*_err) << "    default brackets option\n";
 	(*_err) << "    If no brackets option is set,\n";
@@ -1422,13 +1428,13 @@ void ASConsole::printHelp() const
 	(*_err) << "    --indent-col1-comments  OR  -Y\n";
 	(*_err) << "    Indent line comments that start in column one.\n";
 	(*_err) << endl;
-	(*_err) << "    --max-instatement-indent=#  OR  -M#\n";
-	(*_err) << "    Indent a maximal # spaces in a continuous statement,\n";
-	(*_err) << "    relative to the previous line.\n";
-	(*_err) << endl;
 	(*_err) << "    --min-conditional-indent=#  OR  -m#\n";
 	(*_err) << "    Indent a minimal # spaces in a continuous conditional\n";
 	(*_err) << "    belonging to a conditional header.\n";
+	(*_err) << endl;
+	(*_err) << "    --max-instatement-indent=#  OR  -M#\n";
+	(*_err) << "    Indent a maximal # spaces in a continuous statement,\n";
+	(*_err) << "    relative to the previous line.\n";
 	(*_err) << endl;
 	(*_err) << "Padding options:\n";
 	(*_err) << "--------------------\n";
@@ -2375,8 +2381,8 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string& errorI
 
 void ASOptions::parseOption(const string& arg, const string& errorInfo)
 {
-	if ( isOption(arg, "style=allman") || isOption(arg, "style=ansi")  
-			|| isOption(arg, "style=bsd") || isOption(arg, "style=break") )
+	if ( isOption(arg, "style=allman") || isOption(arg, "style=ansi")
+	        || isOption(arg, "style=bsd") || isOption(arg, "style=break") )
 	{
 		formatter.setFormattingStyle(STYLE_ALLMAN);
 	}
@@ -2943,8 +2949,9 @@ char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded)
 #ifdef ASTYLE_LIB
 // *************************   GUI functions   ****************************************************
 /*
- * IMPORTANT VC DLL linker must have the parameter  /EXPORT:AStyleMain=_AStyleMain@16
- *                                                  /EXPORT:AStyleGetVersion=_AStyleGetVersion@0
+ * IMPORTANT VC DLL linker for WIN32 must have the parameter  /EXPORT:AStyleMain=_AStyleMain@16
+ *                                                            /EXPORT:AStyleGetVersion=_AStyleGetVersion@0
+ * No /EXPORT is required for x64
  */
 extern "C" EXPORT char* STDCALL
 AStyleMain(const char* pSourceIn,          // pointer to the source to be formatted

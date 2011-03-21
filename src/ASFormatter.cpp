@@ -942,11 +942,13 @@ string ASFormatter::nextLine()
 			else if ((newHeader = findHeader(preCommandHeaders)) != NULL)
 			{
 				if (!(*newHeader == AS_CONST && previousCommandChar != ')')) // 'const' member functions is a command bracket
+				{
 					foundPreCommandHeader = true;
-				appendSequence(*newHeader);
-				goForward(newHeader->length() - 1);
+					appendSequence(*newHeader);
+					goForward(newHeader->length() - 1);
 
-				continue;
+					continue;
+				}
 			}
 			else if ((newHeader = findHeader(castOperators)) != NULL)
 			{
@@ -3223,12 +3225,14 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 
 	if (shouldAttachClosingBracket)
 	{
+		// for now, namespaces and classes will be attached. Uncomment the lines below to break.
 		if ((isEmptyLine(formattedLine)			// if a blank line preceeds this
 		        || isCharImmediatelyPostLineComment
 		        || isCharImmediatelyPostComment
 		        || (isImmediatelyPostPreprocessor && (int) currentLine.find_first_not_of(" \t") == charNum)
-		        || (isBracketType(bracketType, CLASS_TYPE) && isOkToBreakBlock(bracketType) && previousNonWSChar != '{')
-		        || (isBracketType(bracketType, NAMESPACE_TYPE) && isOkToBreakBlock(bracketType) && previousNonWSChar != '{'))
+//		        || (isBracketType(bracketType, CLASS_TYPE) && isOkToBreakBlock(bracketType) && previousNonWSChar != '{')
+//		        || (isBracketType(bracketType, NAMESPACE_TYPE) && isOkToBreakBlock(bracketType) && previousNonWSChar != '{')
+		    )
 		        && (!isBracketType(bracketType, SINGLE_LINE_TYPE) || isOkToBreakBlock(bracketType)))
 		{
 			breakLine();

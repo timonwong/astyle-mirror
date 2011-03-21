@@ -893,7 +893,7 @@ string ASBeautifier::beautify(const string& originalLine)
 	// Flag an indented header in case this line is a one-line block.
 	// The header in the header stack will be deleted by a one-line block.
 	bool isInExtraHeaderIndent = false;
-	if (headerStack->size() > 1
+	if (headerStack->size() > 0
 	        && line.length() > 0
 	        && line[0] == '{'
 	        && (headerStack->back() != &AS_OPEN_BRACKET
@@ -2136,7 +2136,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			lastLineHeader = &AS_OPEN_BRACKET;
 
 			continue;
-		}
+		}	// end '{'
 
 		//check if a header has been reached
 		bool isPotentialHeader = isCharPotentialHeader(line, i);
@@ -2349,6 +2349,16 @@ void ASBeautifier::parseCurrentLine(const string& line)
 				--tabCount;
 			}
 
+			else if (isCStyle() && !isInClass
+			         && headerStack->size() >= 2
+			         && (*headerStack)[headerStack->size()-2] == &AS_CLASS
+			         && (*headerStack)[headerStack->size()-1] == &AS_OPEN_BRACKET)
+			{
+				// found a 'private:' or 'public:' inside a class definition
+				// and on the same line as the class opening bracket
+				// do nothing
+			}
+
 			else if (isCStyle() && prevNonSpaceCh == ')' && !isInCase)
 			{
 				isInClassInitializer = true;
@@ -2507,7 +2517,8 @@ void ASBeautifier::parseCurrentLine(const string& line)
 
 					// do not indent namespace bracket unless namespaces are indented
 					if (!namespaceIndent && headerStack->size() > 0
-					        && (*headerStack).back() == &AS_NAMESPACE)
+					        && (*headerStack).back() == &AS_NAMESPACE
+					        && i == 0)		// must be the first bracket on the line
 						shouldIndentBrackettedLine = false;
 
 					if (!tempStacks->empty())

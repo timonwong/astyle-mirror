@@ -490,7 +490,6 @@ bool ASEnhancer::isOneLineBlockReached(string& line, int startChar) const
 	int lineLength = line.length();
 	char quoteChar_ = ' ';
 	char ch = ' ';
-	char prevCh = ' ';
 
 	for (int i = startChar + 1; i < lineLength; ++i)
 	{
@@ -543,9 +542,6 @@ bool ASEnhancer::isOneLineBlockReached(string& line, int startChar) const
 
 		if (bracketCount == 0)
 			return true;
-
-		if (!isWhiteSpace(ch))
-			prevCh = ch;
 	}
 
 	return false;
@@ -620,10 +616,10 @@ size_t ASEnhancer::processSwitchBlock(string& line, size_t index)
 		{
 			if (line[i] == '{')
 			{
-				bracketCount++;					
+				bracketCount++;
 				sw.switchBracketCount++;
 				if (!isOneLineBlockReached(line, i))
-					unindentNextLine = true;	
+					unindentNextLine = true;
 				return i;
 			}
 		}
