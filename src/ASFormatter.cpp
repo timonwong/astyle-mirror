@@ -3871,6 +3871,7 @@ void ASFormatter::formatCommentBody()
 		if (peekNextChar() == '}'
 		        && previousCommandChar != ';'
 		        && !isBracketType(bracketTypeStack->back(),  ARRAY_TYPE)
+				&& !isInPreprocessor
 		        && isOkToBreakBlock(bracketTypeStack->back()))
 		{
 			isInLineBreak = true;

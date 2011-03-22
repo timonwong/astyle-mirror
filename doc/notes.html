@@ -30,10 +30,12 @@
         <li>Change "brackets=horstman" to "brackets=run-in", used for both Horstmann and Pico styles.</li>
         <li>Change functions setting&nbsp; the "indent-brackets" and "indent-blocks" variables from public to protected.</li>
         <li>Change to abort if UTF-32 files are detected.</li>
+        <li>Change "Cannot set native locale" error message from cout to cerr (3,139,873). </li>
         <li>Fix Linux infinite loop when a directory name is entered instead of a file name.&nbsp; </li>
         <li>Fix trying to process directories as files when a wildcard is used without recursive (<span>3,134,108)</span>.&nbsp;</li>
         <li>Fix processing a "const" variable as a "const" method when it follows a header (3,168,156). </li>
         <li>Fix indentation of a one-line block that follows a header.</li>
+        <li>Fix breaking a preprocessor define that has code after a comment end (3,132,531). </li>
         <li>Fix indentation of a class opening bracket followed by a class modifier on the same line when indent-namespaces
             and indent-classes is used.</li>
         <li>Refactor to aid debugging, improve speed, and improve the design and decomposition:

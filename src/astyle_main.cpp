@@ -3046,7 +3046,7 @@ int main(int argc, char** argv)
 	// For testing on Linux change the following setlocale: "fr_FR.UTF-8", "de_DE.UTF-8".
 	char* localeName = setlocale(LC_ALL, "");
 	if (localeName == NULL)
-		cout << "Cannot set native locale" << endl;
+		cerr << "Cannot set native locale" << endl;
 
 	// create objects
 	ASFormatter formatter;
