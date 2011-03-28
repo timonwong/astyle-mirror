@@ -1505,6 +1505,15 @@ void ASConsole::printHelp() const
 	(*_err) << "    --align-pointer=name    OR  -k3\n";
 	(*_err) << "    Attach a pointer or reference operator (* or &) to either\n";
 	(*_err) << "    the operator type (left), middle, or operator name (right).\n";
+	(*_err) << "    To align the reference separately use --align-reference.\n";
+	(*_err) << endl;
+	(*_err) << "    --align-reference=none    OR  -W0\n";
+	(*_err) << "    --align-reference=type    OR  -W1\n";
+	(*_err) << "    --align-reference=middle  OR  -W2\n";
+	(*_err) << "    --align-reference=name    OR  -W3\n";
+	(*_err) << "    Attach a reference operator (&) to either\n";
+	(*_err) << "    the operator type (left), middle, or operator name (right).\n";
+	(*_err) << "    If not set, follow pointer alignment.\n";
 	(*_err) << endl;
 	(*_err) << "    --mode=c\n";
 	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
@@ -2665,15 +2674,15 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	}
 	else if ( isOption(arg, "align-pointer=type") )
 	{
-		formatter.setPointerAlignment(ALIGN_TYPE);
+		formatter.setPointerAlignment(PTR_ALIGN_TYPE);
 	}
 	else if ( isOption(arg, "align-pointer=middle") )
 	{
-		formatter.setPointerAlignment(ALIGN_MIDDLE);
+		formatter.setPointerAlignment(PTR_ALIGN_MIDDLE);
 	}
 	else if ( isOption(arg, "align-pointer=name") )
 	{
-		formatter.setPointerAlignment(ALIGN_NAME);
+		formatter.setPointerAlignment(PTR_ALIGN_NAME);
 	}
 	else if ( isParamOption(arg, "k") )
 	{
@@ -2684,14 +2693,46 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 		if (align < 1 || align > 3)
 			isOptionError(arg, errorInfo);
 		else if (align == 1)
-			formatter.setPointerAlignment(ALIGN_TYPE);
+			formatter.setPointerAlignment(PTR_ALIGN_TYPE);
 		else if (align == 2)
-			formatter.setPointerAlignment(ALIGN_MIDDLE);
+			formatter.setPointerAlignment(PTR_ALIGN_MIDDLE);
 		else if (align == 3)
-			formatter.setPointerAlignment(ALIGN_NAME);
+			formatter.setPointerAlignment(PTR_ALIGN_NAME);
 	}
-	// depreciated options ////////////////////////////////////////////////////////////////////////
-	// removed in release 2.02 ////////////////////////////////////////////////////////////////////
+	else if ( isOption(arg, "align-reference=none") )
+	{
+		formatter.setReferenceAlignment(REF_ALIGN_NONE);
+	}
+	else if ( isOption(arg, "align-reference=type") )
+	{
+		formatter.setReferenceAlignment(REF_ALIGN_TYPE);
+	}
+	else if ( isOption(arg, "align-reference=middle") )
+	{
+		formatter.setReferenceAlignment(REF_ALIGN_MIDDLE);
+	}
+	else if ( isOption(arg, "align-reference=name") )
+	{
+		formatter.setReferenceAlignment(REF_ALIGN_NAME);
+	}
+	else if ( isParamOption(arg, "W") )
+	{
+		int align = 0;
+		string styleParam = getParam(arg, "W");
+		if (styleParam.length() > 0)
+			align = atoi(styleParam.c_str());
+		if (align < 0 || align > 3)
+			isOptionError(arg, errorInfo);
+		else if (align == 0)
+			formatter.setReferenceAlignment(REF_ALIGN_NONE);
+		else if (align == 1)
+			formatter.setReferenceAlignment(REF_ALIGN_TYPE);
+		else if (align == 2)
+			formatter.setReferenceAlignment(REF_ALIGN_MIDDLE);
+		else if (align == 3)
+			formatter.setReferenceAlignment(REF_ALIGN_NAME);
+	}
+	// depreciated options release 2.02 ///////////////////////////////////////////////////////////
 	else if ( isOption(arg, "brackets=horstmann") )
 	{
 		isOptionError(arg, errorInfo);
@@ -2704,8 +2745,6 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		isOptionError(arg, errorInfo);
 	}
-	// depreciated in release 2.02 ////////////////////////////////////////////////////////////////
-
 	// end depreciated options ////////////////////////////////////////////////////////////////////
 #ifdef ASTYLE_LIB
 	// End of options used by GUI /////////////////////////////////////////////////////////////////

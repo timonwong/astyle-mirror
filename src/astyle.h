@@ -109,11 +109,18 @@ enum BracketType   { NULL_TYPE = 0,
                      SINGLE_LINE_TYPE = 512
                    };
 
-enum PointerAlign { ALIGN_NONE,
-                    ALIGN_TYPE,
-                    ALIGN_MIDDLE,
-                    ALIGN_NAME
+enum PointerAlign { PTR_ALIGN_NONE,
+                    PTR_ALIGN_TYPE,
+                    PTR_ALIGN_MIDDLE,
+                    PTR_ALIGN_NAME
                   };
+
+enum ReferenceAlign { REF_ALIGN_NONE = PTR_ALIGN_NONE,
+                      REF_ALIGN_TYPE = PTR_ALIGN_TYPE,
+                      REF_ALIGN_MIDDLE = PTR_ALIGN_MIDDLE,
+                      REF_ALIGN_NAME = PTR_ALIGN_NAME,
+                      REF_SAME_AS_PTR
+                    };
 
 enum MinConditional { MINCOND_ZERO,
                       MINCOND_ONE,
@@ -183,11 +190,11 @@ class ASResource
 		static const string AS_DO, AS_WHILE;
 		static const string AS_FOR;
 		static const string AS_SWITCH, AS_CASE, AS_DEFAULT;
-		static const string AS_TRY, AS_CATCH, AS_THROWS, AS_FINALLY;
+		static const string AS_TRY, AS_CATCH, AS_THROWS, AS_FINALLY, _AS_TRY, _AS_FINALLY, _AS_EXCEPT;
 		static const string AS_PUBLIC, AS_PROTECTED, AS_PRIVATE;
 		static const string AS_CLASS, AS_STRUCT, AS_UNION, AS_INTERFACE, AS_NAMESPACE;
 		static const string AS_EXTERN, AS_ENUM;
-		static const string AS_STATIC, AS_CONST, AS_VOLATILE, AS_NEW;
+		static const string AS_STATIC, AS_CONST, AS_SEALED, AS_OVERRIDE, AS_VOLATILE, AS_NEW;
 		static const string AS_WHERE, AS_SYNCHRONIZED;
 		static const string AS_OPERATOR, AS_TEMPLATE;
 		static const string AS_OPEN_BRACKET, AS_CLOSE_BRACKET;
@@ -388,6 +395,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		vector<const string*>* headers;
 		vector<const string*>* nonParenHeaders;
 		vector<const string*>* preBlockStatements;
+		vector<const string*>* preCommandHeaders;
 		vector<const string*>* assignmentOperators;
 		vector<const string*>* nonAssignmentOperators;
 		vector<const string*>* indentableHeaders;
@@ -452,6 +460,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool shouldIndentBrackettedLine;
 		bool isInClass;
 		bool isInSwitch;
+		bool foundPreCommandHeader;
 		int  tabCount;
 		int  spaceTabCount;
 		int  lineOpeningBlocksNum;
@@ -570,6 +579,7 @@ class ASFormatter : public ASBeautifier
 		void setParensHeaderPaddingMode(bool mode);
 		void setParensUnPaddingMode(bool state);
 		void setPointerAlignment(PointerAlign alignment);
+		void setReferenceAlignment(ReferenceAlign alignment);
 		void setSingleStatementsMode(bool state);
 		void setTabSpaceConversionMode(bool state);
 		size_t getChecksumIn() const;
@@ -605,6 +615,7 @@ class ASFormatter : public ASBeautifier
 		bool isSharpStyleWithParen(const string* header) const;
 		bool isStructAccessModified(string&  firstLine, size_t index) const;
 		bool isUnaryOperator() const;
+		bool isImmediatelyPostCast() const;
 		bool isInExponent() const;
 		bool isNextCharOpeningBracket(int startChar) const;
 		bool isOkToBreakBlock(BracketType bracketType) const;
@@ -695,6 +706,7 @@ class ASFormatter : public ASBeautifier
 		BracketMode bracketFormatMode;
 		BracketType previousBracketType;
 		PointerAlign pointerAlignment;
+		ReferenceAlign referenceAlignment;
 		LineEndFormat lineEnd;
 		bool computeChecksumIn(const string& currentLine_);
 		bool computeChecksumOut(const string& beautifiedLine);
@@ -722,7 +734,6 @@ class ASFormatter : public ASBeautifier
 		bool isInVerbatimQuote;
 		bool haveLineContinuationChar;
 		bool isInQuoteContinuation;
-//		bool isInBlParen;
 		bool isSpecialChar;
 		bool isNonParenHeader;
 		bool foundQuestionMark;

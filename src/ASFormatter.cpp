@@ -48,7 +48,8 @@ ASFormatter::ASFormatter()
 	lineCommentNoIndent = false;
 	formattingStyle = STYLE_NONE;
 	bracketFormatMode = NONE_MODE;
-	pointerAlignment = ALIGN_NONE;
+	pointerAlignment = PTR_ALIGN_NONE;
+	referenceAlignment = REF_SAME_AS_PTR;
 	lineEnd = LINEEND_DEFAULT;
 	shouldPadOperators = false;
 	shouldPadParensOutside = false;
@@ -211,7 +212,6 @@ void ASFormatter::init(ASSourceIterator* si)
 	isImmediatelyPostNonInStmt = false;
 	isCharImmediatelyPostNonInStmt = false;
 	isInTemplate = false;
-//	isInBlParen = false;
 	isImmediatelyPostComment = false;
 	isImmediatelyPostLineComment = false;
 	isImmediatelyPostEmptyBlock = false;
@@ -353,7 +353,6 @@ void ASFormatter::fixOptionVariableConflicts()
  *
  * @return    formatted line.
  */
-
 string ASFormatter::nextLine()
 {
 	const string* newHeader;
@@ -620,11 +619,10 @@ string ASFormatter::nextLine()
 		if (currentChar == '(' || currentChar == '[' || (isInTemplate && currentChar == '<'))
 		{
 			parenStack->back()++;
-//			if (currentChar == '[')
-//				isInBlParen = true;
 		}
 		else if (currentChar == ')' || currentChar == ']' || (isInTemplate && currentChar == '>'))
 		{
+			foundPreCommandHeader = false;
 			parenStack->back()--;
 			if (isInTemplate && currentChar == '>')
 			{
@@ -642,8 +640,6 @@ string ASFormatter::nextLine()
 				isInHeader = false;
 				isImmediatelyPostHeader = true;
 			}
-//			if (currentChar == ']')
-//				isInBlParen = false;
 			if (currentChar == ')')
 			{
 				foundCastOperator = false;
@@ -828,6 +824,8 @@ string ASFormatter::nextLine()
 				        || (newHeader == &AS_CATCH && currentHeader == &AS_CATCH)
 				        || (newHeader == &AS_FINALLY && currentHeader == &AS_TRY)
 				        || (newHeader == &AS_FINALLY && currentHeader == &AS_CATCH)
+				        || (newHeader == &_AS_FINALLY && currentHeader == &_AS_TRY)
+				        || (newHeader == &_AS_EXCEPT && currentHeader == &_AS_TRY)
 				        || (newHeader == &AS_SET && currentHeader == &AS_GET)
 				        || (newHeader == &AS_REMOVE && currentHeader == &AS_ADD))
 					foundClosingHeader = true;
@@ -941,14 +939,8 @@ string ASFormatter::nextLine()
 			}
 			else if ((newHeader = findHeader(preCommandHeaders)) != NULL)
 			{
-				if (!(*newHeader == AS_CONST && previousCommandChar != ')')) // 'const' member functions is a command bracket
-				{
-					foundPreCommandHeader = true;
-					appendSequence(*newHeader);
-					goForward(newHeader->length() - 1);
-
-					continue;
-				}
+				foundPreCommandHeader = true;
+				// fall thru here for a 'const' that is not a precommand header
 			}
 			else if ((newHeader = findHeader(castOperators)) != NULL)
 			{
@@ -1122,6 +1114,7 @@ string ASFormatter::nextLine()
 					if (find(assignmentOperators->begin(), assignmentOperators->end(), newHeader)
 					        != assignmentOperators->end())
 					{
+						foundPreCommandHeader = false;
 						char peekedChar = peekNextChar();
 						isInPotentialCalculation = (!(newHeader == &AS_EQUAL && peekedChar == '*')
 						                            && !(newHeader == &AS_EQUAL && peekedChar == '&'));
@@ -1489,6 +1482,11 @@ void ASFormatter::setDeleteEmptyLinesMode(bool state)
 void ASFormatter::setPointerAlignment(PointerAlign alignment)
 {
 	pointerAlignment = alignment;
+}
+
+void ASFormatter::setReferenceAlignment(ReferenceAlign alignment)
+{
+	referenceAlignment = alignment;
 }
 
 /**
@@ -2018,7 +2016,6 @@ bool ASFormatter::isPointerOrReference() const
 		return false;
 
 	if ((currentChar == '&' && previousChar == '&')
-//	        || isInBlParen
 	        || isCharImmediatelyPostOperator)
 		return false;
 
@@ -2086,7 +2083,7 @@ bool ASFormatter::isPointerOrReference() const
 	             || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)
 	             || (!isLegalNameChar(previousNonWSChar)
 	                 && !(previousNonWSChar == ')' && nextChar == '(')
-	                 && !(previousNonWSChar == ')' && currentChar == '*')
+	                 && !(previousNonWSChar == ')' && currentChar == '*' && !isImmediatelyPostCast())
 	                 && previousNonWSChar != ']')
 	            );
 
@@ -2614,7 +2611,6 @@ void ASFormatter::padOperators(const string* newOperator)
 
 	// pad before operator
 	if (shouldPad
-//	        && !isInBlParen
 	        && !(newOperator == &AS_COLON && !foundQuestionMark)
 	        && !(newOperator == &AS_QUESTION && isSharpStyle() // check for C# nullable type (e.g. int?)
 	             && currentLine.find(':', charNum+1) == string::npos)
@@ -2627,7 +2623,6 @@ void ASFormatter::padOperators(const string* newOperator)
 	// pad after operator
 	// but do not pad after a '-' that is a unary-minus.
 	if (shouldPad
-//	        && !isInBlParen
 	        && !isBeforeAnyComment()
 	        && !(newOperator == &AS_PLUS && isUnaryOperator())
 	        && !(newOperator == &AS_MINUS && isUnaryOperator())
@@ -2652,6 +2647,10 @@ void ASFormatter::formatPointerOrReference(void)
 {
 	assert(currentChar == '*' || currentChar == '&');
 	assert(isCStyle());
+
+	int pa = pointerAlignment;
+	int ra = referenceAlignment;
+	int itemAlignment = (currentChar == '*') ? pa : ((ra == REF_SAME_AS_PTR) ? pa : ra);
 
 	// check for cast
 	char peekedChar = peekNextChar();
@@ -2681,7 +2680,7 @@ void ASFormatter::formatPointerOrReference(void)
 	// do this before bumping charNum
 	bool isOldPRCentered = isPointerOrReferenceCentered();
 
-	if (pointerAlignment == ALIGN_TYPE)
+	if (itemAlignment == PTR_ALIGN_TYPE)
 	{
 		size_t prevCh = formattedLine.find_last_not_of(" \t");
 		if (prevCh == string::npos)
@@ -2714,7 +2713,7 @@ void ASFormatter::formatPointerOrReference(void)
 			spacePadNum--;
 		}
 	}
-	else if (pointerAlignment == ALIGN_MIDDLE)
+	else if (itemAlignment == PTR_ALIGN_MIDDLE)
 	{
 		// compute current whitespace before
 		size_t wsBefore = currentLine.find_last_not_of(" \t", charNum - 1);
@@ -2780,7 +2779,7 @@ void ASFormatter::formatPointerOrReference(void)
 			formattedLine.insert(formattedLine.length() - padAfter, sequenceToInsert);
 		}
 	}
-	else if (pointerAlignment == ALIGN_NAME)
+	else if (itemAlignment == PTR_ALIGN_NAME)
 	{
 		size_t startNum = formattedLine.find_last_not_of(" \t");
 		string sequenceToInsert = currentChar == '*' ? "*" : "&";
@@ -2828,7 +2827,7 @@ void ASFormatter::formatPointerOrReference(void)
 			spacePadNum--;
 		}
 	}
-	else	// pointerAlignment == ALIGN_NONE
+	else	// pointerAlignment == PTR_ALIGN_NONE
 	{
 		appendCurrentChar();
 	}
@@ -2847,13 +2846,17 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	assert(currentChar == '*' || currentChar == '&');
 	assert(isCStyle());
 
+	int pa = pointerAlignment;
+	int ra = referenceAlignment;
+	int itemAlignment = (currentChar == '*') ? pa : ((ra == REF_SAME_AS_PTR) ? pa : ra);
+
 	string sequenceToInsert = currentChar == '*' ? "*" : "&";
 	if (isSequenceReached("**"))
 	{
 		sequenceToInsert = "**";
 		goForward(1);
 	}
-	if (pointerAlignment == ALIGN_NONE)
+	if (itemAlignment == PTR_ALIGN_NONE)
 	{
 		appendSequence(sequenceToInsert, false);
 		return;
@@ -2868,8 +2871,8 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 		spacePadNum -= (formattedLine.length() - 1 - prevCh);
 		formattedLine.erase(prevCh+1);
 	}
-	if (pointerAlignment == ALIGN_MIDDLE
-	        || pointerAlignment == ALIGN_NAME)
+	if (itemAlignment == PTR_ALIGN_MIDDLE
+	        || itemAlignment == PTR_ALIGN_NAME)
 	{
 		appendSpacePad();
 		appendSequence(sequenceToInsert, false);
@@ -3871,7 +3874,7 @@ void ASFormatter::formatCommentBody()
 		if (peekNextChar() == '}'
 		        && previousCommandChar != ';'
 		        && !isBracketType(bracketTypeStack->back(),  ARRAY_TYPE)
-				&& !isInPreprocessor
+		        && !isInPreprocessor
 		        && isOkToBreakBlock(bracketTypeStack->back()))
 		{
 			isInLineBreak = true;
@@ -4621,6 +4624,28 @@ bool ASFormatter::isClosingHeader(const string* header) const
 	return (header == &AS_ELSE
 	        || header == &AS_CATCH
 	        || header == &AS_FINALLY);
+}
+
+/**
+ * Determine if a * following a closing paren is immediately.
+ * after a cast. If so it is a dereference and not a multiply.
+ * e.g. "(int*) *ptr" is a dereference.
+ */
+bool ASFormatter::isImmediatelyPostCast() const
+{
+	assert(previousNonWSChar == ')' && currentChar == '*');
+	// find preceeding closing paren
+	size_t paren = currentLine.rfind(")", charNum);
+	if (paren == string::npos || paren == 0)
+		return false;
+	// find character preceeding the closing paren
+	size_t lastChar = currentLine.find_last_not_of(" \t", paren-1);
+	if (lastChar == string::npos)
+		return false;
+	// check for pointer cast
+	if (currentLine[lastChar] == '*')
+		return true;
+	return false;
 }
 
 /**

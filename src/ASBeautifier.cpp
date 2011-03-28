@@ -79,6 +79,7 @@ ASBeautifier::ASBeautifier()
 	assignmentOperators = new vector<const string*>;
 	nonAssignmentOperators = new vector<const string*>;
 	preBlockStatements = new vector<const string*>;
+	preCommandHeaders = new vector<const string*>;
 	indentableHeaders = new vector<const string*>;
 }
 
@@ -136,6 +137,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 	assignmentOperators = other.assignmentOperators;
 	nonAssignmentOperators = other.nonAssignmentOperators;
 	preBlockStatements = other.preBlockStatements;
+	preCommandHeaders = other.preCommandHeaders;
 	indentableHeaders = other.indentableHeaders;
 
 	// protected variables
@@ -199,6 +201,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 	shouldIndentBrackettedLine = other.shouldIndentBrackettedLine;
 	isInClass = other.isInClass;
 	isInSwitch = other.isInSwitch;
+	foundPreCommandHeader = other.foundPreCommandHeader;
 	tabCount = other.tabCount;
 	spaceTabCount = other.spaceTabCount;
 	lineOpeningBlocksNum = other.lineOpeningBlocksNum;
@@ -339,6 +342,7 @@ void ASBeautifier::init()
 	shouldIndentBrackettedLine = true;
 	isInClass = false;
 	isInSwitch = false;
+	foundPreCommandHeader = false;
 	isNonInStatementArray = false;
 	isSharpAccessor = false;
 	isSharpDelegate = false;
@@ -365,6 +369,7 @@ void ASBeautifier::initVectors()
 	assignmentOperators->clear();
 	nonAssignmentOperators->clear();
 	preBlockStatements->clear();
+	preCommandHeaders->clear();
 	indentableHeaders->clear();
 
 	ASResource::buildHeaders(headers, fileType, true);
@@ -372,6 +377,7 @@ void ASBeautifier::initVectors()
 	ASResource::buildAssignmentOperators(assignmentOperators);
 	ASResource::buildNonAssignmentOperators(nonAssignmentOperators);
 	ASResource::buildPreBlockStatements(preBlockStatements, fileType);
+	ASResource::buildPreCommandHeaders(preCommandHeaders, fileType);
 	ASResource::buildIndentableHeaders(indentableHeaders);
 }
 
@@ -1313,6 +1319,7 @@ void ASBeautifier::deleteBeautifierVectors()
 	delete headers;
 	delete nonParenHeaders;
 	delete preBlockStatements;
+	delete preCommandHeaders;
 	delete assignmentOperators;
 	delete nonAssignmentOperators;
 	delete indentableHeaders;
@@ -1718,7 +1725,6 @@ void ASBeautifier::computePreliminaryIndentation()
 			        || (*headerStack)[i] == &AS_CLASS
 			        || (*headerStack)[i] == &AS_STRUCT
 			        || (*headerStack)[i] == &AS_UNION
-			        || (*headerStack)[i] == &AS_CONST
 			        || (*headerStack)[i] == &AS_VOLATILE
 			        || (*headerStack)[i] == &AS_INTERFACE
 			        || (*headerStack)[i] == &AS_THROWS
@@ -1887,7 +1893,6 @@ void ASBeautifier::parseCurrentLine(const string& line)
 		if (probationHeader != NULL)
 		{
 			if (((probationHeader == &AS_STATIC
-			        || probationHeader == &AS_CONST
 			        || probationHeader == &AS_VOLATILE) && ch == '{')
 			        || (probationHeader == &AS_SYNCHRONIZED && ch == '('))
 			{
@@ -1903,8 +1908,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 				if (previousLineProbation
 				        && ch == '{'
 				        && !(blockIndent
-				             && (probationHeader == &AS_CONST
-				                 || probationHeader == &AS_VOLATILE
+				             && (probationHeader == &AS_VOLATILE
 				                 || probationHeader == &AS_STATIC)))
 				{
 					tabCount++;
@@ -1992,6 +1996,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			}
 			else if (ch == ')' || ch == ']')
 			{
+				foundPreCommandHeader = false;
 				parenDepth--;
 				if (parenDepth == 0)
 				{
@@ -2035,6 +2040,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			                      || prevNonSpaceCh == ')'
 			                      || prevNonSpaceCh == ';'
 			                      || peekNextChar(line, i) == '{'
+			                      || foundPreCommandHeader
 			                      || isInClassInitializer
 			                      || isNonInStatementArray
 			                      || isSharpAccessor
@@ -2130,6 +2136,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			blockTabCount += isInStatement ? 1 : 0;
 			parenDepth = 0;
 			isInStatement = false;
+			foundPreCommandHeader = false;
 
 			tempStacks->push_back(new vector<const string*>);
 			headerStack->push_back(&AS_OPEN_BRACKET);
@@ -2256,13 +2263,11 @@ void ASBeautifier::parseCurrentLine(const string& line)
 				}
 				else if (newHeader == &AS_STATIC
 				         || newHeader == &AS_SYNCHRONIZED
-				         || (newHeader == &AS_CONST && isCStyle())
 				         || (newHeader == &AS_VOLATILE && isCStyle()))
 				{
 					if (!headerStack->empty() &&
 					        (headerStack->back() == &AS_STATIC
 					         || headerStack->back() == &AS_SYNCHRONIZED
-					         || headerStack->back() == &AS_CONST
 					         || headerStack->back() == &AS_VOLATILE))
 					{
 						isIndentableHeader = false;
@@ -2272,10 +2277,6 @@ void ASBeautifier::parseCurrentLine(const string& line)
 						isIndentableHeader = false;
 						probationHeader = newHeader;
 					}
-				}
-				else if (newHeader == &AS_CONST)
-				{
-					isIndentableHeader = false;
 				}
 				else if (newHeader == &AS_TEMPLATE)
 				{
@@ -2301,6 +2302,9 @@ void ASBeautifier::parseCurrentLine(const string& line)
 
 				continue;
 			}  // newHeader != NULL
+
+			if (findHeader(line, i, preCommandHeaders))
+				foundPreCommandHeader = true;
 
 			if (isCStyle() && findKeyword(line, i, AS_ENUM))
 				isInEnum = true;
@@ -2557,6 +2561,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			isInClassInitializer = false;
 			isInEnum = false;
 			isInQuestion = false;
+			foundPreCommandHeader = false;
 
 			continue;
 		}
@@ -2688,6 +2693,8 @@ void ASBeautifier::parseCurrentLine(const string& line)
 
 			else if (foundAssignmentOp != NULL)
 			{
+				foundPreCommandHeader = false;		// clears this for array assignments
+
 				if (foundAssignmentOp->length() > 1)
 					i += foundAssignmentOp->length() - 1;
 

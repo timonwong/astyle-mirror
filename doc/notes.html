@@ -22,8 +22,10 @@
 
     <ul>
         <li>Add new bracket style, "style=pico".</li>
+        <li>Add new option "align-reference=".</li>
         <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16. </li>
-        <li>Add isDigit() function to avoid the assert statements in Visual C.</li>
+        <li>Add Microsoft C++ extensions for try-finally and&nbsp; try-except statements (3,222,216). </li>
+        <li>Add "override" and "sealed" modifiers (Visual C specific) to preCommandHeaders vector (3,167,978).&nbsp; </li>
         <li>New option "style=break" for Allman style brackets.</li>
         <li>New option "style=attach" for Java style brackets.</li>
         <li>Remove "indent-brackets" and "indent-blocks" from the valid options.</li>
@@ -36,6 +38,7 @@
         <li>Fix processing a "const" variable as a "const" method when it follows a header (3,168,156). </li>
         <li>Fix indentation of a one-line block that follows a header.</li>
         <li>Fix breaking a preprocessor define that has code after a comment end (3,132,531). </li>
+        <li>Fix "pad-oper" padding a dereference that follows a C-style cast (<span>2,989,638</span>).</li>
         <li>Fix indentation of a class opening bracket followed by a class modifier on the same line when indent-namespaces
             and indent-classes is used.</li>
         <li>Refactor to aid debugging, improve speed, and improve the design and decomposition:
@@ -44,7 +47,9 @@
                 <li>Extract method computePreliminaryIndentation() from beautify() in ASBeautifier. </li>
                 <li>Extract method parseCurrentLine() from beautify() in ASBeautifier. </li>
                 <li>Remove unnecessary copies to outBuffer variable in ASBeautifier. </li>
+                <li>Add preCommandHeaders vector to ASBeautifier and remove the "const" modifier comparisons.</li>
                 <li>Change static vectors to member variables.</li>
+                <li>Add isDigit() function to avoid the assert statements in Visual C. </li>
             </ul>
         </li>
     </ul>

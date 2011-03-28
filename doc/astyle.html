@@ -108,13 +108,16 @@
     <p class="contents1">
         <a class="contents" href="#_Formatting_Options">Formatting&nbsp;Options</a></p>
     <p class="contents2">
-        <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp; <a
-            class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_add-brackets">
-                add&#8209;brackets</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_add-one-line-brackets">add&#8209;one&#8209;line&#8209;brackets</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_break-closing-brackets">break&#8209;closing&#8209;brackets</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_add-brackets">add&#8209;brackets</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_add-one-line-brackets">add&#8209;one&#8209;line&#8209;brackets</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_align-pointer">
-            align&#8209;pointer</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_align-pointer">align&#8209;pointer</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_align-reference">align&#8209;reference</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
         <a class="contents" href="#_Other_Options">Other&nbsp;Options</a></p>
@@ -1313,24 +1316,65 @@ else
             --align-pointer=middle / -k2<br />
             --align-pointer=name&nbsp;&nbsp; / -k3</code><br />
         Attach a pointer or reference operator (* or &amp;) to either the variable type (left) or variable name (right),
-        or place it between the type and name. The spacing between the type and name will be preserved, if possible. This
-        option is effective for C/C++ files only.</p>
+        or place it between the type and name (middle). The spacing between the type and name will be preserved, if possible. This
+        option is effective for C/C++ files only. To format references separately use the following align-reference option.</p>
     <div class="code">
-        <pre>char *foo1;</pre>
+        <pre>
+char *foo1;
+char &amp;foo2;</pre>
         <p class="code">
             becomes (with align-pointer=type):</p>
-        <pre>char* foo1;</pre>
+        <pre>char* foo1;
+char&amp; foo2;</pre>
     </div>
     <div class="code">
-        <pre>char* foo2;</pre>
+        <pre>
+char* foo1;
+char&amp; foo2;</pre>
         <p class="code">
             becomes (with align-pointer=middle):</p>
-        <pre>char * foo2;</pre>
+        <pre>
+char * foo1;
+char &amp; foo2;</pre>
+    </div>
+    <div class="code">
+        <pre>
+char* foo1;
+char&amp; foo2;</pre>
+        <p class="code">
+            becomes (with align-pointer=name):</p>
+        <pre>
+char *foo1;
+char &amp;foo2;</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_align-reference">
+        <code class="title">--align-reference=none&nbsp;&nbsp; / -W0<br />
+            --align-reference=type&nbsp;&nbsp; / -W1<br />
+            --align-reference=middle / -W2<br />
+            --align-reference=name&nbsp;&nbsp; / -W3</code><br />
+        This option will align references
+        separate from pointers. Pointers are not changes by this option. If pointers and references are to be aligned the same, use the previous align-pointer option. The option align-reference=none
+        will not change the reference alignment. The other options are the same as for align-pointer. This option is effective for C/C++ files
+        only.
+    </p>
+    <div class="code">
+        <pre>char &amp;foo1;</pre>
+        <p class="code">
+            becomes (with align-reference=type):</p>
+        <pre>char&amp; foo1;</pre>
+    </div>
+    <div class="code">
+        <pre>char&amp; foo2;</pre>
+        <p class="code">
+            becomes (with align-reference=middle):</p>
+        <pre>char &amp; foo2;</pre>
     </div>
     <div class="code">
         <pre>char& foo3;</pre>
         <p class="code">
-            becomes (with align-pointer=name):</p>
+            becomes (with align-reference=name):</p>
         <pre>char &amp;foo3;</pre>
     </div>
     <p>
