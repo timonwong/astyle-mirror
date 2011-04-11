@@ -639,6 +639,7 @@ string ASFormatter::nextLine()
 			{
 				isInHeader = false;
 				isImmediatelyPostHeader = true;
+				foundQuestionMark = false;
 			}
 			if (currentChar == ')')
 			{

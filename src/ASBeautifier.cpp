@@ -2263,7 +2263,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 				}
 				else if (newHeader == &AS_STATIC
 				         || newHeader == &AS_SYNCHRONIZED
-				         || (newHeader == &AS_VOLATILE && isCStyle()))
+				         || (newHeader == &AS_VOLATILE))
 				{
 					if (!headerStack->empty() &&
 					        (headerStack->back() == &AS_STATIC
@@ -2280,8 +2280,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 				}
 				else if (newHeader == &AS_TEMPLATE)
 				{
-					if (isCStyle())
-						isInTemplate = true;
+					isInTemplate = true;
 					isIndentableHeader = false;
 				}
 

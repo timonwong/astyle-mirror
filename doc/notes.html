@@ -21,11 +21,13 @@
         Artistic Style 2.02&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new bracket style, "style=pico".</li>
-        <li>Add new option "align-reference=".</li>
+        <li>Add a new program module, ASLocalizer, containing languang translations.</li>
+        <li>Add new option "ascii".</li>
+        <li>Add new bracket style, "style=pico". </li>
+        <li>Add new option "align-reference=" (3,136,744). </li>
         <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16. </li>
-        <li>Add Microsoft C++ extensions for try-finally and&nbsp; try-except statements (3,222,216). </li>
-        <li>Add "override" and "sealed" modifiers (Visual C specific) to preCommandHeaders vector (3,167,978).&nbsp; </li>
+        <li>Add Microsoft C++ extensions for try-finally and try-except statements (3,222,216). </li>
+        <li>Add "override" and "sealed" modifiers (Visual C specific) to preCommandHeaders vector (3,167,978). </li>
         <li>New option "style=break" for Allman style brackets.</li>
         <li>New option "style=attach" for Java style brackets.</li>
         <li>Remove "indent-brackets" and "indent-blocks" from the valid options.</li>
@@ -33,12 +35,14 @@
         <li>Change functions setting&nbsp; the "indent-brackets" and "indent-blocks" variables from public to protected.</li>
         <li>Change to abort if UTF-32 files are detected.</li>
         <li>Change "Cannot set native locale" error message from cout to cerr (3,139,873). </li>
-        <li>Fix Linux infinite loop when a directory name is entered instead of a file name.&nbsp; </li>
-        <li>Fix trying to process directories as files when a wildcard is used without recursive (<span>3,134,108)</span>.&nbsp;</li>
+        <li>Fix Linux infinite loop when a directory name is entered instead of a file name. </li>
+        <li>Fix trying to process directories as files when a wildcard is used without recursive (3,134,108).</li>
         <li>Fix processing a "const" variable as a "const" method when it follows a header (3,168,156). </li>
         <li>Fix indentation of a one-line block that follows a header.</li>
         <li>Fix breaking a preprocessor define that has code after a comment end (3,132,531). </li>
-        <li>Fix "pad-oper" padding a dereference that follows a C-style cast (<span>2,989,638</span>).</li>
+        <li>Fix "pad-oper" padding a dereference that follows a C-style cast (3,259,713). </li>
+        <li>Fix not clearing a flag when a "?" conditional is included in an "if" statement (2,989,638). </li>
+        <li>Fix not printing a zero for formatted numbers.</li>
         <li>Fix indentation of a class opening bracket followed by a class modifier on the same line when indent-namespaces
             and indent-classes is used.</li>
         <li>Refactor to aid debugging, improve speed, and improve the design and decomposition:

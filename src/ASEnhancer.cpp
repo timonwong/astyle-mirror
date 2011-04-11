@@ -486,7 +486,7 @@ bool ASEnhancer::isOneLineBlockReached(string& line, int startChar) const
 
 	bool isInComment_ = false;
 	bool isInQuote_ = false;
-	int bracketCount = 1;
+	int _bracketCount = 1;
 	int lineLength = line.length();
 	char quoteChar_ = ' ';
 	char ch = ' ';
@@ -536,11 +536,11 @@ bool ASEnhancer::isOneLineBlockReached(string& line, int startChar) const
 		}
 
 		if (ch == '{')
-			++bracketCount;
+			++_bracketCount;
 		else if (ch == '}')
-			--bracketCount;
+			--_bracketCount;
 
-		if (bracketCount == 0)
+		if (_bracketCount == 0)
 			return true;
 	}
 

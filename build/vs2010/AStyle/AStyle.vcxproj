@@ -254,6 +254,7 @@
     <ClCompile Include="..\..\..\src\ASBeautifier.cpp" />
     <ClCompile Include="..\..\..\src\ASEnhancer.cpp" />
     <ClCompile Include="..\..\..\src\ASFormatter.cpp" />
+    <ClCompile Include="..\..\..\src\ASLocalizer.cpp" />
     <ClCompile Include="..\..\..\src\ASResource.cpp" />
     <ClCompile Include="..\..\..\src\astyle_main.cpp" />
   </ItemGroup>

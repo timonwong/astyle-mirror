@@ -51,6 +51,12 @@
 #endif
 #endif  //  ASTYLE_JNI
 
+// for console build only
+#ifndef ASTYLE_LIB
+#include "ASLocalizer.h"
+#define _(a) localizer.settext(a)
+#endif
+
 // for G++ implementation of string.compare:
 #if defined(__GNUC__) && __GNUC__ < 3
 #error - Use GNU C compiler release 3 or higher
@@ -114,6 +120,38 @@ class ASStreamIterator : public ASSourceIterator
 };
 
 //----------------------------------------------------------------------------
+// ASOptions class for options processing
+// used by both console and library builds
+//----------------------------------------------------------------------------
+
+class ASOptions
+{
+	public:
+		ASOptions(ASFormatter& formatterArg) : formatter(formatterArg) {}
+		string getOptionErrors();
+		void importOptions(istream& in, vector<string> &optionsVector);
+		bool parseOptions(vector<string> &optionsVector, const string& errorInfo);
+
+	private:
+		// variables
+		ASFormatter& formatter;			// reference to the ASFormatter object
+		stringstream optionErrors;		// option error messages
+
+		// functions
+		ASOptions& operator=(ASOptions&);          // not to be implemented
+		string getParam(const string& arg, const char* op);
+		string getParam(const string& arg, const char* op1, const char* op2);
+		bool isOption(const string arg, const char* op);
+		bool isOption(const string& arg, const char* op1, const char* op2);
+		void isOptionError(const string& arg, const string& errorInfo);
+		bool isParamOption(const string& arg, const char* option);
+		bool isParamOption(const string& arg, const char* option1, const char* option2);
+		void parseOption(const string& arg, const string& errorInfo);
+};
+
+#ifndef	ASTYLE_LIB
+
+//----------------------------------------------------------------------------
 // ASConsole class for console build
 //----------------------------------------------------------------------------
 
@@ -121,6 +159,7 @@ class ASConsole
 {
 	private:	// variables
 		ASFormatter& formatter;				// reference to the ASFormatter object
+		ASLocalizer localizer;				// ASLocalizer object
 		// command line options
 		bool isRecursive;                   // recursive option
 		string origSuffix;                  // suffix= option
@@ -130,6 +169,7 @@ class ASConsole
 		bool isQuiet;                       // quiet option
 		bool isFormattedOnly;               // formatted lines only option
 		bool optionsFileRequired;           // options= option
+		bool useAscii;                      // ascii option
 		// other variables
 		bool hasWildcard;                   // file name includes a wildcard
 		size_t mainDirectoryLength;         // directory length to be excluded in displays
@@ -163,6 +203,7 @@ class ASConsole
 			isQuiet = false;
 			isFormattedOnly = false;
 			optionsFileRequired = false;
+			useAscii = false;
 			// other variables
 			hasWildcard = false;
 			filesAreIdentical = true;
@@ -191,6 +232,7 @@ class ASConsole
 		bool getIsVerbose();
 		bool getLineEndsMixed();
 		bool getNoBackup();
+		string getLanguageID() const;
 		string getNumberFormat(int num, size_t=0) const ;
 		string getNumberFormat(int num, const char* groupingArg, const char* separator) const;
 		string getOptionsFileName();
@@ -240,10 +282,10 @@ class ASConsole
 		bool isParamOption(const string& arg, const char* option);
 		bool isPathExclued(const string& subPath);
 		void printHelp() const;
-		void printMsg(const string& msg) const;
+		void printMsg(const char* msg, const string& data) const;
 		void printSeparatingLine() const;
-		void printVerboseHeader() const;
-		void printVerboseStats(clock_t startTime) const;
+		void printVerboseHeader();
+		void printVerboseStats(clock_t startTime);
 		FileEncoding readFile(const string& fileName, stringstream& in) const;
 		void removeFile(const char* fileName_, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;
@@ -258,36 +300,7 @@ class ASConsole
 		void displayLastError();
 #endif
 };
-
-//----------------------------------------------------------------------------
-// ASOptions class for options processing
-// used by both console and library builds
-//----------------------------------------------------------------------------
-
-class ASOptions
-{
-	public:
-		ASOptions(ASFormatter& formatterArg) : formatter(formatterArg) {}
-		string getOptionErrors();
-		void importOptions(istream& in, vector<string> &optionsVector);
-		bool parseOptions(vector<string> &optionsVector, const string& errorInfo);
-
-	private:
-		// variables
-		ASFormatter& formatter;			// reference to the ASFormatter object
-		stringstream optionErrors;		// option error messages
-
-		// functions
-		ASOptions& operator=(ASOptions&);          // not to be implemented
-		string getParam(const string& arg, const char* op);
-		string getParam(const string& arg, const char* op1, const char* op2);
-		bool isOption(const string arg, const char* op);
-		bool isOption(const string& arg, const char* op1, const char* op2);
-		void isOptionError(const string& arg, const string& errorInfo);
-		bool isParamOption(const string& arg, const char* option);
-		bool isParamOption(const string& arg, const char* option1, const char* option2);
-		void parseOption(const string& arg, const string& errorInfo);
-};
+#endif	// ASTYLE_LIB
 
 }   // end of namespace astyle
 

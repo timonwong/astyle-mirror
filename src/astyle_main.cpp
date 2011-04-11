@@ -33,9 +33,6 @@
 #include <sstream>
 #include <cstdlib>
 #include <errno.h>
-#ifdef __DMC__
-#include <locale.h>
-#endif
 
 // includes for recursive getFileNames() function
 #ifdef _WIN32
@@ -466,7 +463,6 @@ void ASConsole::verifyCinPeek() const
  * Open input file, format it, and close the output.
  *
  * @param fileName_     The path and name of the file to be processed.
- * @param formatter     The formatter object.
  */
 void ASConsole::formatFile(const string& fileName_)
 {
@@ -551,13 +547,13 @@ void ASConsole::formatFile(const string& fileName_)
 	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
 	{
 		writeFile(fileName_, encoding, out);
-		printMsg("formatted  " + displayName);
+		printMsg(_("formatted %s\n"), displayName);
 		filesFormatted++;
 	}
 	else
 	{
 		if (!isFormattedOnly)
-			printMsg("unchanged* " + displayName);
+			printMsg(_("unchanged %s\n"), displayName);
 		filesUnchanged++;
 	}
 
@@ -606,6 +602,9 @@ int ASConsole::getFilesFormatted()
 
 bool ASConsole::getIsFormattedOnly()
 { return isFormattedOnly; }
+
+string ASConsole::getLanguageID() const
+{ return localizer.getLanguageID(); }
 
 bool ASConsole::getIsQuiet()
 { return isQuiet; }
@@ -838,7 +837,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 			// if a sub directory and recursive, save sub directory
 			string subDirectoryPath = directory + g_fileSeparator + findFileData.cFileName;
 			if (isPathExclued(subDirectoryPath))
-				printMsg("exclude " + subDirectoryPath.substr(mainDirectoryLength));
+				printMsg(_("exclude %s\n"), subDirectoryPath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(subDirectoryPath);
 			continue;
@@ -852,7 +851,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		if (wildcmp(wildcard.c_str(), findFileData.cFileName))
 		{
 			if (isExcluded)
-				printMsg("exclude " + filePathName.substr(mainDirectoryLength));
+				printMsg(_("exclude %s\n"), filePathName.substr(mainDirectoryLength));
 			else
 				fileName.push_back(filePathName);
 		}
@@ -891,6 +890,8 @@ string ASConsole::getNumberFormat(int num, size_t lcid) const
 	stringstream alphaNum;
 	alphaNum << num;
 	string number = alphaNum.str();
+	if (useAscii)
+		return number;
 
 	// format the number using the Windows API
 	if (lcid == 0)
@@ -911,6 +912,8 @@ string ASConsole::getNumberFormat(int num, size_t lcid) const
 	size_t i = formattedNum.rfind(decBuf);
 	if (i != string::npos)
 		formattedNum.erase(i);
+	if (!formattedNum.length())
+		formattedNum = "0";
 
 	delete [] outBuf;
 	delete [] decBuf;
@@ -980,7 +983,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		if (S_ISDIR(statbuf.st_mode) && isRecursive)
 		{
 			if (isPathExclued(entryFilepath))
-				printMsg("exclude " + entryFilepath.substr(mainDirectoryLength));
+				printMsg(_("exclude %s\n"), entryFilepath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(entryFilepath);
 			continue;
@@ -995,7 +998,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 			if (wildcmp(wildcard.c_str(), entry->d_name))
 			{
 				if (isExcluded)
-					printMsg("exclude " + entryFilepath.substr(mainDirectoryLength));
+					printMsg(_("exclude %s\n"), entryFilepath.substr(mainDirectoryLength));
 				else
 					fileName.push_back(entryFilepath);
 			}
@@ -1146,7 +1149,7 @@ void ASConsole::getFilePaths(string& filePath)
 	if (hasWildcard)
 	{
 		printSeparatingLine();
-		printMsg("directory " + targetDirectory + g_fileSeparator + targetFilename);
+		printMsg(_("directory %s\n"), targetDirectory + g_fileSeparator + targetFilename);
 	}
 
 	// create a vector of paths and file names to process
@@ -1629,7 +1632,14 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 	{
 		arg = argvOptions[i];
 
-		if ( isOption(arg, "--options=none") )
+		if ( isOption(arg, "-I" )
+		        || isOption(arg, "--ascii") )
+		{
+			useAscii = true;
+			setlocale(LC_ALL, "C");		// use English decimal indicator
+			localizer.setLanguageFromName("en");
+		}
+		else if ( isOption(arg, "--options=none") )
 		{
 			shouldParseOptionsFile = false;
 		}
@@ -1698,13 +1708,13 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 		{
 			options.importOptions(optionsIn, fileOptionsVector);
 			ok = options.parseOptions(fileOptionsVector,
-			                          string("Invalid option file options: "));
+			                          string(_("Invalid option file options: ")));
 		}
 		else
 		{
 			if (optionsFileRequired)
 			{
-				(*_err) << "Cannot open options file: " << optionsFileName.c_str() << endl;
+				(*_err) << _("Cannot open options file: ") << optionsFileName.c_str() << endl;
 				error();
 			}
 			optionsFileName.clear();
@@ -1714,17 +1724,17 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 	if (!ok)
 	{
 		(*_err) << options.getOptionErrors() << endl;
-		(*_err) << "For help on options, type 'astyle -h' " << endl;
+		(*_err) << _("For help on options, type 'astyle -h'") << endl;
 		error();
 	}
 
 	// parse the command line options vector for errors
 	ok = options.parseOptions(optionsVector,
-	                          string("Invalid command line options: "));
+	                          string(_("Invalid command line options: ")));
 	if (!ok)
 	{
 		(*_err) << options.getOptionErrors() << endl;
-		(*_err) << "For help on options, type 'astyle -h' \n" << endl;
+		(*_err) << _("For help on options, type 'astyle -h'") << endl;
 		error();
 	}
 }
@@ -1827,11 +1837,11 @@ void ASConsole::standardizePath(string& path, bool removeBeginningSeparator /*fa
 		path.erase(0, 1);
 }
 
-void ASConsole::printMsg(const string& msg) const
+void ASConsole::printMsg(const char* msg, const string& data) const
 {
 	if (isQuiet)
 		return;
-	printf("%s\n", msg.c_str());
+	printf(msg, data.c_str());
 }
 
 void ASConsole::printSeparatingLine() const
@@ -1839,20 +1849,20 @@ void ASConsole::printSeparatingLine() const
 	string line;
 	for (size_t i = 0; i < 60; i++)
 		line.append("-");
-	printMsg(line);
+	printMsg("%s\n", line);
 }
 
-void ASConsole::printVerboseHeader() const
+void ASConsole::printVerboseHeader()
 {
 	assert(isVerbose);
 	if (isQuiet)
 		return;
 	printf("Artistic Style %s\n", g_version);
 	if (!optionsFileName.empty())
-		printf("Using default options file %s\n", optionsFileName.c_str());
+		printf(_("Using default options file %s\n"), optionsFileName.c_str());
 }
 
-void ASConsole::printVerboseStats(clock_t startTime) const
+void ASConsole::printVerboseStats(clock_t startTime)
 {
 	assert(isVerbose);
 	if (isQuiet)
@@ -1861,7 +1871,7 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 		printSeparatingLine();
 	string formatted = getNumberFormat(filesFormatted);
 	string unchanged = getNumberFormat(filesUnchanged);
-	printf(" %s formatted;  %s unchanged;  ", formatted.c_str(), unchanged.c_str());
+	printf(_(" %s formatted;  %s unchanged;  "), formatted.c_str(), unchanged.c_str());
 
 	// show processing time
 	clock_t stopTime = clock();
@@ -1874,7 +1884,7 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 			printf("%.1f", secs);
 		else
 			printf("%.0f", secs);
-		printf("%s", " seconds;  ");
+		printf("%s", _(" seconds;  "));
 	}
 	else
 	{
@@ -1882,11 +1892,11 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 		int min = (int) secs / 60;
 		secs -= min * 60;
 		int minsec = int (secs + .5);
-		printf("%d min %d sec;  ", min, minsec);
+		printf(_("%d min %d sec;  "), min, minsec);
 	}
 
 	string lines = getNumberFormat(linesOut);
-	printf("%s lines\n", lines.c_str());
+	printf(_("%s lines\n"), lines.c_str());
 }
 
 void ASConsole::sleep(int seconds) const
@@ -3078,15 +3088,6 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 
 int main(int argc, char** argv)
 {
-	// Set the locale.
-	// Not all compilers support the C++ function locale::global(locale(""));
-	// For testing on Windows change the "Region and Language" settings.
-	// Changing setlocale will NOT work since ::GetNumberFormat uses the LCID.
-	// For testing on Linux change the following setlocale: "fr_FR.UTF-8", "de_DE.UTF-8".
-	char* localeName = setlocale(LC_ALL, "");
-	if (localeName == NULL)
-		cerr << "Cannot set native locale" << endl;
-
 	// create objects
 	ASFormatter formatter;
 	g_console = new ASConsole(formatter);
