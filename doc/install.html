@@ -33,8 +33,6 @@
     <p class="contents1">
         <a class="contents" href="#_Mac_OS_X_Version">Mac OS X Version</a></p>
     <p class="contents1">
-        <a class="contents" href="#_OpenVMS_Version">OpenVMS Version</a></p>
-    <p class="contents1">
         <a class="contents" href="#_Windows_Version">Windows Version</a></p>
     <p class="contents2">
         <a class="contents" href="#_Precompiled_Executable">Precompiled Executable</a></p>
@@ -54,10 +52,6 @@
     <p>
         astyle_x.x_macosx.tar.gz is the <b>Mac OS X</b> version of Artistic Style. It contains the source code, documentation,
         and a makefile. The Mac OS X Version compile instructions below give information for compiling the source code.</p>
-    <p>
-        astyle_x_x_openvms.zip is the <b>OpenVMS</b> version of Artistic Style. It contains the source code, documentation,
-        object files, build files, and executables. The OpenVMS Version compile instructions below give information for
-        compiling the source code. Object code is included for people that don't have the Hewlett-Packard C++ compiler.</p>
     <p>
         astyle_x.x_windows.zip is the <b>Windows</b> version of Artistic Style. It contains the source code, documentation,
         Visual C project files, and an executable. The Windows Version compile instructions below give information for
@@ -208,37 +202,6 @@
     <br />
     <p>
         The <a href="#_Other_Makefile_Options">Other Makefile Options</a> are the same as for the Linux compilers.</p>
-
-    <h3 id="_OpenVMS_Version">
-        OpenVMS Version</h3>
-
-    <p>
-        To build Artistic Style on an OpenVMS system, you will need Hewlett-Packard's C++ compiler installed. To build
-        the code, use the OpenVMS specific build file located in the astyle/build/vms directory. The executables will
-        be in the astyle/bin directory. To build the standalone executable, enter the following:</p>
-    <pre>set def [.astyle.build.vms]<br />@vmsbuild
-</pre>
-    <p>
-        To run Artistic Style, you should move the standalone executable to an appropriate directory, and create a foreign
-        symbol for it. For example:</p>
-    <pre>create/dir my_disk:[astyle.exe]<br />set def [--.bin]<br />copy astyle_main.exe my_disk:[astyle.exe]<br />ast*yle :== $my_disk:[astyle.exe]astyle_main.exe
-</pre>
-    <p>
-        The build command procedure also includes a method to build a sharable image version of the program, which can
-        be linked and called from other executable modules.</p>
-    <p>
-        Additionally, if you have a Java Development Kit installed, you can build a Java Native Interface version of the
-        program, which can be called from Java code.</p>
-    <p>
-        To build either of these versions, please see the comments located at the end of the VMSBUILD.COM command procedure.</p>
-    <p>
-        If you use Artistic Style on ODS-2 disks, you will need to specify a different suffix for file renaming, as the
-        default is .orig, and multi-dot filenames are not supported on ODS-2 disks. Add the --suffix=_orig switch to either
-        the command line or your Artistic Style initialization file.</p>
-    <p>
-        To set up an initialization file on OpenVMS, create a file and define a logical to point to it. For example:</p>
-    <pre>create my_disk:[astyle]astyle.ini<br /> --suffix=_orig<br /> ^Z<br />define artistic_style_options my_disk:[astyle]astyle.ini
-</pre>
 
     <h3 id="_Windows_Version">
         Windows Version</h3>

@@ -284,8 +284,8 @@ class ASConsole
 		void printHelp() const;
 		void printMsg(const char* msg, const string& data) const;
 		void printSeparatingLine() const;
-		void printVerboseHeader();
-		void printVerboseStats(clock_t startTime);
+		void printVerboseHeader() const;
+		void printVerboseStats(clock_t startTime) const;
 		FileEncoding readFile(const string& fileName, stringstream& in) const;
 		void removeFile(const char* fileName_, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;

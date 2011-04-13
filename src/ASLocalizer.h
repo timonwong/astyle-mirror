@@ -46,12 +46,12 @@ class ASLocalizer
 		ASLocalizer();
 		virtual ~ASLocalizer();
 		string getLanguageID() const;
-		const Translation* getTranslationClass();
+		const Translation* getTranslationClass() const;
 #ifdef _WIN32
 		void setLanguageFromLCID(size_t lcid);
 #endif
 		void setLanguageFromName(const char* langID);
-		const char* settext(const char* textIn);
+		const char* settext(const char* textIn) const;
 
 	private:	// functions
 		void setTranslationClass();
@@ -78,11 +78,9 @@ class Translation
 	public:
 		Translation() {};
 		string convertToMultiByte(const wstring& wideStr) const;
-		size_t getTranslationVectorSize();
-		bool getWideTranslation(const string& stringIn, wstring& wideOut);
-		string& translate(const string& stringIn);
-		// variables
-		string m_mbTranslation;		// translated multi-byte string
+		size_t getTranslationVectorSize() const;
+		bool getWideTranslation(const string& stringIn, wstring& wideOut) const;
+		string& translate(const string& stringIn) const;
 
 	protected:
 		void addPair(const string& english, const wstring& translated);

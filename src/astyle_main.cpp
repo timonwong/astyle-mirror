@@ -403,7 +403,7 @@ FileEncoding ASConsole::detectEncoding(const char* data, size_t dataSize) const
 // error exit without a message
 void ASConsole::error() const
 {
-	(*_err) << "\nArtistic Style has terminated!" << endl;
+	(*_err) << _("\nArtistic Style has terminated!") << endl;
 	exit(EXIT_FAILURE);
 }
 
@@ -454,7 +454,7 @@ void ASConsole::verifyCinPeek() const
 	int currPos = static_cast<int>(cin.tellg());
 	if (currPos == -1)
 	{
-		(*_err) << "Cannot process the input stream." << endl;
+		(*_err) << _("Cannot process the input stream") << endl;
 		error();
 	}
 }
@@ -670,7 +670,7 @@ FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) cons
 	const int blockSize = 131072;	// 128 KB
 	ifstream fin(fileName_.c_str(), ios::binary);
 	if (!fin)
-		error("Cannot open input file", fileName_.c_str());
+		error(_("Cannot open input file"), fileName_.c_str());
 	char data[blockSize];
 	fin.read(data, sizeof(data));
 	if (fin.bad())
@@ -817,7 +817,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		// Error (123) The filename, directory name, or volume label syntax is incorrect.
 		// ::FindClose(hFind); before exiting
 		displayLastError();
-		error("Cannot open directory", directory.c_str());
+		error(_("Cannot open directory"), directory.c_str());
 	}
 
 	// save files and sub directories
@@ -956,7 +956,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 
 	DIR* dp = opendir(directory.c_str());
 	if (dp == NULL)
-		error("Cannot open directory", directory.c_str());
+		error(_("Cannot open directory"), directory.c_str());
 
 	// save the first fileName entry for this recursion
 	const unsigned firstEntry = fileName.size();
@@ -1708,15 +1708,12 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 		{
 			options.importOptions(optionsIn, fileOptionsVector);
 			ok = options.parseOptions(fileOptionsVector,
-			                          string(_("Invalid option file options: ")));
+			                          string(_("Invalid option file options:")));
 		}
 		else
 		{
 			if (optionsFileRequired)
-			{
-				(*_err) << _("Cannot open options file: ") << optionsFileName.c_str() << endl;
-				error();
-			}
+				error(_("Cannot open options file"), optionsFileName.c_str());
 			optionsFileName.clear();
 		}
 		optionsIn.close();
@@ -1724,17 +1721,17 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 	if (!ok)
 	{
 		(*_err) << options.getOptionErrors() << endl;
-		(*_err) << _("For help on options, type 'astyle -h'") << endl;
+		(*_err) << _("For help on options type 'astyle -h'") << endl;
 		error();
 	}
 
 	// parse the command line options vector for errors
 	ok = options.parseOptions(optionsVector,
-	                          string(_("Invalid command line options: ")));
+	                          string(_("Invalid command line options:")));
 	if (!ok)
 	{
 		(*_err) << options.getOptionErrors() << endl;
-		(*_err) << _("For help on options, type 'astyle -h'") << endl;
+		(*_err) << _("For help on options type 'astyle -h'") << endl;
 		error();
 	}
 }
@@ -1852,7 +1849,7 @@ void ASConsole::printSeparatingLine() const
 	printMsg("%s\n", line);
 }
 
-void ASConsole::printVerboseHeader()
+void ASConsole::printVerboseHeader() const
 {
 	assert(isVerbose);
 	if (isQuiet)
@@ -1862,7 +1859,7 @@ void ASConsole::printVerboseHeader()
 		printf(_("Using default options file %s\n"), optionsFileName.c_str());
 }
 
-void ASConsole::printVerboseStats(clock_t startTime)
+void ASConsole::printVerboseStats(clock_t startTime) const
 {
 	assert(isVerbose);
 	if (isQuiet)

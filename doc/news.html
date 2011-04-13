@@ -70,8 +70,8 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         the best translation possible. The translations are at the end of ASLocalizer.cpp in the form of an English-Translation
         pair. If you correct a translation, send the source as a bug report and it will be included in the next release.</p>
     <p>
-        To add a language, add a new class to ASLocalizer.h and the constructor containig the English-Translation pair
-        to ASLocalizer.cpp . In ASLocalizer.cpp, update the WinLangCode array, if necessary,
+        To add a language, add a new translation class to ASLocalizer.h. Add the English-Translation pair
+        to the constructor in ASLocalizer.cpp, update the WinLangCode array, if necessary,
         and add the language code to the function setTranslationClass(). The program contains comments that give web pages
         for obtaining the LCIDs and language codes. Send the source code as a bug report and it will be included in the
         next release.</p>
@@ -125,7 +125,7 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         a byte-order-mark (BOM) to be recognized. Again, this is the Visual Studio default.</p>
     <p>
         The Visual Studio project files now have a solution for both Win32 and x64 compiles. The x64 version will be needed if
-        you are using an Artistic Style dll for Java or C# on a Windows7 platform. Or you may just prefer an x64 console
+        you are using an Artistic Style dll for Java or C# on a Windows 7 platform. Or you may just prefer an x64 console
         program. The executable included in the Windows distribution is still Win32. It will work on both Win32 and x64
         systems.</p>
     <p>

@@ -167,7 +167,7 @@ string ASLocalizer::getLanguageID() const
 	return m_langID;
 }
 
-const Translation* ASLocalizer::getTranslationClass()
+const Translation* ASLocalizer::getTranslationClass() const
 // Returns the name of the translation class in m_translation.
 {
 	assert(m_translation);
@@ -214,7 +214,7 @@ void ASLocalizer::setLanguageFromName(const char* langID)
 	setTranslationClass();
 }
 
-const char* ASLocalizer::settext(const char* textIn)
+const char* ASLocalizer::settext(const char* textIn) const
 // Call the settext class and return the value.
 {
 	assert(m_translation);
@@ -276,13 +276,13 @@ string Translation::convertToMultiByte(const wstring& wideStr) const
 	return mbTranslation;
 }
 
-size_t Translation::getTranslationVectorSize()
+size_t Translation::getTranslationVectorSize() const
 // Return the translation vector size.  Used for testing.
 {
 	return m_translation.size();
 }
 
-bool Translation::getWideTranslation(const string& stringIn, wstring& wideOut)
+bool Translation::getWideTranslation(const string& stringIn, wstring& wideOut) const
 // Get the wide translation string. Used for testing.
 {
 	size_t i;
@@ -299,23 +299,25 @@ bool Translation::getWideTranslation(const string& stringIn, wstring& wideOut)
 	return false;
 }
 
-string& Translation::translate(const string& stringIn)
+string& Translation::translate(const string& stringIn) const
 // Translate a string.
+// Return a static string instead of a member variable so the method can have a "const" designation.
+// This allows "settext" to be called from a "const" method.
 {
-	size_t i;
-	m_mbTranslation.clear();
-	for (i = 0; i < m_translation.size(); i++)
+	static string mbTranslation;
+	mbTranslation.clear();
+	for (size_t i = 0; i < m_translation.size(); i++)
 	{
 		if (m_translation[i].first == stringIn)
 		{
-			m_mbTranslation = convertToMultiByte(m_translation[i].second);
+			mbTranslation = convertToMultiByte(m_translation[i].second);
 			break;
 		}
 	}
 	// not found, return english
-	if (m_mbTranslation.empty())
-		m_mbTranslation = stringIn;
-	return m_mbTranslation;
+	if (mbTranslation.empty())
+		mbTranslation = stringIn;
+	return mbTranslation;
 }
 
 void Translation::systemAbort(const string& message) const
@@ -341,10 +343,14 @@ ChineseSimplified::ChineseSimplified()
 	addPair("%s lines\n", L"%s 线\n");
 	addPair("exclude %s\n", L"排除 %s\n");
 	addPair("Using default options file %s\n", L"使用默认选项文件 %s\n");
-	addPair("Invalid option file options: ", L"无效的选项文件选项：");
-	addPair("Invalid command line options: ", L"无效的命令行选项：");
-	addPair("For help on options, type 'astyle -h'", L"上选项的帮助下，键入 'astyle -h'");
-	addPair("Cannot open options file: ", L"无法打开选项文件：");
+	addPair("Invalid option file options:", L"无效的选项文件选项：");
+	addPair("Invalid command line options:", L"无效的命令行选项：");
+	addPair("For help on options type 'astyle -h'", L"上选项的帮助下键入 'astyle -h'");
+	addPair("Cannot open options file", L"无法打开选项文件");
+	addPair("Cannot open input file", L"无法打开输入文件");
+	addPair("Cannot open directory", L"无法打开目录");
+	addPair("Cannot process the input stream", L"无法处理的输入流");
+	addPair("\nArtistic Style has terminated!", L"\nArtistic Style 已经终止！");
 }
 
 ChineseTraditional::ChineseTraditional()
@@ -358,10 +364,14 @@ ChineseTraditional::ChineseTraditional()
 	addPair("%s lines\n", L"%s 線\n");
 	addPair("exclude %s\n", L"排除 %s\n");
 	addPair("Using default options file %s\n", L"使用默認選項文件 %s\n");
-	addPair("Invalid option file options: ", L"無效的選項文件選項：");
-	addPair("Invalid command line options: ", L"無效的命令行選項：");
-	addPair("For help on options, type 'astyle -h'", L"如需幫助選項，鍵入 'astyle -h'");
-	addPair("Cannot open options file: ", L"無法打開選項文件：");
+	addPair("Invalid option file options:", L"無效的選項文件選項：");
+	addPair("Invalid command line options:", L"無效的命令行選項：");
+	addPair("For help on options type 'astyle -h'", L"如需幫助選項鍵入 'astyle -h'");
+	addPair("Cannot open options file", L"無法打開選項文件");
+	addPair("Cannot open input file", L"無法打開輸入文件");
+	addPair("Cannot open directory", L"無法打開目錄");
+	addPair("Cannot process the input stream", L"無法處理的輸入流");
+	addPair("\nArtistic Style has terminated!", L"\nArtistic Style 已經終止！");
 }
 
 English::English()
@@ -380,10 +390,14 @@ French::French()
 	addPair("%s lines\n", L"%s lignes\n");
 	addPair("exclude %s\n", L"exclure %s\n");
 	addPair("Using default options file %s\n", L"Options par défaut utilisation du fichier %s\n");
-	addPair("Invalid option file options: ", L"Options Blancs option du fichier: ");
-	addPair("Invalid command line options: ", L"Blancs options ligne de commande: ");
-	addPair("For help on options, type 'astyle -h'", L"Pour de l'aide sur les options, tapez 'astyle -h'");
-	addPair("Cannot open options file: ", L"Impossible d'ouvrir le fichier d'options: ");
+	addPair("Invalid option file options:", L"Options Blancs option du fichier:");
+	addPair("Invalid command line options:", L"Blancs options ligne de commande:");
+	addPair("For help on options type 'astyle -h'", L"Pour de l'aide sur les options tapez 'astyle -h'");
+	addPair("Cannot open options file", L"Impossible d'ouvrir le fichier d'options");
+	addPair("Cannot open input file", L"Impossible d'ouvrir le fichier d'entrée");
+	addPair("Cannot open directory", L"Impossible d'ouvrir le répertoire");
+	addPair("Cannot process the input stream", L"Impossible de traiter le flux d'entrée");
+	addPair("\nArtistic Style has terminated!", L"\nArtistic Style a mis fin!");
 }
 
 German::German()
@@ -398,10 +412,14 @@ German::German()
 	addPair("%s lines\n", L"%s linien\n");
 	addPair("exclude %s\n", L"ausschließen %s\n");
 	addPair("Using default options file %s\n", L"Mit standard-optionen datei %s\n");
-	addPair("Invalid option file options: ", L"Ungültige Option Datei Optionen: ");
-	addPair("Invalid command line options: ", L"Ungültige Kommandozeilen-Optionen: ");
-	addPair("For help on options, type 'astyle -h'", L"Für Hilfe zu den Optionen, geben Sie 'astyle -h'");
-	addPair("Cannot open options file: ", L"Kann nicht geöffnet werden Optionsdatei: ");
+	addPair("Invalid option file options:", L"Ungültige Option Datei Optionen:");
+	addPair("Invalid command line options:", L"Ungültige Kommandozeilen-Optionen:");
+	addPair("For help on options type 'astyle -h'", L"Für Hilfe zu den Optionen geben Sie 'astyle -h'");
+	addPair("Cannot open options file", L"Kann nicht geöffnet werden Optionsdatei");
+	addPair("Cannot open input file", L"Kann Eingabedatei nicht öffnen");
+	addPair("Cannot open directory", L"Kann nicht geöffnet werden direkt");
+	addPair("Cannot process the input stream", L"Kann nicht verarbeiten input stream");
+	addPair("\nArtistic Style has terminated!", L"\nArtistic Style ist beendet!");
 }
 
 Hindi::Hindi()
@@ -416,10 +434,14 @@ Hindi::Hindi()
 	addPair("%s lines\n", L"%s लाइनों\n");
 	addPair("exclude %s\n", L"निकालना %s\n");
 	addPair("Using default options file %s\n", L"डिफ़ॉल्ट विकल्प का उपयोग कर फ़ाइल %s\n");
-	addPair("Invalid option file options: ", L"अवैध विकल्प फ़ाइल विकल्प हैं: ");
-	addPair("Invalid command line options: ", L"कमांड लाइन विकल्प अवैध: ");
-	addPair("For help on options, type 'astyle -h'", L"विकल्पों पर मदद के लिए, प्रकार 'astyle -h'");
-	addPair("Cannot open options file: ", L"विकल्प फ़ाइल नहीं खोल सकता है: ");
+	addPair("Invalid option file options:", L"अवैध विकल्प फ़ाइल विकल्प हैं:");
+	addPair("Invalid command line options:", L"कमांड लाइन विकल्प अवैध:");
+	addPair("For help on options type 'astyle -h'", L"विकल्पों पर मदद के लिए प्रकार 'astyle -h'");
+	addPair("Cannot open options file", L"विकल्प फ़ाइल नहीं खोल सकता है");
+	addPair("Cannot open input file", L"इनपुट फ़ाइल नहीं खोल सकता");
+	addPair("Cannot open directory", L"निर्देशिका नहीं खोल सकता");
+	addPair("Cannot process the input stream", L"इनपुट स्ट्रीम प्रक्रिया नहीं कर सकते");
+	addPair("\nArtistic Style has terminated!", L"\nArtistic Style समाप्त किया है!");
 }
 
 Spanish::Spanish()
@@ -434,10 +456,14 @@ Spanish::Spanish()
 	addPair("%s lines\n", L"%s líneas\n");
 	addPair("exclude %s\n", L"excluir %s\n");
 	addPair("Using default options file %s\n", L"Uso de las opciones por defecto del archivo %s\n");
-	addPair("Invalid option file options: ", L"Opción no válida opciones de archivo: ");
-	addPair("Invalid command line options: ", L"No válido opciones de línea de comando: ");
-	addPair("For help on options, type 'astyle -h'", L"Para obtener ayuda sobre las opciones, tipo 'astyle -h'");
-	addPair("Cannot open options file: ", L"No se puede abrir el archivo de opciones: ");
+	addPair("Invalid option file options:", L"Opción no válida opciones de archivo:");
+	addPair("Invalid command line options:", L"No válido opciones de línea de comando:");
+	addPair("For help on options type 'astyle -h'", L"Para obtener ayuda sobre las opciones tipo 'astyle -h'");
+	addPair("Cannot open options file", L"No se puede abrir el archivo de opciones");
+	addPair("Cannot open input file", L"No se puede abrir archivo de entrada");
+	addPair("Cannot open directory", L"No se puede abrir el directorio");
+	addPair("Cannot process the input stream", L"No se puede procesar el flujo de entrada");
+	addPair("\nArtistic Style has terminated!", L"\nArtistic Style ha terminado!");
 }
 
 
