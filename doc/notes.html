@@ -28,9 +28,11 @@
         <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16. </li>
         <li>Add Microsoft C++ extensions for try-finally and try-except statements (3,222,216). </li>
         <li>Add "override" and "sealed" modifiers (Visual C specific) to preCommandHeaders vector (3,167,978). </li>
+        <li>Add "case" and "default" to the list of formatters in ASFormatter (3,276,212).</li>
         <li>New option "style=break" for Allman style brackets.</li>
         <li>New option "style=attach" for Java style brackets.</li>
         <li>Remove "indent-brackets" and "indent-blocks" from the valid options.</li>
+        <li>Remove "volatile" from headers and remove comparisons in ASBeautifier.</li>
         <li>Change "brackets=horstman" to "brackets=run-in", used for both Horstmann and Pico styles.</li>
         <li>Change functions setting&nbsp; the "indent-brackets" and "indent-blocks" variables from public to protected.</li>
         <li>Change to abort if UTF-32 files are detected.</li>
@@ -41,7 +43,10 @@
         <li>Fix indentation of a one-line block that follows a header.</li>
         <li>Fix breaking a preprocessor define that has code after a comment end (3,132,531). </li>
         <li>Fix "pad-oper" padding a dereference that follows a C-style cast (3,259,713). </li>
+        <li>Fix "unpad-parens" not recognizine an xor (^) operator (3,285,639). </li>
+        <li>Fix "break-blocks" procedure for "case" and "default" headers.</li>
         <li>Fix not clearing a flag when a "?" conditional is included in an "if" statement (2,989,638). </li>
+        <li>Fix incorrect indentation when "volatile" modifier is used (<span>3,279,856</span>). </li>
         <li>Fix not printing a zero for formatted numbers.</li>
         <li>Fix indentation of a class opening bracket followed by a class modifier on the same line when indent-namespaces
             and indent-classes is used.</li>

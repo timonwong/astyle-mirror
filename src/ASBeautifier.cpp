@@ -1725,7 +1725,6 @@ void ASBeautifier::computePreliminaryIndentation()
 			        || (*headerStack)[i] == &AS_CLASS
 			        || (*headerStack)[i] == &AS_STRUCT
 			        || (*headerStack)[i] == &AS_UNION
-			        || (*headerStack)[i] == &AS_VOLATILE
 			        || (*headerStack)[i] == &AS_INTERFACE
 			        || (*headerStack)[i] == &AS_THROWS
 			        || (*headerStack)[i] == &AS_STATIC))
@@ -1892,8 +1891,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 
 		if (probationHeader != NULL)
 		{
-			if (((probationHeader == &AS_STATIC
-			        || probationHeader == &AS_VOLATILE) && ch == '{')
+			if ((probationHeader == &AS_STATIC && ch == '{')
 			        || (probationHeader == &AS_SYNCHRONIZED && ch == '('))
 			{
 				// insert the probation header as a new header
@@ -1907,9 +1905,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 				// if the probation comes from the previous line, then indent by 1 tab count.
 				if (previousLineProbation
 				        && ch == '{'
-				        && !(blockIndent
-				             && (probationHeader == &AS_VOLATILE
-				                 || probationHeader == &AS_STATIC)))
+				        && !(blockIndent && probationHeader == &AS_STATIC))
 				{
 					tabCount++;
 					previousLineProbationTab = true;
@@ -2262,13 +2258,11 @@ void ASBeautifier::parseCurrentLine(const string& line)
 					--tabCount;
 				}
 				else if (newHeader == &AS_STATIC
-				         || newHeader == &AS_SYNCHRONIZED
-				         || (newHeader == &AS_VOLATILE))
+				         || newHeader == &AS_SYNCHRONIZED)
 				{
 					if (!headerStack->empty() &&
 					        (headerStack->back() == &AS_STATIC
-					         || headerStack->back() == &AS_SYNCHRONIZED
-					         || headerStack->back() == &AS_VOLATILE))
+					         || headerStack->back() == &AS_SYNCHRONIZED))
 					{
 						isIndentableHeader = false;
 					}

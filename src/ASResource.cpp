@@ -236,6 +236,8 @@ void ASResource::buildHeaders(vector<const string*>* headers, int fileType, bool
 	headers->push_back(&AS_WHILE);
 	headers->push_back(&AS_DO);
 	headers->push_back(&AS_SWITCH);
+	headers->push_back(&AS_CASE);
+	headers->push_back(&AS_DEFAULT);
 	headers->push_back(&AS_TRY);
 	headers->push_back(&AS_CATCH);
 
@@ -265,13 +267,9 @@ void ASResource::buildHeaders(vector<const string*>* headers, int fileType, bool
 
 	if (beautifier)
 	{
-		headers->push_back(&AS_CASE);
-		headers->push_back(&AS_DEFAULT);
-
 		if (fileType == C_TYPE)
 		{
 			headers->push_back(&AS_TEMPLATE);
-			headers->push_back(&AS_VOLATILE);
 		}
 
 		if (fileType == JAVA_TYPE)
@@ -291,9 +289,6 @@ void ASResource::buildHeaders(vector<const string*>* headers, int fileType, bool
 void ASResource::buildIndentableHeaders(vector<const string*>* indentableHeaders)
 {
 	indentableHeaders->push_back(&AS_RETURN);
-//	indentableHeaders->push_back(&AS_COUT);
-//	indentableHeaders->push_back(&AS_CERR);
-//	indentableHeaders->push_back(&AS_CIN);
 
 	sort(indentableHeaders->begin(), indentableHeaders->end(), sortOnName);
 }
@@ -336,7 +331,9 @@ void ASResource::buildNonParenHeaders(vector<const string*>* nonParenHeaders, in
 	nonParenHeaders->push_back(&AS_ELSE);
 	nonParenHeaders->push_back(&AS_DO);
 	nonParenHeaders->push_back(&AS_TRY);
-	nonParenHeaders->push_back(&AS_CATCH);
+	nonParenHeaders->push_back(&AS_CATCH);		// can be paren or non-paren
+	nonParenHeaders->push_back(&AS_CASE);		// can be paren or non-paren
+	nonParenHeaders->push_back(&AS_DEFAULT);
 
 	if (fileType == C_TYPE)
 	{
@@ -359,12 +356,9 @@ void ASResource::buildNonParenHeaders(vector<const string*>* nonParenHeaders, in
 
 	if (beautifier)
 	{
-		nonParenHeaders->push_back(&AS_CASE);
-		nonParenHeaders->push_back(&AS_DEFAULT);
 		if (fileType == C_TYPE)
 		{
 			nonParenHeaders->push_back(&AS_TEMPLATE);
-			nonParenHeaders->push_back(&AS_VOLATILE);
 		}
 		if (fileType == JAVA_TYPE)
 		{
@@ -476,6 +470,7 @@ void ASResource::buildPreCommandHeaders(vector<const string*>* preCommandHeaders
 	if (fileType == C_TYPE)
 	{
 		preCommandHeaders->push_back(&AS_CONST);
+		preCommandHeaders->push_back(&AS_VOLATILE);
 		preCommandHeaders->push_back(&AS_SEALED);		// Visual C only
 		preCommandHeaders->push_back(&AS_OVERRIDE);		// Visual C only
 	}

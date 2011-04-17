@@ -334,15 +334,15 @@ void Translation::systemAbort(const string& message) const
 
 ChineseSimplified::ChineseSimplified()
 {
-	addPair("formatted %s\n", L"格式化 %s\n");		// should align with unchanged
-	addPair("unchanged %s\n", L"不变   %s\n");		// should align with formatted
-	addPair("directory %s\n", L"目录 %s\n");
-	addPair(" %s formatted;  %s unchanged;  ", L" %s 格式化;  %s 不变;  ");
-	addPair(" seconds;  ", L" 秒;  ");
-	addPair("%d min %d sec;  ", L"%d 分钟 %d 秒;  ");
+	addPair("formatted  %s\n", L"格式化  %s\n");		// should align with unchanged
+	addPair("unchanged  %s\n", L"不变    %s\n");		// should align with formatted
+	addPair("directory  %s\n", L"目录  %s\n");
+	addPair(" %s formatted   %s unchanged   ", L" %s 格式化   %s 不变   ");
+	addPair(" seconds   ", L" 秒   ");
+	addPair("%d min %d sec   ", L"%d 分钟 %d 秒   ");
 	addPair("%s lines\n", L"%s 线\n");
-	addPair("exclude %s\n", L"排除 %s\n");
-	addPair("Using default options file %s\n", L"使用默认选项文件 %s\n");
+	addPair("exclude  %s\n", L"排除  %s\n");
+	addPair("Using default options file  %s\n", L"使用默认选项文件  %s\n");
 	addPair("Invalid option file options:", L"无效的选项文件选项：");
 	addPair("Invalid command line options:", L"无效的命令行选项：");
 	addPair("For help on options type 'astyle -h'", L"上选项的帮助下键入 'astyle -h'");
@@ -355,15 +355,15 @@ ChineseSimplified::ChineseSimplified()
 
 ChineseTraditional::ChineseTraditional()
 {
-	addPair("formatted %s\n", L"格式化 %s\n");		// should align with unchanged
-	addPair("unchanged %s\n", L"不變   %s\n");		// should align with formatted
-	addPair("directory %s\n", L"目錄 %s\n");
-	addPair(" %s formatted;  %s unchanged;  ", L" %s 格式化;  %s 不變;  ");
-	addPair(" seconds;  ", L" 秒;  ");
-	addPair("%d min %d sec;  ", L"%d 分鐘 %d 秒;  ");
+	addPair("formatted  %s\n", L"格式化  %s\n");		// should align with unchanged
+	addPair("unchanged  %s\n", L"不變    %s\n");		// should align with formatted
+	addPair("directory  %s\n", L"目錄  %s\n");
+	addPair(" %s formatted   %s unchanged   ", L" %s 格式化   %s 不變   ");
+	addPair(" seconds   ", L" 秒   ");
+	addPair("%d min %d sec   ", L"%d 分鐘 %d 秒   ");
 	addPair("%s lines\n", L"%s 線\n");
-	addPair("exclude %s\n", L"排除 %s\n");
-	addPair("Using default options file %s\n", L"使用默認選項文件 %s\n");
+	addPair("exclude  %s\n", L"排除  %s\n");
+	addPair("Using default options file  %s\n", L"使用默認選項文件  %s\n");
 	addPair("Invalid option file options:", L"無效的選項文件選項：");
 	addPair("Invalid command line options:", L"無效的命令行選項：");
 	addPair("For help on options type 'astyle -h'", L"如需幫助選項鍵入 'astyle -h'");
@@ -381,15 +381,15 @@ English::English()
 French::French()
 // build the translation vector in the Translation base class
 {
-	addPair("formatted %s\n", L"formaté   %s\n");	// should align with unchanged
-	addPair("unchanged %s\n", L"inchangée %s\n");	// should align with formatted
-	addPair("directory %s\n", L"répertoire %s\n");
-	addPair(" %s formatted;  %s unchanged;  ", L" %s formaté;  %s inchangée;  ");
-	addPair(" seconds;  ", L" seconde;  ");
-	addPair("%d min %d sec;  ", L"%d min %d sec;  ");
+	addPair("formatted  %s\n", L"formaté    %s\n");	// should align with unchanged
+	addPair("unchanged  %s\n", L"inchangée  %s\n");	// should align with formatted
+	addPair("directory  %s\n", L"répertoire  %s\n");
+	addPair(" %s formatted   %s unchanged   ", L" %s formaté   %s inchangée   ");
+	addPair(" seconds   ", L" seconde   ");
+	addPair("%d min %d sec   ", L"%d min %d sec   ");
 	addPair("%s lines\n", L"%s lignes\n");
-	addPair("exclude %s\n", L"exclure %s\n");
-	addPair("Using default options file %s\n", L"Options par défaut utilisation du fichier %s\n");
+	addPair("exclude  %s\n", L"exclure  %s\n");
+	addPair("Using default options file  %s\n", L"Options par défaut utilisation du fichier  %s\n");
 	addPair("Invalid option file options:", L"Options Blancs option du fichier:");
 	addPair("Invalid command line options:", L"Blancs options ligne de commande:");
 	addPair("For help on options type 'astyle -h'", L"Pour de l'aide sur les options tapez 'astyle -h'");
@@ -403,15 +403,15 @@ French::French()
 German::German()
 // build the translation vector in the Translation base class
 {
-	addPair("formatted %s\n", L"formatiert  %s\n");	// should align with unchanged
-	addPair("unchanged %s\n", L"unverändert %s\n");	// should align with formatted
-	addPair("directory %s\n", L"verzeichnis %s\n");
-	addPair(" %s formatted;  %s unchanged;  ", L" %s formatiert;  %s unverändert;  ");
-	addPair(" seconds;  ", L" sekunden;  ");
-	addPair("%d min %d sec;  ", L"%d min %d sek;  ");
+	addPair("formatted  %s\n", L"formatiert   %s\n");	// should align with unchanged
+	addPair("unchanged  %s\n", L"unverändert  %s\n");	// should align with formatted
+	addPair("directory  %s\n", L"verzeichnis  %s\n");
+	addPair(" %s formatted   %s unchanged   ", L" %s formatiert   %s unverändert   ");
+	addPair(" seconds   ", L" sekunden   ");
+	addPair("%d min %d sec   ", L"%d min %d sek   ");
 	addPair("%s lines\n", L"%s linien\n");
-	addPair("exclude %s\n", L"ausschließen %s\n");
-	addPair("Using default options file %s\n", L"Mit standard-optionen datei %s\n");
+	addPair("exclude  %s\n", L"ausschließen  %s\n");
+	addPair("Using default options file  %s\n", L"Mit standard-optionen datei  %s\n");
 	addPair("Invalid option file options:", L"Ungültige Option Datei Optionen:");
 	addPair("Invalid command line options:", L"Ungültige Kommandozeilen-Optionen:");
 	addPair("For help on options type 'astyle -h'", L"Für Hilfe zu den Optionen geben Sie 'astyle -h'");
@@ -425,15 +425,15 @@ German::German()
 Hindi::Hindi()
 // build the translation vector in the Translation base class
 {
-	addPair("formatted %s\n", L"स्वरूपित किया %s\n");	// should align with unchanged
-	addPair("unchanged %s\n", L"अपरिवर्तित    %s\n");	// should align with formatted
-	addPair("directory %s\n", L"निर्देशिका %s\n");
-	addPair(" %s formatted;  %s unchanged;  ", L" %s स्वरूपित किया;  %s अपरिवर्तित;  ");
-	addPair(" seconds;  ", L" सेकंड;  ");
-	addPair("%d min %d sec;  ", L"%d मिनट %d सेकंड;  ");
+	addPair("formatted  %s\n", L"स्वरूपित किया  %s\n");	// should align with unchanged
+	addPair("unchanged  %s\n", L"अपरिवर्तित     %s\n");	// should align with formatted
+	addPair("directory  %s\n", L"निर्देशिका  %s\n");
+	addPair(" %s formatted   %s unchanged   ", L" %s स्वरूपित किया   %s अपरिवर्तित   ");
+	addPair(" seconds   ", L" सेकंड   ");
+	addPair("%d min %d sec   ", L"%d मिनट %d सेकंड   ");
 	addPair("%s lines\n", L"%s लाइनों\n");
-	addPair("exclude %s\n", L"निकालना %s\n");
-	addPair("Using default options file %s\n", L"डिफ़ॉल्ट विकल्प का उपयोग कर फ़ाइल %s\n");
+	addPair("exclude  %s\n", L"निकालना  %s\n");
+	addPair("Using default options file  %s\n", L"डिफ़ॉल्ट विकल्प का उपयोग कर फ़ाइल  %s\n");
 	addPair("Invalid option file options:", L"अवैध विकल्प फ़ाइल विकल्प हैं:");
 	addPair("Invalid command line options:", L"कमांड लाइन विकल्प अवैध:");
 	addPair("For help on options type 'astyle -h'", L"विकल्पों पर मदद के लिए प्रकार 'astyle -h'");
@@ -447,15 +447,15 @@ Hindi::Hindi()
 Spanish::Spanish()
 // build the translation vector in the Translation base class
 {
-	addPair("formatted %s\n", L"formato    %s\n");	// should align with unchanged
-	addPair("unchanged %s\n", L"inalterado %s\n");	// should align with formatted
-	addPair("directory %s\n", L"directorio %s\n");
-	addPair(" %s formatted;  %s unchanged;  ", L" %s formato;  %s inalterado;  ");
-	addPair(" seconds;  ", L" segundo;  ");
-	addPair("%d min %d sec;  ", L"%d min %d seg;  ");
+	addPair("formatted  %s\n", L"formato     %s\n");	// should align with unchanged
+	addPair("unchanged  %s\n", L"inalterado  %s\n");	// should align with formatted
+	addPair("directory  %s\n", L"directorio  %s\n");
+	addPair(" %s formatted   %s unchanged   ", L" %s formato   %s inalterado   ");
+	addPair(" seconds   ", L" segundo   ");
+	addPair("%d min %d sec   ", L"%d min %d seg   ");
 	addPair("%s lines\n", L"%s líneas\n");
-	addPair("exclude %s\n", L"excluir %s\n");
-	addPair("Using default options file %s\n", L"Uso de las opciones por defecto del archivo %s\n");
+	addPair("exclude  %s\n", L"excluir  %s\n");
+	addPair("Using default options file  %s\n", L"Uso de las opciones por defecto del archivo  %s\n");
 	addPair("Invalid option file options:", L"Opción no válida opciones de archivo:");
 	addPair("Invalid command line options:", L"No válido opciones de línea de comando:");
 	addPair("For help on options type 'astyle -h'", L"Para obtener ayuda sobre las opciones tipo 'astyle -h'");

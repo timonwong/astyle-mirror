@@ -547,13 +547,13 @@ void ASConsole::formatFile(const string& fileName_)
 	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
 	{
 		writeFile(fileName_, encoding, out);
-		printMsg(_("formatted %s\n"), displayName);
+		printMsg(_("formatted  %s\n"), displayName);
 		filesFormatted++;
 	}
 	else
 	{
 		if (!isFormattedOnly)
-			printMsg(_("unchanged %s\n"), displayName);
+			printMsg(_("unchanged  %s\n"), displayName);
 		filesUnchanged++;
 	}
 
@@ -837,7 +837,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 			// if a sub directory and recursive, save sub directory
 			string subDirectoryPath = directory + g_fileSeparator + findFileData.cFileName;
 			if (isPathExclued(subDirectoryPath))
-				printMsg(_("exclude %s\n"), subDirectoryPath.substr(mainDirectoryLength));
+				printMsg(_("exclude  %s\n"), subDirectoryPath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(subDirectoryPath);
 			continue;
@@ -851,7 +851,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		if (wildcmp(wildcard.c_str(), findFileData.cFileName))
 		{
 			if (isExcluded)
-				printMsg(_("exclude %s\n"), filePathName.substr(mainDirectoryLength));
+				printMsg(_("exclude  %s\n"), filePathName.substr(mainDirectoryLength));
 			else
 				fileName.push_back(filePathName);
 		}
@@ -983,7 +983,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		if (S_ISDIR(statbuf.st_mode) && isRecursive)
 		{
 			if (isPathExclued(entryFilepath))
-				printMsg(_("exclude %s\n"), entryFilepath.substr(mainDirectoryLength));
+				printMsg(_("exclude  %s\n"), entryFilepath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(entryFilepath);
 			continue;
@@ -998,7 +998,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 			if (wildcmp(wildcard.c_str(), entry->d_name))
 			{
 				if (isExcluded)
-					printMsg(_("exclude %s\n"), entryFilepath.substr(mainDirectoryLength));
+					printMsg(_("exclude  %s\n"), entryFilepath.substr(mainDirectoryLength));
 				else
 					fileName.push_back(entryFilepath);
 			}
@@ -1149,7 +1149,7 @@ void ASConsole::getFilePaths(string& filePath)
 	if (hasWildcard)
 	{
 		printSeparatingLine();
-		printMsg(_("directory %s\n"), targetDirectory + g_fileSeparator + targetFilename);
+		printMsg(_("directory  %s\n"), targetDirectory + g_fileSeparator + targetFilename);
 	}
 
 	// create a vector of paths and file names to process
@@ -1854,9 +1854,18 @@ void ASConsole::printVerboseHeader() const
 	assert(isVerbose);
 	if (isQuiet)
 		return;
-	printf("Artistic Style %s\n", g_version);
+	// get the date
+	struct tm* ptr;
+	time_t lt;
+	char str[20];
+	lt = time(NULL);
+	ptr = localtime(&lt);
+	strftime(str, 20, "%x", ptr);
+	// print the header
+	printf("Artistic Style %s     %s\n", g_version, str);
+	// print options file
 	if (!optionsFileName.empty())
-		printf(_("Using default options file %s\n"), optionsFileName.c_str());
+		printf(_("Using default options file  %s\n"), optionsFileName.c_str());
 }
 
 void ASConsole::printVerboseStats(clock_t startTime) const
@@ -1868,7 +1877,7 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 		printSeparatingLine();
 	string formatted = getNumberFormat(filesFormatted);
 	string unchanged = getNumberFormat(filesUnchanged);
-	printf(_(" %s formatted;  %s unchanged;  "), formatted.c_str(), unchanged.c_str());
+	printf(_(" %s formatted   %s unchanged   "), formatted.c_str(), unchanged.c_str());
 
 	// show processing time
 	clock_t stopTime = clock();
@@ -1881,7 +1890,7 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 			printf("%.1f", secs);
 		else
 			printf("%.0f", secs);
-		printf("%s", _(" seconds;  "));
+		printf("%s", _(" seconds   "));
 	}
 	else
 	{
@@ -1889,7 +1898,7 @@ void ASConsole::printVerboseStats(clock_t startTime) const
 		int min = (int) secs / 60;
 		secs -= min * 60;
 		int minsec = int (secs + .5);
-		printf(_("%d min %d sec;  "), min, minsec);
+		printf(_("%d min %d sec   "), min, minsec);
 	}
 
 	string lines = getNumberFormat(linesOut);

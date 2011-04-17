@@ -870,7 +870,9 @@ string ASFormatter::nextLine()
 				// this checks currentLine, appendSpacePad() checks formattedLine
 				// in C# 'catch' can be either a paren or non-paren header
 				if (shouldPadHeader
-				        && (!isNonParenHeader || (currentHeader == &AS_CATCH && peekNextChar() == '('))
+				        && (!isNonParenHeader
+				            || (currentHeader == &AS_CASE && peekNextChar() == '(')
+				            || (currentHeader == &AS_CATCH && peekNextChar() == '('))
 				        && charNum < (int) currentLine.length() - 1 && !isWhiteSpace(currentLine[charNum+1]))
 					appendSpacePad();
 
@@ -918,6 +920,10 @@ string ASFormatter::nextLine()
 					}
 
 				}
+
+				if (currentHeader == &AS_CASE
+				        || currentHeader == &AS_DEFAULT)
+					isInCase = true;
 
 				continue;
 			}
@@ -974,7 +980,11 @@ string ASFormatter::nextLine()
 				}
 
 				// append post block empty line for unbracketed header
-				if (shouldBreakBlocks && currentHeader != NULL && parenStack->back() == 0)
+				if (shouldBreakBlocks
+				        && currentHeader != NULL
+				        && currentHeader != &AS_CASE
+				        && currentHeader != &AS_DEFAULT
+				        && parenStack->back() == 0)
 				{
 					isAppendPostBlockEmptyLineRequested = true;
 				}
@@ -1030,10 +1040,6 @@ string ASFormatter::nextLine()
 
 		if (isPotentialHeader &&  !isInTemplate)
 		{
-			if (findKeyword(currentLine, charNum, AS_CASE)
-			        || findKeyword(currentLine, charNum, AS_DEFAULT))
-				isInCase = true;
-
 			if (findKeyword(currentLine, charNum, AS_NEW))
 				isInPotentialCalculation = false;
 
@@ -2975,7 +2981,9 @@ void ASFormatter::padParens(void)
 			         || lastChar == '-'
 			         || lastChar == '*'
 			         || lastChar == '/'
-			         || lastChar == '%')
+			         || lastChar == '%'
+			         || lastChar == '^'
+			        )
 				spacesOutsideToDelete--;
 
 			if (spacesOutsideToDelete > 0)
@@ -3267,7 +3275,16 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 
 	if (shouldBreakBlocks && currentHeader != NULL && parenStack->back() == 0)
 	{
-		isAppendPostBlockEmptyLineRequested = true;
+		if (currentHeader == &AS_CASE || currentHeader == &AS_DEFAULT)
+		{
+			// do not insert line if "break" statement is outside the brackets
+			/////////////// check for end of line and send a "" ???????????????????????????????
+			string nextText = peekNextText(currentLine.substr(charNum+1));
+			if (nextText.substr(0, 5) != "break")
+				isAppendPostBlockEmptyLineRequested = true;
+		}
+		else
+			isAppendPostBlockEmptyLineRequested = true;
 	}
 }
 
