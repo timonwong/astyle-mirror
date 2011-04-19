@@ -6,7 +6,7 @@ SRC = astyle_main.cpp \
       ASBeautifier.cpp \
       ASFormatter.cpp \
       ASEnhancer.cpp \
-	  ASLocalizer.cpp \
+      ASLocalizer.cpp \
       ASResource.cpp
 
 # source directories

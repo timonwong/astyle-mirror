@@ -1610,7 +1610,7 @@ bool ASBeautifier::isIndentedPreprocessor(const string& line, size_t currPos) co
 		}
 		// check for "pragma omp"
 		string word = line.substr(start, end - start);
-		if (word == "omp")
+		if (word == "omp" || word == "region" || word == "endregion")
 			return true;
 	}
 	return false;

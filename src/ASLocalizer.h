@@ -84,7 +84,6 @@ class Translation
 
 	protected:
 		void addPair(const string& english, const wstring& translated);
-		void systemAbort(const string& message) const;
 		// variables
 		vector<pair<string, wstring> > m_translation;		// translation vector
 

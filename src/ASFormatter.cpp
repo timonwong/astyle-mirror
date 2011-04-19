@@ -449,10 +449,11 @@ string ASFormatter::nextLine()
 		// treat these preprocessor statements as a line comment
 		else if (currentChar =='#')
 		{
-			if (isSequenceReached("#region")
-			        || isSequenceReached("#endregion")
-			        || isSequenceReached("#error")
-			        || isSequenceReached("#warning"))
+			string preproc = trim(currentLine.c_str() + charNum + 1);
+			if (preproc.compare(0, 6, "region") == 0
+			        || preproc.compare(0, 9, "endregion") == 0
+			        || preproc.compare(0, 5, "error") == 0
+			        || preproc.compare(0, 7, "warning") == 0)
 			{
 				// check for horstmann run-in
 				if (formattedLine.length() > 0 && formattedLine[0] == '{')
@@ -3277,8 +3278,7 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 	{
 		if (currentHeader == &AS_CASE || currentHeader == &AS_DEFAULT)
 		{
-			// do not insert line if "break" statement is outside the brackets
-			/////////////// check for end of line and send a "" ???????????????????????????????
+			// do not yet insert a line if "break" statement is outside the brackets
 			string nextText = peekNextText(currentLine.substr(charNum+1));
 			if (nextText.substr(0, 5) != "break")
 				isAppendPostBlockEmptyLineRequested = true;
@@ -4358,6 +4358,10 @@ bool ASFormatter::addBracketsToStatement()
 	        && currentHeader != &AS_WHILE
 	        && currentHeader != &AS_DO
 	        && currentHeader != &AS_FOREACH)
+		return false;
+
+	// do not bracket an empty statement
+	if (currentChar == ';')
 		return false;
 
 	// do not add if a header follows (i.e. else if)

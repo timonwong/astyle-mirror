@@ -259,16 +259,31 @@ void Translation::addPair(const string& english, const wstring& translated)
 
 string Translation::convertToMultiByte(const wstring& wideStr) const
 // Convert wchar_t to a multibyte string using the currently assigned locale.
-// The converted string is in m_mbTranslation.
+// Return an empty string if an error occurs.
 {
+	static bool msgDisplayed = false;
 	// get length of the output excluding the NULL and validate the parameters
 	size_t mbLen = wcstombs(NULL, wideStr.c_str(), 0);
 	if (mbLen == string::npos)
-		systemAbort("Bad char in wide character string");
+	{
+		if (!msgDisplayed)
+		{
+			printf("\n%s\n\n", "Cannot convert to multi-byte string, reverting to English");
+			msgDisplayed = true;
+		}
+		return "";
+	}
 	// convert the characters
 	char* mbStr = new(nothrow) char[mbLen+1];
 	if (mbStr == NULL)
-		systemAbort("Bad memory alloc for multi-byte string");
+	{
+		if (!msgDisplayed)
+		{
+			printf("\n%s\n\n", "Bad memory alloc for multi-byte string, reverting to English");
+			msgDisplayed = true;
+		}
+		return "";
+	}
 	wcstombs(mbStr, wideStr.c_str(), mbLen+1);
 	// return the string
 	string mbTranslation = mbStr;
@@ -318,13 +333,6 @@ string& Translation::translate(const string& stringIn) const
 	if (mbTranslation.empty())
 		mbTranslation = stringIn;
 	return mbTranslation;
-}
-
-void Translation::systemAbort(const string& message) const
-{
-	cerr << message << endl;
-	cerr << "\nArtistic Style has terminated!" << endl;
-	exit(EXIT_FAILURE);
 }
 
 //----------------------------------------------------------------------------
