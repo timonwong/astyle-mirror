@@ -1468,7 +1468,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    Remove unnecessary space padding around parenthesis.  This\n";
 	(*_err) << "    can be used in combination with the 'pad' options above.\n";
 	(*_err) << endl;
-	(*_err) << "    --delete-empty-lines  OR  -x\n";
+	(*_err) << "    --delete-empty-lines  OR  -xd\n";
 	(*_err) << "    Delete empty lines within a function or method.\n";
 	(*_err) << "    It will NOT delete lines added by the break-blocks options.\n";
 	(*_err) << endl;
@@ -2383,13 +2383,18 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string& errorI
 
 			for (i = 1; i < arg.length(); ++i)
 			{
-				if (isalpha(arg[i]) && i > 1)
+				if (i > 1
+					&& isalpha(arg[i]) 
+					&& arg[i-1] != 'x')
 				{
+					// parse the previous option in subArg
 					parseOption(subArg, errorInfo);
 					subArg = "";
 				}
+				// append the current option to subArg
 				subArg.append(1, arg[i]);
 			}
+			// parse the last option
 			parseOption(subArg, errorInfo);
 			subArg = "";
 		}
@@ -2647,7 +2652,7 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		formatter.setOperatorPaddingMode(true);
 	}
-	else if ( isOption(arg, "x", "delete-empty-lines") )
+	else if ( isOption(arg, "xd", "delete-empty-lines") )
 	{
 		formatter.setDeleteEmptyLinesMode(true);
 	}

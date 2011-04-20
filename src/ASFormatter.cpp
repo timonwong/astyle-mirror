@@ -4360,6 +4360,9 @@ bool ASFormatter::addBracketsToStatement()
 	        && currentHeader != &AS_FOREACH)
 		return false;
 
+	if (currentHeader == &AS_WHILE && foundClosingHeader)	// do-while
+		return false;
+
 	// do not bracket an empty statement
 	if (currentChar == ';')
 		return false;

@@ -52,31 +52,31 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         must be input from the command line and not an option file. See the documentation for details.</p>
     <p>
         The translations were mostly done with an automated translation program, Google Translate, so they may not be
-        the best translation possible. The translations are at the end of ASLocalizer.cpp in the form of an English-Translation
+        the best translation possible. The translations are at the end of ASLocalizer.cpp in the form of an English&#8209;Translation
         pair. If you correct a translation, send the source as a bug report and it will be included in the next release.</p>
     <p>
-        To add a language, add a new translation class to ASLocalizer.h. Add the English-Translation pair
-        to the constructor in ASLocalizer.cpp, update the WinLangCode array, if necessary,
-        and add the language code to the function setTranslationClass(). The program contains comments that give web pages
-        for obtaining the LCIDs and language codes. Send the source code as a bug report and it will be included in the
-        next release.</p>
+        To add a language, add a new translation class to ASLocalizer.h. Add the English&#8209;Translation pair to the
+        constructor in ASLocalizer.cpp. Update the WinLangCode array, if necessary, and add the language code to the function
+        setTranslationClass(). The ASLocalizer.cpp program contains comments that give web pages for obtaining the LCIDs
+        and language codes. Send the source code as a bug report and it will be included in the next release.</p>
 
     <h4>
         Brackets</h4>
 
     <p>
         Since release 1.22 (April 2008) the predefined styles have increased from 5 to11 and the bracket types have increased
-        from 4 to 6. Having two different ways of defining bracket styles has resulted in some confusion and unnecessary duplication. This release starts a redesign of the bracket definitions to simplify
-        the user interface. The predefined styles and bracket types will be combined into a single option category.
+        from 4 to 6. Having two different ways of defining bracket styles has resulted in some confusion and unnecessary
+        duplication. This release starts a redesign of the bracket definitions to simplify the user interface. The predefined
+        styles and bracket types will be combined into a single option category.
     </p>
     <p>
         The "Predefined Style" options have been renamed "Bracket Style" options. The "Bracket Options" have been depreciated
         and will be removed in a future release. If you are using a "brackets=" option, you should start changing to one
         of the "style=" options. There is a "style" option available for every "brackets" option.</p>
     <p>
-        All "Bracket Style" options now default to 4 spaces per indent. If you were using a "Predefined Style" with
-        a default indent other than 4, you will need to add one of the "Tab Options" to maintain the same indentation.
-        The styles which used indents other than 4 were:</p>
+        All "Bracket Style" options now default to 4 spaces per indent. If you were using a "Predefined Style" with a
+        default indent other than 4, you will need to add one of the "Tab Options" to maintain the same indentation. The
+        styles which used indents other than 4 were:</p>
     <ul>
         <li>Stroustrup - 5 spaces per indent. </li>
         <li>Gnu - 2 spaces per indent. </li>
@@ -84,12 +84,12 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         <li>Horstmann - 3 spaces per indent.</li>
     </ul>
     <p>
-        There is a new "Bracket Style" option "style=pico" or "A11". It uses run-in brackets, like Horstmann style, and attaches
-        the closing bracket to the last line in the block. It also sets the options "keep one line blocks" and "keep one
-        line statements". This is a very compact style and is a good style for small monitors.</p>
+        There is a new "Bracket Style" option "style=pico" or "A11". It uses run-in brackets, like Horstmann style, and
+        attaches the closing bracket to the last line in the block. It also sets the options "keep one line blocks" and
+        "keep one line statements". This is a very compact style and is a good style for small monitors.</p>
     <p>
-        The option "brackets=horstmann" has been removed. Instead use "style=horstmann" or "A9". The short option "g" is now equivalent
-        to the new "brackets=run-in". Run-in brackets are used for both Horstmann and Pico styles.</p>
+        The option "brackets=horstmann" has been removed. Instead use "style=horstmann" or "A9". The short option "g"
+        is now equivalent to the new "brackets=run-in". Run-in brackets are used for both Horstmann and Pico styles.</p>
     <p>
         The option "indent-brackets" and short option "B" have been removed. Instead use "style=whitesmith" or "style=banner".</p>
     <p>
@@ -101,18 +101,25 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         Other Changes</h4>
 
     <p>
-        A new option "align-reference=" allows references to be aligned separate from pointers. See the documentation
+        To allow for future expansion the short options will now allow an "x" prefix to be used. New short options may
+        start with an "x" and will be followed by another character (e.g. "xa", "xb", "xc" ...). The current options,
+        with one exception, will still be valid.</p>
+    <p>
+        The short option for "delete-empty-lines" has been changed from "x" to "xd" to allow for the expansion of short
+        options.</p>
+    <p>
+        A new option "align-reference=" (-W#) allows references to be aligned separate from pointers. See the documentation
         for details.</p>
     <p>
-        Artistic Style can now format UTF-16 encoded files, both big and little endian. This format is the default for
+        Artistic Style can now format UTF-16 encoded files, both little and big endian. This format is the default for
         Visual Studio unicode files. The file is formatted by converting it to UTF&#8209;8 and then back back to UTF&#8209;16.
-        The conversion process does not add a significant amount of time to the formatting. The UTF-16 file must be encoded with
-        a byte-order-mark (BOM) to be recognized. Again, this is the Visual Studio default.</p>
+        The conversion process does not add a significant amount of time to the formatting. The UTF-16 file must be encoded
+        with a byte-order-mark (BOM) to be recognized. Again, this is the Visual Studio default.</p>
     <p>
-        The Visual Studio project files now have a solution for both Win32 and x64 compiles. The x64 version will be needed if
-        you are using an Artistic Style dll for Java or C# on a Windows 7 platform. Or you may just prefer an x64 console
-        program. The executable included in the Windows distribution is still Win32. It will work on both Win32 and x64
-        systems.</p>
+        The Visual Studio project files now have a solution for both Win32 and x64 compiles. The x64 version will be needed
+        if you are using an Artistic Style dll for Java or C# on a Windows&nbsp;7 platform. Or you may just prefer an
+        x64 console program. The executable included in the Windows distribution is still Win32. It will work on both
+        Win32 and x64 systems.</p>
     <p>
         The documentation contains a new section "Command-line Only" which lists commands that are not available from
         an options file. The options were transferred from the "Other Options" section.</p>
@@ -130,11 +137,9 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
 
     <p>
         The Artistic Style for Windows program contains a sample GUI using the new bracket style options. The old predefined
-        styles are now bracket styles. The bracket
-        options have been removed along with the indent&#8209;brackets and indent&#8209;blocks options. The new bracket styles all use the same default indent of 4 spaces, therefore, it
-        is not necessary to set an indentation from the bracket style. The new &nbsp;format is available for use with
-        this release.</p>
-
+        styles are now bracket styles. The bracket options have been removed along with the indent&#8209;brackets and
+        indent&#8209;blocks options. The new bracket styles all use the same default indent of 4 spaces, therefore it
+        is not necessary to set an indentation from the bracket style. The new format is available for use with this release.</p>
     <p>
     </p>
 

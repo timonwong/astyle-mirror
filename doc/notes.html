@@ -22,9 +22,10 @@
 
     <ul>
         <li>Add a new program module, ASLocalizer, containing languang translations.</li>
-        <li>Add new option "ascii".</li>
+        <li>Add new short option prefix "x" to allow for expansion of short options.</li>
+        <li>Add new command line only option "ascii" (-I). </li>
         <li>Add new bracket style, "style=pico". </li>
-        <li>Add new option "align-reference=" (3,136,744). </li>
+        <li>Add new option "align-reference=" (-W#) (3,136,744). </li>
         <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16. </li>
         <li>Add Microsoft C++ extensions for try-finally and try-except statements (3,222,216). </li>
         <li>Add "override" and "sealed" modifiers (Visual C specific) to preCommandHeaders vector (3,167,978). </li>
@@ -33,6 +34,7 @@
         <li>New option "style=attach" for Java style brackets.</li>
         <li>Remove "indent-brackets" and "indent-blocks" from the valid options.</li>
         <li>Remove "volatile" from headers and remove comparisons in ASBeautifier.</li>
+        <li>Change "delete-empty-lines" short option from "x" to "xd".</li>
         <li>Change "brackets=horstman" to "brackets=run-in", used for both Horstmann and Pico styles.</li>
         <li>Change functions setting&nbsp; the "indent-brackets" and "indent-blocks" variables from public to protected.</li>
         <li>Change to abort if UTF-32 files are detected.</li>
