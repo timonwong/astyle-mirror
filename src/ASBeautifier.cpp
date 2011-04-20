@@ -773,7 +773,8 @@ string ASBeautifier::beautify(const string& originalLine)
 	{
 		if (backslashEndsPrevLine)  // must continue to clear variables
 			line = ' ';
-		else if (emptyLineFill && !isInQuoteContinuation && headerStack->size() > 0)
+		else if (emptyLineFill && !isInQuoteContinuation 
+			&& (headerStack->size() > 0 || isInEnum))
 			return preLineWS(prevFinalLineSpaceTabCount, prevFinalLineTabCount);
 		else
 			return line;
@@ -2299,8 +2300,13 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			if (findHeader(line, i, preCommandHeaders))
 				foundPreCommandHeader = true;
 
+			// this applies only to C enums
 			if (isCStyle() && findKeyword(line, i, AS_ENUM))
+			{
+				// need in-statement indents in an enum
 				isInEnum = true;
+				isNonInStatementArray = false;
+			}
 
 		}   // isPotentialHeader
 
