@@ -107,15 +107,21 @@
         Intel Compiler</h4>
 
     <p>
-        There is no autoconf dependency. To use the Intel makefile the files icc and icpc should be copied to /usr/sbin.
-        If the compiler release is 11.1 or higher the file iccvars.sh, or compilervars.sh for C++ Composer XE, should
-        also be copied to /usr/sbin. These files are located in the installed directories of the compiler.</p>
+        There is no autoconf dependency. The compiler release should be <strong>2011.1.107</strong> or higher. These procedures and the
+        makefile will not work for earlier versions.</p>
     <p>
-        Beginning with compiler release 11.1 there are environment variables that should be set before running the make. If this
-        has not been done already, enter:</p>
-    <pre>source iccvars.sh <em>arg </em>   or    source compilervars.sh <em>arg</em>  (for C++ Composer XE)</pre>
+        The Intel Compiler will not recognize a file byte order mark (BOM). ASLocalizer.cpp is UTF-8 encoding and contains
+        a BOM which must be removed. It can be removed with many text editors and development environments. Or it may
+        be removed from the command line with "<strong>tail --bytes=+4 ASlocalizer.cpp &gt; ASlocalizerNEW.cpp</strong>".
+        If it is not removed the compiler will get an error "unrecognized token" or "expected a declaration".</p>
     <p>
-        where <em>arg</em> is ia32, intel64, or ia64. If this is not done the make will display an error message "***
+        To compile the source there are environment variables that must be set. If this has
+        not been done already enter: "<strong>source &nbsp;&lt;install-dir&gt;/bin/iccvars.sh&nbsp;&lt;arg&gt;</strong>", where
+        &lt;install-dir&gt; is the directory where the compiler is installed and &lt;arg&gt; is ia32, intel64, or moc. On an Intel x64 platform installed in the default directory
+        the instruction would be</p>
+    <pre>source /opt/intel/bin/iccvars.sh intel64</pre>
+    <p>
+        If this is not done the make will display an error message "***
         No rule to make target `obj/astyle_main.o', needed by `astyle'." Instructions for the options are in the compiler
         documentation file "getting_started_c.pdf" in the section "Starting the Compiler from the Command Line".
     </p>
@@ -218,7 +224,7 @@
 
     <p>
         There are configuration and project files for 4 versions of the Visual C compiler; build/vs2005 (Visual Studio
-        2005), build/vs2008 (Visual Studio 2008)&nbsp; and build/vs2010 (Visual Studio 2010). Open the AStyle configuration
+        2005), build/vs2008 (Visual Studio 2008) and build/vs2010 (Visual Studio 2010). Open the AStyle configuration
         file in the appropriate &quot;build&quot; directory. All project files have Release and Debug configurations.
         Release file output will be in the &quot;bin&quot; directory. Debug file output will be in the &quot;debug&quot;
         directory. The following solution files are available.</p>

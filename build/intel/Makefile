@@ -2,10 +2,8 @@
 # The license.html file describes the conditions under which this software may be distributed.
 #
 # Before running "make" the COMPILER environment variables must be set.
-# The file iccvars.sh should have been copied to /usr/sbin.
 # To set the environment variables "source" the compiler environment script:
-#     source iccvars.sh <arg>
-#            where <arg> is ia32, intel64, or ia64.
+#     source /opt/intel/bin/iccvars.sh intel64
 # Refer to the install instructions for details.
 #
 # IF YOU GET AN ERROR MESSAGE:
@@ -17,6 +15,7 @@ SRC = astyle_main.cpp \
       ASBeautifier.cpp \
       ASFormatter.cpp \
       ASEnhancer.cpp \
+      ASLocalizer.cpp \
       ASResource.cpp
 
 # source directories
@@ -42,10 +41,12 @@ SYSCONF_PATH_OLD=$(prefix)/share/astyle
 bindir = bin
 objdir = obj
 ipath=$(prefix)/bin
-# -vec-report0 turns off BLOCK WAS VECTORIZED warnings. To disable vectorization use -mia32 instead.
-# -no-multibyte-chars is a temporary compiler bug work-around, http://software.intel.com/en-us/forums/intel-c-compiler/topic/56258
+
 # if the intel compiler version doesn't support the current GCC headers use -gxx-name=g++-4.x where x is a previous GCC compiler 
-CBASEFLAGS = -w2 -Wall -fno-rtti -fno-exceptions -vec-report0 -no-multibyte-chars
+# the following were REMOVED in release 2011.1.107
+#     -vec-report0 turns off BLOCK WAS VECTORIZED warnings. To disable vectorization use -mia32 instead.
+#     -no-multibyte-chars is a temporary compiler bug work-around, http://software.intel.com/en-us/forums/intel-c-compiler/topic/56258
+CBASEFLAGS = -w2 -Wall -fno-rtti -fno-exceptions
 JAVAINCS   = -I$(JAVA_HOME)/include
 CXX = icpc
 INSTALL=install -o $(USER) -g $(USER)

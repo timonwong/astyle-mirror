@@ -168,6 +168,8 @@ class ASConsole
 		bool isVerbose;                     // verbose option
 		bool isQuiet;                       // quiet option
 		bool isFormattedOnly;               // formatted lines only option
+		bool ignoreExcludeErrors;           // don't abort on unmatched excludes
+		bool ignoreExcludeErrorsDisplay;    // don't display unmatched excludes
 		bool optionsFileRequired;           // options= option
 		bool useAscii;                      // ascii option
 		// other variables
@@ -202,6 +204,8 @@ class ASConsole
 			isVerbose = false;
 			isQuiet = false;
 			isFormattedOnly = false;
+			ignoreExcludeErrors = false;
+			ignoreExcludeErrorsDisplay = false;
 			optionsFileRequired = false;
 			useAscii = false;
 			// other variables
@@ -226,6 +230,8 @@ class ASConsole
 		bool fileNameVectorIsEmpty();
 		int  getFilesFormatted();
 		int  getFilesUnchanged();
+		bool getIgnoreExcludeErrors();
+		bool getIgnoreExcludeErrorsDisplay();
 		bool getIsFormattedOnly();
 		bool getIsQuiet();
 		bool getIsRecursive();
@@ -241,6 +247,8 @@ class ASConsole
 		bool getPreserveDate();
 		void processFiles();
 		void processOptions(vector<string>& argvOptions);
+		void setIgnoreExcludeErrors(bool state);
+		void setIgnoreExcludeErrorsAndDisplay(bool state);
 		void setIsFormattedOnly(bool state);
 		void setIsQuiet(bool state);
 		void setIsRecursive(bool state);

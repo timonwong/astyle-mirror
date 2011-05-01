@@ -338,10 +338,23 @@ void ASFormatter::fixOptionVariableConflicts()
 		setBreakOneLineBlocksMode(false);
 		setSingleStatementsMode(false);
 		// add-brackets won't work for pico, but it could be fixed if necessary
+		// both options should be set to true
 		if (shouldAddBrackets)
 			shouldAddOneLineBrackets = true;
 	}
-
+	else if (formattingStyle == STYLE_LISP)
+	{
+		setBracketFormatMode(ATTACH_MODE);
+		setAttachClosingBracket(true);
+		setSingleStatementsMode(false);
+		// add-one-line-brackets won't work for lisp
+		// only shouldAddBrackets should be set to true
+		if (shouldAddOneLineBrackets)
+		{
+			shouldAddBrackets = true;
+			shouldAddOneLineBrackets = false;
+		}
+	}
 	setMinConditionalIndentLength();
 	// add-one-line-brackets implies keep-one-line-blocks
 	if (shouldAddOneLineBrackets)
@@ -973,9 +986,10 @@ string ASFormatter::nextLine()
 		{
 			if (currentChar == ';')
 			{
-				if ((shouldBreakOneLineStatements
+				if (((shouldBreakOneLineStatements
 				        || isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE))
 				        && isOkToBreakBlock(bracketTypeStack->back()))
+				        && !(shouldAttachClosingBracket && peekNextChar() == '}'))
 				{
 					passedSemicolon = true;
 				}
@@ -3253,7 +3267,8 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 		}
 		else
 		{
-			if (previousNonWSChar != '{' && !isBracketType(bracketType, SINGLE_LINE_TYPE))
+			if (previousNonWSChar != '{'
+			        && (!isBracketType(bracketType, SINGLE_LINE_TYPE) || isOkToBreakBlock(bracketType)))
 				appendSpacePad();
 			appendCurrentChar(false);			// attach
 		}
@@ -4289,7 +4304,9 @@ string ASFormatter::getPreviousWord(const string& line, int currPos) const
 void ASFormatter::isLineBreakBeforeClosingHeader()
 {
 	assert(foundClosingHeader && previousNonWSChar == '}');
-	if (bracketFormatMode == BREAK_MODE || bracketFormatMode == RUN_IN_MODE)
+	if (bracketFormatMode == BREAK_MODE
+	        || bracketFormatMode == RUN_IN_MODE
+	        || shouldAttachClosingBracket)
 	{
 		isInLineBreak = true;
 	}

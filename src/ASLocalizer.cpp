@@ -73,6 +73,7 @@ ASLocalizer::ASLocalizer()
 	char* localeName = setlocale(LC_ALL, "");
 	if (localeName == NULL)		// use the english (ascii) defaults
 	{
+		fprintf(stderr, "\n%s\n\n", "Cannot set native locale, reverting to English");
 		setTranslationClass();
 		return;
 	}
@@ -268,7 +269,7 @@ string Translation::convertToMultiByte(const wstring& wideStr) const
 	{
 		if (!msgDisplayed)
 		{
-			printf("\n%s\n\n", "Cannot convert to multi-byte string, reverting to English");
+			fprintf(stderr, "\n%s\n\n", "Cannot convert to multi-byte string, reverting to English");
 			msgDisplayed = true;
 		}
 		return "";
@@ -279,7 +280,7 @@ string Translation::convertToMultiByte(const wstring& wideStr) const
 	{
 		if (!msgDisplayed)
 		{
-			printf("\n%s\n\n", "Bad memory alloc for multi-byte string, reverting to English");
+			fprintf(stderr, "\n%s\n\n", "Bad memory alloc for multi-byte string, reverting to English");
 			msgDisplayed = true;
 		}
 		return "";
@@ -340,138 +341,176 @@ string& Translation::translate(const string& stringIn) const
 // These classes have only a constructor which builds the language vector.
 //----------------------------------------------------------------------------
 
-ChineseSimplified::ChineseSimplified()
+ChineseSimplified::ChineseSimplified()	// 中文（简体）
 {
-	addPair("formatted  %s\n", L"格式化  %s\n");		// should align with unchanged
-	addPair("unchanged  %s\n", L"不变    %s\n");		// should align with formatted
-	addPair("directory  %s\n", L"目录  %s\n");
+	addPair("Formatted  %s\n", L"格式化  %s\n");		// should align with unchanged
+	addPair("Unchanged  %s\n", L"不变    %s\n");		// should align with formatted
+	addPair("Directory  %s\n", L"目录  %s\n");
+	addPair("Exclude  %s\n", L"排除  %s\n");
+	addPair("Exclude (unmatched)  %s\n", L"排除（无与伦比） %s\n");
 	addPair(" %s formatted   %s unchanged   ", L" %s 格式化   %s 不变   ");
 	addPair(" seconds   ", L" 秒   ");
 	addPair("%d min %d sec   ", L"%d 分钟 %d 秒   ");
 	addPair("%s lines\n", L"%s 线\n");
-	addPair("exclude  %s\n", L"排除  %s\n");
-	addPair("Using default options file  %s\n", L"使用默认选项文件  %s\n");
+	addPair("Using default options file %s\n", L"使用默认选项文件%s\n");
 	addPair("Invalid option file options:", L"无效的选项文件选项：");
 	addPair("Invalid command line options:", L"无效的命令行选项：");
-	addPair("For help on options type 'astyle -h'", L"上选项的帮助下键入 'astyle -h'");
+	addPair("For help on options type 'astyle -h'", L"有关期权类型'astyle -h'的帮助");
 	addPair("Cannot open options file", L"无法打开选项文件");
-	addPair("Cannot open input file", L"无法打开输入文件");
 	addPair("Cannot open directory", L"无法打开目录");
 	addPair("Cannot process the input stream", L"无法处理的输入流");
-	addPair("\nArtistic Style has terminated!", L"\nArtistic Style 已经终止！");
+	addPair("Missing filename in %s\n", L"在%s名失踪\n");
+	addPair("Recursive option with no wildcard", L"递归选项没有通配符");
+	addPair("Did you intend quote the filename", L"你打算引用文件");
+	addPair("No file to process %s\n", L"没有文件处理%s\n");
+	addPair("Did you intend to use --recursive", L"你打算使用 --recursive");
+	addPair("Cannot process UTF-32 encoding", L"不能处理UTF-32编码");
+	addPair("\nArtistic Style has terminated", L"\nArtistic Style 已经终止");
 }
 
-ChineseTraditional::ChineseTraditional()
+ChineseTraditional::ChineseTraditional()	// 中文（繁體）
 {
-	addPair("formatted  %s\n", L"格式化  %s\n");		// should align with unchanged
-	addPair("unchanged  %s\n", L"不變    %s\n");		// should align with formatted
-	addPair("directory  %s\n", L"目錄  %s\n");
+	addPair("Formatted  %s\n", L"格式化  %s\n");		// should align with unchanged
+	addPair("Unchanged  %s\n", L"不變    %s\n");		// should align with formatted
+	addPair("Directory  %s\n", L"目錄  %s\n");
+	addPair("Exclude  %s\n", L"排除  %s\n");
+	addPair("Exclude (unmatched)  %s\n", L"排除（無與倫比） %s\n");
 	addPair(" %s formatted   %s unchanged   ", L" %s 格式化   %s 不變   ");
 	addPair(" seconds   ", L" 秒   ");
 	addPair("%d min %d sec   ", L"%d 分鐘 %d 秒   ");
 	addPair("%s lines\n", L"%s 線\n");
-	addPair("exclude  %s\n", L"排除  %s\n");
-	addPair("Using default options file  %s\n", L"使用默認選項文件  %s\n");
+	addPair("Using default options file %s\n", L"使用默認選項文件%s\n");
 	addPair("Invalid option file options:", L"無效的選項文件選項：");
 	addPair("Invalid command line options:", L"無效的命令行選項：");
-	addPair("For help on options type 'astyle -h'", L"如需幫助選項鍵入 'astyle -h'");
+	addPair("For help on options type 'astyle -h'", L"幫助信息選項類型'astyle -h的'");
 	addPair("Cannot open options file", L"無法打開選項文件");
-	addPair("Cannot open input file", L"無法打開輸入文件");
 	addPair("Cannot open directory", L"無法打開目錄");
 	addPair("Cannot process the input stream", L"無法處理的輸入流");
-	addPair("\nArtistic Style has terminated!", L"\nArtistic Style 已經終止！");
+	addPair("Missing filename in %s\n", L"在%s名失踪\n");
+	addPair("Recursive option with no wildcard", L"遞歸選項沒有通配符");
+	addPair("Did you intend quote the filename", L"你打算引用文件");
+	addPair("No file to process %s\n", L"沒有文件處理%s\n");
+	addPair("Did you intend to use --recursive", L"你打算使用 --recursive");
+	addPair("Cannot process UTF-32 encoding", L"不能處理 UTF-32編碼");
+	addPair("\nArtistic Style has terminated", L"\nArtistic Style 已經終止");
 }
 
 English::English()
 // this class is NOT translated
 {}
 
-French::French()
+French::French()	// Française
 // build the translation vector in the Translation base class
 {
-	addPair("formatted  %s\n", L"formaté    %s\n");	// should align with unchanged
-	addPair("unchanged  %s\n", L"inchangée  %s\n");	// should align with formatted
-	addPair("directory  %s\n", L"répertoire  %s\n");
+	addPair("Formatted  %s\n", L"Formaté    %s\n");	// should align with unchanged
+	addPair("Unchanged  %s\n", L"Inchangée  %s\n");	// should align with formatted
+	addPair("Directory  %s\n", L"Répertoire  %s\n");
+	addPair("Exclude  %s\n", L"Exclure  %s\n");
+	addPair("Exclude (unmatched)  %s\n", L"Exclure (non appariés)  %s\n");
 	addPair(" %s formatted   %s unchanged   ", L" %s formaté   %s inchangée   ");
 	addPair(" seconds   ", L" seconde   ");
 	addPair("%d min %d sec   ", L"%d min %d sec   ");
 	addPair("%s lines\n", L"%s lignes\n");
-	addPair("exclude  %s\n", L"exclure  %s\n");
-	addPair("Using default options file  %s\n", L"Options par défaut utilisation du fichier  %s\n");
+	addPair("Using default options file %s\n", L"Options par défaut utilisation du fichier %s\n");
 	addPair("Invalid option file options:", L"Options Blancs option du fichier:");
 	addPair("Invalid command line options:", L"Blancs options ligne de commande:");
 	addPair("For help on options type 'astyle -h'", L"Pour de l'aide sur les options tapez 'astyle -h'");
 	addPair("Cannot open options file", L"Impossible d'ouvrir le fichier d'options");
-	addPair("Cannot open input file", L"Impossible d'ouvrir le fichier d'entrée");
 	addPair("Cannot open directory", L"Impossible d'ouvrir le répertoire");
 	addPair("Cannot process the input stream", L"Impossible de traiter le flux d'entrée");
-	addPair("\nArtistic Style has terminated!", L"\nArtistic Style a mis fin!");
+	addPair("Missing filename in %s\n", L"Nom de fichier manquant dans %s\n");
+	addPair("Recursive option with no wildcard", L"Option récursive sans joker");
+	addPair("Did you intend quote the filename", L"Avez-vous l'intention de citer le nom de fichier");
+	addPair("No file to process %s\n", L"Aucun fichier à traiter %s\n");
+	addPair("Did you intend to use --recursive", L"Avez-vous l'intention d'utiliser --recursive");
+	addPair("Cannot process UTF-32 encoding", L"Impossible de traiter codage UTF-32");
+	addPair("\nArtistic Style has terminated", L"\nArtistic Style a mis fin");
 }
 
-German::German()
+German::German()	// Deutsch
 // build the translation vector in the Translation base class
 {
-	addPair("formatted  %s\n", L"formatiert   %s\n");	// should align with unchanged
-	addPair("unchanged  %s\n", L"unverändert  %s\n");	// should align with formatted
-	addPair("directory  %s\n", L"verzeichnis  %s\n");
+	addPair("Formatted  %s\n", L"Formatiert   %s\n");	// should align with unchanged
+	addPair("Unchanged  %s\n", L"Unverändert  %s\n");	// should align with formatted
+	addPair("Directory  %s\n", L"Verzeichnis  %s\n");
+	addPair("Exclude  %s\n", L"Ausschließen  %s\n");
+	addPair("Exclude (unmatched)  %s\n", L"Ausschließen (unerreichte)  %s\n");
 	addPair(" %s formatted   %s unchanged   ", L" %s formatiert   %s unverändert   ");
 	addPair(" seconds   ", L" sekunden   ");
 	addPair("%d min %d sec   ", L"%d min %d sek   ");
 	addPair("%s lines\n", L"%s linien\n");
-	addPair("exclude  %s\n", L"ausschließen  %s\n");
-	addPair("Using default options file  %s\n", L"Mit standard-optionen datei  %s\n");
-	addPair("Invalid option file options:", L"Ungültige Option Datei Optionen:");
+	addPair("Using default options file %s\n", L"Mit Standard-Optionen Dat %s\n");
+	addPair("Invalid option file options:", L"Ungültige Option Datei-Optionen:");
 	addPair("Invalid command line options:", L"Ungültige Kommandozeilen-Optionen:");
 	addPair("For help on options type 'astyle -h'", L"Für Hilfe zu den Optionen geben Sie 'astyle -h'");
 	addPair("Cannot open options file", L"Kann nicht geöffnet werden Optionsdatei");
-	addPair("Cannot open input file", L"Kann Eingabedatei nicht öffnen");
-	addPair("Cannot open directory", L"Kann nicht geöffnet werden direkt");
-	addPair("Cannot process the input stream", L"Kann nicht verarbeiten input stream");
-	addPair("\nArtistic Style has terminated!", L"\nArtistic Style ist beendet!");
+	addPair("Cannot open directory", L"Kann nicht geöffnet werden Verzeichnis");
+	addPair("Cannot process the input stream", L"Kann nicht verarbeiten Input-Stream");
+	addPair("Missing filename in %s\n", L"Missing in %s Dateiname\n");
+	addPair("Recursive option with no wildcard", L"Rekursive Option ohne Wildcard");
+	addPair("Did you intend quote the filename", L"Haben Sie die Absicht Inhalte der Dateiname");
+	addPair("No file to process %s\n", L"Keine Datei zu verarbeiten %s\n");
+	addPair("Did you intend to use --recursive", L"Haben Sie verwenden möchten --recursive");
+	addPair("Cannot process UTF-32 encoding", L"Nicht verarbeiten kann UTF-32-Codierung");
+	addPair("\nArtistic Style has terminated", L"\nArtistic Style ist beendet");
 }
 
-Hindi::Hindi()
+Hindi::Hindi()	// हिन्दी
 // build the translation vector in the Translation base class
 {
-	addPair("formatted  %s\n", L"स्वरूपित किया  %s\n");	// should align with unchanged
-	addPair("unchanged  %s\n", L"अपरिवर्तित     %s\n");	// should align with formatted
-	addPair("directory  %s\n", L"निर्देशिका  %s\n");
+	// NOTE: Scintilla based editors (CodeBlocks) cannot always edit Hindi.
+	//       Use Visual Studio instead.
+	addPair("Formatted  %s\n", L"स्वरूपित किया  %s\n");	// should align with unchanged
+	addPair("Unchanged  %s\n", L"अपरिवर्तित     %s\n");	// should align with formatted
+	addPair("Directory  %s\n", L"निर्देशिका  %s\n");
+	addPair("Exclude  %s\n", L"निकालना  %s\n");
+	addPair("Exclude (unmatched)  %s\n", L"अपवर्जित (बेजोड़)  %s\n");
 	addPair(" %s formatted   %s unchanged   ", L" %s स्वरूपित किया   %s अपरिवर्तित   ");
 	addPair(" seconds   ", L" सेकंड   ");
 	addPair("%d min %d sec   ", L"%d मिनट %d सेकंड   ");
 	addPair("%s lines\n", L"%s लाइनों\n");
-	addPair("exclude  %s\n", L"निकालना  %s\n");
-	addPair("Using default options file  %s\n", L"डिफ़ॉल्ट विकल्प का उपयोग कर फ़ाइल  %s\n");
+	addPair("Using default options file %s\n", L"डिफ़ॉल्ट विकल्प का उपयोग कर फ़ाइल %s\n");
 	addPair("Invalid option file options:", L"अवैध विकल्प फ़ाइल विकल्प हैं:");
 	addPair("Invalid command line options:", L"कमांड लाइन विकल्प अवैध:");
 	addPair("For help on options type 'astyle -h'", L"विकल्पों पर मदद के लिए प्रकार 'astyle -h'");
 	addPair("Cannot open options file", L"विकल्प फ़ाइल नहीं खोल सकता है");
-	addPair("Cannot open input file", L"इनपुट फ़ाइल नहीं खोल सकता");
 	addPair("Cannot open directory", L"निर्देशिका नहीं खोल सकता");
 	addPair("Cannot process the input stream", L"इनपुट स्ट्रीम प्रक्रिया नहीं कर सकते");
-	addPair("\nArtistic Style has terminated!", L"\nArtistic Style समाप्त किया है!");
+	addPair("Missing filename in %s\n", L"लापता में फ़ाइलनाम %s\n");
+	addPair("Recursive option with no wildcard", L"कोई वाइल्डकार्ड साथ पुनरावर्ती विकल्प");
+	addPair("Did you intend quote the filename", L"क्या आप बोली फ़ाइलनाम का इरादा");
+	addPair("No file to process %s\n", L"कोई फ़ाइल %s प्रक्रिया के लिए\n");
+	addPair("Did you intend to use --recursive", L"क्या आप उपयोग करना चाहते हैं --recursive");
+	addPair("Cannot process UTF-32 encoding", L"UTF-32 कूटबन्धन प्रक्रिया नहीं कर सकते");
+	addPair("\nArtistic Style has terminated", L"\nArtistic Style समाप्त किया है");
 }
 
-Spanish::Spanish()
+Spanish::Spanish()	// Español
 // build the translation vector in the Translation base class
 {
-	addPair("formatted  %s\n", L"formato     %s\n");	// should align with unchanged
-	addPair("unchanged  %s\n", L"inalterado  %s\n");	// should align with formatted
-	addPair("directory  %s\n", L"directorio  %s\n");
+	addPair("Formatted  %s\n", L"Formato     %s\n");	// should align with unchanged
+	addPair("Unchanged  %s\n", L"Inalterado  %s\n");	// should align with formatted
+	addPair("Directory  %s\n", L"Directorio  %s\n");
+	addPair("Exclude  %s\n", L"Excluir  %s\n");
+	addPair("Exclude (unmatched)  %s\n", L"Excluir (incomparable)  %s\n");
 	addPair(" %s formatted   %s unchanged   ", L" %s formato   %s inalterado   ");
 	addPair(" seconds   ", L" segundo   ");
 	addPair("%d min %d sec   ", L"%d min %d seg   ");
 	addPair("%s lines\n", L"%s líneas\n");
-	addPair("exclude  %s\n", L"excluir  %s\n");
-	addPair("Using default options file  %s\n", L"Uso de las opciones por defecto del archivo  %s\n");
+	addPair("Using default options file %s\n", L"Uso de las opciones por defecto del archivo %s\n");
 	addPair("Invalid option file options:", L"Opción no válida opciones de archivo:");
 	addPair("Invalid command line options:", L"No válido opciones de línea de comando:");
 	addPair("For help on options type 'astyle -h'", L"Para obtener ayuda sobre las opciones tipo 'astyle -h'");
 	addPair("Cannot open options file", L"No se puede abrir el archivo de opciones");
-	addPair("Cannot open input file", L"No se puede abrir archivo de entrada");
 	addPair("Cannot open directory", L"No se puede abrir el directorio");
 	addPair("Cannot process the input stream", L"No se puede procesar el flujo de entrada");
-	addPair("\nArtistic Style has terminated!", L"\nArtistic Style ha terminado!");
+	addPair("Missing filename in %s\n", L"Falta nombre del archivo en %s\n");
+	addPair("Recursive option with no wildcard", L"Recursiva opción sin comodín");
+	addPair("Did you intend quote the filename", L"Se tiene la intención de citar el nombre de archivo");
+	addPair("No file to process %s\n", L"No existe el fichero a procesar %s\n");
+	addPair("Did you intend to use --recursive", L"Se va a utilizar --recursive");
+	addPair("Cannot process UTF-32 encoding", L"No se puede procesar la codificación UTF-32");
+	addPair("\nArtistic Style has terminated", L"\nArtistic Style ha terminado");
 }
 
 

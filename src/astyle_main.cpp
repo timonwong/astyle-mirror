@@ -403,7 +403,7 @@ FileEncoding ASConsole::detectEncoding(const char* data, size_t dataSize) const
 // error exit without a message
 void ASConsole::error() const
 {
-	(*_err) << _("\nArtistic Style has terminated!") << endl;
+	(*_err) << _("\nArtistic Style has terminated") << endl;
 	exit(EXIT_FAILURE);
 }
 
@@ -547,13 +547,13 @@ void ASConsole::formatFile(const string& fileName_)
 	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
 	{
 		writeFile(fileName_, encoding, out);
-		printMsg(_("formatted  %s\n"), displayName);
+		printMsg(_("Formatted  %s\n"), displayName);
 		filesFormatted++;
 	}
 	else
 	{
 		if (!isFormattedOnly)
-			printMsg(_("unchanged  %s\n"), displayName);
+			printMsg(_("Unchanged  %s\n"), displayName);
 		filesUnchanged++;
 	}
 
@@ -599,6 +599,12 @@ int ASConsole::getFilesUnchanged()
 
 int ASConsole::getFilesFormatted()
 { return filesFormatted; }
+
+bool ASConsole::getIgnoreExcludeErrors()
+{ return ignoreExcludeErrors; }
+
+bool ASConsole::getIgnoreExcludeErrorsDisplay()
+{ return ignoreExcludeErrorsDisplay; }
 
 bool ASConsole::getIsFormattedOnly()
 { return isFormattedOnly; }
@@ -670,7 +676,7 @@ FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) cons
 	const int blockSize = 131072;	// 128 KB
 	ifstream fin(fileName_.c_str(), ios::binary);
 	if (!fin)
-		error(_("Cannot open input file"), fileName_.c_str());
+		error("Cannot open input file", fileName_.c_str());
 	char data[blockSize];
 	fin.read(data, sizeof(data));
 	if (fin.bad())
@@ -678,7 +684,7 @@ FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) cons
 	size_t dataSize = static_cast<size_t>(fin.gcount());
 	FileEncoding encoding = detectEncoding(data, dataSize);
 	if (encoding ==  UTF_32BE || encoding ==  UTF_32LE)
-		error("Cannot process UTF-32 encoding", fileName_.c_str());
+		error(_("Cannot process UTF-32 encoding"), fileName_.c_str());
 	bool firstBlock = true;
 	while (dataSize)
 	{
@@ -703,6 +709,12 @@ FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) cons
 	fin.close();
 	return encoding;
 }
+
+void ASConsole::setIgnoreExcludeErrors(bool state)
+{ ignoreExcludeErrors = state; }
+
+void ASConsole::setIgnoreExcludeErrorsAndDisplay(bool state)
+{ ignoreExcludeErrors = state; ignoreExcludeErrorsDisplay = state; }
 
 void ASConsole::setIsFormattedOnly(bool state)
 { isFormattedOnly = state; }
@@ -837,7 +849,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 			// if a sub directory and recursive, save sub directory
 			string subDirectoryPath = directory + g_fileSeparator + findFileData.cFileName;
 			if (isPathExclued(subDirectoryPath))
-				printMsg(_("exclude  %s\n"), subDirectoryPath.substr(mainDirectoryLength));
+				printMsg(_("Exclude  %s\n"), subDirectoryPath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(subDirectoryPath);
 			continue;
@@ -851,7 +863,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		if (wildcmp(wildcard.c_str(), findFileData.cFileName))
 		{
 			if (isExcluded)
-				printMsg(_("exclude  %s\n"), filePathName.substr(mainDirectoryLength));
+				printMsg(_("Exclude  %s\n"), filePathName.substr(mainDirectoryLength));
 			else
 				fileName.push_back(filePathName);
 		}
@@ -983,7 +995,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 		if (S_ISDIR(statbuf.st_mode) && isRecursive)
 		{
 			if (isPathExclued(entryFilepath))
-				printMsg(_("exclude  %s\n"), entryFilepath.substr(mainDirectoryLength));
+				printMsg(_("Exclude  %s\n"), entryFilepath.substr(mainDirectoryLength));
 			else
 				subDirectory.push_back(entryFilepath);
 			continue;
@@ -998,7 +1010,7 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
 			if (wildcmp(wildcard.c_str(), entry->d_name))
 			{
 				if (isExcluded)
-					printMsg(_("exclude  %s\n"), entryFilepath.substr(mainDirectoryLength));
+					printMsg(_("Exclude  %s\n"), entryFilepath.substr(mainDirectoryLength));
 				else
 					fileName.push_back(entryFilepath);
 			}
@@ -1123,7 +1135,10 @@ void ASConsole::getFilePaths(string& filePath)
 	}
 
 	if (targetFilename.length() == 0)
-		error("Missing filename in", filePath.c_str());
+	{
+		fprintf(stderr, _("Missing filename in %s\n"), filePath.c_str());
+		error();
+	}
 
 	// check filename for wildcards
 	hasWildcard = false;
@@ -1138,9 +1153,9 @@ void ASConsole::getFilePaths(string& filePath)
 	// wildcard instead of passing it to the program.
 	if (isRecursive && !hasWildcard)
 	{
-		(*_err) << "Recursive option with no wildcard." << endl;
+		fprintf(stderr, "%s\n", _("Recursive option with no wildcard"));
 #ifndef _WIN32
-		(*_err) << "Did you intend quote the filename?" << endl;
+		fprintf(stderr, "%s\n", _("Did you intend quote the filename"));
 #endif
 		error();
 	}
@@ -1149,7 +1164,7 @@ void ASConsole::getFilePaths(string& filePath)
 	if (hasWildcard)
 	{
 		printSeparatingLine();
-		printMsg(_("directory  %s\n"), targetDirectory + g_fileSeparator + targetFilename);
+		printMsg(_("Directory  %s\n"), targetDirectory + g_fileSeparator + targetFilename);
 	}
 
 	// create a vector of paths and file names to process
@@ -1164,35 +1179,46 @@ void ASConsole::getFilePaths(string& filePath)
 			fileName.push_back(entryFilepath);
 	}
 
-	if (hasWildcard)
-		printSeparatingLine();
-
 	// check for unprocessed excludes
 	bool excludeErr = false;
 	for (size_t ix = 0; ix < excludeHitsVector.size(); ix++)
 	{
 		if (excludeHitsVector[ix] == false)
 		{
-			(*_err) << "Unmatched exclude " << excludeVector[ix].c_str() << endl;
 			excludeErr = true;
+			if (!ignoreExcludeErrorsDisplay) 
+			{
+				if (ignoreExcludeErrors)
+					printMsg(_("Exclude (unmatched)  %s\n"), excludeVector[ix].c_str());
+				else
+					fprintf(stderr, _("Exclude (unmatched)  %s\n"), excludeVector[ix].c_str());
+			}
+			else
+			{
+				if (!ignoreExcludeErrors)
+					fprintf(stderr, _("Exclude (unmatched)  %s\n"), excludeVector[ix].c_str());
+			}
 		}
 	}
 
-	if (excludeErr)
+	if (excludeErr && !ignoreExcludeErrors)
 	{
 		if (hasWildcard && !isRecursive)
-			(*_err) << "Did you intend to use --recursive?"<< endl;
+			fprintf(stderr, "%s\n", _("Did you intend to use --recursive"));
 		error();
 	}
 
 	// check if files were found (probably an input error if not)
 	if (fileName.size() == 0)
 	{
-		(*_err) << "No file to process " << filePath.c_str() << endl;
+		fprintf(stderr, _("No file to process %s\n"), filePath.c_str());
 		if (hasWildcard && !isRecursive)
-			(*_err) << "Did you intend to use --recursive?"<< endl;
+			fprintf(stderr, "%s\n", _("Did you intend to use --recursive"));
 		error();
 	}
+	
+	if (hasWildcard)
+		printSeparatingLine();
 }
 
 bool ASConsole::fileNameVectorIsEmpty()
@@ -1826,9 +1852,10 @@ void ASConsole::standardizePath(string& path, bool removeBeginningSeparator /*fa
 			break;
 		path[i] = g_fileSeparator;
 	}
-	// remove separator from the end
-	if (path[path.length()-1] == g_fileSeparator)
-		path.erase(path.length()-1, 1);
+//  The following was removed in release 2.02 - jimp
+//	// remove separator from the end
+//	if (path[path.length()-1] == g_fileSeparator)
+//		path.erase(path.length()-1, 1);
 	// remove beginning separator if requested
 	if (removeBeginningSeparator && (path[0] == g_fileSeparator))
 		path.erase(0, 1);
@@ -1865,7 +1892,7 @@ void ASConsole::printVerboseHeader() const
 	printf("Artistic Style %s     %s\n", g_version, str);
 	// print options file
 	if (!optionsFileName.empty())
-		printf(_("Using default options file  %s\n"), optionsFileName.c_str());
+		printf(_("Using default options file %s\n"), optionsFileName.c_str());
 }
 
 void ASConsole::printVerboseStats(clock_t startTime) const
@@ -2384,8 +2411,8 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string& errorI
 			for (i = 1; i < arg.length(); ++i)
 			{
 				if (i > 1
-					&& isalpha(arg[i]) 
-					&& arg[i-1] != 'x')
+				        && isalpha(arg[i])
+				        && arg[i-1] != 'x')
 				{
 					// parse the previous option in subArg
 					parseOption(subArg, errorInfo);
@@ -2456,6 +2483,10 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		formatter.setFormattingStyle(STYLE_PICO);
 	}
+	else if ( isOption(arg, "style=lisp") || isOption(arg, "style=python") )
+	{
+		formatter.setFormattingStyle(STYLE_LISP);
+	}
 	else if ( isParamOption(arg, "A") )
 	{
 		int style = 0;
@@ -2484,6 +2515,8 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 			formatter.setFormattingStyle(STYLE_1TBS);
 		else if (style == 11)
 			formatter.setFormattingStyle(STYLE_PICO);
+		else if (style == 12)
+			formatter.setFormattingStyle(STYLE_LISP);
 		else isOptionError(arg, errorInfo);
 	}
 	// must check for mode=cs before mode=c !!!
@@ -2810,6 +2843,14 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	else if ( isOption(arg, "q", "quiet") )
 	{
 		g_console->setIsQuiet(true);
+	}
+	else if ( isOption(arg, "i", "ignore-exclude-errors") )
+	{
+		g_console->setIgnoreExcludeErrors(true);
+	}
+	else if ( isOption(arg, "xi", "ignore-exclude-errors-x") )
+	{
+		g_console->setIgnoreExcludeErrorsAndDisplay(true);
 	}
 	else if ( isOption(arg, "X", "errors-to-stdout") )
 	{

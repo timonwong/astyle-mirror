@@ -773,8 +773,8 @@ string ASBeautifier::beautify(const string& originalLine)
 	{
 		if (backslashEndsPrevLine)  // must continue to clear variables
 			line = ' ';
-		else if (emptyLineFill && !isInQuoteContinuation 
-			&& (headerStack->size() > 0 || isInEnum))
+		else if (emptyLineFill && !isInQuoteContinuation
+		         && (headerStack->size() > 0 || isInEnum))
 			return preLineWS(prevFinalLineSpaceTabCount, prevFinalLineTabCount);
 		else
 			return line;

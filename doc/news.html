@@ -88,6 +88,11 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         attaches the closing bracket to the last line in the block. It also sets the options "keep one line blocks" and
         "keep one line statements". This is a very compact style and is a good style for small monitors.</p>
     <p>
+        Another new "Bracket Style" option is "style=lisp" or "style=python" or "A12". It uses attached brackets, like
+        Java style, and attaches the closing bracket to the last line in the block. It also sets the options "keep one
+        line blocks" and "keep one line statements". This style makes indentation the only way of distinguishing blocks
+        of code, but has the advantage of containing no uninformative lines. It is also a very compact style.</p>
+    <p>
         The option "brackets=horstmann" has been removed. Instead use "style=horstmann" or "A9". The short option "g"
         is now equivalent to the new "brackets=run-in". Run-in brackets are used for both Horstmann and Pico styles.</p>
     <p>
@@ -111,7 +116,13 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         A new option "align-reference=" (-W#) allows references to be aligned separate from pointers. See the documentation
         for details.</p>
     <p>
-        Artistic Style can now format UTF-16 encoded files, both little and big endian. This format is the default for
+        New options ignore&#8209;exclude&#8209;errors (&#8209;i) and ignore&#8209;exclude&#8209;errors&#8209;x (&#8209;xi)
+        will allow processing to continue if there are errors in the "exclude" options. This lets the excludes for several
+        projects to be entered in a single option file. The "ignore" options may be placed in the same option file as
+        the excludes. The ignore&#8209;exclude&#8209;errors option will display the unmatched excludes, ignore&#8209;exclude&#8209;errors&#8209;x
+        will not display them.</p>
+    <p>
+        Artistic Style can now format UTF-16 encoded files, both little and big endian. This encoding is the default for
         Visual Studio unicode files. The file is formatted by converting it to UTF&#8209;8 and then back back to UTF&#8209;16.
         The conversion process does not add a significant amount of time to the formatting. The UTF-16 file must be encoded
         with a byte-order-mark (BOM) to be recognized. Again, this is the Visual Studio default.</p>
