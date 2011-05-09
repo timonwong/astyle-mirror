@@ -1186,7 +1186,7 @@ void ASConsole::getFilePaths(string& filePath)
 		if (excludeHitsVector[ix] == false)
 		{
 			excludeErr = true;
-			if (!ignoreExcludeErrorsDisplay) 
+			if (!ignoreExcludeErrorsDisplay)
 			{
 				if (ignoreExcludeErrors)
 					printMsg(_("Exclude (unmatched)  %s\n"), excludeVector[ix].c_str());
@@ -1216,7 +1216,7 @@ void ASConsole::getFilePaths(string& filePath)
 			fprintf(stderr, "%s\n", _("Did you intend to use --recursive"));
 		error();
 	}
-	
+
 	if (hasWildcard)
 		printSeparatingLine();
 }

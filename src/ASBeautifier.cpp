@@ -2714,8 +2714,11 @@ void ASBeautifier::parseCurrentLine(const string& line)
 						}
 					}
 					else
+					{
+						if (i == 0 && spaceTabCount == 0)
+							spaceTabCount += indentLength;
 						registerInStatementIndent(line, i, spaceTabCount, tabIncrementIn, 0, false);
-
+					}
 					isInStatement = true;
 				}
 			}

@@ -2185,7 +2185,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
  * Check if the currently reached  '*' or '&' character is
  * centered with one space on each side.
  * Only spaces are checked, not tabs.
- * If true then a space wil be deleted on the output.
+ * If true then a space will be deleted on the output.
  *
  * @return        whether current character is centered.
  */
@@ -2820,6 +2820,9 @@ void ASFormatter::formatPointerOrReference(void)
 			// this may not work every time with tab characters
 			for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
 			{
+				// if a padded paren follows don't move
+				if (shouldPadParensOutside && peekedChar == '(' && !isOldPRCentered)
+					break;
 				goForward(1);
 				formattedLine.append(1, currentLine[i]);
 			}

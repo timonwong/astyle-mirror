@@ -39,8 +39,8 @@ ipath=$(prefix)/bin
 CBASEFLAGS = -W -Wall -fno-rtti -fno-exceptions
 JAVAINCS   = -I$(JAVA_HOME)/include
 CXX = g++
-# INSTALL=install -o $(USER) -g $(USER)
-INSTALL=install -o 0 -g 0
+INSTALL=install -o $(USER) -g $(USER)
+# INSTALL=install -o 0 -g 0
 
 # for testing on linux
 ifdef linux
