@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   astyle_main.cpp
  *
- *   Copyright (C) 2006-2010 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2011 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -51,6 +51,10 @@
 #endif /* __VMS */
 #endif
 
+#ifdef __DMC__
+#include <locale.h>
+#endif
+
 // turn off MinGW automatic file globbing
 // this CANNOT be in the astyle namespace
 #ifndef ASTYLE_LIB
@@ -81,7 +85,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* g_version = "2.02 beta";
+const char* g_version = "2.02";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -1319,6 +1323,21 @@ void ASConsole::printHelp() const
 	(*_err) << "    Short options (starting with '-') may be appended together.\n";
 	(*_err) << "    Thus, -bps4 is the same as -b -p -s4.\n";
 	(*_err) << endl;
+	(*_err) << "Default options file:\n";
+	(*_err) << "---------------------\n";
+	(*_err) << "    Artistic Style looks for a default options file in the\n";
+	(*_err) << "    following order:\n";
+	(*_err) << "    1. The contents of the ARTISTIC_STYLE_OPTIONS environment\n";
+	(*_err) << "       variable if it exists.\n";
+	(*_err) << "    2. The file called .astylerc in the directory pointed to by the\n";
+	(*_err) << "       HOME environment variable ( i.e. $HOME/.astylerc ).\n";
+	(*_err) << "    3. The file called astylerc in the directory pointed to by the\n";
+	(*_err) << "       USERPROFILE environment variable ( i.e. %USERPROFILE%\\astylerc ).\n";
+	(*_err) << "    If a default options file is found, the options in this file\n";
+	(*_err) << "    will be parsed BEFORE the command-line options.\n";
+	(*_err) << "    Long options within the default option file may be written without\n";
+	(*_err) << "    the preliminary '--'.\n";
+	(*_err) << endl;
 	(*_err) << "Bracket Style Options:\n";
 	(*_err) << "----------------------\n";
 	(*_err) << "    --style=allman  OR  --style=ansi  OR  --style=bsd\n";
@@ -1330,7 +1349,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    Java style formatting/indenting.\n";
 	(*_err) << "    Attached brackets.\n";
 	(*_err) << endl;
-	(*_err) << "    --style=k&r  OR  --style=k/r  OR  -A3\n";
+	(*_err) << "    --style=kr  OR  --style=k&r  OR  --style=k/r  OR  -A3\n";
 	(*_err) << "    Kernighan & Ritchie style formatting/indenting.\n";
 	(*_err) << "    Linux brackets.\n";
 	(*_err) << endl;
@@ -1369,6 +1388,11 @@ void ASConsole::printHelp() const
 	(*_err) << "    Run-in opening brackets and attached closing brackets.\n";
 	(*_err) << "    Uses keep one line blocks and keep one line statements.\n";
 	(*_err) << endl;
+	(*_err) << "    --style=lisp  OR  -A12\n";
+	(*_err) << "    Lisp style formatting/indenting.\n";
+	(*_err) << "    Attached opening brackets and attached closing brackets.\n";
+	(*_err) << "    Uses keep one line statements.\n";
+	(*_err) << endl;
 	(*_err) << "Tab Options:\n";
 	(*_err) << "------------\n";
 	(*_err) << "    default indent option\n";
@@ -1395,30 +1419,26 @@ void ASConsole::printHelp() const
 	(*_err) << "will be removed in a future release.\n";
 	(*_err) << "Use the above Bracket Style Options instead.\n";
 	(*_err) << endl;
-	(*_err) << "    default brackets option\n";
-	(*_err) << "    If no brackets option is set,\n";
-	(*_err) << "    the brackets will not be changed.\n";
-	(*_err) << endl;
-	(*_err) << "    --brackets=break  OR  -b\n";
+	(*_err) << "    --brackets=break  OR  -b  (deprectaied)\n";
 	(*_err) << "    Break brackets from pre-block code (i.e. ANSI C/C++ style).\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=attach  OR  -a\n";
+	(*_err) << "    --brackets=attach  OR  -a  (deprectaied)\n";
 	(*_err) << "    Attach brackets to pre-block code (i.e. Java/K&R style).\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=linux  OR  -l\n";
+	(*_err) << "    --brackets=linux  OR  -l  (deprectaied)\n";
 	(*_err) << "    Break definition-block brackets and attach command-block\n";
 	(*_err) << "    brackets.\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=stroustrup  OR  -u\n";
+	(*_err) << "    --brackets=stroustrup  OR  -u  (deprectaied)\n";
 	(*_err) << "    Attach all brackets except function definition brackets.\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=run-in  OR  -g\n";
+	(*_err) << "    --brackets=run-in  OR  -g  (deprectaied)\n";
 	(*_err) << "    Break brackets from pre-block code, but allow following\n";
 	(*_err) << "    run-in statements on the same line as an opening bracket.\n";
 	(*_err) << endl;
 	(*_err) << "    --brackets=horstmann\n";
 	(*_err) << "    THIS IS NO LONGER A VALID OPTION.\n";
-	(*_err) << "    Use style=horstmann or brackets=run-in instead.\n";
+	(*_err) << "    Use style=horstmann instead.\n";
 	(*_err) << endl;
 	(*_err) << "Indentation options:\n";
 	(*_err) << "--------------------\n";
@@ -1460,10 +1480,18 @@ void ASConsole::printHelp() const
 	(*_err) << "    --min-conditional-indent=#  OR  -m#\n";
 	(*_err) << "    Indent a minimal # spaces in a continuous conditional\n";
 	(*_err) << "    belonging to a conditional header.\n";
+	(*_err) << "    The valid values are:\n";
+	(*_err) << "    0 - no minimal indent.\n";
+	(*_err) << "    1 - indent at least one additional indent.\n";
+	(*_err) << "    2 - indent at least two additional indents.\n";
+	(*_err) << "    3 - indent at least one-half an additional indent.\n";
+	(*_err) << "    The default value is 2, two additional indents.\n";
 	(*_err) << endl;
 	(*_err) << "    --max-instatement-indent=#  OR  -M#\n";
 	(*_err) << "    Indent a maximal # spaces in a continuous statement,\n";
 	(*_err) << "    relative to the previous line.\n";
+	(*_err) << "    The valid values are 40 thru 120.\n";
+	(*_err) << "    The default value is 40.\n";
 	(*_err) << endl;
 	(*_err) << "Padding options:\n";
 	(*_err) << "--------------------\n";
@@ -1561,18 +1589,19 @@ void ASConsole::printHelp() const
 	(*_err) << "    --suffix=none  OR  -n\n";
 	(*_err) << "    Do not retain a backup of the original file.\n";
 	(*_err) << endl;
-	(*_err) << "    --options=####\n";
-	(*_err) << "    Specify an options file #### to read and use.\n";
-	(*_err) << endl;
-	(*_err) << "    --options=none\n";
-	(*_err) << "    Disable the default options file.\n";
-	(*_err) << "    Only the command-line parameters will be used.\n";
-	(*_err) << endl;
 	(*_err) << "    --recursive  OR  -r  OR  -R\n";
 	(*_err) << "    Process subdirectories recursively.\n";
 	(*_err) << endl;
 	(*_err) << "    --exclude=####\n";
 	(*_err) << "    Specify a file or directory #### to be excluded from processing.\n";
+	(*_err) << endl;
+	(*_err) << "    ignore-exclude-errors  OR  -i\n";
+	(*_err) << "    Allow processing to continue if there are errors in the exclude=###\n";
+	(*_err) << "    options. It will display the unmatched excludes.\n";
+	(*_err) << endl;
+	(*_err) << "    ignore-exclude-errors-x  OR  -xi\n";
+	(*_err) << "    Allow processing to continue if there are errors in the exclude=###\n";
+	(*_err) << "    options. It will NOT display the unmatched excludes.\n";
 	(*_err) << endl;
 	(*_err) << "    --errors-to-stdout  OR  -X\n";
 	(*_err) << "    Print errors and help information to standard-output rather than\n";
@@ -1596,26 +1625,23 @@ void ASConsole::printHelp() const
 	(*_err) << "    Force use of the specified line end style. Valid options\n";
 	(*_err) << "    are windows (CRLF), linux (LF), and macold (CR).\n";
 	(*_err) << endl;
+	(*_err) << "Command Line Only:\n";
+	(*_err) << "------------------\n";
+	(*_err) << "    --options=####\n";
+	(*_err) << "    Specify an options file #### to read and use.\n";
+	(*_err) << endl;
+	(*_err) << "    --options=none\n";
+	(*_err) << "    Disable the default options file.\n";
+	(*_err) << "    Only the command-line parameters will be used.\n";
+	(*_err) << endl;
+	(*_err) << "    --ascii  OR  -I\n";
+	(*_err) << "    The displayed output will be ascii characters only.\n";
+	(*_err) << endl;
 	(*_err) << "    --version  OR  -V\n";
 	(*_err) << "    Print version number.\n";
 	(*_err) << endl;
 	(*_err) << "    --help  OR  -h  OR  -?\n";
 	(*_err) << "    Print this help message.\n";
-	(*_err) << endl;
-	(*_err) << "Default options file:\n";
-	(*_err) << "---------------------\n";
-	(*_err) << "    Artistic Style looks for a default options file in the\n";
-	(*_err) << "    following order:\n";
-	(*_err) << "    1. The contents of the ARTISTIC_STYLE_OPTIONS environment\n";
-	(*_err) << "       variable if it exists.\n";
-	(*_err) << "    2. The file called .astylerc in the directory pointed to by the\n";
-	(*_err) << "       HOME environment variable ( i.e. $HOME/.astylerc ).\n";
-	(*_err) << "    3. The file called astylerc in the directory pointed to by the\n";
-	(*_err) << "       USERPROFILE environment variable ( i.e. %USERPROFILE%\\astylerc ).\n";
-	(*_err) << "    If a default options file is found, the options in this file\n";
-	(*_err) << "    will be parsed BEFORE the command-line options.\n";
-	(*_err) << "    Long options within the default option file may be written without\n";
-	(*_err) << "    the preliminary '--'.\n";
 	(*_err) << endl;
 }
 
@@ -2603,7 +2629,7 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 		string maxIndentParam = getParam(arg, "M", "max-instatement-indent=");
 		if (maxIndentParam.length() > 0)
 			maxIndent = atoi(maxIndentParam.c_str());
-		if (maxIndent > 80)
+		if (maxIndent > 120)
 			isOptionError(arg, errorInfo);
 		else
 			formatter.setMaxInStatementIndentLength(maxIndent);
