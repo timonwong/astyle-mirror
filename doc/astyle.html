@@ -53,7 +53,7 @@
         <a class="contents" href="#_default_bracket_style">default&nbsp;bracket&nbsp;style</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=allman">style=allman</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=java">style=java</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_style=k&r">style=k&r</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_style=kr">style=kr</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=stroustrup">style=stroustrup</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=whitesmith">style=whitesmith</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=banner">style=banner</a>&nbsp;&nbsp;&nbsp; 
@@ -144,7 +144,7 @@
     <p class="contents2">
         <a class="contents" href="#_options">options</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_options=none">options=none</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_options">ascii</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_ascii">ascii</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_version">version</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_help">help</a>&nbsp;&nbsp;&nbsp;
     </p>
@@ -190,6 +190,26 @@
         a different string by the option <code>--suffix=</code>, or suppressed altogether by the options <code>-n</code>
         or <code>--suffix=none</code>). Thus, after indenting <code><em>SourceFile.cpp</em></code> the indented file will
         be named <code><em>SourceFile.cpp</em></code>, while the original pre-indented file will be renamed to <code><em>SourceFile.cpp.orig</em></code>.</p>
+
+    <h4>
+        Internationalization</h4>
+
+    <p>
+        Artistic Style has been internationalized to process files and directories in any language.</p>
+    <p>
+        It has also been translated into several languages. The translation to use is determined from the User Locale for Windows
+        and the LANG environment variable for other systems. The translation will be done automatically from these settings.
+        If no translation is available it will default to English. There is an ascii option to use English instead of
+        the system language.</p>
+    <p>
+        The source code for the translations is at the end of ASLocalizer.cpp in the form of an English&#8209;Translation
+        pair. If you make corrections to a translation, send the source as a bug report and it will be included in the
+        next release.</p>
+    <p>
+        To add a new language, add a new translation class to ASLocalizer.h. Add the English&#8209;Translation pair to
+        the constructor in ASLocalizer.cpp. Update the WinLangCode array, if necessary, and add the language code to the
+        function setTranslationClass(). The ASLocalizer.cpp program contains comments that give web pages for obtaining
+        the LCIDs and language codes. Send the source code as a bug report and it will be included in the next release.</p>
 
     <h4>
         Other Considerations</h4>
@@ -356,7 +376,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_default_bracket_style">
         <code class="title">default bracket style</code><br />
         If no bracket style option is set, the opening brackets will not be changed and closing brackets will be broken
-        from the preceeding line.</p>
+        from the preceding line.</p>
     <p>
         &nbsp;</p>
     <p id="_style=allman">
@@ -392,7 +412,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     </div>
     <p>
         &nbsp;</p>
-    <p id="_style=k&r">
+    <p id="_style=kr">
         <code class="title">--style=kr / --style=k&amp;r / --style=k/r / -A3</code><br />
         Kernighan &amp; Ritchie style formatting/indenting uses linux brackets. Brackets are broken from namespaces, classes,
         and function definitions. Brackets are attached to statements within a function.</p>
@@ -469,7 +489,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=gnu">
         <code class="title">--style=gnu / -A7</code><br />
-        GNU style formatting/indenting uses broken brackets and indented blocks.&nbsp; This style frequently is used with
+        GNU style formatting/indenting uses broken brackets and indented blocks. This style frequently is used with
         an indent of 2 spaces.
     </p>
     <p>
@@ -553,7 +573,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         <code class="title">--style=pico / -A11</code><br />
         Pico style formatting/indenting uses run-in brackets, opening brackets are broken and allow run-in statements. The
         closing bracket is attached to the last line in the block. Switches are indented to allow a run-in to the opening
-        switch block. The style impiles&nbsp; keep-one-line-blocks and keep-one-line-statements. This style does
+        switch block. The style implies keep-one-line-blocks and keep-one-line-statements. This style does
         not support multiple-line brackets. If add-brackets is used they will be added as one-line brackets. This style
         frequently is used with an indent of 2 spaces.
     </p>
@@ -572,7 +592,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         <code class="title">--style=lisp / --style=python / -A12</code><br />
         Lisp style formatting/indenting uses attached brackets, opening brackets are attached at the end of the statement.
         The
-        closing bracket is attached to the last line in the block. The style impiles&nbsp; keep-one-line-statements
+        closing bracket is attached to the last line in the block. The style implies keep-one-line-statements
         but NOT keep-one-line-blocks. This style does not support one-line brackets. If add-one-line-brackets is used
         they will be added as multiple-line brackets.</p>
     <div class="code">
@@ -594,7 +614,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         Tab Options</h3>
 
     <p id="_default_indent">
-        <code class="title">default indent option</code><br />
+        <code class="title">default indent</code><br />
         If no indentation option is set, the default option of 4 spaces will be used (e.g. <code>-s<span class="option">4</span>
             --indent=spaces=<span class="option">4</span></code>).</p>
     <p id="_indent=spaces">
@@ -627,7 +647,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
             Use the above Bracket Style Options instead.</big></b></p>
     <p id="_brackets=break">
         <code class="title">--brackets=break / -b&nbsp; (<em>depreciated</em>)</code><br />
-        Break brackets from their pre-block statements ( e.g. Allman / ANSI style ). Thiis option is depreciated. Instead
+        Break brackets from their pre-block statements ( e.g. Allman / ANSI style ). This option is depreciated. Instead
         use style=allman.</p>
     <div class="code">
         <pre>void Foo(bool isFoo)
@@ -647,7 +667,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_brackets=attach">
         <code class="title">--brackets=attach / -a&nbsp; (<em>depreciated</em>)</code><br />
-        Attach brackets to their pre-block statements ( e.g. Java style ). Thiis option is depreciated. Instead use style=java.</p>
+        Attach brackets to their pre-block statements ( e.g. Java style ). This option is depreciated. Instead use style=java.</p>
     <div class="code">
         <pre>void Foo(bool isFoo) <span class="brace">{</span>
     if (isFoo) <span class="brace">{</span>
@@ -663,7 +683,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_brackets=linux">
         <code class="title">--brackets=linux / -l&nbsp; (<em>depreciated</em>)</code><br />
         Break brackets from namespace, class, and function definitions, but attach brackets to statements within a function&nbsp;
-        ( e.g. K&amp;R / Linux style ). Thiis option is depreciated. Instead use style=kr or style=linux.</p>
+        ( e.g. K&amp;R / Linux style ). This option is depreciated. Instead use style=kr or style=linux.</p>
     <p>
         With C++ files brackets are attached for function definitions within a class (inline class functions). The brackets
         are also attached for arrays, structs, enums, and other top level objects that are not classes or functions. This
@@ -684,7 +704,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_brackets=stroustrup">
         <code class="title">--brackets=stroustrup / -u&nbsp; (<em>depreciated</em>)</code><br />
         Break brackets from function definitions only. Attach brackets to namespaces, classes, and statements within a
-        function ( e.g. Stroustrup style ). Thiis option is depreciated. Instead use style=stroustrup.</p>
+        function ( e.g. Stroustrup style ). This option is depreciated. Instead use style=stroustrup.</p>
     <p>
         With C++ files brackets are attached for function definitions within a class (inline class functions). The brackets
         are also attached for arrays, structs, enums, and other top level objects that are not classes or functions. This
@@ -705,7 +725,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_brackets=run-in">
         <code class="title">--brackets=run-in / -g&nbsp; (<em>depreciated</em>)</code><br />
         Break brackets from their pre-block statements but allow run-in statements on the same line as an opening bracket
-        ( e.g. Horstmann style ). Thiis option is depreciated. Instead use style=horstmann.</p>
+        ( e.g. Horstmann style ). This option is depreciated. Instead use style=horstmann.</p>
     <div class="code">
         <pre>void Foo(bool isFoo)
 <span class="brace">{</span>   if (isFoo())

@@ -21,26 +21,26 @@
         Artistic Style 2.02&nbsp; (May 2011)</h3>
 
     <ul>
-        <li>Add a new program module, ASLocalizer, containing languang translations.</li>
+        <li>Add a new program module, ASLocalizer, containing language translations.</li>
         <li>Add new short option prefix "x" to allow for expansion of short options.</li>
         <li>Add new command line only option "ascii" (-I). </li>
         <li>Add new bracket style, "style=pico" (-A11). </li>
         <li>Add new bracket style, "style=lisp" (-A12). </li>
         <li>Add new option "align-reference=" (-W#) (3,136,744). </li>
         <li>Add new options ignore-exclude-errors (-i) and ignore-exclude-errors-x (-xi) (3,259,910).</li>
+        <li>Add new option "style=break" for Allman style brackets. </li>
+        <li>Add new option "style=attach" for Java style brackets.</li>
         <li>Add processing of UTF-16 files by converting to UTF-8 and back to UTF-16. </li>
         <li>Add Microsoft C++ extensions for try-finally and try-except statements (3,222,216). </li>
         <li>Add "override" and "sealed" modifiers (Visual C specific) to preCommandHeaders vector (3,167,978). </li>
         <li>Add "case" and "default" to the list of formatters in ASFormatter (3,276,212).</li>
-        <li>New option "style=break" for Allman style brackets.</li>
-        <li>New option "style=attach" for Java style brackets.</li>
         <li>Remove "indent-brackets" and "indent-blocks" from the valid options.</li>
         <li>Remove "volatile" from headers and remove comparisons in ASBeautifier.</li>
         <li>Change "delete-empty-lines" short option from "x" to "xd".</li>
         <li>Change "max-instatement-indent" maximum value from 80 to 120 (3,255,930).</li>
         <li>Change "brackets=horstman" to "brackets=run-in", used for both Horstmann and Pico styles.</li>
         <li>Change C enumerations to allow in-statement indents (3,280,454). </li>
-        <li>Change functions setting&nbsp; the "indent-brackets" and "indent-blocks" variables from public to protected.</li>
+        <li>Change functions setting the "indent-brackets" and "indent-blocks" variables from public to protected.</li>
         <li>Change to indent lines beginning with an assignment operator (3,292,880). </li>
         <li>Change to abort if UTF-32 files are detected.</li>
         <li>Change "Cannot set native locale" error message from cout to cerr (3,139,873). </li>
@@ -50,7 +50,7 @@
         <li>Fix indentation of a one-line block that follows a header.</li>
         <li>Fix breaking a preprocessor define that has code after a comment end (3,132,531). </li>
         <li>Fix "pad-oper" padding a dereference that follows a C-style cast (3,259,713). </li>
-        <li>Fix "unpad-parens" not recognizine an xor (^) operator (3,285,639). </li>
+        <li>Fix "unpad-parens" not recognizing an xor (^) operator (3,285,639). </li>
         <li>Fix "break-blocks" procedure for "case" and "default" headers.</li>
         <li>Fix "add-brackets" adding brackets to the "while" of a "do-while" loop (3,267,880). </li>
         <li>Fix "add-brackets" adding brackets to an empty statement. </li>
@@ -60,7 +60,7 @@
         <li>Fix indentation for Microsoft "#pragma region" and "#pragma endregion" preprocessor directives.</li>
         <li>Fix not printing a zero for formatted numbers.</li>
         <li>Fix indentation of a class opening bracket followed by a class modifier on the same line when indent-namespaces
-            and indent-classes is used.</li>
+            and indent-classes are used.</li>
         <li>Refactor to aid debugging, improve speed, and improve the design and decomposition:
             <ul>
                 <li>Extract method processProcessor() from beautify() in ASBeautifier. </li>

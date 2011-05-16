@@ -44,7 +44,7 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         console build and are optional for the library builds. It contains language translations for several of the most
         common users of Artistic Style. The method used was adapted from the Gnu "gettext" method.</p>
     <p>
-        The translation is determined from the User Locale for Windows and the LANG environment variable for other systems.
+        The translation to use is determined from the User Locale for Windows and the LANG environment variable for other systems.
         The translation will be done automatically from these settings. If no translation is available it will default
         to English.</p>
     <p>
@@ -64,7 +64,7 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         Brackets</h4>
 
     <p>
-        Since release 1.22 (April 2008) the predefined styles have increased from 5 to11 and the bracket types have increased
+        Since release 1.22 (April 2008) the predefined styles have increased from 5 to 12 and the bracket types have increased
         from 4 to 6. Having two different ways of defining bracket styles has resulted in some confusion and unnecessary
         duplication. This release starts a redesign of the bracket definitions to simplify the user interface. The predefined
         styles and bracket types will be combined into a single option category.
@@ -85,13 +85,12 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
     </ul>
     <p>
         There is a new "Bracket Style" option "style=pico" or "A11". It uses run-in brackets, like Horstmann style, and
-        attaches the closing bracket to the last line in the block. It also sets the options "keep one line blocks" and
+        attaches the closing bracket to the last line in the block. It sets the options "keep one line blocks" and
         "keep one line statements". This is a very compact style and is a good style for small monitors.</p>
     <p>
         Another new "Bracket Style" option is "style=lisp" or "style=python" or "A12". It uses attached brackets, like
-        Java style, and attaches the closing bracket to the last line in the block. It also sets the options "keep one
-        line blocks" and "keep one line statements". This style makes indentation the only way of distinguishing blocks
-        of code, but has the advantage of containing no uninformative lines. It is also a very compact style.</p>
+        Java style, and attaches the closing bracket to the last line in the block. It sets the option "keep one line statements". This style makes indentation the only way of distinguishing blocks
+        of code, but has the advantage of containing no uninformative lines. Like Pico, it is also a very compact style.</p>
     <p>
         The option "brackets=horstmann" has been removed. Instead use "style=horstmann" or "A9". The short option "g"
         is now equivalent to the new "brackets=run-in". Run-in brackets are used for both Horstmann and Pico styles.</p>
@@ -126,36 +125,70 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         will not display them.</p>
     <p>
         Artistic Style can now format UTF-16 encoded files, both little and big endian. This encoding is the default for
-        Visual Studio unicode files. The file is formatted by converting it to UTF&#8209;8 and then back back to UTF&#8209;16.
+        Visual Studio Unicode files. The file is formatted by converting it to UTF&#8209;8 and then back to UTF&#8209;16.
         The conversion process does not add a significant amount of time to the formatting. The UTF-16 file must be encoded
         with a byte-order-mark (BOM) to be recognized. Again, this is the Visual Studio default.</p>
     <p>
         The Visual Studio project files now have a solution for both Win32 and x64 compiles. The x64 version will be needed
-        if you are using an Artistic Style dll for Java or C# on a Windows&nbsp;7 platform. Or you may just prefer an
+        if you are using an Artistic Style DLL for Java or C# on a Windows&nbsp;7 platform. Or you may just prefer an
         x64 console program. The executable included in the Windows distribution is still Win32. It will work on both
         Win32 and x64 systems.</p>
+    <p>
+        If you use Visual Studio C++ Express the 2010 release has the ability to compile x64 code. But you must use Vista
+        or Windows&nbsp;7 and need to install the .NET Framework SDK. I have created a brief instruction page <a href="vsinstall.html"
+            target="_blank" title="open new window">here</a>. Note that a fix is required if you apply Service Pack&nbsp;1
+        after installing the .NET Framework SDK.</p>
     <p>
         The documentation contains a new section "Command-line Only" which lists commands that are not available from
         an options file. The options were transferred from the "Other Options" section.</p>
     <p>
-        Thanks to Milian Wolff, Johannes Martin, and Arne F?rlie, and Marvin Humphrey for their contributions.</p>
+        Thanks to Milian Wolff, Johannes Martin, and Arne F?rlie, and Marvin Humphrey for their contributions. The UTF&#8209;8
+        and UTF&#8209;16 conversions were obtained from the SciTE source code editor.</p>
 
     <h4>
         Survey Results</h4>
 
     <p>
-        Pending</p>
+        The results of the survey posted last release are available at <a href="http://astyle.sourceforge.net/SurveyGeneralInfo.html"
+            target="survey" title="open new window">General Information</a> and <a href="http://astyle.sourceforge.net/SurveyOptions.html"
+                target="survey" title="open new window">Artistic Style Options</a>. Thanks to everyone who took the time
+        to complete it.</p>
+    <p>
+        Surveys give an indication of how many people are using an option or want certain features. This is information
+        that is not available in the bug reports.</p>
+    <p>
+        In the "Enhancements" group there were three items with multiple requests. The most frequent request by far was
+        to enforce a maximum line length. This is also the oldest request in the bug reports. Another item with multiple
+        requests
+        was to disable/enable Artistic Style formatting on request within source files. This is the second oldest
+        request in the bug reports. A third item with multiple requests was to customize namespace brackets independent
+        of the requested bracket style. I will try to address these in the next release.</p>
+    <p>
+        Things that stand out to me in the multiple&#8209;choice sections:</p>
+    <ul>
+        <li>The predefined styles and brackets options were each used about 50% each. That will change with this release.</li>
+        <li>Over 50% of the survey uses Artistic Style for Windows. I have been working for a couple of years on a new program
+            based on wxWidgets. I will try to give this more priority in the future. </li>
+        <li>Over 75% of the survey uses Artistic Style to format entire projects.</li>
+        <li>About one&#8209;third of the Windows C++ users use Artistic Style for Managed C++.</li>
+        <li>The most popular option is add&#8209;brackets (60%), which was just recently added.</li>
+        <li>The attach&#8209;pointer options, in total (70%), are even more popular than add-brackets. They were also recently added.</li>
+        <li>The preserve-date option is used by nearly one-third of the survey.</li>
+        <li>All of the options are used by someone in the survey, even the ones I thought were outdated. The bracket styles that are not used are probably a result
+            of not having enough response.</li>
+    </ul>
 
     <h4>
         Developers</h4>
 
     <p>
-        The Artistic Style for Windows program contains a sample GUI using the new bracket style options. The old predefined
-        styles are now bracket styles. The bracket options have been removed along with the indent&#8209;brackets and
-        indent&#8209;blocks options. The new bracket styles all use the same default indent of 4 spaces, therefore it
-        is not necessary to set an indentation from the bracket style. The new format is available for use with this release.</p>
+        The <a href="http://jimp03.zxq.net/" target="astyle" title="open new window">Artistic Style for Windows</a> program
+        contains a sample GUI using the new bracket style options. The old predefined styles are now the bracket styles.
+        The bracket options have been removed along with the indent&#8209;brackets and indent&#8209;blocks options. The
+        new bracket styles all use the same default indent of 4 spaces, therefore it is not necessary to set an indentation
+        from the bracket style. The new format is available for use with this release.</p>
     <p>
-    </p>
+        &nbsp;</p>
 
     <h3>
         Artistic Style 2.01&nbsp; (November 2010)
@@ -234,6 +267,8 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         option is set in the function fixOptionVariableConflicts.</p>
     <p>
         The use of locales affects only the command line build.</p>
+    <p>
+        &nbsp;</p>
 
     <h3>
         Artistic Style 1.24&nbsp; (February 2010)</h3>
