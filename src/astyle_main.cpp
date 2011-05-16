@@ -2006,7 +2006,6 @@ void ASConsole::updateExcludeVector(string suffixParam)
 
 // Adapted from SciTE UniConversion.cxx.
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
-// The SciTe License.txt file describes the license conditions.
 // Modified for Artistic Style by Jim Pattee.
 //
 // Compute the length of an output utf-8 file given a utf-16 file.
@@ -2046,7 +2045,6 @@ size_t ASConsole::Utf8Length(const char* data, size_t tlen, FileEncoding encodin
 
 // Adapted from SciTE Utf8_16.cxx.
 // Copyright (C) 2002 Scott Kirkwood.
-// The SciTe License.txt file describes the license conditions.
 // Modified for Artistic Style by Jim Pattee.
 size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding, char* utf16Out) const
 {
@@ -2136,7 +2134,6 @@ size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding,
 
 // Adapted from SciTE UniConversion.cxx.
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
-// The SciTe License.txt file describes the license conditions.
 // Modified for Artistic Style by Jim Pattee.
 //
 // Compute the length of an output utf-16 file given a utf-8 file.
@@ -2168,7 +2165,6 @@ size_t ASConsole::Utf16Length(const char* data, size_t len) const
 
 // Adapted from SciTE Utf8_16.cxx.
 // Copyright (C) 2002 Scott Kirkwood.
-// The SciTe License.txt file describes the license conditions.
 // Modified for Artistic Style by Jim Pattee.
 size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding,
                               bool firstBlock, char* utf8Out) const
