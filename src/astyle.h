@@ -330,8 +330,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setPreprocessorIndent(bool state);
 		int  getBeautifierFileType() const;
 		int  getFileType();
-		int  getIndentLength(void);
-		string getIndentString(void);
+		int  getIndentLength(void) const;
+		string getIndentString(void) const;
 		string getNextWord(const string& line, size_t currPos) const;
 		bool getBracketIndent(void);
 		bool getBlockIndent(void);
@@ -566,6 +566,7 @@ class ASFormatter : public ASBeautifier
 		void setAddBracketsMode(bool state);
 		void setAddOneLineBracketsMode(bool state);
 		void setBracketFormatMode(BracketMode mode);
+		void setBreakAfterMode(bool state);
 		void setBreakClosingHeaderBracketsMode(bool state);
 		void setBreakBlocksMode(bool state);
 		void setBreakClosingHeaderBlocksMode(bool state);
@@ -574,6 +575,7 @@ class ASFormatter : public ASBeautifier
 		void setDeleteEmptyLinesMode(bool state);
 		void setIndentCol1CommentsMode(bool state);
 		void setLineEndFormat(LineEndFormat fmt);
+		void setMaxCodeLength(int max);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
@@ -611,6 +613,7 @@ class ASFormatter : public ASBeautifier
 		bool isEmptyLine(const string& line) const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
 		bool isNonInStatementArrayBracket() const;
+		bool isOkToSplitFormattedLine();
 		bool isPointerOrReference() const;
 		bool isPointerOrReferenceCentered() const;
 		bool isSharpStyleWithParen(const string* header) const;
@@ -620,18 +623,23 @@ class ASFormatter : public ASBeautifier
 		bool isInExponent() const;
 		bool isNextCharOpeningBracket(int startChar) const;
 		bool isOkToBreakBlock(BracketType bracketType) const;
+		int  findRemainingPadding(int maxExtraCharsAllowed) const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
 		int  isOneLineBlockReached(string& line, int startChar) const;
 		void adjustComments();
+		void appendChar(char ch, bool canBreakLine);
 		void appendCharInsideComments();
 		void appendSequence(const string& sequence, bool canBreakLine = true);
 		void appendSpacePad();
 		void appendSpaceAfter();
-		void breakLine();
+		void breakLine(bool isSplitLine=false);
 		void buildLanguageVectors();
 		void checkForHeaderFollowingComment(const string& firstLine);
+		void updateFormattedLineSplitPoints(char appendedChar);
+		void updateFormattedLineSplitPointSequence(const string& sequence);
 		void checkIfTemplateOpener();
+		void clearFormattedLineSplitPoints();
 		void convertTabToSpaces();
 		void deleteContainer(vector<BracketType>* &container);
 		void formatArrayRunIn();
@@ -657,7 +665,9 @@ class ASFormatter : public ASBeautifier
 		void processPreprocessor();
 		void setAttachClosingBracket(bool state);
 		void setBreakBlocksVariables();
+		void testForTimeToSplitFormattedLine(int sequenceLength=0);
 		void trimContinuationLine();
+		size_t findFormattedLineSplitPoint(int sequenceLength) const;
 		size_t findNextChar(string& line, char searchChar, int searchStart = 0);
 		string getPreviousWord(const string& line, int currPos) const;
 		string peekNextText(const string& firstLine, bool endOnEmptyLine=false, bool shouldReset=false) const;
@@ -699,9 +709,18 @@ class ASFormatter : public ASBeautifier
 		int  traceLineNumber;
 		size_t checksumIn;
 		size_t checksumOut;
-		size_t leadingSpaces;
-		size_t formattedLineCommentNum;     // comment location on formattedLine
 		size_t currentLineFirstBracketNum;	// first bracket location on currentLine
+		size_t formattedLineCommentNum;     // comment location on formattedLine
+		size_t leadingSpaces;
+		size_t maxCodeLength;
+
+		// possible split points
+		size_t maxSemi;			// probably a 'for' statement
+		size_t maxAndOr;		// probably an 'if' statement
+		size_t maxComma;
+		size_t maxParen;
+		size_t maxWhiteSpace;
+
 		size_t previousReadyFormattedLineLength;
 		FormatStyle formattingStyle;
 		BracketMode bracketFormatMode;
@@ -721,6 +740,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldIndentCol1Comments;
 		bool isInLineComment;
 		bool isInComment;
+		bool isInCommentStartLine;
 		bool noTrimCommentContinuation;
 		bool isInPreprocessor;
 		bool isInPreprocessorBeautify;
@@ -746,6 +766,7 @@ class ASFormatter : public ASBeautifier
 		bool foundPreCommandHeader;
 		bool foundCastOperator;
 		bool isInLineBreak;
+		bool endOfAsmReached;
 		bool endOfCodeReached;
 		bool lineCommentNoIndent;
 		bool isInExecSQL;
@@ -773,11 +794,13 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakOneLineStatements;
 		bool shouldBreakClosingHeaderBrackets;
 		bool shouldBreakElseIfs;
+		bool shouldBreakLineAfterLogical;
 		bool shouldAddBrackets;
 		bool shouldAddOneLineBrackets;
 		bool shouldDeleteEmptyLines;
 		bool needHeaderOpeningBracket;
 		bool shouldBreakLineAtNextChar;
+		bool shouldKeepLineUnbroken;
 		bool passedSemicolon;
 		bool passedColon;
 		bool isImmediatelyPostNonInStmt;
@@ -789,30 +812,19 @@ class ASFormatter : public ASBeautifier
 		bool isImmediatelyPostReturn;
 		bool isImmediatelyPostOperator;
 		bool isImmediatelyPostPointerOrReference;
-
 		bool shouldBreakBlocks;
 		bool shouldBreakClosingHeaderBlocks;
 		bool isPrependPostBlockEmptyLineRequested;
 		bool isAppendPostBlockEmptyLineRequested;
-
 		bool prependEmptyLine;
 		bool appendOpeningBracket;
 		bool foundClosingHeader;
-
 		bool isInHeader;
 		bool isImmediatelyPostHeader;
 		bool isInCase;
 		bool isJavaStaticConstructor;
 
 	private:  // inline functions
-		// append a character to the current formatted line.
-		void appendChar(char ch, bool canBreakLine) {
-			if (canBreakLine && isInLineBreak)
-				breakLine();
-			formattedLine.append(1, ch);
-			isImmediatelyPostCommentOnly = false;
-		}
-
 		// append the CURRENT character (curentChar) to the current formatted line.
 		void appendCurrentChar(bool canBreakLine = true) {
 			appendChar(currentChar, canBreakLine);

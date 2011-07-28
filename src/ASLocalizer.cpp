@@ -29,21 +29,32 @@
 // headers
 //----------------------------------------------------------------------------
 
+#include "ASLocalizer.h"
+
 #ifdef _WIN32
 #include <windows.h>
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)  // secure version deprecation warnings
+// #pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
 #endif
 
 #ifdef __DMC__
 #include <locale.h>
 #endif
 
+#ifdef __VMS
+#define __USE_STD_IOSTREAM 1
+#include <assert>
+#else
+#include <cassert>
+#endif
+
 #include <cstdio>
 #include <iostream>
 #include <stdlib.h>
 #include <typeinfo>
-
-#include "astyle_main.h"
-#include "ASLocalizer.h"
 
 namespace astyle
 {
@@ -301,8 +312,7 @@ size_t Translation::getTranslationVectorSize() const
 bool Translation::getWideTranslation(const string& stringIn, wstring& wideOut) const
 // Get the wide translation string. Used for testing.
 {
-	size_t i;
-	for (i = 0; i < m_translation.size(); i++)
+	for (size_t i = 0; i < m_translation.size(); i++)
 	{
 		if (m_translation[i].first == stringIn)
 		{

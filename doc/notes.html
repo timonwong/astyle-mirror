@@ -17,6 +17,23 @@
     <p>
         &nbsp;</p>
 
+    <h3 id="_2.03">
+        Artistic Style 2.03&nbsp; (pending)</h3>
+
+    <ul>
+        <li>Add new option "max-code-length=#" (-xC#) to limit the length of code on a line. </li>
+        <li>Add new option "break-after-logical" (-xL) to modify a "max-code-length" line break for conditionals. </li>
+        <li>Fix "break-blocks" used with "delete-empty-lines" not correctly breaking blocks on the first run. </li>
+        <li>Fix "pad-oper" used with "keep-one-line-statements" not padding operators when in a one-line "case" statement.
+        </li>
+        <li>Fix warning messages from cppcheck, except for constructor uninitialized variables (false positive).</li>
+        <li>Refactor to improve the design and decomposition:
+            <ul>
+                <li>Remove appendChar() from the inline functions.. </li>
+            </ul>
+        </li>
+    </ul>
+
     <h3 id="_2.02">
         Artistic Style 2.02&nbsp; (May 2011)</h3>
 
@@ -1237,7 +1254,29 @@
 
     <p>
         &nbsp;</p>
-  
+
+    <!-- Piwik -->
+
+    <script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ? "https://sourceforge.net/apps/piwik/astyle/" : "http://sourceforge.net/apps/piwik/astyle/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+
+    <script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+    </script>
+
+    <noscript>
+        <p>
+            <img src="http://sourceforge.net/apps/piwik/astyle/piwik.php?idsite=1" style="border: 0" alt="" /></p>
+    </noscript>
+
+    <!-- End Piwik Tag -->
+
 </body>
 
 </html>

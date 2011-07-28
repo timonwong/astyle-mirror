@@ -51,6 +51,7 @@ ASFormatter::ASFormatter()
 	pointerAlignment = PTR_ALIGN_NONE;
 	referenceAlignment = REF_SAME_AS_PTR;
 	lineEnd = LINEEND_DEFAULT;
+	maxCodeLength = string::npos;
 	shouldPadOperators = false;
 	shouldPadParensOutside = false;
 	shouldPadParensInside = false;
@@ -66,6 +67,7 @@ ASFormatter::ASFormatter()
 	shouldBreakClosingHeaderBrackets = false;
 	shouldDeleteEmptyLines = false;
 	shouldBreakElseIfs = false;
+	shouldBreakLineAfterLogical = false;
 	shouldAddBrackets = false;
 	shouldAddOneLineBrackets = false;
 
@@ -78,10 +80,6 @@ ASFormatter::ASFormatter()
 	operators = new vector<const string*>;
 	assignmentOperators = new vector<const string*>;
 	castOperators = new vector<const string*>;
-
-	// the following prevents warning messages with cppcheck
-	// it will NOT compile if activated
-//	init();
 }
 
 /**
@@ -142,6 +140,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	parenStack->push_back(0);               // parenStack must contain this default entry
 	initContainer(bracketTypeStack, new vector<BracketType>);
 	bracketTypeStack->push_back(NULL_TYPE); // bracketTypeStack must contain this default entry
+	clearFormattedLineSplitPoints();
 
 	currentHeader = NULL;
 	currentLine = "";
@@ -155,13 +154,13 @@ void ASFormatter::init(ASSourceIterator* si)
 	charNum = 0;
 	checksumIn = 0;
 	checksumOut = 0;
-	leadingSpaces = 0;
+	currentLineFirstBracketNum = string::npos;
 	formattedLineCommentNum = 0;
+	leadingSpaces = 0;
+	previousReadyFormattedLineLength = string::npos;
 	preprocBracketTypeStackSize = 0;
 	spacePadNum = 0;
 	nextLineSpacePadNum = 0;
-	currentLineFirstBracketNum = string::npos;
-	previousReadyFormattedLineLength = string::npos;
 	templateDepth = 0;
 	traceLineNumber = 0;
 	horstmannIndentChars = 0;
@@ -172,6 +171,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	isVirgin = true;
 	isInLineComment = false;
 	isInComment = false;
+	isInCommentStartLine = false;
 	noTrimCommentContinuation = false;
 	isInPreprocessor = false;
 	isInPreprocessorBeautify = false;
@@ -196,6 +196,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	foundCastOperator = false;
 	foundQuestionMark = false;
 	isInLineBreak = false;
+	endOfAsmReached = false;
 	endOfCodeReached = false;
 	isInExecSQL = false;
 	isInAsm = false;
@@ -207,6 +208,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	shouldReparseCurrentChar = false;
 	needHeaderOpeningBracket = false;
 	shouldBreakLineAtNextChar = false;
+	shouldKeepLineUnbroken = false;
 	passedSemicolon = false;
 	passedColon = false;
 	isImmediatelyPostNonInStmt = false;
@@ -265,11 +267,11 @@ void ASFormatter::buildLanguageVectors()
 	ASResource::buildNonParenHeaders(nonParenHeaders, getFileType());
 	ASResource::buildPreDefinitionHeaders(preDefinitionHeaders, getFileType());
 	ASResource::buildPreCommandHeaders(preCommandHeaders, getFileType());
-	if (operators->size() == 0)
+	if (operators->empty())
 		ASResource::buildOperators(operators);
-	if (assignmentOperators->size() == 0)
+	if (assignmentOperators->empty())
 		ASResource::buildAssignmentOperators(assignmentOperators);
-	if (castOperators->size() == 0)
+	if (castOperators->empty())
 		ASResource::buildCastOperators(castOperators);
 }
 
@@ -411,8 +413,10 @@ string ASFormatter::nextLine()
 //		if (inLineNumber >= 7)
 //			int x = 1;
 
-		if (shouldBreakLineAtNextChar && !isWhiteSpace(currentChar))
+		if (shouldBreakLineAtNextChar)
 		{
+			if (isWhiteSpace(currentChar) && !lineIsEmpty)
+				continue;
 			isInLineBreak = true;
 			shouldBreakLineAtNextChar = false;
 		}
@@ -447,16 +451,19 @@ string ASFormatter::nextLine()
 		if (isSequenceReached("//"))
 		{
 			formatLineCommentOpener();
+			testForTimeToSplitFormattedLine();
 			continue;
 		}
 		else if (isSequenceReached("/*"))
 		{
 			formatCommentOpener();
+			testForTimeToSplitFormattedLine();
 			continue;
 		}
 		else if (currentChar == '"' || currentChar == '\'')
 		{
 			formatQuoteOpener();
+			testForTimeToSplitFormattedLine();
 			continue;
 		}
 		// treat these preprocessor statements as a line comment
@@ -659,7 +666,7 @@ string ASFormatter::nextLine()
 			{
 				foundCastOperator = false;
 				if (parenStack->back() == 0)
-					isInAsm = false;
+					endOfAsmReached = true;
 			}
 		}
 
@@ -710,7 +717,7 @@ string ASFormatter::nextLine()
 
 				// added for release 1.24
 				// TODO: remove at the appropriate time
-				assert(isInAsm == false);
+				assert(isInAsm == false || endOfAsmReached == true);
 				assert(isInAsmOneLine == false);
 				assert(isInQuote == false);
 				isInAsm = isInAsmOneLine = isInQuote = false;
@@ -1026,16 +1033,18 @@ string ASFormatter::nextLine()
 			nonInStatementBracket = 0;
 		}
 
-		if (currentChar == ':' && shouldBreakOneLineStatements)
+		if (currentChar == ':')
 		{
 			if (isInCase
 			        && previousChar != ':'          // not part of '::'
 			        && peekNextChar() != ':')       // not part of '::'
 			{
 				isInCase = false;
-				passedColon = true;
+				if (shouldBreakOneLineStatements)
+					passedColon = true;
 			}
 			else if (isCStyle()                     // for C/C++ only
+			         && shouldBreakOneLineStatements
 			         && !foundQuestionMark          // not in a ... ? ... : ... sequence
 			         && !foundPreDefinitionHeader   // not in a definition block (e.g. class foo : public bar
 			         && previousCommandChar != ')'  // not immediately after closing paren of a method header, e.g. ASFormatter::ASFormatter(...) : ASBeautifier(...)
@@ -1314,6 +1323,16 @@ void ASFormatter::setBracketFormatMode(BracketMode mode)
 }
 
 /**
+ * set 'break after' mode for maximum code length
+ *
+ * @param state         the 'break after' mode.
+ */
+void ASFormatter::setBreakAfterMode(bool state)
+{
+	shouldBreakLineAfterLogical = state;
+}
+
+/**
  * set closing header bracket breaking mode
  * options:
  *    true     brackets just before closing headers (e.g. 'else', 'catch')
@@ -1338,6 +1357,16 @@ void ASFormatter::setBreakClosingHeaderBracketsMode(bool state)
 void ASFormatter::setBreakElseIfsMode(bool state)
 {
 	shouldBreakElseIfs = state;
+}
+
+/**
+ * set maximum code length
+ *
+ * @param max         the maximum code length.
+ */
+void ASFormatter::setMaxCodeLength(int max)
+{
+	maxCodeLength = max;
 }
 
 /**
@@ -1693,6 +1722,10 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		}
 		// reset variables for new line
 		inLineNumber++;
+		if (endOfAsmReached)
+			endOfAsmReached = isInAsm = false;
+		shouldKeepLineUnbroken = false;
+		isInCommentStartLine = false;
 		isInCase = false;
 		isInAsmOneLine = false;
 		isInQuoteContinuation = isInVerbatimQuote | haveLineContinuationChar;
@@ -1862,11 +1895,24 @@ void ASFormatter::initNewLine()
 }
 
 /**
- * append a string sequence to the current formatted line.
- * Unless disabled (via canBreakLine == false), first check if a
- * line-break has been registered, and if so break the
- * formatted line, and only then append the sequence into
- * the next formatted line.
+ * Append a character to the current formatted line.
+ *
+ * @param char             the character to append.
+ * @param canBreakLine     if true, a registered line-break
+ */
+void ASFormatter::appendChar(char ch, bool canBreakLine)
+{
+	if (canBreakLine && isInLineBreak)
+		breakLine();
+
+	formattedLine.append(1, ch);
+	isImmediatelyPostCommentOnly = false;
+	if (maxCodeLength != string::npos)
+		updateFormattedLineSplitPoints(ch);
+}
+
+/**
+ * Append a string sequence to the current formatted line.
  *
  * @param sequence         the sequence to append.
  * @param canBreakLine     if true, a registered line-break
@@ -1876,6 +1922,8 @@ void ASFormatter::appendSequence(const string& sequence, bool canBreakLine)
 	if (canBreakLine && isInLineBreak)
 		breakLine();
 	formattedLine.append(sequence);
+	if (maxCodeLength != string::npos)
+		updateFormattedLineSplitPointSequence(sequence);
 }
 
 /**
@@ -1889,6 +1937,8 @@ void ASFormatter::appendSpacePad()
 	{
 		formattedLine.append(1, ' ');
 		spacePadNum++;
+		if (maxCodeLength != string::npos)
+			updateFormattedLineSplitPoints(' ');
 	}
 }
 
@@ -1903,19 +1953,25 @@ void ASFormatter::appendSpaceAfter()
 	{
 		formattedLine.append(1, ' ');
 		spacePadNum++;
+		if (maxCodeLength != string::npos)
+			updateFormattedLineSplitPoints(' ');
 	}
 }
 
 /**
  * register a line break for the formatted line.
  */
-void ASFormatter::breakLine()
+void ASFormatter::breakLine(bool isSplitLine /*false*/)
 {
 	isLineReady = true;
 	isInLineBreak = false;
 	spacePadNum = nextLineSpacePadNum;
 	nextLineSpacePadNum = 0;
 	formattedLineCommentNum = string::npos;
+	readyFormattedLine =  formattedLine;
+	formattedLine = "";
+	if (!isSplitLine)
+		clearFormattedLineSplitPoints();
 
 	// queue an empty line prepend request if one exists
 	prependEmptyLine = isPrependPostBlockEmptyLineRequested;
@@ -1926,12 +1982,7 @@ void ASFormatter::breakLine()
 		isPrependPostBlockEmptyLineRequested = true;
 	}
 	else
-	{
 		isPrependPostBlockEmptyLineRequested = false;
-	}
-
-	readyFormattedLine =  formattedLine;
-	formattedLine = "";
 }
 
 /**
@@ -2664,6 +2715,9 @@ void ASFormatter::padOperators(const string* newOperator)
  * currentChar contains the pointer or reference
  * the symbol and necessary padding will be appended to formattedLine
  * the calling function should have a continue statement after calling this method
+ *
+ * NOTE: Do NOT use appendCurrentChar() in this method. The line should not be
+ *       broken once the calculation starts.
  */
 void ASFormatter::formatPointerOrReference(void)
 {
@@ -2708,7 +2762,7 @@ void ASFormatter::formatPointerOrReference(void)
 		if (prevCh == string::npos)
 			prevCh = 0;
 		if (formattedLine.length() == 0 || prevCh == formattedLine.length() - 1)
-			appendCurrentChar();
+			formattedLine.append(1, currentChar);
 		else
 		{
 			// exchange * or & with character following the type
@@ -2854,7 +2908,7 @@ void ASFormatter::formatPointerOrReference(void)
 	}
 	else	// pointerAlignment == PTR_ALIGN_NONE
 	{
-		appendCurrentChar();
+		formattedLine.append(1, currentChar);
 	}
 	return;
 }
@@ -3205,7 +3259,8 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 				if (peekNextChar() != '}')
 				{
 					appendSpacePad();
-					appendCurrentChar(false);       // OK to attach
+					appendCurrentChar(false);				// OK to attach
+					testForTimeToSplitFormattedLine();		// line length will have changed
 					// should a following comment attach with the bracket?
 					// insert spaces to reposition the comment
 					if (isBeforeComment()
@@ -3721,7 +3776,8 @@ void ASFormatter::checkForHeaderFollowingComment(const string& firstLine)
 	// this is called ONLY IF shouldBreakBlocks is TRUE.
 	assert(shouldBreakBlocks);
 	// look ahead to find the next non-comment text
-	string nextText = peekNextText(firstLine, true);
+	bool endOnEmptyLine = (currentHeader == NULL);
+	string nextText = peekNextText(firstLine, endOnEmptyLine);
 
 	if (nextText.length() == 0 || !isCharPotentialHeader(nextText, 0))
 		return;
@@ -3941,7 +3997,7 @@ void ASFormatter::formatCommentOpener()
 {
 	assert(isSequenceReached("/*"));
 
-	isInComment = true;
+	isInComment = isInCommentStartLine = true;
 	isImmediatelyPostLineComment = false;
 
 	if (spacePadNum != 0 && !isInLineBreak)
@@ -4764,6 +4820,233 @@ void ASFormatter::checkIfTemplateOpener()
 			return;
 		}
 	}
+}
+
+void ASFormatter::updateFormattedLineSplitPoints(char appendedChar)
+{
+	assert(formattedLine.length() > 0);
+
+	if (!isOkToSplitFormattedLine())
+		return;
+
+	char nextChar = peekNextChar();
+
+	if (isWhiteSpace(appendedChar))
+	{
+		if (nextChar != ')'												// empty parens
+		        && currentChar != ')'									// appended space preceeding a paren
+		        && nextChar != '/'										// following comment
+		        && previousNonWSChar != '('								// decided at the '('
+		        && !(nextChar == '('
+		             && !isCharPotentialOperator(previousNonWSChar))	// not an operator followed by a paren
+		        && !(currentChar == '('
+		             && !isCharPotentialOperator(previousNonWSChar))	// appended space between a non operator followed by a paren
+		        // NO && !(previousNonWSChar == '(' && nextChar == '(')		// space between opening parens
+		        // NO && !(currentChar == '(' && nextChar == '(')				// appended space between opening parens
+		        // NO && !(previousNonWSChar == '(' && nextChar == '"')		// space after a paren followed by a quote
+		        // NO && !(currentChar == '(' && nextChar == '"')				// appended space after a paren followed by a quote
+		        && !breakCurrentOneLineBlock)							// a bracket has been added
+			maxWhiteSpace = formattedLine.length() - 1;
+	}
+	else if (appendedChar == ',')
+	{
+		maxComma = formattedLine.length();
+	}
+	else if (appendedChar == '(')
+	{
+		// a following quote is something like wxT("..."), do not break
+		if (nextChar != ')' && nextChar != '(' && nextChar != '"' && nextChar != '\'')
+		{
+			// if follows an operator break before
+			if (isCharPotentialOperator(previousNonWSChar))
+				maxParen = formattedLine.length() - 1 ;
+			else
+				maxParen = formattedLine.length();
+		}
+	}
+	else if (appendedChar == ';')
+	{
+		if (nextChar != ' '  && nextChar != '}' && nextChar != '/')	// check for following comment
+			maxSemi = formattedLine.length();
+	}
+	testForTimeToSplitFormattedLine(1);
+}
+
+void ASFormatter::updateFormattedLineSplitPointSequence(const string& sequence)
+{
+	assert(formattedLine.length() > 0);
+
+	if (!isOkToSplitFormattedLine())
+		return;
+
+	// check for logical conditional
+	if (sequence == "||" || sequence ==  "&&"|| sequence ==  "or"|| sequence ==  "and")
+	{
+		if (shouldBreakLineAfterLogical)
+			maxAndOr = formattedLine.length();
+		else
+			maxAndOr = formattedLine.length() - sequence.length();
+	}
+	testForTimeToSplitFormattedLine(sequence.length());
+}
+
+bool ASFormatter::isOkToSplitFormattedLine()
+{
+	// Is it OK to split the line?
+	if (shouldKeepLineUnbroken
+	        || isInLineComment
+	        || isInComment
+	        || isInQuote
+	        || isInPreprocessor
+	        || isInExecSQL
+	        || isInAsm || isInAsmOneLine || isInAsmBlock
+	        || isInTemplate)
+		return false;
+
+	if (currentChar == '{' || currentChar == '}')
+		return false;
+
+	if (!isOkToBreakBlock(bracketTypeStack->back())
+	        || isBracketType(bracketTypeStack->back(), ARRAY_TYPE))
+	{
+		shouldKeepLineUnbroken = true;
+		clearFormattedLineSplitPoints();
+		return false;
+	}
+	return true;
+}
+
+/* This is called if the option maxCodeLength is set.
+   This can be called either before the characters are attached to the formattedLine
+   or after. If attached before, the sequenceLength of the attached characters must
+   be sent as a parameter. If attached after, the sequenceLength is NOT sent.
+*/
+void ASFormatter::testForTimeToSplitFormattedLine(int sequenceLength /* 0 */)
+{
+	// should the line be split
+	if (formattedLine.length() > maxCodeLength && !isLineReady)
+	{
+		if (charNum + sequenceLength == (int) currentLine.length())
+		{
+			isInLineBreak = true;	// break when this sequence is attached
+			return;
+		}
+
+		size_t splitPoint = findFormattedLineSplitPoint(sequenceLength);
+		if (splitPoint > 0)
+		{
+			string splitLine = formattedLine.substr(splitPoint);
+			formattedLine = formattedLine.substr(0, splitPoint);
+			breakLine(true);
+			formattedLine = splitLine;
+			// don't allow an empty formatted line
+			size_t firstText = formattedLine.find_first_not_of(" \t");
+			if (firstText == string::npos && formattedLine.length() > 0)
+			{
+				formattedLine.erase();
+				for (size_t i = charNum+1; i < currentLine.length() && isWhiteSpace(currentLine[i]); i++)
+					goForward(1);
+			}
+			else if (firstText > 0)
+			{
+				formattedLine.erase(0, firstText);
+			}
+			// adjust max split points
+			maxSemi = (maxSemi > splitPoint) ? (maxSemi - splitPoint) : 0;
+			maxAndOr = (maxAndOr > splitPoint) ? (maxAndOr - splitPoint) : 0;
+			maxComma = (maxComma > splitPoint) ? (maxComma - splitPoint) : 0;
+			maxParen = (maxParen > splitPoint) ? (maxParen - splitPoint) : 0;
+			maxWhiteSpace = (maxWhiteSpace > splitPoint) ? (maxWhiteSpace - splitPoint) : 0;
+		}
+	}
+}
+
+size_t ASFormatter::findFormattedLineSplitPoint(int sequenceLength) const
+{
+	// determine where to split
+	size_t indentLength_ = static_cast<size_t>(getIndentLength());
+	size_t splitPoint = 0;
+	if (maxSemi > 0)
+		splitPoint = maxSemi;
+	else if (maxAndOr > 0)
+		splitPoint = maxAndOr;
+	else if (maxComma > 0)
+		splitPoint = maxComma;
+	else if (maxParen > 0		// use maxParen if it is long enough
+	         && maxParen < maxWhiteSpace
+	         && maxParen > (maxCodeLength * .6))
+		splitPoint = maxParen;
+	else if (maxWhiteSpace > 0
+	         && maxWhiteSpace > (indentLength_ * 2))
+		splitPoint = maxWhiteSpace;
+	else if (maxParen > 0)
+		splitPoint = maxParen;
+
+	// don't split if too short
+	if (splitPoint < (indentLength_ * 2) + 2)
+		splitPoint = 0;
+	// Don't split if near the end.
+	// If "maxExtraCharsAllowed" is changed the test functions
+	// "MaxCodeLength, BreakMaximum..." should be changed.
+	const int maxExtraCharsAllowed = 10;
+	int remainingCurrent = currentLine.length() - charNum - sequenceLength;
+	int remainingFormatted = formattedLine.length() - splitPoint;
+	if (remainingFormatted + remainingCurrent < maxExtraCharsAllowed)
+	{
+		if (shouldPadOperators || shouldPadParensOutside || shouldPadParensInside)
+			remainingCurrent += findRemainingPadding(maxExtraCharsAllowed);
+	}
+	if (remainingFormatted + remainingCurrent < maxExtraCharsAllowed)
+		splitPoint = 0;
+
+	return splitPoint;
+}
+
+int ASFormatter::findRemainingPadding(int maxExtraCharsAllowed) const
+{
+	// find remaining padding on the current line
+	// err on the side of accumulating too much so the line will be broken
+	int remainingPadding = 0;
+	if ((int) currentLine.length() <= charNum + 1)
+		return remainingPadding;
+	string searchLine = currentLine.substr(charNum);
+	char prevChar = searchLine[0];
+	char currChar;
+	char nextChar;
+	for (size_t i = 1; i < searchLine.length(); i++)
+	{
+		currChar = searchLine[i];
+		nextChar = (i+1 >= searchLine.length()) ? ' ' : searchLine[i+1];
+		if (currChar == ',' && nextChar != ' ')
+			++remainingPadding;
+		if (currChar == '(')
+		{
+			if (shouldPadParensOutside && prevChar != ' ')
+				++remainingPadding;
+			if (shouldPadParensInside && nextChar != ' '
+			        && (prevChar != '(' && shouldPadParensInside))	// to avoid double counting '(('
+				++remainingPadding;
+		}
+		if (currChar == ')')
+		{
+			if (shouldPadParensInside && prevChar != ' '
+			        && (prevChar != ')' && shouldPadParensOutside))	// to avoid double counting '))'
+				++remainingPadding;
+			if (shouldPadParensOutside && nextChar != ' ' && nextChar != ';')
+				++remainingPadding;
+		}
+		prevChar = currChar;
+	}
+	return remainingPadding;
+}
+
+void ASFormatter::clearFormattedLineSplitPoints()
+{
+	maxSemi = 0;
+	maxAndOr = 0;
+	maxComma = 0;
+	maxParen = 0;
+	maxWhiteSpace = 0;
 }
 
 /**
