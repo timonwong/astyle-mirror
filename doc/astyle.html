@@ -604,26 +604,87 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <h3 id="_Tab_Options">
         Tab Options</h3>
 
+    <p>
+        The following examples show whitespace characters. A space is indicated with a <strong>.</strong> (dot), a tab is indicated by
+        a &gt; (greater than).</p>
+
     <p id="_default_indent">
         <code class="title">default indent</code><br />
         If no indentation option is set, the default option of 4 spaces will be used (e.g. <code>-s<span class="option">4</span>
             --indent=spaces=<span class="option">4</span></code>).</p>
+    <div class="code">
+        <p class="code">
+            with default values:</p>
+        <pre>void Foo() <span class="brace">{</span>
+....if (isBar1
+............&amp;&amp; isBar2)    <span class="comment">// indent of this line can be changed with min-conditional-indent</span>
+........bar();
+<span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
     <p id="_indent=spaces">
         <code class="title">--indent=spaces / --indent=spaces=<span class="option">#</span> / -s<span class="option">#</span></code><br />
-        Indent using # spaces per indent (e.g. <code>-s<span class="option">6</span></code> <code>--indent=spaces=<span
-            class="option">6</span></code>). # must be between 2 and 20. Not specifying # will result in a default of
+        Indent using # <strong>spaces</strong> per indent (e.g. <code>-s<span class="option">3</span></code> <code>--indent=spaces=<span
+            class="option">3</span></code>). # must be between 2 and 20. Not specifying # will result in a default of
         4 spaces per indent.</p>
+    <div class="code">
+        <p class="code">
+            with indent=spaces=3</p>
+        <pre>void Foo() <span class="brace">{</span>
+...if (isBar1
+.........&amp;&amp; isBar2)    <span class="comment">// indent of this line can be changed with min-conditional-indent</span>
+......bar();
+<span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
     <p id="_indent=tab">
         <code class="title">--indent=tab / --indent=tab=<span class="option">#</span> / -t / -t<span class="option">#</span></code><br />
-        Indent using tab characters. Treat each tab as # spaces (e.g. <code>-t<span class="option">6</span></code> / <code>
-            --indent=tab=<span class="option">6</span></code>). # must be between 2 and 20. If no # is set, treats tabs
-        as 4 spaces.</p>
+        Indent using <strong>tabs for indentation, spaces for continuation line alignment</strong>. This ensures that
+        the code is displayed correctly everywhere, regardless of the viewer&#8217;s tab size. Treat each tab as # spaces
+        (e.g. <code>-t<span class="option">6</span></code> / <code>--indent=tab=<span class="option">6</span></code>).
+        # must be between 2 and 20. If no # is set, treats tabs as 4 spaces.
+    </p>
+    <div class="code">
+        <p class="code">
+            with indent=tab:</p>
+        <pre>void Foo() <span class="brace">{</span>
+&gt;   if (isBar1
+&gt;   ........&amp;&amp; isBar2)    <span class="comment">// indent of this line can be changed with min-conditional-indent</span>
+&gt;   &gt;   bar();
+<span class="brace">}</span>
+</pre>
+        <p class="code">
+            with style=linux, indent=tab=8:</p>
+        <pre>void Foo()
+<span class="brace">{</span>
+&gt;       if (isBar1
+&gt;       ....&amp;&amp; isBar2)    <span class="comment">// indent of this line can NOT be changed with style=linux</span>
+&gt;       &gt;       bar();
+<span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
     <p id="_indent=force-tab">
         <code class="title">--indent=force-tab / --indent=force-tab=<span class="option">#</span> / -T / -T<span class="option">#</span></code><br />
-        Indent using tab characters. Treat each tab as # spaces (e.g. <code>-T<span class="option">6</span></code> / <code>
-            --indent=<span lang="en-us">force-</span>tab=<span class="option">6</span></code>). Uses tabs as indents where
-        <code>&#8209;&#8209;indent=tab</code> prefers to use spaces, such as inside multi-line statements. # must be between
+        Indent using <strong>all tab</strong> characters, if possible. If the continuation line is not an even number
+        of tabs, spaces will be added at the end. Treat each tab as # spaces (e.g. <code>-T<span class="option">6</span></code>
+        / <code>--indent=<span lang="en-us">force-</span>tab=<span class="option">6</span></code>). # must be between
         2 and 20. If no # is set, treats tabs as 4 spaces.</p>
+    <div class="code">
+        <p class="code">
+            with indent=force-tab:</p>
+        <pre>void Foo() <span class="brace">{</span>
+>   if (isBar1
+>   >   >   &amp;&amp; isBar2)    <span class="comment">// indent of this line can be changed with min-conditional-indent</span>
+>   >   bar();
+<span class="brace">}</span>
+</pre>
+    </div>
     <p>
         &nbsp;</p>
     <hr />
@@ -1325,9 +1386,11 @@ else
         (||, &amp;&amp;, ...), comma, paren, semicolon, or space.
     </p>
     <p>
-        Some code will not be broken, such as comments and quotes. Arrays will not be broken. If used with keep&#8209;one&#8209;line&#8209;blocks
-        the blocks will NOT be broken if the line goes over the maximum length. If used with keep&#8209;one&#8209;line&#8209;statements
-        the statements will be broken at a semicolon if the line goes over the maximum length.</p>
+        Some code will not be broken, such as comments, quotes, and arrays. If used with keep&#8209;one&#8209;line&#8209;blocks
+        or add-one-line-brackets the blocks will NOT be broken. If used with keep&#8209;one&#8209;line&#8209;statements
+        the statements will be broken at a semicolon if the line goes over the maximum length. If there is no available
+        break point within the max code length, the line will be broken at the first available break point after the max
+        code length.</p>
     <p>
         By default logical conditionals will be placed first on the new line. The option break&#8209;after&#8209;logical
         will cause the logical conditionals to be placed last on the previous line. This option has no effect without

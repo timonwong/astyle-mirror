@@ -617,13 +617,14 @@ class ASFormatter : public ASBeautifier
 		bool isPointerOrReference() const;
 		bool isPointerOrReferenceCentered() const;
 		bool isSharpStyleWithParen(const string* header) const;
+		bool isSplittableOperator(char appendedChar) const;
 		bool isStructAccessModified(string&  firstLine, size_t index) const;
 		bool isUnaryOperator() const;
 		bool isImmediatelyPostCast() const;
 		bool isInExponent() const;
 		bool isNextCharOpeningBracket(int startChar) const;
 		bool isOkToBreakBlock(BracketType bracketType) const;
-		int  findRemainingPadding(int maxExtraCharsAllowed) const;
+//		int  findRemainingPadding() const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
 		int  isOneLineBlockReached(string& line, int startChar) const;
@@ -715,11 +716,15 @@ class ASFormatter : public ASBeautifier
 		size_t maxCodeLength;
 
 		// possible split points
-		size_t maxSemi;			// probably a 'for' statement
 		size_t maxAndOr;		// probably an 'if' statement
+		size_t maxSemi;			// probably a 'for' statement
 		size_t maxComma;
 		size_t maxParen;
 		size_t maxWhiteSpace;
+		size_t maxSemiPending;
+		size_t maxCommaPending;
+		size_t maxParenPending;
+		size_t maxWhiteSpacePending;
 
 		size_t previousReadyFormattedLineLength;
 		FormatStyle formattingStyle;
@@ -755,6 +760,7 @@ class ASFormatter : public ASBeautifier
 		bool isInVerbatimQuote;
 		bool haveLineContinuationChar;
 		bool isInQuoteContinuation;
+		bool isInBlParen;
 		bool isSpecialChar;
 		bool isNonParenHeader;
 		bool foundQuestionMark;
