@@ -113,10 +113,22 @@ class ChineseTraditional : public Translation
 		ChineseTraditional();
 };
 
+class Dutch : public Translation
+{
+	public:
+		Dutch();
+};
+
 class English : public Translation
 {
 	public:
 		English();
+};
+
+class Finnish : public Translation
+{
+	public:
+		Finnish();
 };
 
 class French : public Translation
@@ -137,11 +149,60 @@ class Hindi : public Translation
 		Hindi();
 };
 
+class Italian : public Translation
+{
+	public:
+		Italian();
+};
+
+class Japanese : public Translation
+{
+	public:
+		Japanese();
+};
+
+class Korean : public Translation
+{
+	public:
+		Korean();
+};
+
+class Polish : public Translation
+{
+	public:
+		Polish();
+};
+
+class Portuguese : public Translation
+{
+	public:
+		Portuguese();
+};
+
+class Russian : public Translation
+{
+	public:
+		Russian();
+};
+
 class Spanish : public Translation
 {
 	public:
 		Spanish();
 };
+
+class Swedish : public Translation
+{
+	public:
+		Swedish();
+};
+
+class Ukrainian : public Translation
+{
+	public:
+		Ukrainian();
+};
+
 
 #endif	//  ASTYLE_LIB
 

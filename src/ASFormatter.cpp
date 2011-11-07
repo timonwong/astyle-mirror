@@ -4906,7 +4906,7 @@ void ASFormatter::updateFormattedLineSplitPoints(char appendedChar)
 				maxWhiteSpacePending = formattedLine.length() -1;
 		}
 	}
-	// unpadded operators will split before the operator (counts as whitespace)
+	// unpadded operators may split before the operator (counts as whitespace)
 	else if (isSplittableOperator(appendedChar))
 	{
 		if (charNum > 0
@@ -4918,6 +4918,24 @@ void ASFormatter::updateFormattedLineSplitPoints(char appendedChar)
 				maxWhiteSpace = formattedLine.length() - 1;
 			else
 				maxWhiteSpacePending = formattedLine.length() - 1;
+		}
+	}
+	// unpadded closing parens may split after the paren (counts as whitespace)
+	else if (appendedChar == ')')
+	{
+		char adjacentChar = ' ';
+		if (charNum + 1 < (int) currentLine.length())
+			adjacentChar = currentLine[charNum + 1];
+		if (previousNonWSChar != '('					// empty parens
+		        && adjacentChar != ' '
+		        && adjacentChar != ';'
+		        && adjacentChar != ','
+		        && adjacentChar != '.')
+		{
+			if (maxWhiteSpace == 0 || formattedLine.length() < maxCodeLength)
+				maxWhiteSpace = formattedLine.length();
+			else
+				maxWhiteSpacePending = formattedLine.length();
 		}
 	}
 	else if (appendedChar == ',')
