@@ -1396,8 +1396,8 @@ void ASConsole::printHelp() const
 	(*_err) << "Tab Options:\n";
 	(*_err) << "------------\n";
 	(*_err) << "    default indent option\n";
-	(*_err) << "    If no indentation option is set,\n";
-	(*_err) << "    the default option of 4 spaces will be used.\n";
+	(*_err) << "    If no indentation option is set, the default\n";
+	(*_err) << "    option of 4 spaces per indent will be used.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent=spaces=#  OR  -s#\n";
 	(*_err) << "    Indent using # spaces per indent. Not specifying #\n";
@@ -1405,13 +1405,18 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --indent=tab  OR  --indent=tab=#  OR  -t  OR  -t#\n";
 	(*_err) << "    Indent using tab characters, assuming that each\n";
-	(*_err) << "    tab is # spaces long. Not specifying # will result\n";
-	(*_err) << "    in a default assumption of 4 spaces per tab.\n";
+	(*_err) << "    indent is # spaces long. Not specifying # will result\n";
+	(*_err) << "    in a default assumption of 4 spaces per indent.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent=force-tab=#  OR  -T#\n";
 	(*_err) << "    Indent using tab characters, assuming that each\n";
-	(*_err) << "    tab is # spaces long. Force tabs to be used in areas\n";
+	(*_err) << "    indent is # spaces long. Force tabs to be used in areas\n";
 	(*_err) << "    Astyle would prefer to use spaces.\n";
+	(*_err) << endl;
+	(*_err) << "    --indent=force-tab-x=#  OR  -xT#\n";
+	(*_err) << "    Allows the tab length to be set to a length that is different\n";
+	(*_err) << "    from the indent length. This may cause the indentation to be\n";
+	(*_err) << "    a mix of both spaces and tabs. This option sets the tab length.\n";
 	(*_err) << endl;
 	(*_err) << "Old Bracket Options (deprectaied):\n";
 	(*_err) << "----------------------------------\n";
@@ -2599,6 +2604,23 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	else if ( isOption(arg, "indent=force-tab") )
 	{
 		formatter.setTabIndentation(4, true);
+	}
+	else if ( isParamOption(arg, "xT", "indent=force-tab-x=") )
+	{
+		int tabNum = 8;
+		string tabNumParam = getParam(arg, "xT", "indent=force-tab-x=");
+		if (tabNumParam.length() > 0)
+			tabNum = atoi(tabNumParam.c_str());
+		if (tabNum < 2 || tabNum > 20)
+			isOptionError(arg, errorInfo);
+		else
+		{
+			formatter.setForceTabXIndentation(tabNum);
+		}
+	}
+	else if ( isOption(arg, "indent=force-tab-x") )
+	{
+		formatter.setForceTabXIndentation(8);
 	}
 	else if ( isParamOption(arg, "s", "indent=spaces=") )
 	{

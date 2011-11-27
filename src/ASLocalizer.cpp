@@ -23,7 +23,7 @@
  *   along with Artistic Style.  If not, see <http://www.gnu.org/licenses/>.
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * 
+ *
  *   To add a new language:
  *
  *   Add a new translation class to ASLocalizer.h.

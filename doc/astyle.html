@@ -66,9 +66,11 @@
         <a class="contents" href="#_Tab_Options">Tab&nbsp;Options</a>
     </p>
     <p class="contents2">
-        <a class="contents" href="#_default_indent">default&nbsp;indent</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_indent=spaces">
-            indent=spaces</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_indent=tab">indent=tab</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_default_indent">default&nbsp;indent</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_indent=spaces">indent=spaces</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_indent=tab">indent=tab</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent=force-tab">indent=force&#8209;tab</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_indent=force-tab-x">--indent=force&#8209;tab&#8209;x&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
         <a class="contents" href="#_Indentation_Options">Indentation&nbsp;Options</a></p>
@@ -643,10 +645,10 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_indent=tab">
         <code class="title">--indent=tab / --indent=tab=<span class="option">#</span> / -t / -t<span class="option">#</span></code><br />
-        Indent using <strong>tabs for indentation, spaces for continuation line alignment</strong>. This ensures that
-        the code is displayed correctly everywhere, regardless of the viewer&#8217;s tab size. Treat each tab as # spaces
+        Indent using <strong>tabs for indentation, and spaces for continuation line alignment</strong>. This ensures that
+        the code is displayed correctly&nbsp; regardless of the viewer&#8217;s tab size. Treat each indent as # spaces
         (e.g. <code>-t<span class="option">6</span></code> / <code>--indent=tab=<span class="option">6</span></code>).
-        # must be between 2 and 20. If no # is set, treats tabs as 4 spaces.
+        # must be between 2 and 20. If no # is set, treats indents as 4 spaces.
     </p>
     <div class="code">
         <p class="code">
@@ -671,7 +673,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_indent=force-tab">
         <code class="title">--indent=force-tab / --indent=force-tab=<span class="option">#</span> / -T / -T<span class="option">#</span></code><br />
-        Indent using <strong>all tab</strong> characters, if possible. If the continuation line is not an even number
+        Indent using <strong>all tab</strong> characters, if possible. If a continuation line is not an even number
         of tabs, spaces will be added at the end. Treat each tab as # spaces (e.g. <code>-T<span class="option">6</span></code>
         / <code>--indent=<span lang="en-us">force-</span>tab=<span class="option">6</span></code>). # must be between
         2 and 20. If no # is set, treats tabs as 4 spaces.</p>
@@ -682,6 +684,29 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 >   if (isBar1
 >   >   >   &amp;&amp; isBar2)    <span class="comment">// indent of this line can be changed with min-conditional-indent</span>
 >   >   bar();
+<span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_indent=force-tab-x">
+        <code class="title">--indent=force-tab-x / --indent=force-tab-x=<span class="option">#</span> / -xT / -xT<span class="option">#</span></code><br />
+        This force-tab option allows the tab length to be set to a length that is different than the indent length. This
+        may cause the indentation to be <strong>a mix of both tabs and spaces.</strong> Tabs will be used to indent, if
+        possible. If a tab indent cannot be used, spaces will be used instead.
+    </p>
+    <p>
+        This option sets the <strong>tab length.</strong> Treat each tab as # spaces (e.g. <code>-xT<span class="option">6</span></code>
+        / <code>--indent=<span lang="en-us">force-</span>tab-x=<span class="option">6</span></code>). # must be between
+        2 and 20. If no # is set, treats tabs as 8 spaces. To change the indent length "indent=force-tab" must also be
+        used.</p>
+    <div class="code">
+        <p class="code">
+            with indent=force-tab-x (default tab length of 8 and default indent length of 4):</p>
+        <pre>void Foo() <span class="brace">{</span>
+....if (isBar1
+&gt;       ....&amp;&amp; isBar2)    <span class="comment">// indent of this line can be changed with min-conditional-indent</span>
+>       bar();
 <span class="brace">}</span>
 </pre>
     </div>

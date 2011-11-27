@@ -312,8 +312,10 @@ class ASBeautifier : protected ASResource, protected ASBase
 		virtual void init(ASSourceIterator* iter);
 		void init();
 		virtual string beautify(const string& line);
-		void setTabIndentation(int length = 4, bool forceTabs = false);
+		void setDefaultTabLength();
+		void setForceTabXIndentation(int length);
 		void setSpaceIndentation(int length = 4);
+		void setTabIndentation(int length = 4, bool forceTabs = false);
 		void setMaxInStatementIndentLength(int max);
 		void setMinConditionalIndentOption(int min);
 		void setMinConditionalIndentLength();
@@ -329,19 +331,20 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setEmptyLineFill(bool state);
 		void setPreprocessorIndent(bool state);
 		int  getBeautifierFileType() const;
-		int  getFileType();
+		int  getFileType() const;
 		int  getIndentLength(void) const;
+		int  getTabLength(void) const;
 		string getIndentString(void) const;
 		string getNextWord(const string& line, size_t currPos) const;
-		bool getBracketIndent(void);
-		bool getBlockIndent(void);
-		bool getCaseIndent(void);
-		bool getClassIndent(void);
-		bool getEmptyLineFill(void);
-		bool getForceTabIndentation(void);
-		bool getModeManuallySet(void);
-		bool getPreprocessorIndent(void);
-		bool getSwitchIndent(void);
+		bool getBracketIndent(void) const;
+		bool getBlockIndent(void) const;
+		bool getCaseIndent(void) const;
+		bool getClassIndent(void) const;
+		bool getEmptyLineFill(void) const;
+		bool getForceTabIndentation(void) const;
+		bool getModeManuallySet(void) const;
+		bool getPreprocessorIndent(void) const;
+		bool getSwitchIndent(void) const;
 
 	protected:
 		void deleteBeautifierVectors();
@@ -374,7 +377,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void computePreliminaryIndentation();
 		void parseCurrentLine(const string& line);
 		void processProcessor(string& line);
-		void registerInStatementIndent(const string& line, int i, int spaceTabCount,
+		void registerInStatementIndent(const string& line, int i, int spaceIndentCount,
 		                               int tabIncrementIn, int minIndent, bool updateParenStack);
 		void initVectors();
 		string preLineWS(int spaceTabCount_, int tabCount_);
@@ -462,8 +465,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInClass;
 		bool isInSwitch;
 		bool foundPreCommandHeader;
-		int  tabCount;
-		int  spaceTabCount;
+		int  indentCount;
+		int  spaceIndentCount;
 		int  lineOpeningBlocksNum;
 		int  lineClosingBlocksNum;
 		int  fileType;
@@ -471,13 +474,14 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  minConditionalIndent;
 		int  parenDepth;
 		int  indentLength;
+		int  tabLength;
 		int  blockTabCount;
 		int  maxInStatementIndent;
-		int  classInitializerTabs;
+		int  classInitializerIndents;
 		int  templateDepth;
-		int  prevFinalLineSpaceTabCount;
-		int  prevFinalLineTabCount;
-		int  defineTabCount;
+		int  prevFinalLineSpaceIndentCount;
+		int  prevFinalLineIndentCount;
+		int  defineIndentCount;
 		char quoteChar;
 		char prevNonSpaceCh;
 		char currentNonSpaceCh;
@@ -494,13 +498,15 @@ class ASEnhancer : protected ASBase
 	public:  // functions
 		ASEnhancer();
 		virtual ~ASEnhancer();
-		void init(int, int, string, bool, bool, bool);
+		void init(int, int, int, bool, bool, bool, bool, bool);
 		void enhance(string& line, bool isInPreprocessor, bool isInSQL);
 
 	private:
 		// options from command line or options file
 		int  indentLength;
+		int  tabLength;
 		bool useTabs;
+		bool forceTab;
 		bool caseIndent;
 		bool preprocessorIndent;
 		bool emptyLineFill;
@@ -539,6 +545,8 @@ class ASEnhancer : protected ASBase
 
 
 	private:  // functions
+		void    convertForceTabIndentToSpaces(string&  line) const;
+		void    convertSpaceIndentToForceTab(string& line) const;
 		size_t  findCaseColon(string&  line, size_t caseIndex) const;
 		int     indentLine(string&  line, int indent) const;
 		bool    isBeginDeclareSectionSQL(string&  line, size_t index) const;

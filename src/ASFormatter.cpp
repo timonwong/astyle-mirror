@@ -128,7 +128,9 @@ void ASFormatter::init(ASSourceIterator* si)
 	ASBeautifier::init(si);
 	enhancer->init(getFileType(),
 	               getIndentLength(),
-	               getIndentString(),
+	               getTabLength(),
+	               getIndentString() == "\t" ? true : false,
+	               getForceTabIndentation(),
 	               getCaseIndent(),
 	               getPreprocessorIndent(),
 	               getEmptyLineFill());
@@ -360,6 +362,9 @@ void ASFormatter::fixOptionVariableConflicts()
 		}
 	}
 	setMinConditionalIndentLength();
+	// if not set by indent=force-tab-x set equal to indentLength
+	if (!getTabLength())
+		setDefaultTabLength();
 	// add-one-line-brackets implies keep-one-line-blocks
 	if (shouldAddOneLineBrackets)
 		setBreakOneLineBlocksMode(false);
@@ -914,7 +919,7 @@ string ASFormatter::nextLine()
 				//     as if it were NOT a header since a closing while()
 				//     should never have a block after it!
 				if (currentHeader != &AS_CASE
-					&& !(foundClosingHeader && currentHeader == &AS_WHILE))
+				        && !(foundClosingHeader && currentHeader == &AS_WHILE))
 				{
 					isInHeader = true;
 
@@ -1845,8 +1850,10 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
  */
 void ASFormatter::initNewLine()
 {
+	assert(getTabLength() > 0);
+
 	size_t len = currentLine.length();
-	size_t indent = getIndentLength();
+	size_t tabSize = getTabLength();
 	charNum = 0;
 
 	if (isInPreprocessor || isInQuoteContinuation)
@@ -1866,10 +1873,10 @@ void ASFormatter::initNewLine()
 				break;
 			if (currentLine[i] == '\t')
 			{
-				size_t numSpaces = indent - ((tabCount_ + i) % indent);
+				size_t numSpaces = tabSize - ((tabCount_ + i) % tabSize);
 				currentLine.replace(i, 1, numSpaces, ' ');
 				tabCount_++;
-				i += indent - 1;
+				i += tabSize - 1;
 			}
 		}
 		// this will correct the format if EXEC SQL is not a hanging indent
@@ -1900,7 +1907,7 @@ void ASFormatter::initNewLine()
 	for (charNum = 0; isWhiteSpace(currentLine[charNum]) && charNum + 1 < (int) len; charNum++)
 	{
 		if (currentLine[charNum] == '\t')
-			tabIncrementIn += indent - 1 - ((tabIncrementIn + charNum) % indent);
+			tabIncrementIn += tabSize - 1 - ((tabIncrementIn + charNum) % tabSize);
 	}
 	leadingSpaces = charNum + tabIncrementIn;
 
@@ -1929,7 +1936,7 @@ void ASFormatter::initNewLine()
 				for (j = charNum + 1; isWhiteSpace(currentLine[j]) && j < firstText; j++)
 				{
 					if (currentLine[j] == '\t')
-						tabIncrementIn += indent - 1 - ((tabIncrementIn + j) % indent);
+						tabIncrementIn += tabSize - 1 - ((tabIncrementIn + j) % tabSize);
 				}
 				leadingSpaces = j + tabIncrementIn;
 				if (currentLine.compare(firstText, 2, "/*") == 0)
@@ -3703,7 +3710,25 @@ void ASFormatter::formatRunIn()
 	        && formattedLine.find_first_not_of(" \t", lastText+1) == string::npos)
 		formattedLine.erase(lastText+1);
 
-	if (getIndentString() == "\t")
+	if (getForceTabIndentation() && getIndentLength() != getTabLength())
+	{
+		// insert the space indents
+		string indent;
+		int indentLength = getIndentLength();
+		int tabLength = getTabLength();
+		indent.append(indentLength, ' ');
+		if (extraIndent)
+			indent.append(indentLength, ' ');
+		// replace spaces indents with tab indents
+		size_t tabCount = indent.length() / tabLength;		// truncate extra spaces
+		indent.erase(0, tabCount * tabLength);
+		indent.insert(0, tabCount, '\t');
+		horstmannIndentChars = indentLength;
+		if (indent[0] == ' ')			// allow for bracket
+			indent.erase(0, 1);
+		formattedLine.append(indent);
+	}
+	else if (getIndentString() == "\t")
 	{
 		appendChar('\t', false);
 		horstmannIndentChars = 2;	// one for { and one for tab
@@ -3713,15 +3738,15 @@ void ASFormatter::formatRunIn()
 			horstmannIndentChars++;
 		}
 	}
-	else
+	else // spaces
 	{
-		int indent = getIndentLength();
-		formattedLine.append(indent-1, ' ');
-		horstmannIndentChars = indent;
+		int indentLength = getIndentLength();
+		formattedLine.append(indentLength - 1, ' ');
+		horstmannIndentChars = indentLength;
 		if (extraIndent)
 		{
-			formattedLine.append(indent, ' ');
-			horstmannIndentChars += indent;
+			formattedLine.append(indentLength, ' ');
+			horstmannIndentChars += indentLength;
 		}
 	}
 	isInHorstmannRunIn = true;
@@ -3829,13 +3854,14 @@ void ASFormatter::initContainer(T& container, T value)
 void ASFormatter::convertTabToSpaces()
 {
 	assert(currentLine[charNum] == '\t');
+	assert(getTabLength() > 0);
 
 	// do NOT replace if in quotes
 	if (isInQuote || isInQuoteContinuation)
 		return;
 
-	size_t indent = getIndentLength();
-	size_t numSpaces = indent - ((tabIncrementIn + charNum) % indent);
+	size_t tabSize = getTabLength();
+	size_t numSpaces = tabSize - ((tabIncrementIn + charNum) % tabSize);
 	currentLine.replace(charNum, 1, numSpaces, ' ');
 	currentChar = currentLine[charNum];
 }
@@ -4779,8 +4805,10 @@ bool ASFormatter::isExecSQL(string&  line, size_t index) const
  */
 void ASFormatter::trimContinuationLine()
 {
+	assert(getTabLength() > 0);
+
 	size_t len = currentLine.length();
-	size_t indent = getIndentLength();
+	size_t tabSize = getTabLength();
 	charNum = 0;
 
 	if (leadingSpaces > 0 && len > 0)
@@ -4797,7 +4825,7 @@ void ASFormatter::trimContinuationLine()
 				break;
 			}
 			if (currentLine[i] == '\t')
-				continuationIncrementIn += indent - 1 - ((continuationIncrementIn + i) % indent);
+				continuationIncrementIn += tabSize - 1 - ((continuationIncrementIn + i) % tabSize);
 		}
 
 		if ((int) continuationIncrementIn == tabIncrementIn)
