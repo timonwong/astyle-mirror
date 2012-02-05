@@ -387,6 +387,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isClassAccessModifier(const string& line) const;
 		bool isIndentedPreprocessor(const string& line, size_t currPos) const;
 		bool isLineEndComment(const string& line, int startPos) const;
+		bool isPreprocessorDefinedCplusplus(const string& line) const;
 		bool statementEndsWithComma(const string& line, int index) const;
 		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier& other) const;
 		template<typename T> void deleteContainer(T& container);
@@ -479,6 +480,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  maxInStatementIndent;
 		int  classInitializerIndents;
 		int  templateDepth;
+		int  preprocessorCppExternCBracket;
 		int  prevFinalLineSpaceIndentCount;
 		int  prevFinalLineIndentCount;
 		int  defineIndentCount;
@@ -785,6 +787,7 @@ class ASFormatter : public ASBeautifier
 		bool endOfAsmReached;
 		bool endOfCodeReached;
 		bool lineCommentNoIndent;
+		bool isInEnum;
 		bool isInExecSQL;
 		bool isInAsm;
 		bool isInAsmOneLine;

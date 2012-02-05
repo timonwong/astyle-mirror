@@ -201,6 +201,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	isInLineBreak = false;
 	endOfAsmReached = false;
 	endOfCodeReached = false;
+	isInEnum = false;
 	isInExecSQL = false;
 	isInAsm = false;
 	isInAsmOneLine = false;
@@ -701,6 +702,7 @@ string ASFormatter::nextLine()
 				foundPreDefinitionHeader = false;
 				foundPreCommandHeader = false;
 				isInPotentialCalculation = false;
+				isInEnum = false;
 				isJavaStaticConstructor = false;
 				isCharImmediatelyPostNonInStmt = false;
 				needHeaderOpeningBracket = false;
@@ -1047,6 +1049,7 @@ string ASFormatter::nextLine()
 			isInPotentialCalculation = false;
 			isSharpAccessor = false;
 			isSharpDelegate = false;
+			isInEnum = false;
 			isInExtern = false;
 			nonInStatementBracket = 0;
 		}
@@ -1069,6 +1072,7 @@ string ASFormatter::nextLine()
 			         && previousChar != ':'         // not part of '::'
 			         && peekNextChar() != ':'       // not part of '::'
 			         && !isDigit(peekNextChar())    // not a bit field
+			         && !isInEnum                   // not an enum with a base type
 			         && !isInAsm                    // not in extended assembler
 			         && !isInAsmOneLine             // not in extended assembler
 			         && !isInAsmBlock)              // not in extended assembler
@@ -1093,6 +1097,9 @@ string ASFormatter::nextLine()
 
 			if (findKeyword(currentLine, charNum, AS_OPERATOR))
 				isImmediatelyPostOperator = true;
+
+			if (isCStyle() && findKeyword(currentLine, charNum, AS_ENUM))
+				isInEnum = true;
 
 			if (isCStyle() && findKeyword(currentLine, charNum, AS_EXTERN))
 				isInExtern = true;
@@ -2076,7 +2083,7 @@ BracketType ASFormatter::getBracketType()
 	        || isBracketType(bracketTypeStack->back(),  ARRAY_TYPE))
 	        && previousCommandChar != ')')
 		returnVal = ARRAY_TYPE;
-	else if (foundPreDefinitionHeader)
+	else if (foundPreDefinitionHeader && previousCommandChar != ')')
 	{
 		returnVal = DEFINITION_TYPE;
 		if (foundNamespaceHeader)
@@ -2778,7 +2785,8 @@ void ASFormatter::padOperators(const string* newOperator)
 
 	// pad before operator
 	if (shouldPad
-	        && !(newOperator == &AS_COLON && !foundQuestionMark)
+	        && !(newOperator == &AS_COLON
+	             && (!foundQuestionMark && !isInEnum) && currentHeader != &AS_FOR)
 	        && !(newOperator == &AS_QUESTION && isSharpStyle() // check for C# nullable type (e.g. int?)
 	             && currentLine.find(':', charNum+1) == string::npos)
 	   )

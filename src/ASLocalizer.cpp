@@ -189,7 +189,7 @@ string ASLocalizer::getLanguageID() const
 }
 
 const Translation* ASLocalizer::getTranslationClass() const
-// Returns the name of the translation class in m_translation.
+// Returns the name of the translation class in m_translation.  Used for testing.
 {
 	assert(m_translation);
 	return m_translation;

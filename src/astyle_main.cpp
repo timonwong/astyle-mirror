@@ -898,10 +898,13 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
  */
 string ASConsole::getNumberFormat(int num, size_t lcid) const
 {
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__BORLANDC__) || defined(__GNUC__)
 	// Compilers that don't support C++ locales should still support this assert.
 	// The C locale should be set but not the C++.
 	// This function is not necessary if the C++ locale is set.
+	// The locale().name() return value is not portable to all compilers.
 	assert(locale().name() == "C");
+#endif
 	// convert num to a string
 	stringstream alphaNum;
 	alphaNum << num;
@@ -1053,10 +1056,13 @@ void ASConsole::getFileNames(const string& directory, const string& wildcard)
  */
 string ASConsole::getNumberFormat(int num, size_t) const
 {
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__BORLANDC__) || defined(__GNUC__)
 	// Compilers that don't support C++ locales should still support this assert.
 	// The C locale should be set but not the C++.
 	// This function is not necessary if the C++ locale is set.
+	// The locale().name() return value is not portable to all compilers.
 	assert(locale().name() == "C");
+#endif
 
 	// get the locale info
 	struct lconv* lc;
@@ -1411,33 +1417,33 @@ void ASConsole::printHelp() const
 	(*_err) << "    --indent=force-tab=#  OR  -T#\n";
 	(*_err) << "    Indent using tab characters, assuming that each\n";
 	(*_err) << "    indent is # spaces long. Force tabs to be used in areas\n";
-	(*_err) << "    Astyle would prefer to use spaces.\n";
+	(*_err) << "    AStyle would prefer to use spaces.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent=force-tab-x=#  OR  -xT#\n";
 	(*_err) << "    Allows the tab length to be set to a length that is different\n";
 	(*_err) << "    from the indent length. This may cause the indentation to be\n";
 	(*_err) << "    a mix of both spaces and tabs. This option sets the tab length.\n";
 	(*_err) << endl;
-	(*_err) << "Old Bracket Options (deprectaied):\n";
+	(*_err) << "Old Bracket Options (depreciated):\n";
 	(*_err) << "----------------------------------\n";
 	(*_err) << "The following bracket options have been depreciated and\n";
 	(*_err) << "will be removed in a future release.\n";
 	(*_err) << "Use the above Bracket Style Options instead.\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=break  OR  -b  (deprectaied)\n";
+	(*_err) << "    --brackets=break  OR  -b  (depreciated)\n";
 	(*_err) << "    Break brackets from pre-block code (i.e. ANSI C/C++ style).\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=attach  OR  -a  (deprectaied)\n";
+	(*_err) << "    --brackets=attach  OR  -a  (depreciated)\n";
 	(*_err) << "    Attach brackets to pre-block code (i.e. Java/K&R style).\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=linux  OR  -l  (deprectaied)\n";
+	(*_err) << "    --brackets=linux  OR  -l  (depreciated)\n";
 	(*_err) << "    Break definition-block brackets and attach command-block\n";
 	(*_err) << "    brackets.\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=stroustrup  OR  -u  (deprectaied)\n";
+	(*_err) << "    --brackets=stroustrup  OR  -u  (depreciated)\n";
 	(*_err) << "    Attach all brackets except function definition brackets.\n";
 	(*_err) << endl;
-	(*_err) << "    --brackets=run-in  OR  -g  (deprectaied)\n";
+	(*_err) << "    --brackets=run-in  OR  -g  (depreciated)\n";
 	(*_err) << "    Break brackets from pre-block code, but allow following\n";
 	(*_err) << "    run-in statements on the same line as an opening bracket.\n";
 	(*_err) << endl;
@@ -1508,7 +1514,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    around closing headers (e.g. 'else', 'catch', ...).\n";
 	(*_err) << endl;
 	(*_err) << "    --pad-oper  OR  -p\n";
-	(*_err) << "    Insert space paddings around operators.\n";
+	(*_err) << "    Insert space padding around operators.\n";
 	(*_err) << endl;
 	(*_err) << "    --pad-paren  OR  -P\n";
 	(*_err) << "    Insert space padding around parenthesis on both the outside\n";
@@ -1524,7 +1530,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    Insert space padding after paren headers (e.g. 'if', 'for'...).\n";
 	(*_err) << endl;
 	(*_err) << "    --unpad-paren  OR  -U\n";
-	(*_err) << "    Remove unnecessary space padding around parenthesis.  This\n";
+	(*_err) << "    Remove unnecessary space padding around parenthesis. This\n";
 	(*_err) << "    can be used in combination with the 'pad' options above.\n";
 	(*_err) << endl;
 	(*_err) << "    --delete-empty-lines  OR  -xd\n";
@@ -3077,9 +3083,9 @@ jstring STDCALL Java_AStyleInterface_AStyleGetVersion(JNIEnv* env, jclass)
 // the function name is constructed from method names in the calling java program
 extern "C"  EXPORT
 jstring STDCALL Java_AStyleInterface_AStyleMain(JNIEnv* env,
-        jobject obj,
-        jstring textInJava,
-        jstring optionsJava)
+                                                jobject obj,
+                                                jstring textInJava,
+                                                jstring optionsJava)
 {
 	g_env = env;                                // make object available globally
 	g_obj = obj;                                // make object available globally

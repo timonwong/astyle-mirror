@@ -46,8 +46,37 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         To add a language, see "Internationalization" in the "General Information" section of the documentation. Send
         the addition as a bug report and it will be included in the next release.</p>
     <p>
+        This release is starting to address changes for the new C++11 standards. See the "Release Notes" for specific
+        information.</p>
+    <p>
+        The C/C++ keyword 'extern "C"' in a preprocessor no longer causes an extra indent</p>
+    <p>
+        The "Developer Information" page has a new example and download for calling Artistic Style from a Python script.
+        It will run with both Python 2 and Python 3. Using Python 3 shows an example of formatting a Unicode string with
+        Artistis Style. The Unicode strings must be encoded to UTF-8 before formatting and decoded back to Unicode afterward.
+        The example script shows the technique for doing this. It also shows how to set up the function pointers and allocate
+        memory in Python.</p>
+    <p>
         Thanks to J, Christopher Sean Morrison, for their contributions.
     </p>
+
+    <h4>
+        Python IDE</h4>
+
+    <p>
+        If you use Visual Studio on Windows, it can now be used for Python development. <a href="https://pytools.codeplex.com/"
+            target="_blank" title="open new window">Python Tools for Visual Studio</a> (PTVS) is a free and open source
+        plug-in for Visual Studio 2010 that supports CPython and IronPython. Other interpreters such Jython and PyPy
+        can be added. It can be easily changed between Python versions or different interpreters. But the best thing is
+        the Visual Studio debugging support using the .NET debugger and the normal Visual Studio debugger. It enables
+        you to set break points, step through functions, change the current statement, inspect local variables, and perform
+        other operations while debugging.</p>
+    <p>
+        It is best to use it with a project file, a minor irritation for single page scripts. And there are some minor
+        bugs. But overall it works quite well.</p>
+    <p>
+        PTVS does not install into VS Express Editions (Express editions aren't pluggable). However PTVS plus a free VS
+        Integrated Shell essentially gives you a "VS Python Express". The PTVS installation instructions give the details.</p>
 
     <h3>
         Artistic Style 2.02&nbsp; (May 2011)</h3>

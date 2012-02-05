@@ -21,13 +21,20 @@
         Artistic Style 2.03&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new option "indent=force-tab-tab=#" (-xT#) to allow "indent=force-tab" to have a tab length that different
-            from the indent length..</li>
+        <li>Add new option "indent=force-tab-x=#" (-xT#) to allow a tab length that different
+            from the indent length (<span>3430662)</span>.</li>
         <li>Add new option "max-code-length=#" (-xC#) to limit the length of code on a line. </li>
         <li>Add new option "break-after-logical" (-xL) to modify a "max-code-length" line break for conditionals. </li>
         <li>Add translations for Dutch, Finnish, Italian, Japanese, Korean, Polish, Portuguese, Russian, Swedish, and Ukrainian.
         </li>
-        <li>Refactor to improve the design and decomposition:
+        <li>Fix C++11 standard for&nbsp; range-based "for" statements (<span>3458402</span>). </li>
+        <li>Fix C++11 standard for "enum" with a base type (<span>3458402</span>). </li>
+        <li>Fix C/C++ keyword 'extern "C"' in a preprocessor causing an extra indent.</li>
+        <li>Fix 'struct' return type being mistaken for a struct.</li>
+        <li>Fix "pad-oper" for java for-each loop.</li>
+        <li>Fix non-portable return value on locale name.</li>
+        <li>Fix spelling of "depreciated" in help message (<span>3454735</span>).</li>
+        <li>Refactor to improve design and decomposition:
             <ul>
                 <li>Fix warning messages from cppcheck, except for constructor uninitialized variables (false positive). </li>
                 <li>Remove astyle_main.h dependency from ASLocalizer.h </li>

@@ -217,6 +217,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 	maxInStatementIndent = other.maxInStatementIndent;
 	classInitializerIndents = other.classInitializerIndents;
 	templateDepth = other.templateDepth;
+	preprocessorCppExternCBracket = other.preprocessorCppExternCBracket;
 	prevFinalLineSpaceIndentCount = other.prevFinalLineSpaceIndentCount;
 	prevFinalLineIndentCount = other.prevFinalLineIndentCount;
 	defineIndentCount = other.defineIndentCount;
@@ -322,20 +323,21 @@ void ASBeautifier::init()
 	templateDepth = 0;
 	parenDepth = 0;
 	blockTabCount = 0;
+	preprocessorCppExternCBracket = 0;
+	prevFinalLineSpaceIndentCount = 0;
+	prevFinalLineIndentCount = 0;
+	defineIndentCount = 0;
 	prevNonSpaceCh = '{';
 	currentNonSpaceCh = '{';
 	prevNonLegalCh = '{';
 	currentNonLegalCh = '{';
 	quoteChar = ' ';
-	prevFinalLineSpaceIndentCount = 0;
-	prevFinalLineIndentCount = 0;
 	probationHeader = NULL;
 	lastLineHeader = NULL;
 	backslashEndsPrevLine = false;
 	lineOpensComment = false;
 	isInDefine = false;
 	isInDefineDefinition = false;
-	defineIndentCount = 0;
 	lineCommentNoBeautify = false;
 	blockCommentNoIndent = false;
 	blockCommentNoBeautify = false;
@@ -920,9 +922,6 @@ string ASBeautifier::beautify(const string& originalLine)
 				indentCount++;
 		}
 	}
-	// handle special case of indented horstmann brackets
-	else if (lineStartsInComment && isInHorstmannComment && bracketIndent)
-		indentCount++;
 
 	// handle special case of horstmann comment in an indented class statement
 	if (isInClass
@@ -944,9 +943,9 @@ string ASBeautifier::beautify(const string& originalLine)
 		isInExtraHeaderIndent = true;
 
 	if (isInConditional)
-	{
 		--indentCount;
-	}
+	if (preprocessorCppExternCBracket >= 3)
+		--indentCount;
 
 	// parse characters in the current line.
 	// increment indentCount and spaceIndentCount for the current line
@@ -1124,7 +1123,7 @@ bool ASBeautifier::isClassAccessModifier(const string& line) const
  * register an in-statement indent.
  */
 void ASBeautifier::registerInStatementIndent(const string& line, int i, int spaceTabCount_,
-        int tabIncrementIn, int minIndent, bool updateParenStack)
+                                             int tabIncrementIn, int minIndent, bool updateParenStack)
 {
 	int inStatementIndent;
 	int remainingCharNum = line.length() - i;
@@ -1269,7 +1268,7 @@ const string* ASBeautifier::findHeader(const string& line, int i,
 
 // check if a specific line position contains an operator.
 const string* ASBeautifier::findOperator(const string& line, int i,
-        const vector<const string*>* possibleOperators) const
+                                         const vector<const string*>* possibleOperators) const
 {
 	assert(isCharPotentialOperator(line[i]));
 	// find the operator in the vector
@@ -1667,6 +1666,36 @@ bool ASBeautifier::isIndentedPreprocessor(const string& line, size_t currPos) co
 	return false;
 }
 
+/**
+ * Check if a preprocessor directive is checking for __cplusplus defined.
+ *
+ * @return is true or false.
+ */
+bool ASBeautifier::isPreprocessorDefinedCplusplus(const string& preproc) const
+{
+	if (preproc.compare(0, 5, "ifdef") == 0 && getNextWord(preproc, 4) == "__cplusplus")
+		return true;
+	if (preproc.compare(0, 2, "if") == 0)
+	{
+		// check for " #if defined(__cplusplus)"
+		size_t charNum = 2;
+		charNum = preproc.find_first_not_of(" \t", charNum);
+		if (preproc.compare(charNum, 7, "defined") == 0)
+		{
+			charNum += 7;
+			charNum = preproc.find_first_not_of(" \t", charNum);
+			if (preproc.compare(charNum, 1, "(") == 0)
+			{
+				++charNum;
+				charNum = preproc.find_first_not_of(" \t", charNum);
+				if (preproc.compare(charNum, 11, "__cplusplus") == 0)
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
 // for unit testing
 int ASBeautifier::getBeautifierFileType() const
 { return beautifierFileType; }
@@ -1707,6 +1736,8 @@ void ASBeautifier::processProcessor(string& line)
 	}
 	else if (preproc.compare(0, 2, "if") == 0)
 	{
+		if (isPreprocessorDefinedCplusplus(preproc))
+			preprocessorCppExternCBracket = 1;
 		// push a new beautifier into the stack
 		waitingBeautifierStackLengthStack->push_back(waitingBeautifierStack->size());
 		activeBeautifierStackLengthStack->push_back(activeBeautifierStack->size());
@@ -1763,6 +1794,8 @@ void ASBeautifier::processProcessor(string& line)
 	}
 }
 
+// Compute the preliminary indentation based on data in the headerStack.
+// Update the class variable indentCount.
 void ASBeautifier::computePreliminaryIndentation()
 {
 	for (size_t i = 0; i < headerStack->size(); i++)
@@ -1808,7 +1841,7 @@ void ASBeautifier::computePreliminaryIndentation()
 			isInSwitch = true;
 		}
 
-	}	// end of for loop * end of for loop * end of for loop * end of for loop * end of for loop *
+	}	// end of for loop
 }
 
 /**
@@ -2108,6 +2141,9 @@ void ASBeautifier::parseCurrentLine(const string& line)
 					spaceIndentCount = 0;
 				isInClassInitializer = false;
 			}
+			// remove indent for preprocessor 'extern "C"' bracket
+			if (isCStyle() && preprocessorCppExternCBracket == 2)
+				++preprocessorCppExternCBracket;
 
 			if (!isBlockOpener && currentHeader != NULL)
 			{
@@ -2376,6 +2412,20 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			else if (isInQuestion)
 			{
 				isInQuestion = false;
+			}
+
+			else if (isCStyle() && isInEnum)
+			{
+				// found an enum with a base-type
+				// so do nothing special
+			}
+			else if (isCStyle()
+			         && !headerStack->empty()
+			         && headerStack->back() == &AS_FOR
+			         && parenDepth > 0)
+			{
+				// found a range-based 'for' loop 'for (auto i : container)'
+				// so do nothing special
 			}
 
 			else if (isCStyle() && isInClassInitializer)
@@ -2657,6 +2707,9 @@ void ASBeautifier::parseCurrentLine(const string& line)
 
 			if (isCStyle() && findKeyword(line, i, AS_OPERATOR))
 				isInOperator = true;
+
+			if (isCStyle() && preprocessorCppExternCBracket == 1 && findKeyword(line, i, AS_EXTERN))
+				++preprocessorCppExternCBracket;
 
 			// "new" operator is a pointer, not a calculation
 			if (findKeyword(line, i, AS_NEW))
