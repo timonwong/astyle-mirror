@@ -181,7 +181,7 @@ class ASResource
 		void buildIndentableHeaders(vector<const string*>* indentableHeaders);
 		void buildNonAssignmentOperators(vector<const string*>* nonAssignmentOperators);
 		void buildNonParenHeaders(vector<const string*>* nonParenHeaders, int fileType, bool beautifier=false);
-		void buildOperators(vector<const string*>* operators);
+		void buildOperators(vector<const string*>* operators, int fileType);
 		void buildPreBlockStatements(vector<const string*>* preBlockStatements, int fileType);
 		void buildPreCommandHeaders(vector<const string*>* preCommandHeaders, int fileType);
 		void buildPreDefinitionHeaders(vector<const string*>* preDefinitionHeaders, int fileType);
@@ -388,6 +388,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isIndentedPreprocessor(const string& line, size_t currPos) const;
 		bool isLineEndComment(const string& line, int startPos) const;
 		bool isPreprocessorDefinedCplusplus(const string& line) const;
+		bool isInPreprocessorUnterminatedComment(const string& line);
 		bool statementEndsWithComma(const string& line, int index) const;
 		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier& other) const;
 		template<typename T> void deleteContainer(T& container);
@@ -432,6 +433,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInAsmOneLine;
 		bool isInAsmBlock;
 		bool isInComment;
+		bool isInPreprocessorComment;
 		bool isInHorstmannComment;
 		bool isInCase;
 		bool isInQuestion;

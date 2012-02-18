@@ -374,7 +374,7 @@ void ASResource::buildNonParenHeaders(vector<const string*>* nonParenHeaders, in
  *
  * @param operators             a reference to the vector to be built.
  */
-void ASResource::buildOperators(vector<const string*>* operators)
+void ASResource::buildOperators(vector<const string*>* operators, int fileType)
 {
 	operators->push_back(&AS_PLUS_ASSIGN);
 	operators->push_back(&AS_MINUS_ASSIGN);
@@ -400,8 +400,6 @@ void ASResource::buildOperators(vector<const string*>* operators)
 	operators->push_back(&AS_LS_LS);
 	operators->push_back(&AS_QUESTION_QUESTION);
 	operators->push_back(&AS_EQUAL_GR);
-	operators->push_back(&AS_GCC_MIN_ASSIGN);
-	operators->push_back(&AS_GCC_MAX_ASSIGN);
 	operators->push_back(&AS_ARROW);
 	operators->push_back(&AS_AND);
 	operators->push_back(&AS_OR);
@@ -421,7 +419,11 @@ void ASResource::buildOperators(vector<const string*>* operators)
 	operators->push_back(&AS_BIT_AND);
 	operators->push_back(&AS_BIT_NOT);
 	operators->push_back(&AS_BIT_XOR);
-
+	if (fileType == C_TYPE)
+	{
+		operators->push_back(&AS_GCC_MIN_ASSIGN);
+		operators->push_back(&AS_GCC_MAX_ASSIGN);
+	}
 	sort(operators->begin(), operators->end(), sortOnLength);
 }
 

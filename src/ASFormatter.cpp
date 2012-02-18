@@ -273,7 +273,7 @@ void ASFormatter::buildLanguageVectors()
 	ASResource::buildPreDefinitionHeaders(preDefinitionHeaders, getFileType());
 	ASResource::buildPreCommandHeaders(preCommandHeaders, getFileType());
 	if (operators->empty())
-		ASResource::buildOperators(operators);
+		ASResource::buildOperators(operators, getFileType());
 	if (assignmentOperators->empty())
 		ASResource::buildAssignmentOperators(assignmentOperators);
 	if (castOperators->empty())
@@ -417,9 +417,6 @@ string ASFormatter::nextLine()
 			isCharImmediatelyPostOpenBlock = false;
 			isCharImmediatelyPostCloseBlock = false;
 		}
-
-//		if (inLineNumber >= 7)
-//			int x = 1;
 
 		if (shouldBreakLineAtNextChar)
 		{
@@ -1812,8 +1809,9 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		// check if is in preprocessor before line trimming
 		// a blank line after a \ will remove the flag
 		isImmediatelyPostPreprocessor = isInPreprocessor;
-		if (previousNonWSChar != '\\'
-		        || isEmptyLine(currentLine))
+		if (!isInComment
+		        && (previousNonWSChar != '\\'
+		            || isEmptyLine(currentLine)))
 			isInPreprocessor = false;
 
 		if (passedSemicolon)
@@ -1863,7 +1861,9 @@ void ASFormatter::initNewLine()
 	size_t tabSize = getTabLength();
 	charNum = 0;
 
-	if (isInPreprocessor || isInQuoteContinuation)
+	// don't trim these
+	if (isInQuoteContinuation
+	        || (isInPreprocessor && !getPreprocessorIndent()))
 		return;
 
 	// SQL continuation lines must be adjusted so the leading spaces
@@ -1911,9 +1911,11 @@ void ASFormatter::initNewLine()
 	currentLineFirstBracketNum = string::npos;
 	tabIncrementIn = 0;
 
+	// bypass whitespace at the start of a line
+	// preprocessor tabs are replaced later in the program
 	for (charNum = 0; isWhiteSpace(currentLine[charNum]) && charNum + 1 < (int) len; charNum++)
 	{
-		if (currentLine[charNum] == '\t')
+		if (currentLine[charNum] == '\t' && !isInPreprocessor)
 			tabIncrementIn += tabSize - 1 - ((tabIncrementIn + charNum) % tabSize);
 	}
 	leadingSpaces = charNum + tabIncrementIn;
@@ -1954,6 +1956,14 @@ void ASFormatter::initNewLine()
 	else if (isWhiteSpace(currentLine[charNum]) && !(charNum + 1 < (int) currentLine.length()))
 	{
 		lineIsEmpty = true;
+	}
+
+	// do not trim indented preprocessor define (except for comment continuation lines)
+	if (isInPreprocessor)
+	{
+		if (!doesLineStartComment)
+			leadingSpaces = 0;
+		charNum = 0;
 	}
 }
 
@@ -2777,6 +2787,10 @@ void ASFormatter::padOperators(const string* newOperator)
 	                  && !(newOperator == &AS_GCC_MIN_ASSIGN
 	                       && ASBase::peekNextChar(currentLine, charNum+1) == '>')
 	                  && !(newOperator == &AS_GR && previousNonWSChar == '?')
+	                  && !(newOperator == &AS_QUESTION			// check for Java wildcard
+	                       && (previousNonWSChar == '<'
+	                           || ASBase::peekNextChar(currentLine, charNum) == '>'
+	                           || ASBase::peekNextChar(currentLine, charNum) == '.'))
 	                  && !isInCase
 	                  && !isInAsm
 	                  && !isInAsmOneLine
@@ -3941,7 +3955,7 @@ void ASFormatter::checkForHeaderFollowingComment(const string& firstLine)
 
 /**
  * process preprocessor statements.
- * charNum should be the index of the preprocessor directive.
+ * charNum should be the index of the #.
  *
  * delete bracketTypeStack entries added by #if if a #else is found.
  * prevents double entries in the bracketTypeStack.
@@ -3950,7 +3964,10 @@ void ASFormatter::processPreprocessor()
 {
 	assert(currentChar == '#');
 
-	const int preproc = charNum + 1;
+	const size_t preproc = currentLine.find_first_not_of(" \t", charNum + 1);
+
+	if (preproc == string::npos)
+		return;
 
 	if (currentLine.compare(preproc, 2, "if") == 0)
 	{
@@ -4956,7 +4973,7 @@ void ASFormatter::checkIfTemplateOpener()
 		{
 			continue;
 		}
-		else if (!isLegalNameChar(currentChar_))
+		else if (!isLegalNameChar(currentChar_) && currentChar_ != '?')
 		{
 			// this is not a template -> leave...
 			isInTemplate = false;

@@ -169,6 +169,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier& other) : ASBase(other)
 	isInAsmOneLine = other.isInAsmOneLine;
 	isInAsmBlock = other.isInAsmBlock;
 	isInComment = other.isInComment;
+	isInPreprocessorComment = other.isInPreprocessorComment;
 	isInHorstmannComment = other.isInHorstmannComment;
 	isInCase = other.isInCase;
 	isInQuestion = other.isInQuestion;
@@ -305,6 +306,7 @@ void ASBeautifier::init()
 	isInAsmOneLine = false;
 	isInAsmBlock = false;
 	isInComment = false;
+	isInPreprocessorComment = false;
 	isInHorstmannComment = false;
 	isInStatement = false;
 	isInCase = false;
@@ -821,6 +823,7 @@ string ASBeautifier::beautify(const string& originalLine)
 	// handle preprocessor commands
 	// except C# region and endregion
 	if (!isInComment
+	        && !isInQuoteContinuation
 	        && line.length() > 0
 	        && ((line[0] == '#' && !isIndentedPreprocessor(line, 0))
 	            || backslashEndsPrevLine))
@@ -831,6 +834,9 @@ string ASBeautifier::beautify(const string& originalLine)
 		// check if the last char is a backslash
 		if (line.length() > 0)
 			backslashEndsPrevLine = (line[line.length() - 1] == '\\');
+		// comments within the definition line can be continued without the backslash
+		if (isInPreprocessorUnterminatedComment(line))
+			backslashEndsPrevLine = true;
 
 		// check if this line ends a multi-line #define
 		// if so, use the #define's cloned beautifier for the line's indentation
@@ -1694,6 +1700,30 @@ bool ASBeautifier::isPreprocessorDefinedCplusplus(const string& preproc) const
 		}
 	}
 	return false;
+}
+
+/**
+ * Check if a preprocessor definition contains an unterminated comment.
+ * Comments within a preprocessor definition can be continued without the backslash.
+ *
+ * @return is true or false.
+ */
+bool ASBeautifier::isInPreprocessorUnterminatedComment(const string& line)
+{
+	if (!isInPreprocessorComment)
+	{
+		size_t startPos = line.find("/*");
+		if (startPos == string::npos)
+			return false;
+	}
+	size_t endNum = line.find("*/");
+	if (endNum != string::npos)
+	{
+		isInPreprocessorComment = false;
+		return false;
+	}
+	isInPreprocessorComment = true;
+	return true;
 }
 
 // for unit testing
