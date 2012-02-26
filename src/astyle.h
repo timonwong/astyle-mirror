@@ -590,6 +590,7 @@ class ASFormatter : public ASBeautifier
 		void setMaxCodeLength(int max);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
+		void setParensFirstPaddingMode(bool mode);
 		void setParensInsidePaddingMode(bool mode);
 		void setParensHeaderPaddingMode(bool mode);
 		void setParensUnPaddingMode(bool state);
@@ -752,6 +753,7 @@ class ASFormatter : public ASBeautifier
 		bool isVirgin;
 		bool shouldPadOperators;
 		bool shouldPadParensOutside;
+		bool shouldPadFirstParen;
 		bool shouldPadParensInside;
 		bool shouldPadHeader;
 		bool shouldUnPadParens;

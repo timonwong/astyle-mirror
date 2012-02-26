@@ -21,24 +21,25 @@
         Artistic Style 2.03&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new option "indent=force-tab-x=#" (-xT#) to allow a tab length that different
-            from the indent length (<span>3430662)</span>.</li>
+        <li>Add new option "indent=force-tab-x=#" (-xT#) to allow a tab length that different from the indent length (<span>3430662)</span>.</li>
+        <li>Add new option, "pad-first-paren-out" (xd), to pad only the first paren in a seies on the outside (3350356).</li>
         <li>Add new option "max-code-length=#" (-xC#) to limit the length of code on a line. </li>
         <li>Add new option "break-after-logical" (-xL) to modify a "max-code-length" line break for conditionals. </li>
         <li>Add translations for Dutch, Finnish, Italian, Japanese, Korean, Polish, Portuguese, Russian, Swedish, and Ukrainian.
         </li>
-        <li>Fix C++11 standard for&nbsp; range-based "for" statements (<span>3458402, <span>3480095</span></span>). </li>
-        <li>Fix C++11 standard for "enum" with a base type (<span>3458402</span>). </li>
+        <li>Change the short option for delete-empty-lines from "xd" to "xe".</li>
+        <li>Fix C++11 standard for range-based "for" statements (3458402, 3480095). </li>
+        <li>Fix C++11 standard for "enum" with a base type (3458402). </li>
         <li>Fix C/C++ keyword 'extern "C"' in a preprocessor causing an extra indent (1514844, 2953388, 2963382, 3093842,
             <span>3467479)</span>. </li>
-        <li>Fix quote continuation sometimes being processed as a preprocessor directive (<span>3445475).</span></li>
+        <li>Fix quote continuation sometimes being processed as a preprocessor directive (3445475).</li>
         <li>Fix Java formatting of generics with wildcards (3428140).</li>
         <li>Fix 'struct' return type being mistaken for a struct.</li>
         <li>Fix "pad-oper" in java for-each loop.</li>
-        <li>Fix recognition of a macro multi-line comment (<span>3414970).</span></li>
+        <li>Fix recognition of a macro multi-line comment (3414970).</li>
         <li>Fix bracketTypeStack entries added by #if and #else if the # is separated from the word. </li>
-        <li>Fix non-portable return value on locale name (<span>3452574</span>). </li>
-        <li>Fix spelling of "depreciated" in help message (<span>3454735</span>).</li>
+        <li>Fix non-portable return value on locale name (3452574). </li>
+        <li>Fix spelling of "depreciated" in help message (3454735).</li>
         <li>Refactor to improve design and decomposition:
             <ul>
                 <li>Fix warning messages from cppcheck, except for constructor uninitialized variables (false positive). </li>

@@ -39,6 +39,11 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         A new option, "max-code-length=#" or "xC#", will limit the length of code on a line. A new option "break&#8209;after&#8209;logical",
         or "xL", will modify a line break for conditionals. See the documentation for details.</p>
     <p>
+        A new option, "pad-first-paren-out" or "xd", will pad only the first paren in a seies on the outside. See the
+        documentation for details.</p>
+    <p>
+        The short option for delete-empty-lines has changed from "xd" to "xe".</p>
+    <p>
         Translations have been added for Dutch, Finnish, Italian, Japanese, Korean, Polish, Portuguese, Russian, Swedish,
         and Ukrainian. The translations were done with an automated translation program, Google Translate, so they may
         not be the best translation possible. The translations are at the end of ASLocalizer.cpp in the form of an English&#8209;Translation
@@ -46,10 +51,9 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         To add a language, see "Internationalization" in the "General Information" section of the documentation. Send
         the addition as a bug report and it will be included in the next release.</p>
     <p>
-        This release is starting to address changes for the new C++11 standards. See the "Release Notes" for specific
-        information.</p>
+        The C/C++ keyword 'extern "C"' in a preprocessor no longer causes an extra indent.</p>
     <p>
-        The C/C++ keyword 'extern "C"' in a preprocessor no longer causes an extra indent</p>
+        The byte order mark (BOM) has been removed from ASLocalizer.cpp for the non&#8209;Windows distributions.</p>
     <p>
         The "Developer Information" page has a new example and download for calling Artistic Style from a Python script.
         It will run with both Python 2 and Python 3. Using Python 3 shows an example of formatting a Unicode string with
@@ -57,7 +61,7 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         The example script shows the technique for doing this. It also shows how to set up the function pointers and allocate
         memory in Python.</p>
     <p>
-        Thanks to J, Christopher Sean Morrison, for their contributions.
+        Thanks to Christopher Sean Morrison, Keith OHara, and J for their contributions.
     </p>
 
     <h4>

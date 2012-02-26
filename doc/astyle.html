@@ -92,7 +92,8 @@
         <a class="contents" href="#_break-blocks=all">break&#8209;blocks=all</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_pad-oper">pad&#8209;oper</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-paren">pad&#8209;paren</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_pad-paren-out">pad&#8209;paren&#8209;out</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_pad-paren-out">pad&#8209;paren&#8209;out</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_pad-first-paren-out">pad&#8209;first&#8209;paren&#8209;out</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_pad-paren-in">pad&#8209;paren&#8209;in</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-header">pad&#8209;header</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_unpad-paren">unpad&#8209;paren</a>&nbsp;&nbsp;&nbsp; 
@@ -1085,12 +1086,13 @@ isBar = false;
         Insert space padding around parenthesis on both the <strong>outside</strong> and the <strong>inside</strong>.
         Any end of line comments will remain in the original column, if possible.</p>
     <div class="code">
-        <pre>if (isFoo(a, b))
+        <pre>if (isFoo((a+2), b))
     bar(a, b);
 </pre>
         <p class="code">
             becomes:</p>
-        <pre>if ( isFoo ( a, b ) )
+        <pre>
+if ( isFoo ( ( a+2 ), b ) )
     bar ( a, b );
 </pre>
     </div>
@@ -1099,14 +1101,33 @@ isBar = false;
     <p id="_pad-paren-out">
         <code class="title">--pad-paren-out / -d </code><br />
         Insert space padding around parenthesis on the <strong>outside</strong> only. Any end of line comments will remain
-        in the original column, if possible. This can be used with <code>unpad-paren</code> below to remove unwanted spaces.</p>
+        in the original column, if possible. This can be used with unpad-paren below to remove unwanted spaces.</p>
     <div class="code">
-        <pre>if (isFoo(a, b))
+        <pre>if (isFoo((a+2), b))
     bar(a, b);
 </pre>
         <p class="code">
             becomes:</p>
-        <pre>if (isFoo (a, b) )
+        <pre>
+if (isFoo ( (a+2), b) )
+    bar (a, b);
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_pad-first-paren-out">
+        <code class="title">--pad-first-paren-out / -xd </code><br />
+        Insert space padding around the <strong>first</strong> parenthesis in a series on the <strong>outside</strong>
+        only. Any end of line comments will remain in the original column, if possible. This can be used with unpad-paren
+        below to remove unwanted spaces. If used with pad-paren or pad-paren-out, this option will be ignored. If used
+        with pad-paren-in, the result will be the same as pad-paren.</p>
+    <div class="code">
+        <pre>if (isFoo((a+2), b))
+    bar(a, b);
+</pre>
+        <p class="code">
+            becomes:</p>
+        <pre>if (isFoo ((a+2), b))
     bar (a, b);
 </pre>
     </div>
@@ -1115,14 +1136,15 @@ isBar = false;
     <p id="_pad-paren-in">
         <code class="title">--pad-paren-in / -D </code><br />
         Insert space padding around parenthesis on the <strong>inside</strong> only. Any end of line comments will remain
-        in the original column, if possible. This can be used with <code>unpad-paren</code> below to remove unwanted spaces.</p>
+        in the original column, if possible. This can be used with unpad-paren below to remove unwanted spaces.</p>
     <div class="code">
-        <pre>if (isFoo(a, b))
+        <pre>if (isFoo((a+2), b))
     bar(a, b);
 </pre>
         <p class="code">
             becomes:</p>
-        <pre>if ( isFoo( a, b ) )
+        <pre>
+if ( isFoo( ( a+2 ), b ) )
     bar( a, b );
 </pre>
     </div>
@@ -1131,14 +1153,14 @@ isBar = false;
     <p id="_pad-header">
         <code class="title">--pad-header / -H </code><br />
         Insert space padding after paren headers only (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).
-        Any end of line comments will remain in the original column, if possible. This can be used with <code>unpad-paren</code>
-        to remove unwanted spaces.</p>
+        Any end of line comments will remain in the original column, if possible. This can be used with unpad-paren to
+        remove unwanted spaces.</p>
     <div class="code">
-        <pre>if(isFoo(a, b))
+        <pre>if(isFoo((a+2), b))
     bar(a, b);</pre>
         <p class="code">
             becomes:</p>
-        <pre>if (isFoo(a, b))
+        <pre>if (isFoo((a+2), b))
     bar(a, b);
 </pre>
     </div>
@@ -1155,19 +1177,20 @@ isBar = false;
         to use <code>unpad-paren</code> to remove the outside padding, and <code>pad&#8209;paren&#8209;in</code> to retain
         the inside padding. Using only <code>pad&#8209;paren&#8209;in</code> would not remove the outside padding.</p>
     <div class="code">
-        <pre>if ( isFoo( a, b ) )
+        <pre>
+if ( isFoo( ( a+2 ), b ) )
     bar ( a, b );
 </pre>
         <p class="code">
             becomes (with no padding option requested):</p>
-        <pre>if(isFoo(a, b))
+        <pre>if(isFoo((a+2), b))
     bar(a, b);
 </pre>
     </div>
     <p>
         &nbsp;</p>
     <p id="_delete-empty-lines">
-        <code class="title">--delete-empty-lines / -xd</code><br />
+        <code class="title">--delete-empty-lines / -xe</code><br />
         Delete empty lines within a function or method. Empty lines outside of functions or methods are NOT deleted. If
         used with break-blocks or break-blocks=all it will delete all lines EXCEPT the lines added by the break-blocks
         options.</p>

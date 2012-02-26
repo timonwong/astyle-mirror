@@ -2730,6 +2730,10 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		formatter.setParensOutsidePaddingMode(true);
 	}
+	else if ( isOption(arg, "xd", "pad-first-paren-out") )
+	{
+		formatter.setParensFirstPaddingMode(true);
+	}
 	else if ( isOption(arg, "D", "pad-paren-in") )
 	{
 		formatter.setParensInsidePaddingMode(true);
@@ -2746,7 +2750,7 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		formatter.setOperatorPaddingMode(true);
 	}
-	else if ( isOption(arg, "xd", "delete-empty-lines") )
+	else if ( isOption(arg, "xe", "delete-empty-lines") )
 	{
 		formatter.setDeleteEmptyLinesMode(true);
 	}

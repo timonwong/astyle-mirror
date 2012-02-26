@@ -54,6 +54,7 @@ ASFormatter::ASFormatter()
 	maxCodeLength = string::npos;
 	shouldPadOperators = false;
 	shouldPadParensOutside = false;
+	shouldPadFirstParen = false;
 	shouldPadParensInside = false;
 	shouldPadHeader = false;
 	shouldUnPadParens = false;
@@ -1233,7 +1234,7 @@ string ASFormatter::nextLine()
 		}
 
 		if ((currentChar == '(' || currentChar == ')')
-		        && (shouldPadParensOutside || shouldPadParensInside || shouldUnPadParens))
+		        && (shouldPadParensOutside || shouldPadParensInside || shouldUnPadParens || shouldPadFirstParen))
 		{
 			padParens();
 			continue;
@@ -1443,6 +1444,19 @@ void ASFormatter::setParensOutsidePaddingMode(bool state)
 void ASFormatter::setParensInsidePaddingMode(bool state)
 {
 	shouldPadParensInside = state;
+}
+
+/**
+ * set padding mode before one or more open parentheses.
+ * options:
+ *    true     first open parenthesis will be padded with a space before.
+ *    false    first open parenthesis will not be padded.
+ *
+ * @param state         the padding mode.
+ */
+void ASFormatter::setParensFirstPaddingMode(bool state)
+{
+	shouldPadFirstParen = state;
 }
 
 /**
@@ -3198,10 +3212,14 @@ void ASFormatter::padParens(void)
 		}
 
 		// pad open paren outside
-		char peekedCharOutside = peekNextChar();
-		if (shouldPadParensOutside)
+		if (shouldPadFirstParen && previousChar != '(')
+			appendSpacePad();
+		else if (shouldPadParensOutside)
+		{
+			char peekedCharOutside = peekNextChar();
 			if (!(currentChar == '(' && peekedCharOutside == ')'))
 				appendSpacePad();
+		}
 
 		appendCurrentChar();
 
@@ -3736,16 +3754,16 @@ void ASFormatter::formatRunIn()
 	{
 		// insert the space indents
 		string indent;
-		int indentLength = getIndentLength();
-		int tabLength = getTabLength();
-		indent.append(indentLength, ' ');
+		int indentLength_ = getIndentLength();
+		int tabLength_ = getTabLength();
+		indent.append(indentLength_, ' ');
 		if (extraIndent)
-			indent.append(indentLength, ' ');
+			indent.append(indentLength_, ' ');
 		// replace spaces indents with tab indents
-		size_t tabCount = indent.length() / tabLength;		// truncate extra spaces
-		indent.erase(0, tabCount * tabLength);
+		size_t tabCount = indent.length() / tabLength_;		// truncate extra spaces
+		indent.erase(0, tabCount * tabLength_);
 		indent.insert(0, tabCount, '\t');
-		horstmannIndentChars = indentLength;
+		horstmannIndentChars = indentLength_;
 		if (indent[0] == ' ')			// allow for bracket
 			indent.erase(0, 1);
 		formattedLine.append(indent);
@@ -3762,13 +3780,13 @@ void ASFormatter::formatRunIn()
 	}
 	else // spaces
 	{
-		int indentLength = getIndentLength();
-		formattedLine.append(indentLength - 1, ' ');
-		horstmannIndentChars = indentLength;
+		int indentLength_ = getIndentLength();
+		formattedLine.append(indentLength_ - 1, ' ');
+		horstmannIndentChars = indentLength_;
 		if (extraIndent)
 		{
-			formattedLine.append(indentLength, ' ');
-			horstmannIndentChars += indentLength;
+			formattedLine.append(indentLength_, ' ');
+			horstmannIndentChars += indentLength_;
 		}
 	}
 	isInHorstmannRunIn = true;
