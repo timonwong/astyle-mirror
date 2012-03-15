@@ -1,4 +1,8 @@
-﻿/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+//
+//  FILE ENCODING IS UTF-8 WITHOUT A BOM.
+//  русский    中国的    日本の    한국의
+//
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   ASLocalizer.cpp
  *
  *   Copyright (C) 2006-2011 by Jim Pattee <jimp03@email.com>

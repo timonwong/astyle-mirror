@@ -40,13 +40,17 @@
 #include <vector>
 #include <cctype>
 
-#ifdef _WIN32
+// define STDCALL for a Windows dynamic libraries (DLLs) only
+// MINGW defines STDCALL in Windows.h (actually windef.h)
+#ifndef STDCALL
+#if defined(_WIN32) && !defined(ASTYLE_STATIC) && ( defined(ASTYLE_LIB) || defined(ASTYLE_JNI) )
 #define STDCALL __stdcall
 #define EXPORT  __declspec(dllexport)
 #else
 #define STDCALL
 #define EXPORT
 #endif
+#endif	// STDCALL
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)  // secure version deprecation warnings
@@ -257,7 +261,7 @@ class ASBase
 		bool isLegalNameChar(char ch) const {
 			if (isWhiteSpace(ch)) return false;
 			if ((unsigned) ch > 127) return false;
-			return (isalnum(ch)
+			return (isalnum((unsigned char)ch)
 			        || ch == '.' || ch == '_'
 			        || (isJavaStyle() && ch == '$')
 			        || (isSharpStyle() && ch == '@'));  // may be used as a prefix
@@ -277,7 +281,7 @@ class ASBase
 		bool isCharPotentialOperator(char ch) const {
 			assert(!isWhiteSpace(ch));
 			if ((unsigned) ch > 127) return false;
-			return (ispunct(ch)
+			return (ispunct((unsigned char)ch)
 			        && ch != '{' && ch != '}'
 			        && ch != '(' && ch != ')'
 			        && ch != '[' && ch != ']'
@@ -584,6 +588,7 @@ class ASFormatter : public ASBeautifier
 		void setBreakClosingHeaderBlocksMode(bool state);
 		void setBreakElseIfsMode(bool state);
 		void setBreakOneLineBlocksMode(bool state);
+		void setCloseTemplatesMode(bool state);
 		void setDeleteEmptyLinesMode(bool state);
 		void setIndentCol1CommentsMode(bool state);
 		void setLineEndFormat(LineEndFormat fmt);
@@ -759,6 +764,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldUnPadParens;
 		bool shouldConvertTabs;
 		bool shouldIndentCol1Comments;
+		bool shouldCloseTemplates;
 		bool isInLineComment;
 		bool isInComment;
 		bool isInCommentStartLine;

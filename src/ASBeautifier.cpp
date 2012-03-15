@@ -2049,7 +2049,7 @@ void ASBeautifier::parseCurrentLine(const string& line)
 
 		if (isCStyle() && isInTemplate
 		        && (ch == '<' || ch == '>')
-		        &&  findOperator(line, i, nonAssignmentOperators) == NULL)
+		        && !(line.length() > i+1 && line.compare(i, 2, ">=") == 0))
 		{
 			if (ch == '<')
 			{
@@ -2788,6 +2788,9 @@ void ASBeautifier::parseCurrentLine(const string& line)
 			// Check if an operator has been reached.
 			const string* foundAssignmentOp = findOperator(line, i, assignmentOperators);
 			const string* foundNonAssignmentOp = findOperator(line, i, nonAssignmentOperators);
+
+			if (isInTemplate && foundNonAssignmentOp == &AS_GR_GR)
+				foundNonAssignmentOp = NULL;
 
 			// Since findHeader's boundry checking was not used above, it is possible
 			// that both an assignment op and a non-assignment op where found,

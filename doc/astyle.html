@@ -113,7 +113,8 @@
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_max-code-length">max&#8209;code&#8209;length</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_max-code-length">break&#8209;after&#8209;logical</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_max-code-length">break&#8209;after&#8209;logical</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_close-templates">close&#8209;templates</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
@@ -1091,8 +1092,7 @@ isBar = false;
 </pre>
         <p class="code">
             becomes:</p>
-        <pre>
-if ( isFoo ( ( a+2 ), b ) )
+        <pre>if ( isFoo ( ( a+2 ), b ) )
     bar ( a, b );
 </pre>
     </div>
@@ -1108,8 +1108,7 @@ if ( isFoo ( ( a+2 ), b ) )
 </pre>
         <p class="code">
             becomes:</p>
-        <pre>
-if (isFoo ( (a+2), b) )
+        <pre>if (isFoo ( (a+2), b) )
     bar (a, b);
 </pre>
     </div>
@@ -1143,8 +1142,7 @@ if (isFoo ( (a+2), b) )
 </pre>
         <p class="code">
             becomes:</p>
-        <pre>
-if ( isFoo( ( a+2 ), b ) )
+        <pre>if ( isFoo( ( a+2 ), b ) )
     bar( a, b );
 </pre>
     </div>
@@ -1177,8 +1175,7 @@ if ( isFoo( ( a+2 ), b ) )
         to use <code>unpad-paren</code> to remove the outside padding, and <code>pad&#8209;paren&#8209;in</code> to retain
         the inside padding. Using only <code>pad&#8209;paren&#8209;in</code> would not remove the outside padding.</p>
     <div class="code">
-        <pre>
-if ( isFoo( ( a+2 ), b ) )
+        <pre>if ( isFoo( ( a+2 ), b ) )
     bar ( a, b );
 </pre>
         <p class="code">
@@ -1226,31 +1223,37 @@ if ( isFoo( ( a+2 ), b ) )
             --align-pointer=name&nbsp;&nbsp; / -k3</code><br />
         Attach a pointer or reference operator (* or &amp;) to either the variable type (left) or variable name (right),
         or place it between the type and name (middle). The spacing between the type and name will be preserved, if possible.
-        This option is effective for C/C++ files only. To format references separately use the following align-reference
+        This option is for C/C++, C++/CLI, and C# files. To format references separately use the following align-reference
         option.</p>
     <div class="code">
-        <pre>char *foo1;
-char &amp;foo2;</pre>
+        <pre>char* foo1;
+char &amp; foo2;
+String ^s1;</pre>
         <p class="code">
             becomes (with align-pointer=type):</p>
         <pre>char* foo1;
-char&amp; foo2;</pre>
+char&amp; foo2;
+String^ s1;</pre>
     </div>
     <div class="code">
         <pre>char* foo1;
-char&amp; foo2;</pre>
+char &amp; foo2;
+String ^s1;</pre>
         <p class="code">
             becomes (with align-pointer=middle):</p>
         <pre>char * foo1;
-char &amp; foo2;</pre>
+char &amp; foo2;
+String ^ s1;</pre>
     </div>
     <div class="code">
         <pre>char* foo1;
-char&amp; foo2;</pre>
+char &amp; foo2;
+String ^s1;</pre>
         <p class="code">
             becomes (with align-pointer=name):</p>
         <pre>char *foo1;
-char &amp;foo2;</pre>
+char &amp;foo2;
+String ^s1;</pre>
     </div>
     <p>
         &nbsp;</p>
@@ -1261,8 +1264,8 @@ char &amp;foo2;</pre>
             --align-reference=name&nbsp;&nbsp; / -W3</code><br />
         This option will align references separate from pointers. Pointers are not changes by this option. If pointers
         and references are to be aligned the same, use the previous align-pointer option. The option align-reference=none
-        will not change the reference alignment. The other options are the same as for align-pointer. This option is effective
-        for C/C++ files only.
+        will not change the reference alignment. The other options are the same as for align-pointer. This option is for
+        C/C++, C++/CLI, and C# files.
     </p>
     <div class="code">
         <pre>char &amp;foo1;</pre>
@@ -1420,15 +1423,31 @@ else
     <p>
         &nbsp;</p>
     <p id="_convert-tabs">
-        <code class="title">--convert-tabs / -c</code><br />
-        Converts tabs into spaces in the non-indentation part of the line. The number of spaces inserted will maintain
-        the spacing of the tab. The current setting for spaces per tab is used. It may not produce the expected results
-        if convert-tabs is used when changing spaces per tab. Tabs are not replaced in quotes.</p>
+        <code class="title">--convert-tabs / -c</code><br />Converts tabs into spaces in the non-indentation part of the
+        line. The number of spaces inserted will maintain the spacing of the tab. The current setting for spaces per tab
+        is used. It may not produce the expected results if convert-tabs is used when changing spaces per tab. Tabs are
+        not replaced in quotes.
+    </p>
     <p>
-        &nbsp;</p>
+        &nbsp;
+    </p>
+    <p id="_close-templates">
+        <code class="title">--close-templates / -xy</code><br />Closes ending angle brackets on template definitions. This
+        is allowed by the C++11 standard. Be sure your compiler supports this before making the changes.
+    </p>
+    <div class="code">
+        <pre>Stack&lt;int,List&lt;int&gt; &gt; stack1;</pre>
+        <p class="code">
+            becomes:
+        </p>
+        <pre>Stack&lt;int,List&lt;int&gt;&gt; stack1;</pre>
+    </div>
+    <p>
+        &nbsp;
+    </p>
     <p id="_max-code-length">
-        <code class="title">--max-code-length=<span class="option">#</span>&nbsp;&nbsp; / -xC<span class="option">#</span><br />
-            --break-after-logical / -xL</code><br />
+        <code class="title">--max-code-length=<span class="option">#</span>&nbsp;&nbsp; / -xC<span class="option">#</span>
+            <br />--break-after-logical / -xL</code><br />
         The option max&#8209;code&#8209;length will break a line if the code exceeds <span class="option"><strong>#</strong></span>
         characters. The valid values are 50 thru 200. Lines without logical conditionals will break on a logical conditional
         (||, &amp;&amp;, ...), comma, paren, semicolon, or space.
@@ -1444,26 +1463,26 @@ else
         will cause the logical conditionals to be placed last on the previous line. This option has no effect without
         max&#8209;code&#8209;length.</p>
     <div class="code">
-        <pre>   if (thisVariable1 == thatVariable1 || thisVariable2 == thatVariable2 || thisVariable3 == thatVariable3)
-        bar();</pre>
+        <pre>if (thisVariable1 == thatVariable1 || thisVariable2 == thatVariable2 || thisVariable3 == thatVariable3)
+    bar();</pre>
         <p class="code">
             becomes:</p>
-        <pre>    if (thisVariable1 == thatVariable1
-            || thisVariable2 == thatVariable2
-            || thisVariable3 == thatVariable3)
-        bar();</pre>
+        <pre>if (thisVariable1 == thatVariable1
+        || thisVariable2 == thatVariable2
+        || thisVariable3 == thatVariable3)
+    bar();</pre>
         <p class="code">
             becomes (with break&#8209;after&#8209;logical):</p>
-        <pre>    if (thisVariable1 == thatVariable1 ||
-            thisVariable2 == thatVariable2 ||
-            thisVariable3 == thatVariable3)
-        bar();</pre>
+        <pre>if (thisVariable1 == thatVariable1 ||
+        thisVariable2 == thatVariable2 ||
+        thisVariable3 == thatVariable3)
+    bar();</pre>
     </div>
     <p>
-        &nbsp;</p>
+        &nbsp;
+    </p>
     <p id="_mode">
-        <code class="title">--mode=c</code><br />
-        <code class="title">--mode=cs</code><br />
+        <code class="title">--mode=c</code><br /><code class="title">--mode=cs</code><br />
         <code class="title">--mode=java</code><br />
         Indent a C/C++, C#, or Java file. The option is usually set from the file extension for each file. You can override
         the setting with this entry. It will be used for all files regardless of the file extension. It allows the formatter

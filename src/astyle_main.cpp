@@ -677,11 +677,13 @@ void ASConsole::initializeOutputEOL(LineEndFormat lineEndFormat)
 
 FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) const
 {
-	const int blockSize = 131072;	// 128 KB
+	const int blockSize = 65536;	// 64 KB
 	ifstream fin(fileName_.c_str(), ios::binary);
 	if (!fin)
 		error("Cannot open input file", fileName_.c_str());
-	char data[blockSize];
+	char* data = new(nothrow) char[blockSize];
+	if (!data)
+		error("Cannot allocate memory for input file", fileName_.c_str());
 	fin.read(data, sizeof(data));
 	if (fin.bad())
 		error("Cannot read input file", fileName_.c_str());
@@ -696,7 +698,9 @@ FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) cons
 		{
 			// convert utf-16 to utf-8
 			size_t utf8Size = Utf8Length(data, dataSize, encoding);
-			char* utf8Out = new char[utf8Size];
+			char* utf8Out = new(nothrow) char[utf8Size];
+			if (!utf8Out)
+				error("Cannot allocate memory for utf-8 conversion", fileName_.c_str());
 			size_t utf8Len = Utf16ToUtf8(data, dataSize, encoding, firstBlock, utf8Out);
 			assert(utf8Len == utf8Size);
 			in << string(utf8Out, utf8Len);
@@ -711,6 +715,7 @@ FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) cons
 		firstBlock = false;
 	}
 	fin.close();
+	delete [] data;
 	return encoding;
 }
 
@@ -920,22 +925,20 @@ string ASConsole::getNumberFormat(int num, size_t lcid) const
 	if (outBuf == NULL)
 		return number;
 	::GetNumberFormat(lcid, 0, number.c_str(), NULL, outBuf, outSize);
-
-	// remove the decimal
 	string formattedNum(outBuf);
+	delete [] outBuf;
+	// remove the decimal
 	int decSize = ::GetLocaleInfo(lcid, LOCALE_SDECIMAL, NULL, 0);
 	char* decBuf = new(nothrow) char[decSize];
 	if (decBuf == NULL)
 		return number;
 	::GetLocaleInfo(lcid, LOCALE_SDECIMAL, decBuf, decSize);
 	size_t i = formattedNum.rfind(decBuf);
+	delete [] decBuf;
 	if (i != string::npos)
 		formattedNum.erase(i);
 	if (!formattedNum.length())
 		formattedNum = "0";
-
-	delete [] outBuf;
-	delete [] decBuf;
 	return formattedNum;
 }
 
@@ -1251,7 +1254,7 @@ bool ASConsole::isParamOption(const string& arg, const char* option)
 	bool retVal = arg.compare(0, strlen(option), option) == 0;
 	// if comparing for short option, 2nd char of arg must be numeric
 	if (retVal && strlen(option) == 1 && arg.length() > 1)
-		if (!isdigit(arg[1]))
+		if (!isdigit((unsigned char)arg[1]))
 			retVal = false;
 	return retVal;
 }
@@ -1582,6 +1585,9 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --convert-tabs  OR  -c\n";
 	(*_err) << "    Convert tabs to the appropriate number of spaces.\n";
+	(*_err) << endl;
+	(*_err) << "    --close-templates  OR  -xy\n";
+	(*_err) << "    Close ending angle brackets on template definitions.\n";
 	(*_err) << endl;
 	(*_err) << "    --max-code-length=#    OR  -xC#\n";
 	(*_err) << "    --break-after-logical  OR  -xL\n";
@@ -2453,7 +2459,7 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string& errorI
 			for (i = 1; i < arg.length(); ++i)
 			{
 				if (i > 1
-				        && isalpha(arg[i])
+				        && isalpha((unsigned char)arg[i])
 				        && arg[i-1] != 'x')
 				{
 					// parse the previous option in subArg
@@ -2766,6 +2772,10 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 	{
 		formatter.setTabSpaceConversionMode(true);
 	}
+	else if ( isOption(arg, "xy", "close-templates") )
+	{
+		formatter.setCloseTemplatesMode(true);
+	}
 	else if ( isOption(arg, "F", "break-blocks=all") )
 	{
 		formatter.setBreakBlocksMode(true);
@@ -3054,7 +3064,7 @@ bool ASOptions::isParamOption(const string& arg, const char* option)
 	bool retVal = arg.compare(0, strlen(option), option) == 0;
 	// if comparing for short option, 2nd char of arg must be numeric
 	if (retVal && strlen(option) == 1 && arg.length() > 1)
-		if (!isdigit(arg[1]))
+		if (!isdigit((unsigned char)arg[1]))
 			retVal = false;
 	return retVal;
 }
@@ -3224,8 +3234,7 @@ AStyleMain(const char* pSourceIn,          // pointer to the source to be format
 	if (formatter.getChecksumDiff() != 0)
 		fpErrorHandler(220,
 		               "Checksum error.\n"
-		               "The incorrectly formatted file\n"
-		               "will been returned for debugging.");
+		               "The incorrectly formatted file will be returned for debugging.");
 #endif
 	return pTextOut;
 }

@@ -42,26 +42,40 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         A new option, "pad-first-paren-out" or "xd", will pad only the first paren in a seies on the outside. See the
         documentation for details.</p>
     <p>
-        The short option for delete-empty-lines has changed from "xd" to "xe".</p>
+        The short option for delete-empty-lines has changed from "xd" to "xe".
+    </p>
+    <p>
+        The c++11 standard&nbsp; does NOT require multiple closing angle brackets (&gt;) for templates to have a space in 
+        between. A new option, &quot;close-templates&quot; or-xy, will close ending angle brackets on template definitions. Be 
+        sure your compiler supports this before making the changes.</p>
+    <p>
+        The C/C++ keyword 'extern "C"' in a preprocessor no longer causes an extra indent.
+    </p>
+    <p>
+        Formatting of C++/CLI managed pointers (the &#39;^&#39; character) has been added to the &quot;align-pointer&quot;
+        option.
+    </p>
+    <p>
+        The byte order mark (BOM) has been removed from ASLocalizer.cpp for all distributions. The encoding of the file
+        is UTF-8.
+    </p>
     <p>
         Translations have been added for Dutch, Finnish, Italian, Japanese, Korean, Polish, Portuguese, Russian, Swedish,
         and Ukrainian. The translations were done with an automated translation program, Google Translate, so they may
         not be the best translation possible. The translations are at the end of ASLocalizer.cpp in the form of an English&#8209;Translation
         pair. If you correct a translation, send the source as a bug report and it will be included in the next release.
         To add a language, see "Internationalization" in the "General Information" section of the documentation. Send
-        the addition as a bug report and it will be included in the next release.</p>
-    <p>
-        The C/C++ keyword 'extern "C"' in a preprocessor no longer causes an extra indent.</p>
-    <p>
-        The byte order mark (BOM) has been removed from ASLocalizer.cpp for the non&#8209;Windows distributions.</p>
+        the addition as a bug report and it will be included in the next release.
+    </p>
     <p>
         The "Developer Information" page has a new example and download for calling Artistic Style from a Python script.
         It will run with both Python 2 and Python 3. Using Python 3 shows an example of formatting a Unicode string with
         Artistis Style. The Unicode strings must be encoded to UTF-8 before formatting and decoded back to Unicode afterward.
         The example script shows the technique for doing this. It also shows how to set up the function pointers and allocate
-        memory in Python.</p>
+        memory in Python.
+    </p>
     <p>
-        Thanks to Christopher Sean Morrison, Keith OHara, and J for their contributions.
+        Thanks to Christopher Sean Morrison, Keith OHara, louis6g, and J for their contributions.
     </p>
 
     <h4>

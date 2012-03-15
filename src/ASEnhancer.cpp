@@ -374,8 +374,8 @@ void ASEnhancer::convertSpaceIndentToForceTab(string& line) const
 	// replace leading spaces with tab indents
 	size_t newSpaceIndentLength = line.find_first_not_of(" \t");
 	size_t tabCount = newSpaceIndentLength / tabLength;		// truncate extra spaces
-	line.erase(0, tabCount * tabLength);
-	line.insert(0, tabCount, '\t');
+	line.erase(0U, tabCount * tabLength);
+	line.insert(0U, tabCount, '\t');
 }
 
 /**

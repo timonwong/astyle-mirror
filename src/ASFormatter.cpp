@@ -63,6 +63,7 @@ ASFormatter::ASFormatter()
 	shouldBreakOneLineStatements = true;
 	shouldConvertTabs = false;
 	shouldIndentCol1Comments = false;
+	shouldCloseTemplates = false;
 	shouldBreakBlocks = false;
 	shouldBreakClosingHeaderBlocks = false;
 	shouldBreakClosingHeaderBrackets = false;
@@ -497,6 +498,12 @@ string ASFormatter::nextLine()
 		{
 			appendCurrentChar();
 			continue;
+		}
+
+		if (isInTemplate && shouldCloseTemplates)
+		{
+			if (previousCommandChar == '>' && isWhiteSpace(currentChar) && peekNextChar() == '>')
+				continue;
 		}
 
 		// handle white space - needed to simplify the rest.
@@ -1195,7 +1202,7 @@ string ASFormatter::nextLine()
 		// process pointers and references
 		// check newHeader to elimnate things like '&&' sequence
 		if (!isJavaStyle()
-		        && (newHeader == &AS_MULT || newHeader == &AS_BIT_AND)
+		        && (newHeader == &AS_MULT || newHeader == &AS_BIT_AND || newHeader == &AS_BIT_XOR)
 		        && isPointerOrReference()
 		        && !isDereferenceOrAddressOf())
 		{
@@ -1503,6 +1510,11 @@ void ASFormatter::setAttachClosingBracket(bool state)
 void ASFormatter::setBreakOneLineBlocksMode(bool state)
 {
 	shouldBreakOneLineBlocks = state;
+}
+
+void ASFormatter::setCloseTemplatesMode(bool state)
+{
+	shouldCloseTemplates = state;
 }
 
 /**
@@ -2174,7 +2186,7 @@ bool ASFormatter::isEmptyLine(const string& line) const
 }
 
 /**
- * Check if the currently reached  '*' or '&' character is
+ * Check if the currently reached '*', '&' or '^' character is
  * a pointer-or-reference symbol, or another operator.
  * A pointer dereference (*) or an "address of" character (&)
  * counts as a pointer or reference because it is not an
@@ -2184,7 +2196,7 @@ bool ASFormatter::isEmptyLine(const string& line) const
  */
 bool ASFormatter::isPointerOrReference() const
 {
-	assert(currentChar == '*' || currentChar == '&');
+	assert(currentChar == '*' || currentChar == '&' || currentChar == '^');
 
 	if (isJavaStyle())
 		return false;
@@ -2299,7 +2311,7 @@ bool ASFormatter::isPointerOrReference() const
  */
 bool ASFormatter::isDereferenceOrAddressOf() const
 {
-	assert(currentChar == '*' || currentChar == '&');
+	assert(currentChar == '*' || currentChar == '&' || currentChar == '^');
 
 	if (isCharImmediatelyPostTemplate)
 		return false;
@@ -2350,7 +2362,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 
 	bool isDA = (!(isLegalNameChar(previousNonWSChar) || previousNonWSChar == '>')
 	             || (!isLegalNameChar(nextChar) && nextChar != '/')
-	             || (ispunct(previousNonWSChar) && previousNonWSChar != '.')
+	             || (ispunct((unsigned char)previousNonWSChar) && previousNonWSChar != '.')
 	             || isCharImmediatelyPostReturn);
 
 	return isDA;
@@ -2366,7 +2378,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
  */
 bool ASFormatter::isPointerOrReferenceCentered() const
 {
-	assert(currentLine[charNum] == '*' || currentLine[charNum] == '&');
+	assert(currentLine[charNum] == '*' || currentLine[charNum] == '&' || currentLine[charNum] == '^');
 
 	int prNum = charNum;
 	int lineLength = (int) currentLine.length();
@@ -2851,12 +2863,12 @@ void ASFormatter::padOperators(const string* newOperator)
  */
 void ASFormatter::formatPointerOrReference(void)
 {
-	assert(currentChar == '*' || currentChar == '&');
+	assert(currentChar == '*' || currentChar == '&' || currentChar == '^');
 	assert(!isJavaStyle());
 
 	int pa = pointerAlignment;
 	int ra = referenceAlignment;
-	int itemAlignment = (currentChar == '*') ? pa : ((ra == REF_SAME_AS_PTR) ? pa : ra);
+	int itemAlignment = (currentChar == '*' || currentChar == '^') ? pa : ((ra == REF_SAME_AS_PTR) ? pa : ra);
 
 	// check for cast
 	char peekedChar = peekNextChar();
@@ -2930,8 +2942,7 @@ void ASFormatter::formatPointerOrReference(void)
 			wsBefore = 0;
 		else
 			wsBefore = charNum - wsBefore - 1;
-		// adjust for **
-		string sequenceToInsert = currentChar == '*' ? "*" : "&";
+		string sequenceToInsert(1, currentChar);
 		if (isSequenceReached("**"))
 		{
 			sequenceToInsert = "**";
@@ -3002,7 +3013,7 @@ void ASFormatter::formatPointerOrReference(void)
 	else if (itemAlignment == PTR_ALIGN_NAME)
 	{
 		size_t startNum = formattedLine.find_last_not_of(" \t");
-		string sequenceToInsert = currentChar == '*' ? "*" : "&";
+		string sequenceToInsert(1, currentChar);
 		if (isSequenceReached("**"))
 		{
 			sequenceToInsert = "**";
@@ -3074,14 +3085,14 @@ void ASFormatter::formatPointerOrReference(void)
  */
 void ASFormatter::formatPointerOrReferenceCast(void)
 {
-	assert(currentChar == '*' || currentChar == '&');
+	assert(currentChar == '*' || currentChar == '&' || currentChar == '^');
 	assert(!isJavaStyle());
 
 	int pa = pointerAlignment;
 	int ra = referenceAlignment;
-	int itemAlignment = (currentChar == '*') ? pa : ((ra == REF_SAME_AS_PTR) ? pa : ra);
+	int itemAlignment = (currentChar == '*' || currentChar == '^') ? pa : ((ra == REF_SAME_AS_PTR) ? pa : ra);
 
-	string sequenceToInsert = currentChar == '*' ? "*" : "&";
+	string sequenceToInsert(1, currentChar);
 	if (isSequenceReached("**"))
 	{
 		sequenceToInsert = "**";
@@ -3761,8 +3772,8 @@ void ASFormatter::formatRunIn()
 			indent.append(indentLength_, ' ');
 		// replace spaces indents with tab indents
 		size_t tabCount = indent.length() / tabLength_;		// truncate extra spaces
-		indent.erase(0, tabCount * tabLength_);
-		indent.insert(0, tabCount, '\t');
+		indent.erase(0U, tabCount * tabLength_);
+		indent.insert(0U, tabCount, '\t');
 		horstmannIndentChars = indentLength_;
 		if (indent[0] == ' ')			// allow for bracket
 			indent.erase(0, 1);
@@ -4982,6 +4993,7 @@ void ASFormatter::checkIfTemplateOpener()
 		else if (currentChar_ == ','       // comma,     e.g. A<int, char>
 		         || currentChar_ == '&'    // reference, e.g. A<int&>
 		         || currentChar_ == '*'    // pointer,   e.g. A<int*>
+		         || currentChar_ == '^'    // C++/CLI managed pointer, e.g. A<int^>
 		         || currentChar_ == ':'    // ::,        e.g. std::string
 		         || currentChar_ == '='    // assign     e.g. default parameter
 		         || currentChar_ == '['    // []         e.g. string[]
