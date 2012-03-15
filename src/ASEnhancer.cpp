@@ -102,7 +102,7 @@ void ASEnhancer::init(int  _fileType,
  *
  * @param line       the original formatted line will be updated if necessary.
  */
-void ASEnhancer::enhance(string& line, bool isInPreprocessor, bool isInSQL)
+void ASEnhancer::enhance(string &line, bool isInPreprocessor, bool isInSQL)
 {
 	bool isSpecialChar = false;			// is a backslash escape character
 	shouldIndentLine = true;
@@ -299,7 +299,7 @@ void ASEnhancer::enhance(string& line, bool isInPreprocessor, bool isInSQL)
  * @param i             the line index of the case statement.
  * @return              the line index of the colon.
  */
-size_t ASEnhancer::findCaseColon(string&  line, size_t caseIndex) const
+size_t ASEnhancer::findCaseColon(string  &line, size_t caseIndex) const
 {
 	size_t i = caseIndex;
 	bool isInQuote_ = false;
@@ -346,7 +346,7 @@ size_t ASEnhancer::findCaseColon(string&  line, size_t caseIndex) const
  *
  * @param line          a reference to the line that will be converted.
  */
-void ASEnhancer::convertForceTabIndentToSpaces(string& line) const
+void ASEnhancer::convertForceTabIndentToSpaces(string &line) const
 {
 	// replace tab indents with spaces
 	for (size_t i = 0; i < line.length(); i++)
@@ -367,7 +367,7 @@ void ASEnhancer::convertForceTabIndentToSpaces(string& line) const
  *
  * @param line          a reference to the line that will be converted.
  */
-void ASEnhancer::convertSpaceIndentToForceTab(string& line) const
+void ASEnhancer::convertSpaceIndentToForceTab(string &line) const
 {
 	assert(tabLength > 0);
 
@@ -386,7 +386,7 @@ void ASEnhancer::convertSpaceIndentToForceTab(string& line) const
  * @param indent        the number of tabsets to insert.
  * @return              the number of characters inserted.
  */
-int ASEnhancer::indentLine(string&  line, int indent) const
+int ASEnhancer::indentLine(string  &line, int indent) const
 {
 	if (line.length() == 0
 	        && ! emptyLineFill)
@@ -426,7 +426,7 @@ int ASEnhancer::indentLine(string&  line, int indent) const
  * @param index         the current line index.
  * @return              true if a hit.
  */
-bool ASEnhancer::isBeginDeclareSectionSQL(string&  line, size_t index) const
+bool ASEnhancer::isBeginDeclareSectionSQL(string  &line, size_t index) const
 {
 	string word;
 	size_t hits = 0;
@@ -475,7 +475,7 @@ bool ASEnhancer::isBeginDeclareSectionSQL(string&  line, size_t index) const
  * @param index         the current line index.
  * @return              true if a hit.
  */
-bool ASEnhancer::isEndDeclareSectionSQL(string&  line, size_t index) const
+bool ASEnhancer::isEndDeclareSectionSQL(string  &line, size_t index) const
 {
 	string word;
 	size_t hits = 0;
@@ -524,7 +524,7 @@ bool ASEnhancer::isEndDeclareSectionSQL(string&  line, size_t index) const
  * @return     false = one-line bracket has not been reached.
  *             true  = one-line bracket has been reached.
  */
-bool ASEnhancer::isOneLineBlockReached(string& line, int startChar) const
+bool ASEnhancer::isOneLineBlockReached(string &line, int startChar) const
 {
 	assert(line[startChar] == '{');
 
@@ -598,7 +598,7 @@ bool ASEnhancer::isOneLineBlockReached(string& line, int startChar) const
  * @param index         the current line index.
  * @return              the new line index.
  */
-size_t ASEnhancer::processSwitchBlock(string& line, size_t index)
+size_t ASEnhancer::processSwitchBlock(string &line, size_t index)
 {
 	size_t i = index;
 	bool isPotentialKeyword = isCharPotentialHeader(line, i);
@@ -687,7 +687,7 @@ size_t ASEnhancer::processSwitchBlock(string& line, size_t index)
  * @param unindent      the number of tabsets to erase.
  * @return              the number of characters erased.
  */
-int ASEnhancer::unindentLine(string&  line, int unindent) const
+int ASEnhancer::unindentLine(string  &line, int unindent) const
 {
 	size_t whitespace = line.find_first_not_of(" \t");
 

@@ -241,8 +241,8 @@ class ASBase
 		virtual ~ASBase() {}
 
 		// functions definitions are at the end of ASResource.cpp
-		bool findKeyword(const string& line, int i, const string& keyword) const;
-		string getCurrentWord(const string& line, size_t index) const;
+		bool findKeyword(const string &line, int i, const string &keyword) const;
+		string getCurrentWord(const string &line, size_t index) const;
 
 	protected:
 
@@ -268,7 +268,7 @@ class ASBase
 		}
 
 		// check if a specific character can be part of a header
-		bool isCharPotentialHeader(const string& line, size_t i) const {
+		bool isCharPotentialHeader(const string &line, size_t i) const {
 			assert(!isWhiteSpace(line[i]));
 			char prevCh = ' ';
 			if (i > 0) prevCh = line[i-1];
@@ -294,7 +294,7 @@ class ASBase
 		bool isWhiteSpace(char ch) const { return (ch == ' ' || ch == '\t'); }
 
 		// peek at the next unread character.
-		char peekNextChar(const string& line, int i) const {
+		char peekNextChar(const string &line, int i) const {
 			char ch = ' ';
 			size_t peekNum = line.find_first_not_of(" \t", i + 1);
 			if (peekNum == string::npos)
@@ -315,7 +315,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		virtual ~ASBeautifier();
 		virtual void init(ASSourceIterator* iter);
 		void init();
-		virtual string beautify(const string& line);
+		virtual string beautify(const string &line);
 		void setDefaultTabLength();
 		void setForceTabXIndentation(int length);
 		void setSpaceIndentation(int length = 4);
@@ -339,7 +339,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  getIndentLength(void) const;
 		int  getTabLength(void) const;
 		string getIndentString(void) const;
-		string getNextWord(const string& line, size_t currPos) const;
+		string getNextWord(const string &line, size_t currPos) const;
 		bool getBracketIndent(void) const;
 		bool getBlockIndent(void) const;
 		bool getCaseIndent(void) const;
@@ -352,15 +352,15 @@ class ASBeautifier : protected ASResource, protected ASBase
 
 	protected:
 		void deleteBeautifierVectors();
-		const string* findHeader(const string& line, int i,
+		const string* findHeader(const string &line, int i,
 		                         const vector<const string*>* possibleHeaders) const;
-		const string* findOperator(const string& line, int i,
+		const string* findOperator(const string &line, int i,
 		                           const vector<const string*>* possibleOperators) const;
-		int getNextProgramCharDistance(const string& line, int i) const;
+		int getNextProgramCharDistance(const string &line, int i) const;
 		int  indexOf(vector<const string*> &container, const string* element);
 		void setBlockIndent(bool state);
 		void setBracketIndent(bool state);
-		string trim(const string& str);
+		string trim(const string &str);
 
 		// variables set by ASFormatter - must be updated in activeBeautifierStack
 		int  inLineNumber;
@@ -375,29 +375,29 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInIndentableStruct;
 
 	private:
-		ASBeautifier(const ASBeautifier& copy);
-		ASBeautifier& operator=(ASBeautifier&);        // not to be implemented
+		ASBeautifier(const ASBeautifier &copy);
+		ASBeautifier &operator=(ASBeautifier &);       // not to be implemented
 
 		void computePreliminaryIndentation();
-		void parseCurrentLine(const string& line);
-		void processProcessor(string& line);
-		void registerInStatementIndent(const string& line, int i, int spaceIndentCount,
+		void parseCurrentLine(const string &line);
+		void processProcessor(string &line);
+		void registerInStatementIndent(const string &line, int i, int spaceIndentCount,
 		                               int tabIncrementIn, int minIndent, bool updateParenStack);
 		void initVectors();
 		string preLineWS(int spaceTabCount_, int tabCount_);
 		int  convertTabToSpaces(int i, int tabIncrementIn) const;
-		int  getInStatementIndentAssign(const string& line, size_t currPos) const;
-		int  getInStatementIndentComma(const string& line, size_t currPos) const;
-		bool isClassAccessModifier(const string& line) const;
-		bool isIndentedPreprocessor(const string& line, size_t currPos) const;
-		bool isLineEndComment(const string& line, int startPos) const;
-		bool isPreprocessorDefinedCplusplus(const string& line) const;
-		bool isInPreprocessorUnterminatedComment(const string& line);
-		bool statementEndsWithComma(const string& line, int index) const;
-		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier& other) const;
-		template<typename T> void deleteContainer(T& container);
+		int  getInStatementIndentAssign(const string &line, size_t currPos) const;
+		int  getInStatementIndentComma(const string &line, size_t currPos) const;
+		bool isClassAccessModifier(const string &line) const;
+		bool isIndentedPreprocessor(const string &line, size_t currPos) const;
+		bool isLineEndComment(const string &line, int startPos) const;
+		bool isPreprocessorDefinedCplusplus(const string &line) const;
+		bool isInPreprocessorUnterminatedComment(const string &line);
+		bool statementEndsWithComma(const string &line, int index) const;
+		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier &other) const;
+		template<typename T> void deleteContainer(T &container);
 		void deleteContainer(vector<vector<const string*>*>* &container);
-		template<typename T> void initContainer(T& container, T value);
+		template<typename T> void initContainer(T &container, T value);
 
 	private:  // variables
 
@@ -507,7 +507,7 @@ class ASEnhancer : protected ASBase
 		ASEnhancer();
 		virtual ~ASEnhancer();
 		void init(int, int, int, bool, bool, bool, bool, bool);
-		void enhance(string& line, bool isInPreprocessor, bool isInSQL);
+		void enhance(string &line, bool isInPreprocessor, bool isInSQL);
 
 	private:
 		// options from command line or options file
@@ -553,15 +553,15 @@ class ASEnhancer : protected ASBase
 
 
 	private:  // functions
-		void    convertForceTabIndentToSpaces(string&  line) const;
-		void    convertSpaceIndentToForceTab(string& line) const;
-		size_t  findCaseColon(string&  line, size_t caseIndex) const;
-		int     indentLine(string&  line, int indent) const;
-		bool    isBeginDeclareSectionSQL(string&  line, size_t index) const;
-		bool    isEndDeclareSectionSQL(string&  line, size_t index) const;
-		bool    isOneLineBlockReached(string& line, int startChar) const;
-		size_t  processSwitchBlock(string&  line, size_t index);
-		int     unindentLine(string&  line, int unindent) const;
+		void    convertForceTabIndentToSpaces(string  &line) const;
+		void    convertSpaceIndentToForceTab(string &line) const;
+		size_t  findCaseColon(string  &line, size_t caseIndex) const;
+		int     indentLine(string  &line, int indent) const;
+		bool    isBeginDeclareSectionSQL(string  &line, size_t index) const;
+		bool    isEndDeclareSectionSQL(string  &line, size_t index) const;
+		bool    isOneLineBlockReached(string &line, int startChar) const;
+		size_t  processSwitchBlock(string  &line, size_t index);
+		int     unindentLine(string  &line, int unindent) const;
 };  // Class ASEnhancer
 
 //-----------------------------------------------------------------------------
@@ -609,10 +609,10 @@ class ASFormatter : public ASBeautifier
 		int  getFormatterFileType() const;
 
 	private:  // functions
-		ASFormatter(const ASFormatter& copy);       // copy constructor not to be imlpemented
-		ASFormatter& operator=(ASFormatter&);       // assignment operator not to be implemented
-		template<typename T> void deleteContainer(T& container);
-		template<typename T> void initContainer(T& container, T value);
+		ASFormatter(const ASFormatter &copy);       // copy constructor not to be imlpemented
+		ASFormatter &operator=(ASFormatter &);      // assignment operator not to be implemented
+		template<typename T> void deleteContainer(T &container);
+		template<typename T> void initContainer(T &container, T value);
 		char peekNextChar() const;
 		BracketType getBracketType();
 		bool addBracketsToStatement();
@@ -628,8 +628,8 @@ class ASFormatter : public ASBeautifier
 		bool isClosingHeader(const string* header) const;
 		bool isCurrentBracketBroken() const;
 		bool isDereferenceOrAddressOf() const;
-		bool isExecSQL(string&  line, size_t index) const;
-		bool isEmptyLine(const string& line) const;
+		bool isExecSQL(string  &line, size_t index) const;
+		bool isEmptyLine(const string &line) const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
 		bool isNonInStatementArrayBracket() const;
 		bool isOkToSplitFormattedLine();
@@ -637,7 +637,7 @@ class ASFormatter : public ASBeautifier
 		bool isPointerOrReferenceCentered() const;
 		bool isSharpStyleWithParen(const string* header) const;
 		bool isSplittableOperator(char appendedChar) const;
-		bool isStructAccessModified(string&  firstLine, size_t index) const;
+		bool isStructAccessModified(string  &firstLine, size_t index) const;
 		bool isUnaryOperator() const;
 		bool isImmediatelyPostCast() const;
 		bool isInExponent() const;
@@ -646,18 +646,18 @@ class ASFormatter : public ASBeautifier
 //		int  findRemainingPadding() const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
-		int  isOneLineBlockReached(string& line, int startChar) const;
+		int  isOneLineBlockReached(string &line, int startChar) const;
 		void adjustComments();
 		void appendChar(char ch, bool canBreakLine);
 		void appendCharInsideComments();
-		void appendSequence(const string& sequence, bool canBreakLine = true);
+		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
 		void appendSpaceAfter();
 		void breakLine(bool isSplitLine=false);
 		void buildLanguageVectors();
-		void checkForHeaderFollowingComment(const string& firstLine);
+		void checkForHeaderFollowingComment(const string &firstLine);
 		void updateFormattedLineSplitPoints(char appendedChar);
-		void updateFormattedLineSplitPointSequence(const string& sequence);
+		void updateFormattedLineSplitPointSequence(const string &sequence);
 		void checkIfTemplateOpener();
 		void clearFormattedLineSplitPoints();
 		void convertTabToSpaces();
@@ -688,10 +688,10 @@ class ASFormatter : public ASBeautifier
 		void testForTimeToSplitFormattedLine(int sequenceLength=0);
 		void trimContinuationLine();
 		size_t findFormattedLineSplitPoint(int sequenceLength) const;
-		size_t findNextChar(string& line, char searchChar, int searchStart = 0);
+		size_t findNextChar(string &line, char searchChar, int searchStart = 0);
 		const string* getFollowingOperator() const;
-		string getPreviousWord(const string& line, int currPos) const;
-		string peekNextText(const string& firstLine, bool endOnEmptyLine=false, bool shouldReset=false) const;
+		string getPreviousWord(const string &line, int currPos) const;
+		string peekNextText(const string &firstLine, bool endOnEmptyLine=false, bool shouldReset=false) const;
 
 	private:  // variables
 		int formatterFileType;
@@ -753,8 +753,8 @@ class ASFormatter : public ASBeautifier
 		PointerAlign pointerAlignment;
 		ReferenceAlign referenceAlignment;
 		LineEndFormat lineEnd;
-		bool computeChecksumIn(const string& currentLine_);
-		bool computeChecksumOut(const string& beautifiedLine);
+		bool computeChecksumIn(const string &currentLine_);
+		bool computeChecksumOut(const string &beautifiedLine);
 		bool isVirgin;
 		bool shouldPadOperators;
 		bool shouldPadParensOutside;

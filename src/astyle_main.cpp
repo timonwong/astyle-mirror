@@ -290,10 +290,10 @@ bool ASStreamIterator<T>::getLineEndChange(int lineEndFormat) const
 //-----------------------------------------------------------------------------
 
 // rewrite a stringstream converting the line ends
-void ASConsole::convertLineEnds(ostringstream& out, int lineEnd)
+void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
 {
 	assert(lineEnd == LINEEND_WINDOWS || lineEnd == LINEEND_LINUX || lineEnd == LINEEND_MACOLD);
-	const string& inStr = out.str();	// avoids strange looking syntax
+	const string &inStr = out.str();	// avoids strange looking syntax
 	string outStr;						// the converted ouput
 	int inLength = inStr.length();
 	for (int pos = 0; pos < inLength; pos++)
@@ -373,7 +373,7 @@ void ASConsole::convertLineEnds(ostringstream& out, int lineEnd)
 	out.str(outStr);
 }
 
-void ASConsole::correctMixedLineEnds(ostringstream& out)
+void ASConsole::correctMixedLineEnds(ostringstream &out)
 {
 	LineEndFormat lineEndFormat = LINEEND_DEFAULT;
 	if (strcmp(outputEOL, "\r\n") == 0)
@@ -468,7 +468,7 @@ void ASConsole::verifyCinPeek() const
  *
  * @param fileName_     The path and name of the file to be processed.
  */
-void ASConsole::formatFile(const string& fileName_)
+void ASConsole::formatFile(const string &fileName_)
 {
 	stringstream in;
 	ostringstream out;
@@ -644,7 +644,7 @@ vector<string> ASConsole::getOptionsVector()
 string ASConsole::getOrigSuffix()
 { return origSuffix; }
 
-string ASConsole::getParam(const string& arg, const char* op)
+string ASConsole::getParam(const string &arg, const char* op)
 {
 	return arg.substr(strlen(op));
 }
@@ -675,7 +675,7 @@ void ASConsole::initializeOutputEOL(LineEndFormat lineEndFormat)
 }
 
 
-FileEncoding ASConsole::readFile(const string& fileName_, stringstream& in) const
+FileEncoding ASConsole::readFile(const string &fileName_, stringstream &in) const
 {
 	const int blockSize = 65536;	// 64 KB
 	ifstream fin(fileName_.c_str(), ios::binary);
@@ -806,7 +806,7 @@ void ASConsole::displayLastError()
  *
  * @return              The path of the current directory
  */
-string ASConsole::getCurrentDirectory(const string& fileName_) const
+string ASConsole::getCurrentDirectory(const string &fileName_) const
 {
 	char currdir[MAX_PATH];
 	currdir[0] = '\0';
@@ -822,7 +822,7 @@ string ASConsole::getCurrentDirectory(const string& fileName_) const
  * @param directory     The path of the directory to be processed.
  * @param wildcard      The wildcard to be processed (e.g. *.cpp).
  */
-void ASConsole::getFileNames(const string& directory, const string& wildcard)
+void ASConsole::getFileNames(const string &directory, const string &wildcard)
 {
 	vector<string> subDirectory;    // sub directories of directory
 	WIN32_FIND_DATA findFileData;   // for FindFirstFile and FindNextFile
@@ -952,7 +952,7 @@ string ASConsole::getNumberFormat(int num, size_t lcid) const
  * @param fileName_     The filename is used only for  the error message.
  * @return              The path of the current directory
  */
-string ASConsole::getCurrentDirectory(const string& fileName_) const
+string ASConsole::getCurrentDirectory(const string &fileName_) const
 {
 	char* currdir = getenv("PWD");
 	if (currdir == NULL)
@@ -967,7 +967,7 @@ string ASConsole::getCurrentDirectory(const string& fileName_) const
  * @param directory     The path of the directory to be processed.
  * @param wildcard      The wildcard to be processed (e.g. *.cpp).
  */
-void ASConsole::getFileNames(const string& directory, const string& wildcard)
+void ASConsole::getFileNames(const string &directory, const string &wildcard)
 {
 	struct dirent* entry;           // entry from readdir()
 	struct stat statbuf;            // entry from stat()
@@ -1125,7 +1125,7 @@ string ASConsole::getNumberFormat(int num, const char* groupingArg, const char* 
 #endif  // _WIN32
 
 // get individual file names from the command-line file path
-void ASConsole::getFilePaths(string& filePath)
+void ASConsole::getFilePaths(string &filePath)
 {
 	fileName.clear();
 	targetDirectory = string();
@@ -1239,17 +1239,17 @@ bool ASConsole::fileNameVectorIsEmpty()
 	return fileNameVector.empty();
 }
 
-bool ASConsole::isOption(const string& arg, const char* op)
+bool ASConsole::isOption(const string &arg, const char* op)
 {
 	return arg.compare(op) == 0;
 }
 
-bool ASConsole::isOption(const string& arg, const char* a, const char* b)
+bool ASConsole::isOption(const string &arg, const char* a, const char* b)
 {
 	return (isOption(arg, a) || isOption(arg, b));
 }
 
-bool ASConsole::isParamOption(const string& arg, const char* option)
+bool ASConsole::isParamOption(const string &arg, const char* option)
 {
 	bool retVal = arg.compare(0, strlen(option), option) == 0;
 	// if comparing for short option, 2nd char of arg must be numeric
@@ -1263,7 +1263,7 @@ bool ASConsole::isParamOption(const string& arg, const char* option)
 // used for both directories and filenames
 // updates the g_excludeHitsVector
 // return true if a match
-bool ASConsole::isPathExclued(const string& subPath)
+bool ASConsole::isPathExclued(const string &subPath)
 {
 	bool retVal = false;
 
@@ -1848,7 +1848,7 @@ void ASConsole::renameFile(const char* oldFileName, const char* newFileName, con
 // make sure file separators are correct type (Windows or Linux)
 // remove ending file separator
 // remove beginning file separator if requested and NOT a complete file path
-void ASConsole::standardizePath(string& path, bool removeBeginningSeparator /*false*/) const
+void ASConsole::standardizePath(string &path, bool removeBeginningSeparator /*false*/) const
 {
 #ifdef __VMS
 	struct FAB fab;
@@ -1913,7 +1913,7 @@ void ASConsole::standardizePath(string& path, bool removeBeginningSeparator /*fa
 		path.erase(0, 1);
 }
 
-void ASConsole::printMsg(const char* msg, const string& data) const
+void ASConsole::printMsg(const char* msg, const string &data) const
 {
 	if (isQuiet)
 		return;
@@ -1991,7 +1991,7 @@ void ASConsole::sleep(int seconds) const
 	while (clock() < endwait) {}
 }
 
-bool ASConsole::stringEndsWith(const string& str, const string& suffix) const
+bool ASConsole::stringEndsWith(const string &str, const string &suffix) const
 {
 	int strIndex = (int) str.length() - 1;
 	int suffixIndex = (int) suffix.length() - 1;
@@ -2370,7 +2370,7 @@ int ASConsole::wildcmp(const char* wild, const char* data) const
 	return !*wild;
 }
 
-void ASConsole::writeFile(const string& fileName_, FileEncoding encoding, ostringstream& out) const
+void ASConsole::writeFile(const string &fileName_, FileEncoding encoding, ostringstream &out) const
 {
 	// save date accessed and date modified of original file
 	struct stat stBuf;
@@ -2440,7 +2440,7 @@ void ASConsole::writeFile(const string& fileName_, FileEncoding encoding, ostrin
  *
  * @return        true if no errors, false if errors
  */
-bool ASOptions::parseOptions(vector<string> &optionsVector, const string& errorInfo)
+bool ASOptions::parseOptions(vector<string> &optionsVector, const string &errorInfo)
 {
 	vector<string>::iterator option;
 	string arg, subArg;
@@ -2484,7 +2484,7 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string& errorI
 	return true;
 }
 
-void ASOptions::parseOption(const string& arg, const string& errorInfo)
+void ASOptions::parseOption(const string &arg, const string &errorInfo)
 {
 	if ( isOption(arg, "style=allman") || isOption(arg, "style=ansi")
 	        || isOption(arg, "style=bsd") || isOption(arg, "style=break") )
@@ -2991,7 +2991,7 @@ void ASOptions::parseOption(const string& arg, const string& errorInfo)
 #endif
 }	// End of parseOption function
 
-void ASOptions::importOptions(istream& in, vector<string> &optionsVector)
+void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
 {
 	char ch;
 	string currentToken;
@@ -3032,12 +3032,12 @@ string ASOptions::getOptionErrors()
 	return optionErrors.str();
 }
 
-string ASOptions::getParam(const string& arg, const char* op)
+string ASOptions::getParam(const string &arg, const char* op)
 {
 	return arg.substr(strlen(op));
 }
 
-string ASOptions::getParam(const string& arg, const char* op1, const char* op2)
+string ASOptions::getParam(const string &arg, const char* op1, const char* op2)
 {
 	return isParamOption(arg, op1) ? getParam(arg, op1) : getParam(arg, op2);
 }
@@ -3047,19 +3047,19 @@ bool ASOptions::isOption(const string arg, const char* op)
 	return arg.compare(op) == 0;
 }
 
-bool ASOptions::isOption(const string& arg, const char* op1, const char* op2)
+bool ASOptions::isOption(const string &arg, const char* op1, const char* op2)
 {
 	return (isOption(arg, op1) || isOption(arg, op2));
 }
 
-void ASOptions::isOptionError(const string& arg, const string& errorInfo)
+void ASOptions::isOptionError(const string &arg, const string &errorInfo)
 {
 	if (optionErrors.str().length() == 0)
 		optionErrors << errorInfo << endl;   // need main error message
 	optionErrors << arg << endl;
 }
 
-bool ASOptions::isParamOption(const string& arg, const char* option)
+bool ASOptions::isParamOption(const string &arg, const char* option)
 {
 	bool retVal = arg.compare(0, strlen(option), option) == 0;
 	// if comparing for short option, 2nd char of arg must be numeric
@@ -3069,7 +3069,7 @@ bool ASOptions::isParamOption(const string& arg, const char* option)
 	return retVal;
 }
 
-bool ASOptions::isParamOption(const string& arg, const char* option1, const char* option2)
+bool ASOptions::isParamOption(const string &arg, const char* option1, const char* option2)
 {
 	return isParamOption(arg, option1) || isParamOption(arg, option2);
 }

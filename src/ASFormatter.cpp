@@ -2019,7 +2019,7 @@ void ASFormatter::appendChar(char ch, bool canBreakLine)
  * @param sequence         the sequence to append.
  * @param canBreakLine     if true, a registered line-break
  */
-void ASFormatter::appendSequence(const string& sequence, bool canBreakLine)
+void ASFormatter::appendSequence(const string &sequence, bool canBreakLine)
 {
 	if (canBreakLine && isInLineBreak)
 		breakLine();
@@ -2180,7 +2180,7 @@ BracketType ASFormatter::getBracketType()
  *
  * @return        whether line is empty
  */
-bool ASFormatter::isEmptyLine(const string& line) const
+bool ASFormatter::isEmptyLine(const string &line) const
 {
 	return line.find_first_not_of(" \t") == string::npos;
 }
@@ -2503,7 +2503,7 @@ bool ASFormatter::isNonInStatementArrayBracket() const
  *             1 = one-line bracket has been reached.
  *             2 = one-line bracket has been reached and is followed by a comma.
  */
-int ASFormatter::isOneLineBlockReached(string& line, int startChar) const
+int ASFormatter::isOneLineBlockReached(string &line, int startChar) const
 {
 	assert(line[startChar] == '{');
 
@@ -2628,7 +2628,7 @@ bool ASFormatter::isNextCharOpeningBracket(int startChar) const
  * @param   the first line to check
  * @return  the next non-whitespace substring.
  */
-string ASFormatter::peekNextText(const string& firstLine, bool endOnEmptyLine /*false*/, bool shouldReset /*false*/) const
+string ASFormatter::peekNextText(const string &firstLine, bool endOnEmptyLine /*false*/, bool shouldReset /*false*/) const
 {
 	bool isFirstLine = true;
 	bool needReset = shouldReset;
@@ -3858,7 +3858,7 @@ void ASFormatter::deleteContainer(vector<BracketType>* &container)
  * used for all vectors except bracketTypeStack
  */
 template<typename T>
-void ASFormatter::deleteContainer(T& container)
+void ASFormatter::deleteContainer(T &container)
 {
 	if (container != NULL)
 	{
@@ -3885,7 +3885,7 @@ void ASFormatter::initContainer(vector<BracketType>* &container, vector<BracketT
  * used for all vectors except bracketTypeStack
  */
 template<typename T>
-void ASFormatter::initContainer(T& container, T value)
+void ASFormatter::initContainer(T &container, T value)
 {
 	// since the ASFormatter object is never deleted,
 	// the existing vectors must be deleted before creating new ones
@@ -3952,7 +3952,7 @@ bool ASFormatter::isSharpStyleWithParen(const string* header) const
  * if a header follows, the comments are kept as part of the header block.
  * firstLine must contain the start of the comment.
  */
-void ASFormatter::checkForHeaderFollowingComment(const string& firstLine)
+void ASFormatter::checkForHeaderFollowingComment(const string &firstLine)
 {
 	assert(isInComment || isInLineComment);
 	// this is called ONLY IF shouldBreakBlocks is TRUE.
@@ -4521,7 +4521,7 @@ int ASFormatter::getCurrentLineCommentAdjustment()
  *
  * @return is the previous word or an empty string if none found.
  */
-string ASFormatter::getPreviousWord(const string& line, int currPos) const
+string ASFormatter::getPreviousWord(const string &line, int currPos) const
 {
 	// get the last legal word (may be a number)
 	if (currPos == 0)
@@ -4669,7 +4669,7 @@ bool ASFormatter::addBracketsToStatement()
  * @param searchStart  the start position on the line (default is 0).
  * @return the position on the line or string::npos if not found.
  */
-size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart /*0*/)
+size_t ASFormatter::findNextChar(string &line, char searchChar, int searchStart /*0*/)
 {
 	// find the next searchChar
 	size_t i;
@@ -4723,7 +4723,7 @@ size_t ASFormatter::findNextChar(string& line, char searchChar, int searchStart 
  * @param index         the current line index.
  * @return              true if the struct has access modifiers.
  */
-bool ASFormatter::isStructAccessModified(string&  firstLine, size_t index) const
+bool ASFormatter::isStructAccessModified(string  &firstLine, size_t index) const
 {
 	assert(firstLine[index] == '{');
 	assert(isCStyle());
@@ -4826,7 +4826,7 @@ bool ASFormatter::isStructAccessModified(string&  firstLine, size_t index) const
  * @param index         the current line index.
  * @return              true if the statement is EXEC SQL.
  */
-bool ASFormatter::isExecSQL(string&  line, size_t index) const
+bool ASFormatter::isExecSQL(string  &line, size_t index) const
 {
 	if (line[index] != 'e' && line[index] != 'E')	// quick check to reject most
 		return false;
@@ -5136,7 +5136,7 @@ void ASFormatter::updateFormattedLineSplitPoints(char appendedChar)
 	}
 }
 
-void ASFormatter::updateFormattedLineSplitPointSequence(const string& sequence)
+void ASFormatter::updateFormattedLineSplitPointSequence(const string &sequence)
 {
 	assert(formattedLine.length() > 0);
 
@@ -5388,7 +5388,7 @@ void ASFormatter::clearFormattedLineSplitPoints()
  * Compute the input checksum.
  * This is called as an assert so it for is debug config only
  */
-bool ASFormatter::computeChecksumIn(const string& currentLine_)
+bool ASFormatter::computeChecksumIn(const string &currentLine_)
 {
 	for (size_t i = 0; i < currentLine_.length(); i++)
 		if (!isWhiteSpace(currentLine_[i]))
@@ -5410,7 +5410,7 @@ size_t ASFormatter::getChecksumIn() const
  * Compute the output checksum.
  * This is called as an assert so it is for debug config only
  */
-bool ASFormatter::computeChecksumOut(const string& beautifiedLine)
+bool ASFormatter::computeChecksumOut(const string &beautifiedLine)
 {
 	for (size_t i = 0; i < beautifiedLine.length(); i++)
 		if (!isWhiteSpace(beautifiedLine[i]))

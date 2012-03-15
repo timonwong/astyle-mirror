@@ -525,7 +525,7 @@ void ASResource::buildPreDefinitionHeaders(vector<const string*>* preDefinitionH
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // check if a specific line position contains a keyword.
-bool ASBase::findKeyword(const string& line, int i, const string& keyword) const
+bool ASBase::findKeyword(const string &line, int i, const string &keyword) const
 {
 	assert(isCharPotentialHeader(line, i));
 	// check the word
@@ -549,7 +549,7 @@ bool ASBase::findKeyword(const string& line, int i, const string& keyword) const
 
 // get the current word on a line
 // index must point to the beginning of the word
-string ASBase::getCurrentWord(const string& line, size_t index) const
+string ASBase::getCurrentWord(const string &line, size_t index) const
 {
 	assert(isCharPotentialHeader(line, index));
 	size_t lineLength = line.length();
