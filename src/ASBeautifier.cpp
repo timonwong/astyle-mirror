@@ -1340,6 +1340,10 @@ string ASBeautifier::trim(const string &str)
 	while (start <= end && isWhiteSpace(str[end]))
 		end--;
 
+	// don't trim if it ends in a continuation
+	if (end > -1 && str[end] == '\\')
+		end = str.length() - 1;
+
 	string returnStr(str, start, end + 1 - start);
 	return returnStr;
 }

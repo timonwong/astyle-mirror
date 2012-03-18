@@ -112,9 +112,9 @@
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_close-templates">close&#8209;templates</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-code-length">max&#8209;code&#8209;length</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-code-length">break&#8209;after&#8209;logical</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_close-templates">close&#8209;templates</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
@@ -1432,11 +1432,12 @@ else
         &nbsp;
     </p>
     <p id="_close-templates">
-        <code class="title">--close-templates / -xy</code><br />Closes ending angle brackets on template definitions. This
-        is allowed by the C++11 standard. Be sure your compiler supports this before making the changes.
+        <code class="title">--close-templates / -xy</code><br />Closes whitespace in the angle brackets of template definitions. 
+        Closing the ending angle brackets
+        is now allowed by the C++11 standard. Be sure your compiler supports this before making the changes.
     </p>
     <div class="code">
-        <pre>Stack&lt;int,List&lt;int&gt; &gt; stack1;</pre>
+        <pre>Stack&lt; int,List&lt; int &gt; &gt; stack1;</pre>
         <p class="code">
             becomes:
         </p>

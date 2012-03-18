@@ -25,7 +25,7 @@
         <li>Add new option, "pad-first-paren-out" (xd), to pad only the first paren in a seies on the outside (3350356).</li>
         <li>Add new option "max-code-length=#" (-xC#) to limit the length of code on a line. </li>
         <li>Add new option "break-after-logical" (-xL) to modify a "max-code-length" line break for conditionals. </li>
-        <li>Add new option &quot;close-templates&quot; (-xy) to close ending angle brackets &#39;&gt;&#39; on template definitions.</li>
+        <li>Add new option &quot;close-templates&quot; (-xy) to close whitespace in the angle brackets &#39;&gt;&#39; of template definitions.</li>
         <li>Add formatting of C++/CLI managed pointers (the &#39;^&#39; character) to the &quot;align-pointer&quot; option.</li>
         <li>Add translations for Dutch, Finnish, Italian, Japanese, Korean, Polish, Portuguese, Russian, Swedish, and Ukrainian.
         </li>
@@ -41,6 +41,7 @@
         <li>Fix quote continuation sometimes being processed as a preprocessor directive (3445475).</li>
         <li>Fix Java formatting of generics with wildcards (3428140).</li>
         <li>Fix formatting of pointers and references after a template close.</li>
+        <li>Fix C comments beginning a line breaking if they follow a semi-colon (3502700).</li>
         <li>Fix 'struct' return type being mistaken for a struct.</li>
         <li>Fix "pad-oper" in java for-each loop.</li>
         <li>Fix recognition of a macro multi-line comment (3414970).</li>
@@ -49,7 +50,7 @@
         <li>Fix spelling of "depreciated" in help message (3454735).</li>
         <li>Refactor to improve design and decomposition:
             <ul>
-                <li>Fix warning messages from Visual Studio dynamic code analysis.</li>
+                <li>Fix warning messages from Visual Studio static code analysis.</li>
                 <li>Fix warning messages from cppcheck, except for constructor uninitialized variables (false positive). </li>
                 <li>Remove astyle_main.h dependency from ASLocalizer.h </li>
                 <li>Remove appendChar() from the inline functions.</li>

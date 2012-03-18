@@ -502,7 +502,9 @@ string ASFormatter::nextLine()
 
 		if (isInTemplate && shouldCloseTemplates)
 		{
-			if (previousCommandChar == '>' && isWhiteSpace(currentChar) && peekNextChar() == '>')
+			if (previousCommandChar == '<' && isWhiteSpace(currentChar))
+				continue;
+			if (isWhiteSpace(currentChar) && peekNextChar() == '>')
 				continue;
 		}
 
@@ -605,7 +607,7 @@ string ASFormatter::nextLine()
 		if (passedSemicolon)    // need to break the formattedLine
 		{
 			passedSemicolon = false;
-			if (parenStack->back() == 0 && currentChar != ';') // allow ;;
+			if (parenStack->back() == 0 && !isCharImmediatelyPostComment && currentChar != ';') // allow ;;
 			{
 				// does a one-line statement have ending comments?
 				if (isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE))

@@ -1103,7 +1103,7 @@ string ASConsole::getNumberFormat(int num, const char* groupingArg, const char* 
 		// extract a group of numbers
 		string group;
 		if (i < grouping)
-			group = number.substr(0);
+			group = number;
 		else
 			group = number.substr(i - grouping);
 		// update formatted number
@@ -2233,7 +2233,7 @@ size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding
 			else
 			{
 				nCur16 = static_cast<utf16>(*pRead++ << 8);
-				nCur16 |= *pRead;
+				nCur16 |= static_cast<utf16>(*pRead);
 			}
 			if (nCur16 >= SURROGATE_LEAD_FIRST && nCur16 <= SURROGATE_LEAD_LAST)
 			{
@@ -2247,7 +2247,7 @@ size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding
 				else
 				{
 					trail = static_cast<utf16>(*pRead++ << 8);
-					trail |= *pRead;
+					trail |= static_cast<utf16>(*pRead);
 				}
 				nCur16 = (((nCur16 & 0x3ff) << 10) | (trail & 0x3ff)) + SURROGATE_FIRST_VALUE;
 			}
