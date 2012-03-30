@@ -56,6 +56,7 @@ const string ASResource::AS_OPERATOR = string("operator");
 const string ASResource::AS_TEMPLATE = string("template");
 const string ASResource::AS_TRY = string("try");
 const string ASResource::AS_CATCH = string("catch");
+const string ASResource::AS_THROW = string("throw");
 const string ASResource::AS_FINALLY = string("finally");
 const string ASResource::_AS_TRY = string("__try");
 const string ASResource::_AS_FINALLY = string("__finally");

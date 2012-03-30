@@ -42,15 +42,17 @@
 
 // define STDCALL for a Windows dynamic libraries (DLLs) only
 // MINGW defines STDCALL in Windows.h (actually windef.h)
-#ifndef STDCALL
-#if defined(_WIN32) && !defined(ASTYLE_STATIC) && ( defined(ASTYLE_LIB) || defined(ASTYLE_JNI) )
+#ifdef STDCALL
+#undef STDCALL
+#endif
+#if defined(_WIN32) && !defined(ASTYLE_STATIC) \
+&& ( defined(ASTYLE_LIB) || defined(ASTYLE_JNI) || defined(ASTYLE_CONLIB) )
 #define STDCALL __stdcall
 #define EXPORT  __declspec(dllexport)
 #else
 #define STDCALL
 #define EXPORT
-#endif
-#endif	// STDCALL
+#endif	// #if defined(_WIN32) ...
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)  // secure version deprecation warnings
@@ -195,7 +197,8 @@ class ASResource
 		static const string AS_DO, AS_WHILE;
 		static const string AS_FOR;
 		static const string AS_SWITCH, AS_CASE, AS_DEFAULT;
-		static const string AS_TRY, AS_CATCH, AS_THROWS, AS_FINALLY, _AS_TRY, _AS_FINALLY, _AS_EXCEPT;
+		static const string AS_TRY, AS_CATCH, AS_THROW, AS_THROWS, AS_FINALLY;
+		static const string _AS_TRY, _AS_FINALLY, _AS_EXCEPT;
 		static const string AS_PUBLIC, AS_PROTECTED, AS_PRIVATE;
 		static const string AS_CLASS, AS_STRUCT, AS_UNION, AS_INTERFACE, AS_NAMESPACE;
 		static const string AS_EXTERN, AS_ENUM;
@@ -812,6 +815,7 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostCloseBlock;
 		bool isCharImmediatelyPostTemplate;
 		bool isCharImmediatelyPostReturn;
+		bool isCharImmediatelyPostThrow;
 		bool isCharImmediatelyPostOperator;
 		bool isCharImmediatelyPostPointerOrReference;
 		bool breakCurrentOneLineBlock;
@@ -839,6 +843,7 @@ class ASFormatter : public ASBeautifier
 		bool isImmediatelyPostEmptyBlock;
 		bool isImmediatelyPostPreprocessor;
 		bool isImmediatelyPostReturn;
+		bool isImmediatelyPostThrow;
 		bool isImmediatelyPostOperator;
 		bool isImmediatelyPostTemplate;
 		bool isImmediatelyPostPointerOrReference;

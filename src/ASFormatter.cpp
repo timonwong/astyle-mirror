@@ -225,10 +225,12 @@ void ASFormatter::init(ASSourceIterator* si)
 	isImmediatelyPostEmptyBlock = false;
 	isImmediatelyPostPreprocessor = false;
 	isImmediatelyPostReturn = false;
+	isImmediatelyPostThrow = false;
 	isImmediatelyPostOperator = false;
 	isImmediatelyPostTemplate = false;
 	isImmediatelyPostPointerOrReference = false;
 	isCharImmediatelyPostReturn = false;
+	isCharImmediatelyPostThrow = false;
 	isCharImmediatelyPostOperator = false;
 	isCharImmediatelyPostComment = false;
 	isPreviousCharPostComment = false;
@@ -414,6 +416,7 @@ string ASFormatter::nextLine()
 			isCharImmediatelyPostComment = false;
 			isCharImmediatelyPostTemplate = false;
 			isCharImmediatelyPostReturn = false;
+			isCharImmediatelyPostThrow = false;
 			isCharImmediatelyPostOperator = false;
 			isCharImmediatelyPostPointerOrReference = false;
 			isCharImmediatelyPostOpenBlock = false;
@@ -551,6 +554,12 @@ string ASFormatter::nextLine()
 		{
 			isImmediatelyPostReturn = false;
 			isCharImmediatelyPostReturn = true;
+		}
+
+		if (isImmediatelyPostThrow)
+		{
+			isImmediatelyPostThrow = false;
+			isCharImmediatelyPostThrow = true;
 		}
 
 		if (isImmediatelyPostOperator)
@@ -1091,7 +1100,7 @@ string ASFormatter::nextLine()
 		if (currentChar == '?')
 			foundQuestionMark = true;
 
-		if (isPotentialHeader &&  !isInTemplate)
+		if (isPotentialHeader && !isInTemplate)
 		{
 			if (findKeyword(currentLine, charNum, AS_NEW))
 				isInPotentialCalculation = false;
@@ -1101,6 +1110,12 @@ string ASFormatter::nextLine()
 				isInPotentialCalculation = true;	// return is the same as an = sign
 				isImmediatelyPostReturn = true;
 			}
+
+			if (isCStyle()
+				    && findKeyword(currentLine, charNum, AS_THROW)
+			        && previousCommandChar != ')'
+			        && !foundPreCommandHeader)      // 'const' throw()
+				isImmediatelyPostThrow = true;
 
 			if (findKeyword(currentLine, charNum, AS_OPERATOR))
 				isImmediatelyPostOperator = true;
@@ -1241,6 +1256,12 @@ string ASFormatter::nextLine()
 				continue;
 			}
 		}
+
+		// do NOT use 'continue' after this, it must do padParens if necessary
+		if (currentChar == '('
+		        && shouldPadHeader
+		        && (isCharImmediatelyPostReturn || isCharImmediatelyPostThrow))
+			appendSpacePad();
 
 		if ((currentChar == '(' || currentChar == ')')
 		        && (shouldPadParensOutside || shouldPadParensInside || shouldUnPadParens || shouldPadFirstParen))
@@ -3169,7 +3190,9 @@ void ASFormatter::padParens(void)
 						prevWordH = ASBeautifier::findHeader(prevWord, 0, headers);
 					if (prevWordH != NULL)
 						prevIsParenHeader = true;
-					else if (prevWord == "return")  // don't unpad return statements
+					else if (prevWord == "return")  // don't unpad
+						prevIsParenHeader = true;
+					else if (isCStyle() && prevWord == "throw" && shouldPadHeader) // don't unpad
 						prevIsParenHeader = true;
 					else if (prevWord == "and" || prevWord == "or")  // don't unpad
 						prevIsParenHeader = true;
