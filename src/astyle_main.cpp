@@ -424,23 +424,56 @@ void ASConsole::error(const char* why, const char* what) const
  * This is used to format text for text editors like TextWrangler (Mac).
  * Do NOT display any console messages when this function is used.
  */
-void ASConsole::formatCinToCout() const
+void ASConsole::formatCinToCout()
 {
 	verifyCinPeek();
+#ifdef _WIN32
+	// Assure that redirected cin is all Windows line ends.
+	// TODO: The following can be removed when tellg() is removed.
+	// Windows line ends must be used on the input. If not, a problem occurs
+	// when tellg() statements are used. The tellg() will be out of sequence 
+	// with the get() statements. The following file conversion could be 
+	// eliminated if the tellg() statements were removed.
+	istream* streamIn = &cin;
+	ostringstream out;
+	char buf[65536];    // 64 KB
+	while (!streamIn->eof())
+	{
+		streamIn->read(buf, sizeof(buf) - 1);
+		buf[streamIn->gcount()] = '\0';
+		out << buf;
+	}
+	convertLineEnds(out, LINEEND_WINDOWS);
+	stringstream in(out.str().c_str());
+	ASStreamIterator<stringstream> streamIterator(&in); // create iterator for converted input
+
+	// Must specify LF line ends for Windows. This will output CRLF on the terminal.
+	// Specifying CRLF line ends will output CRCRLF (2 CRs) on the terminal.
+	// There is no way I know to change the line ends on Windows redirection.
+	LineEndFormat lineEndFormat = LINEEND_LF;
+#else
+	// Linux can handle any line end.
 	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
+	LineEndFormat lineEndFormat = formatter.getLineEndFormat();
+#endif  //  _WIN32
+	initializeOutputEOL(lineEndFormat);
 	formatter.init(&streamIterator);
 
 	while (formatter.hasMoreLines())
 	{
 		cout << formatter.nextLine();
 		if (formatter.hasMoreLines())
-			cout << streamIterator.getOutputEOL();
+		{
+			setOutputEOL(lineEndFormat, streamIterator.getOutputEOL());
+			cout << outputEOL;
+		}
 		else
 		{
 			// this can happen if the file if missing a closing bracket and break-blocks is requested
 			if (formatter.getIsLineReady())
 			{
-				cout << streamIterator.getOutputEOL();
+				setOutputEOL(lineEndFormat, streamIterator.getOutputEOL());
+				cout << outputEOL;
 				cout << formatter.nextLine();
 			}
 		}

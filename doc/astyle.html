@@ -278,7 +278,7 @@
         The <span style="color: #0000a0">&lt;</span> and <span style="color: #0000a0">&gt;</span> characters are used
         to redirect the files into standard input (cin) and out of standard output (cout) - don't forget them! With this
         option only one file at a time can be formatted. Wildcards are not recognized, there are no console messages,
-        and a backup is not created.</p>
+        and a backup is not created. On Windows the output will always have Windows line ends.</p>
     <p>
         &nbsp;</p>
     <hr />
@@ -1562,6 +1562,9 @@ else
         Force use of the specified line end style. Valid options are windows (CRLF), linux (LF), and macold (CR). MacOld
         style is the format for OS 9 and earlier. Mac OS X uses the Linux style. If one of these options is not used the
         line ends will be determined automatically from the input file.</p>
+    <p>
+        When <strong>redirection</strong> is used on Windows the output will always have Windows line ends. This option
+        will be ignored.</p>
     <p>
         &nbsp;</p>
     <hr style="margin-left: -0.4in;" />

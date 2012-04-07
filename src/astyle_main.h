@@ -225,7 +225,7 @@ class ASConsole
 		FileEncoding detectEncoding(const char* data, size_t dataSize) const;
 		void error() const;
 		void error(const char* why, const char* what) const;
-		void formatCinToCout() const;
+		void formatCinToCout();
 		vector<string> getArgvOptions(int argc, char** argv) const;
 		bool fileNameVectorIsEmpty();
 		int  getFilesFormatted();
