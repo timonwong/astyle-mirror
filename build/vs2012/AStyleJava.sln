@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C++ Express 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 11
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AStyleJava", "AStyleJava\AStyleJava.vcxproj", "{4CFDAD41-2CA5-4D74-8410-A6BD9C37620D}"
 EndProject
 Global
