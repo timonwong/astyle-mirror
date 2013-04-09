@@ -67,8 +67,9 @@
 				OutputFile="$(OutDir)\AStyled.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).exe.pdb"
 				SubSystem="1"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -146,8 +147,9 @@
 				OutputFile="$(OutDir)\AStyled.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(ProjectDir)$(PlatformName)\$(ConfigurationName)\$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).exe.pdb"
 				SubSystem="1"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -226,10 +228,11 @@
 				OutputFile="$(OutDir)\AStyle.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
-				ProgramDatabaseFile="$(ProjectDir))$(PlatformName)\$(ConfigurationName)\$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).exe.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -309,10 +312,11 @@
 				OutputFile="$(OutDir)\AStyle.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
-				ProgramDatabaseFile="$(ProjectDir))$(PlatformName)\$(ConfigurationName)\$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).exe.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -391,10 +395,11 @@
 				OutputFile="$(OutDir)\AStyle.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
-				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).exe.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -474,10 +479,11 @@
 				OutputFile="$(OutDir)\AStyle.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
-				ProgramDatabaseFile="$(ProjectDir))$(PlatformName)\$(ConfigurationName)\$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).exe.pdb"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -544,6 +550,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\..\src\ASLocalizer.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\..\src\astyle.h"
 				>

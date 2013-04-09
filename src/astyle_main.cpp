@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   astyle_main.cpp
  *
- *   Copyright (C) 2006-2011 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2013 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -28,11 +28,10 @@
 #include "astyle_main.h"
 
 #include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <cstdlib>
 #include <errno.h>
+#include <fstream>
+#include <sstream>
 
 // includes for recursive getFileNames() function
 #ifdef _WIN32
@@ -85,7 +84,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* g_version = "2.03 beta";
+const char* g_version = "2.03";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -431,18 +430,22 @@ void ASConsole::formatCinToCout()
 	// Assure that redirected cin is all Windows line ends.
 	// TODO: The following can be removed when tellg() is removed.
 	// Windows line ends must be used on the input. If not, a problem occurs
-	// when tellg() statements are used. The tellg() will be out of sequence 
-	// with the get() statements. The following file conversion could be 
+	// when tellg() statements are used. The tellg() will be out of sequence
+	// with the get() statements. The following file conversion could be
 	// eliminated if the tellg() statements were removed.
 	istream* streamIn = &cin;
 	ostringstream out;
-	char buf[65536];    // 64 KB
+	const int bufSize = 65536;	// 64 KB
+	char* buf = new(nothrow) char[bufSize];
+	if (!buf)
+		error("Cannot allocate memory for input file", "");
 	while (!streamIn->eof())
 	{
-		streamIn->read(buf, sizeof(buf) - 1);
-		buf[streamIn->gcount()] = '\0';
-		out << buf;
+		streamIn->read(buf, bufSize);
+		out.write(buf, streamIn->gcount());;
 	}
+	delete [] buf;
+	buf = NULL;
 	convertLineEnds(out, LINEEND_WINDOWS);
 	stringstream in(out.str().c_str());
 	ASStreamIterator<stringstream> streamIterator(&in); // create iterator for converted input
@@ -1235,7 +1238,7 @@ void ASConsole::getFilePaths(string &filePath)
 			if (!ignoreExcludeErrorsDisplay)
 			{
 				if (ignoreExcludeErrors)
-					printMsg(_("Exclude (unmatched)  %s\n"), excludeVector[ix].c_str());
+					printMsg(_("Exclude (unmatched)  %s\n"), excludeVector[ix]);
 				else
 					fprintf(stderr, _("Exclude (unmatched)  %s\n"), excludeVector[ix].c_str());
 			}
@@ -1732,7 +1735,7 @@ void ASConsole::processFiles()
 
 // process options from the command line and options file
 // build the vectors fileNameVector, excludeVector, optionsVector, and fileOptionsVector
-void ASConsole::processOptions(vector<string>& argvOptions)
+void ASConsole::processOptions(vector<string> &argvOptions)
 {
 	string arg;
 	bool ok = true;
@@ -1850,31 +1853,36 @@ void ASConsole::processOptions(vector<string>& argvOptions)
 // remove a file and check for an error
 void ASConsole::removeFile(const char* fileName_, const char* errMsg) const
 {
-	remove(fileName_);
-	if (errno == ENOENT)        // no file is OK
-		errno = 0;
-	if (errno)
+	if (remove(fileName_))
 	{
-		perror("errno message");
-		error(errMsg, fileName_);
+		if (errno == ENOENT)        // no file is OK
+			errno = 0;
+		if (errno)
+		{
+			perror("errno message");
+			error(errMsg, fileName_);
+		}
 	}
 }
 
 // rename a file and check for an error
 void ASConsole::renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const
 {
-	rename(oldFileName, newFileName);
-	// if file still exists the remove needs more time - retry
-	if (errno == EEXIST)
+	int result = rename(oldFileName, newFileName);
+	if (result != 0)
 	{
-		errno = 0;
-		waitForRemove(newFileName);
-		rename(oldFileName, newFileName);
-	}
-	if (errno)
-	{
-		perror("errno message");
-		error(errMsg, oldFileName);
+		// if file still exists the remove needs more time - retry
+		if (errno == EEXIST)
+		{
+			errno = 0;
+			waitForRemove(newFileName);
+			result = rename(oldFileName, newFileName);
+		}
+		if (result != 0)
+		{
+			perror("errno message");
+			error(errMsg, oldFileName);
+		}
 	}
 }
 
@@ -3075,7 +3083,7 @@ string ASOptions::getParam(const string &arg, const char* op1, const char* op2)
 	return isParamOption(arg, op1) ? getParam(arg, op1) : getParam(arg, op2);
 }
 
-bool ASOptions::isOption(const string arg, const char* op)
+bool ASOptions::isOption(const string &arg, const char* op)
 {
 	return arg.compare(op) == 0;
 }
@@ -3190,11 +3198,10 @@ char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded)
  *                                                            /EXPORT:AStyleGetVersion=_AStyleGetVersion@0
  * No /EXPORT is required for x64
  */
-extern "C" EXPORT char* STDCALL
-AStyleMain(const char* pSourceIn,          // pointer to the source to be formatted
-           const char* pOptions,           // pointer to AStyle options, separated by \n
-           fpError fpErrorHandler,         // pointer to error handler function
-           fpAlloc fpMemoryAlloc)          // pointer to memory allocation function
+extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,          // pointer to the source to be formatted
+                                           const char* pOptions,           // pointer to AStyle options, separated by \n
+                                           fpError fpErrorHandler,         // pointer to error handler function
+                                           fpAlloc fpMemoryAlloc)          // pointer to memory allocation function
 {
 	if (fpErrorHandler == NULL)         // cannot display a message if no error handler
 		return NULL;

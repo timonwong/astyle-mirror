@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   astyle_main.h
  *
- *   Copyright (C) 2006-2011 by Jim Pattee <jimp03@email.com>
+ *   Copyright (C) 2006-2013 by Jim Pattee <jimp03@email.com>
  *   Copyright (C) 1998-2002 by Tal Davidson
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
@@ -32,9 +32,10 @@
 // headers
 //----------------------------------------------------------------------------
 
+#include "astyle.h"
+
 #include <sstream>
 #include <ctime>
-#include "astyle.h"
 
 #if defined(_MSC_VER) || defined(__DMC__)
 #include <sys/utime.h>
@@ -68,7 +69,7 @@
 #endif
 
 // for mingw BOM, UTF-16, and Unicode functions
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
 #if (__MINGW32_MAJOR_VERSION > 3)  || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 16))
 #error - Use MinGW compiler version 4 or higher
 #endif
@@ -141,7 +142,7 @@ class ASOptions
 		ASOptions &operator=(ASOptions &);         // not to be implemented
 		string getParam(const string &arg, const char* op);
 		string getParam(const string &arg, const char* op1, const char* op2);
-		bool isOption(const string arg, const char* op);
+		bool isOption(const string &arg, const char* op);
 		bool isOption(const string &arg, const char* op1, const char* op2);
 		void isOptionError(const string &arg, const string &errorInfo);
 		bool isParamOption(const string &arg, const char* option);
@@ -246,7 +247,7 @@ class ASConsole
 		string getOrigSuffix();
 		bool getPreserveDate();
 		void processFiles();
-		void processOptions(vector<string>& argvOptions);
+		void processOptions(vector<string> &argvOptions);
 		void setIgnoreExcludeErrors(bool state);
 		void setIgnoreExcludeErrorsAndDisplay(bool state);
 		void setIsFormattedOnly(bool state);

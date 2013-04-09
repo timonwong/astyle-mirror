@@ -68,10 +68,11 @@
 				OutputFile="$(OutDir)\AStyled.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).exe.pdb"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -150,6 +151,7 @@
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -231,6 +233,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -313,6 +316,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="17"
 			/>
 			<Tool
@@ -394,6 +398,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -476,6 +481,7 @@
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
+				ImportLibrary="$(IntDir)\$(TargetName).exe.lib"
 				TargetMachine="17"
 			/>
 			<Tool
