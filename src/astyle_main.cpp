@@ -60,8 +60,7 @@
 int _CRT_glob = 0;
 #endif
 
-namespace astyle
-{
+namespace astyle {
 
 #ifdef _WIN32
 char g_fileSeparator = '\\';
@@ -84,7 +83,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* g_version = "2.03";
+const char* g_version = "2.04 beta";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -614,9 +613,7 @@ vector<string> ASConsole::getArgvOptions(int argc, char** argv) const
 
 // for unit testing
 vector<bool> ASConsole::getExcludeHitsVector()
-{
-	return excludeHitsVector;
-}
+{ return excludeHitsVector; }
 
 // for unit testing
 vector<string> ASConsole::getExcludeVector()
@@ -634,59 +631,66 @@ vector<string> ASConsole::getFileNameVector()
 vector<string> ASConsole::getFileOptionsVector()
 { return fileOptionsVector; }
 
-int ASConsole::getFilesUnchanged()
-{ return filesUnchanged; }
-
+// for unit testing
 int ASConsole::getFilesFormatted()
 { return filesFormatted; }
 
+// for unit testing
 bool ASConsole::getIgnoreExcludeErrors()
 { return ignoreExcludeErrors; }
 
+// for unit testing
 bool ASConsole::getIgnoreExcludeErrorsDisplay()
 { return ignoreExcludeErrorsDisplay; }
 
+// for unit testing
 bool ASConsole::getIsFormattedOnly()
 { return isFormattedOnly; }
 
+// for unit testing
 string ASConsole::getLanguageID() const
 { return localizer.getLanguageID(); }
 
+// for unit testing
 bool ASConsole::getIsQuiet()
 { return isQuiet; }
 
+// for unit testing
 bool ASConsole::getIsRecursive()
 { return isRecursive; }
 
+// for unit testing
 bool ASConsole::getIsVerbose()
 { return isVerbose; }
 
+// for unit testing
 bool ASConsole::getLineEndsMixed()
 { return lineEndsMixed; }
 
+// for unit testing
 bool ASConsole::getNoBackup()
 { return noBackup; }
 
+// for unit testing
 string ASConsole::getOptionsFileName()
 { return optionsFileName; }
-
-bool ASConsole::getOptionsFileRequired()
-{ return optionsFileRequired; }
 
 // for unit testing
 vector<string> ASConsole::getOptionsVector()
 { return optionsVector; }
 
+// for unit testing
 string ASConsole::getOrigSuffix()
 { return origSuffix; }
+
+// for unit testing
+bool ASConsole::getPreserveDate()
+{ return preserveDate; }
 
 string ASConsole::getParam(const string &arg, const char* op)
 {
 	return arg.substr(strlen(op));
 }
-
-bool ASConsole::getPreserveDate()
-{ return preserveDate; }
 
 // initialize output end of line
 void ASConsole::initializeOutputEOL(LineEndFormat lineEndFormat)
@@ -778,9 +782,6 @@ void ASConsole::setNoBackup(bool state)
 
 void ASConsole::setOptionsFileName(string name)
 { optionsFileName = name; }
-
-void ASConsole::setOptionsFileRequired(bool state)
-{ optionsFileRequired = state; }
 
 void ASConsole::setOrigSuffix(string suffix)
 { origSuffix = suffix; }
@@ -1437,6 +1438,17 @@ void ASConsole::printHelp() const
 	(*_err) << "    Lisp style formatting/indenting.\n";
 	(*_err) << "    Attached opening brackets and attached closing brackets.\n";
 	(*_err) << "    Uses keep one line statements.\n";
+	(*_err) << endl;
+	(*_err) << "Bracket Modifier Options:\n";
+	(*_err) << "-------------------------\n";
+	(*_err) << "    --attach-namespaces  OR  -xn\n";
+	(*_err) << "    Attach brackets to a namespace statement.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-classes  OR  -xc\n";
+	(*_err) << "    Attach brackets to a class statement.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-inlines  OR  -xi\n";
+	(*_err) << "    Attach brackets to class inline function definitions.\n";
 	(*_err) << endl;
 	(*_err) << "Tab Options:\n";
 	(*_err) << "------------\n";
@@ -2899,19 +2911,20 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setBreakAfterMode(true);
 	}
+	else if ( isOption(arg, "xc", "attach-classes") )
+	{
+		formatter.setAttachClass(true);
+	}
+	else if ( isOption(arg, "xn", "attach-namespaces") )
+	{
+		formatter.setAttachNamespace(true);
+	}
+	else if ( isOption(arg, "xi", "attach-inlines") )
+	{
+		formatter.setAttachInline(true);
+	}
 	// depreciated options release 2.02 ///////////////////////////////////////////////////////////////////////////////
-	else if ( isOption(arg, "brackets=horstmann") )
-	{
-		isOptionError(arg, errorInfo);
-	}
-	else if ( isOption(arg, "B", "indent-brackets") )
-	{
-		isOptionError(arg, errorInfo);
-	}
-	else if ( isOption(arg, "G", "indent-blocks") )
-	{
-		isOptionError(arg, errorInfo);
-	}
+	//
 	// end depreciated options ////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ASTYLE_LIB
 	// End of options used by GUI /////////////////////////////////////////////////////////////////////////////////////

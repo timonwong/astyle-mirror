@@ -29,8 +29,8 @@
 #include <algorithm>
 
 
-namespace astyle
-{
+namespace astyle {
+
 const string ASResource::AS_IF = string("if");
 const string ASResource::AS_ELSE = string("else");
 const string ASResource::AS_FOR = string("for");

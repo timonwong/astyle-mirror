@@ -76,8 +76,7 @@
 #endif
 
 
-namespace astyle
-{
+namespace astyle {
 
 //----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -230,7 +229,6 @@ class ASConsole
 		vector<string> getArgvOptions(int argc, char** argv) const;
 		bool fileNameVectorIsEmpty();
 		int  getFilesFormatted();
-		int  getFilesUnchanged();
 		bool getIgnoreExcludeErrors();
 		bool getIgnoreExcludeErrorsDisplay();
 		bool getIsFormattedOnly();
@@ -243,7 +241,6 @@ class ASConsole
 		string getNumberFormat(int num, size_t=0) const ;
 		string getNumberFormat(int num, const char* groupingArg, const char* separator) const;
 		string getOptionsFileName();
-		bool getOptionsFileRequired();
 		string getOrigSuffix();
 		bool getPreserveDate();
 		void processFiles();
@@ -256,7 +253,6 @@ class ASConsole
 		void setIsVerbose(bool state);
 		void setNoBackup(bool state);
 		void setOptionsFileName(string name);
-		void setOptionsFileRequired(bool state);
 		void setOrigSuffix(string suffix);
 		void setPreserveDate(bool state);
 		void setProgramLocale();

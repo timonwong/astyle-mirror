@@ -69,8 +69,7 @@
 #include <stdlib.h>
 #include <typeinfo>
 
-namespace astyle
-{
+namespace astyle {
 
 #ifndef ASTYLE_LIB
 

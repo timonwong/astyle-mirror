@@ -30,8 +30,7 @@
 #include <algorithm>
 
 
-namespace astyle
-{
+namespace astyle {
 
 /**
  * ASBeautifier's constructor
@@ -235,12 +234,12 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
  */
 ASBeautifier::~ASBeautifier()
 {
-	deleteContainer(waitingBeautifierStack);
-	deleteContainer(activeBeautifierStack);
+	deleteBeautifierContainer(waitingBeautifierStack);
+	deleteBeautifierContainer(activeBeautifierStack);
 	deleteContainer(waitingBeautifierStackLengthStack);
 	deleteContainer(activeBeautifierStackLengthStack);
 	deleteContainer(headerStack);
-	deleteContainer(tempStacks);
+	deleteTempStacksContainer(tempStacks);
 	deleteContainer(blockParenDepthStack);
 	deleteContainer(blockStatementStack);
 	deleteContainer(parenStatementStack);
@@ -1424,13 +1423,36 @@ void ASBeautifier::deleteContainer(T &container)
 }
 
 /**
+ * Delete the ASBeautifier vector object.
+ * This is a vector of pointers to ASBeautifier objects allocated with
+ * the 'new' operator.
+ * Therefore the ASBeautifier objects have to be deleted in addition to the
+ * ASBeautifier pointer entries.
+ */
+void ASBeautifier::deleteBeautifierContainer(vector<ASBeautifier*>* &container)
+{
+	if (container != NULL)
+	{
+		vector<ASBeautifier*>::iterator iter = container->begin();
+		while (iter < container->end())
+		{
+			delete *iter;
+			++iter;
+		}
+		container->clear();
+		delete (container);
+		container = NULL;
+	}
+}
+
+/**
  * Delete the tempStacks vector object.
  * The tempStacks is a vector of pointers to strings allocated with
  * the 'new' operator.
  * Therefore the strings have to be deleted in addition to the
  * tempStacks entries.
  */
-void ASBeautifier::deleteContainer(vector<vector<const string*>*>* &container)
+void ASBeautifier::deleteTempStacksContainer(vector<vector<const string*>*>* &container)
 {
 	if (container != NULL)
 	{

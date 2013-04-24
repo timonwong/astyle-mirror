@@ -28,8 +28,7 @@
 #include "astyle.h"
 
 
-namespace astyle
-{
+namespace astyle {
 
 /**
  * ASEnhancer constructor

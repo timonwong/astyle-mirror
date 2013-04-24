@@ -31,8 +31,7 @@
 #include <fstream>
 
 
-namespace astyle
-{
+namespace astyle {
 /**
  * Constructor of ASFormatter
  */
@@ -63,6 +62,9 @@ ASFormatter::ASFormatter()
 	shouldConvertTabs = false;
 	shouldIndentCol1Comments = false;
 	shouldCloseTemplates = false;
+	shouldAttachNamespace = false;
+	shouldAttachClass = false;
+	shouldAttachInline = false;
 	shouldBreakBlocks = false;
 	shouldBreakClosingHeaderBlocks = false;
 	shouldBreakClosingHeaderBrackets = false;
@@ -1566,6 +1568,36 @@ void ASFormatter::setParensUnPaddingMode(bool state)
 void ASFormatter::setAttachClosingBracket(bool state)
 {
 	shouldAttachClosingBracket = state;
+}
+
+/**
+ * set option to attach class brackets
+ *
+ * @param state        true = attach, false = use style default.
+ */
+void ASFormatter::setAttachClass(bool state)
+{
+	shouldAttachClass = state;
+}
+
+/**
+ * set option to attach namespace brackets
+ *
+ * @param state        true = attach, false = use style default.
+ */
+void ASFormatter::setAttachNamespace(bool state)
+{
+	shouldAttachNamespace = state;
+}
+
+/**
+ * set option to attach inline brackets
+ *
+ * @param state        true = attach, false = use style default.
+ */
+void ASFormatter::setAttachInline(bool state)
+{
+	shouldAttachInline = state;
 }
 
 /**
@@ -4345,9 +4377,34 @@ bool ASFormatter::isCurrentBracketBroken() const
 	assert(bracketTypeStack->size() > 1);
 
 	bool breakBracket = false;
-	size_t bracketTypeStackEnd = bracketTypeStack->size()-1;
+	size_t stackEnd = bracketTypeStack->size()-1;
 
-	if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd], EXTERN_TYPE))
+	// check bracket modifiers
+	if (shouldAttachNamespace
+	        && isBracketType((*bracketTypeStack)[stackEnd], NAMESPACE_TYPE))
+	{
+		return false;
+	}
+	else if (shouldAttachClass
+	         && (isBracketType((*bracketTypeStack)[stackEnd], CLASS_TYPE)
+	             || isBracketType((*bracketTypeStack)[stackEnd], INTERFACE_TYPE)))
+	{
+		return false;
+	}
+	else if (shouldAttachInline
+	         && isCStyle()			// for C++ only
+	         && bracketFormatMode != RUN_IN_MODE
+	         && isBracketType((*bracketTypeStack)[stackEnd], COMMAND_TYPE))
+	{
+		size_t i;
+		for (i = 1; i < bracketTypeStack->size(); i++)
+			if (isBracketType((*bracketTypeStack)[i], CLASS_TYPE)
+			        || isBracketType((*bracketTypeStack)[i], STRUCT_TYPE))
+				return false;
+	}
+
+	// check brackets
+	if (isBracketType((*bracketTypeStack)[stackEnd], EXTERN_TYPE))
 	{
 		if (currentLineBeginsWithBracket
 		        || bracketFormatMode == RUN_IN_MODE)
@@ -4365,42 +4422,32 @@ bool ASFormatter::isCurrentBracketBroken() const
 	}
 	else if (bracketFormatMode == LINUX_MODE || bracketFormatMode == STROUSTRUP_MODE)
 	{
-		// break a class if Linux
-		if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd], CLASS_TYPE))
-		{
-			if (bracketFormatMode == LINUX_MODE)
-				breakBracket = true;
-		}
-		// break a namespace or interface if Linux
-		else if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd], NAMESPACE_TYPE)
-		         || isBracketType((*bracketTypeStack)[bracketTypeStackEnd], INTERFACE_TYPE))
+		// break a namespace, class, or interface if Linux
+		if (isBracketType((*bracketTypeStack)[stackEnd], NAMESPACE_TYPE)
+		        || isBracketType((*bracketTypeStack)[stackEnd], CLASS_TYPE)
+		        || isBracketType((*bracketTypeStack)[stackEnd], INTERFACE_TYPE))
 		{
 			if (bracketFormatMode == LINUX_MODE)
 				breakBracket = true;
 		}
 		// break the first bracket if a function
-		else if (bracketTypeStackEnd == 1
-		         && isBracketType((*bracketTypeStack)[bracketTypeStackEnd], COMMAND_TYPE))
+		else if (isBracketType((*bracketTypeStack)[stackEnd], COMMAND_TYPE))
 		{
-			breakBracket = true;
-		}
-		else if (bracketTypeStackEnd > 1)
-		{
-			// break the first bracket after a namespace or extern if a function
-			if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], NAMESPACE_TYPE)
-			        || isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], EXTERN_TYPE))
+			if (stackEnd == 1)
 			{
-				if (isBracketType((*bracketTypeStack)[bracketTypeStackEnd], COMMAND_TYPE))
-					breakBracket = true;
+				breakBracket = true;
 			}
-			// if not C style then break the first bracket after a class if a function
-			else if (!isCStyle())
+			else if (stackEnd > 1)
 			{
-				if ((isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], CLASS_TYPE)
-				        || isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], ARRAY_TYPE)
-				        || isBracketType((*bracketTypeStack)[bracketTypeStackEnd-1], STRUCT_TYPE))
-				        && isBracketType((*bracketTypeStack)[bracketTypeStackEnd], COMMAND_TYPE))
+				// break the first bracket after these if a function
+				if (isBracketType((*bracketTypeStack)[stackEnd-1], NAMESPACE_TYPE)
+				        || isBracketType((*bracketTypeStack)[stackEnd-1], CLASS_TYPE)
+				        || isBracketType((*bracketTypeStack)[stackEnd-1], ARRAY_TYPE)
+				        || isBracketType((*bracketTypeStack)[stackEnd-1], STRUCT_TYPE)
+				        || isBracketType((*bracketTypeStack)[stackEnd-1], EXTERN_TYPE))
+				{
 					breakBracket = true;
+				}
 			}
 		}
 	}
@@ -4441,7 +4488,7 @@ void ASFormatter::formatCommentBody()
 		// append the comment up to the next tab or comment end
 		// tabs must be checked for convert-tabs before appending
 		while (charNum + 1 < (int) currentLine.length()
-		        && !isLineReady
+//		        && !isLineReady	// commented out in release 2.04, causing 2 passes thru this function instead of 1
 		        && currentLine[charNum+1] != '\t'
 		        && currentLine.compare(charNum+1, 2, "*/") != 0)
 		{
@@ -4549,7 +4596,7 @@ void ASFormatter::formatLineCommentBody()
 	// append the comment up to the next tab
 	// tabs must be checked for convert-tabs before appending
 	while (charNum + 1 < (int) currentLine.length()
-	        && !isLineReady
+//	        && !isLineReady	// commented out in release 2.04, unnecessary
 	        && currentLine[charNum+1] != '\t')
 	{
 		currentChar = currentLine[++charNum];

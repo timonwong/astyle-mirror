@@ -33,8 +33,7 @@
 
 using namespace std;
 
-namespace astyle
-{
+namespace astyle {
 
 #ifndef ASTYLE_LIB
 

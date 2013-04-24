@@ -79,8 +79,7 @@
 
 using namespace std;
 
-namespace astyle
-{
+namespace astyle {
 
 enum FileType      { C_TYPE=0, JAVA_TYPE=1, SHARP_TYPE=2 };
 
@@ -107,8 +106,7 @@ enum BracketMode   { NONE_MODE,
                      BREAK_MODE,
                      LINUX_MODE,
                      STROUSTRUP_MODE,
-                     RUN_IN_MODE,
-                     BDAC_MODE = LINUX_MODE
+                     RUN_IN_MODE
                    };
 
 enum BracketType   { NULL_TYPE = 0,
@@ -410,7 +408,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool statementEndsWithComma(const string &line, int index) const;
 		vector<vector<const string*>*>* copyTempStacks(const ASBeautifier &other) const;
 		template<typename T> void deleteContainer(T &container);
-		void deleteContainer(vector<vector<const string*>*>* &container);
+		void deleteBeautifierContainer(vector<ASBeautifier*>* &container);
+		void deleteTempStacksContainer(vector<vector<const string*>*>* &container);
 		template<typename T> void initContainer(T &container, T value);
 
 	private:  // variables
@@ -595,6 +594,9 @@ class ASFormatter : public ASBeautifier
 		void setFormattingStyle(FormatStyle style);
 		void setAddBracketsMode(bool state);
 		void setAddOneLineBracketsMode(bool state);
+		void setAttachClass(bool state);
+		void setAttachNamespace(bool state);
+		void setAttachInline(bool state);
 		void setBracketFormatMode(BracketMode mode);
 		void setBreakAfterMode(bool state);
 		void setBreakClosingHeaderBracketsMode(bool state);
@@ -784,6 +786,9 @@ class ASFormatter : public ASBeautifier
 		bool shouldConvertTabs;
 		bool shouldIndentCol1Comments;
 		bool shouldCloseTemplates;
+		bool shouldAttachNamespace;
+		bool shouldAttachClass;
+		bool shouldAttachInline;
 		bool isInLineComment;
 		bool isInComment;
 		bool isInCommentStartLine;
