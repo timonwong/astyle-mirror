@@ -263,7 +263,6 @@ class ASConsole
 		size_t Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding, char* utf16Out) const;
 		size_t Utf16Length(const char* data, size_t len) const;
 		size_t Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding, bool firstBlock, char* utf8Out) const;
-		void verifyCinPeek() const;
 
 		// for unit testing
 		vector<string> getExcludeVector();

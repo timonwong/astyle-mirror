@@ -228,7 +228,7 @@ string ASStreamIterator<T>::peekNextLine()
 	// remove end-of-line characters
 	if (!inStream->eof())
 	{
-		if ((peekCh == '\n' || peekCh == '\r') && peekCh != ch)  /////////////  changed  //////////
+		if ((peekCh == '\n' || peekCh == '\r') && peekCh != ch)
 			inStream->get();
 	}
 
@@ -424,40 +424,24 @@ void ASConsole::error(const char* why, const char* what) const
  */
 void ASConsole::formatCinToCout()
 {
-	verifyCinPeek();
-#ifdef _WIN32
-	// Assure that redirected cin is all Windows line ends.
-	// TODO: The following can be removed when tellg() is removed.
-	// Windows line ends must be used on the input. If not, a problem occurs
-	// when tellg() statements are used. The tellg() will be out of sequence
-	// with the get() statements. The following file conversion could be
-	// eliminated if the tellg() statements were removed.
-	istream* streamIn = &cin;
-	ostringstream out;
-	const int bufSize = 65536;	// 64 KB
-	char* buf = new(nothrow) char[bufSize];
-	if (!buf)
-		error("Cannot allocate memory for input file", "");
-	while (!streamIn->eof())
+	// Using cin.tellg() causes problems with both Windows and Linux.
+	// The Windows problem occurs when the input is not Windows line-ends.
+	// The tellg() will be out of sequence with the get() statements.
+	// The Linux cin.tellg() will return -1 (invalid).
+	// Copying the input sequentially to a stringstream before
+	// formatting solves the problem for both.
+	istream* inStream = &cin;
+	stringstream outStream;
+	char ch;
+	while (!inStream->eof())
 	{
-		streamIn->read(buf, bufSize);
-		out.write(buf, streamIn->gcount());;
+		inStream->get(ch);
+		outStream.put(ch);
 	}
-	delete [] buf;
-	buf = NULL;
-	convertLineEnds(out, LINEEND_WINDOWS);
-	stringstream in(out.str().c_str());
-	ASStreamIterator<stringstream> streamIterator(&in); // create iterator for converted input
-
-	// Must specify LF line ends for Windows. This will output CRLF on the terminal.
-	// Specifying CRLF line ends will output CRCRLF (2 CRs) on the terminal.
-	// There is no way I know to change the line ends on Windows redirection.
-	LineEndFormat lineEndFormat = LINEEND_LF;
-#else
-	// Linux can handle any line end.
-	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
+	ASStreamIterator<stringstream> streamIterator(&outStream);
+	// Windows pipe or redirection always outputs Windows line-ends.
+	// Linux pipe or redirection will output any line end.
 	LineEndFormat lineEndFormat = formatter.getLineEndFormat();
-#endif  //  _WIN32
 	initializeOutputEOL(lineEndFormat);
 	formatter.init(&streamIterator);
 
@@ -481,21 +465,6 @@ void ASConsole::formatCinToCout()
 		}
 	}
 	cout.flush();
-}
-
-/**
- * Verify that tellg() works with cin.
- * This will fail if cin is piped to AStyle "cat txt.cpp | ./astyled".
- * But is OK for redirection "./astyled < txt.cpp".
- */
-void ASConsole::verifyCinPeek() const
-{
-	int currPos = static_cast<int>(cin.tellg());
-	if (currPos == -1)
-	{
-		(*_err) << _("Cannot process the input stream") << endl;
-		error();
-	}
 }
 
 /**
