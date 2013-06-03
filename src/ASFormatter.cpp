@@ -73,6 +73,7 @@ ASFormatter::ASFormatter()
 	shouldBreakLineAfterLogical = false;
 	shouldAddBrackets = false;
 	shouldAddOneLineBrackets = false;
+	shouldRemoveBrackets = false;
 
 	// initialize ASFormatter member vectors
 	formatterFileType = 9;		// reset to an invalid type
@@ -243,6 +244,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	isCharImmediatelyPostTemplate = false;
 	isCharImmediatelyPostPointerOrReference = false;
 	breakCurrentOneLineBlock = false;
+	shouldRemoveNextClosingBracket = false;
 	isInHorstmannRunIn = false;
 	currentLineBeginsWithBracket = false;
 	isPrependPostBlockEmptyLineRequested = false;
@@ -343,6 +345,7 @@ void ASFormatter::fixOptionVariableConflicts()
 	{
 		setBracketFormatMode(LINUX_MODE);
 		setAddBracketsMode(true);
+		setRemoveBracketsMode(false);
 	}
 	else if (formattingStyle == STYLE_PICO)
 	{
@@ -376,6 +379,9 @@ void ASFormatter::fixOptionVariableConflicts()
 	// add-one-line-brackets implies keep-one-line-blocks
 	if (shouldAddOneLineBrackets)
 		setBreakOneLineBlocksMode(false);
+	// don't allow add-brackets and remove-brackets
+	if (shouldAddBrackets || shouldAddOneLineBrackets)
+		setRemoveBracketsMode(false);
 }
 
 /**
@@ -453,13 +459,13 @@ string ASFormatter::nextLine()
 			continue;
 		}
 
-		// not in line comment or comment
-
 		else if (isInQuote)
 		{
 			formatQuoteBody();
 			continue;
 		}
+
+		// not in quote or comment or line comment
 
 		if (isSequenceReached("//"))
 		{
@@ -515,6 +521,16 @@ string ASFormatter::nextLine()
 			if (previousCommandChar == '<' && isWhiteSpace(currentChar))
 				continue;
 			if (isWhiteSpace(currentChar) && peekNextChar() == '>')
+				continue;
+		}
+
+		if (shouldRemoveNextClosingBracket && currentChar == '}')
+		{
+			currentLine[charNum] = currentChar = ' ';
+			shouldRemoveNextClosingBracket = false;
+			assert(adjustChecksumIn(-'}'));
+			// if the line is empty, delete it
+			if (currentLine.find_first_not_of(" \t"))
 				continue;
 		}
 
@@ -598,6 +614,20 @@ string ASFormatter::nextLine()
 					assert(firstText != string::npos);
 					if ((int) firstText == charNum)
 						breakCurrentOneLineBlock = true;
+				}
+			}
+			// should brackets be removed
+			else if (currentChar == '{' && shouldRemoveBrackets)
+			{
+				bool bracketsRemoved = removeBracketsFromStatement();
+				if (bracketsRemoved)
+				{
+					shouldRemoveNextClosingBracket = true;
+					if (shouldBreakOneLineBlocks
+					        || (currentLineBeginsWithBracket
+					            && currentLine.find_first_not_of(" \t") != string::npos))
+						shouldBreakLineAtNextChar = true;
+					continue;
 				}
 			}
 
@@ -1403,7 +1433,7 @@ void ASFormatter::setFormattingStyle(FormatStyle style)
  *    true     brackets added to headers for single line statements.
  *    false    brackets NOT added to headers for single line statements.
  *
- * @param mode         the bracket formatting mode.
+ * @param mode         the add brackets mode.
  */
 void ASFormatter::setAddBracketsMode(bool state)
 {
@@ -1416,12 +1446,25 @@ void ASFormatter::setAddBracketsMode(bool state)
  *    true     one line brackets added to headers for single line statements.
  *    false    one line brackets NOT added to headers for single line statements.
  *
- * @param mode         the bracket formatting mode.
+ * @param mode         the add one line brackets mode.
  */
 void ASFormatter::setAddOneLineBracketsMode(bool state)
 {
 	shouldAddBrackets = state;
 	shouldAddOneLineBrackets = state;
+}
+
+/**
+ * set the remove brackets mode.
+ * options:
+ *    true     brackets removed from headers for single line statements.
+ *    false    brackets NOT removed from headers for single line statements.
+ *
+ * @param mode         the remove brackets mode.
+ */
+void ASFormatter::setRemoveBracketsMode(bool state)
+{
+	shouldRemoveBrackets = state;
 }
 
 /**
@@ -4989,7 +5032,7 @@ bool ASFormatter::addBracketsToStatement()
 	if (currentChar == ';')
 		return false;
 
-	// do not add if a header follows (i.e. else if)
+	// do not add if a header follows
 	if (isCharPotentialHeader(currentLine, charNum))
 		if (findHeader(headers) != NULL)
 			return false;
@@ -5017,6 +5060,102 @@ bool ASFormatter::addBracketsToStatement()
 		if ((formattedLine.length() - 1) - lastText > 1)
 			formattedLine.erase(lastText + 1);
 	}
+	return true;
+}
+
+/**
+ * Remove brackets from a single line statement following a header.
+ * Brackets are not removed if the proper conditions are not met.
+ * The first bracket is replaced by a space.
+ */
+bool ASFormatter::removeBracketsFromStatement()
+{
+	assert(isImmediatelyPostHeader);
+	assert(currentChar == '{');
+
+	if (currentHeader != &AS_IF
+	        && currentHeader != &AS_ELSE
+	        && currentHeader != &AS_FOR
+	        && currentHeader != &AS_WHILE
+	        && currentHeader != &AS_FOREACH)
+		return false;
+
+	if (currentHeader == &AS_WHILE && foundClosingHeader)	// do-while
+		return false;
+
+	bool isFirstLine = true;
+	bool needReset = false;
+	string nextLine = currentLine.substr(charNum + 1);
+	size_t nextChar = 0;
+
+	// find the first non-blank text
+	while (sourceIterator->hasMoreLines() || isFirstLine)
+	{
+		if (isFirstLine)
+			isFirstLine = false;
+		else
+		{
+			nextLine = sourceIterator->peekNextLine();
+			nextChar = 0;
+			needReset = true;
+		}
+
+		nextChar = nextLine.find_first_not_of(" \t", nextChar);
+		if (nextChar != string::npos)
+			break;
+	}
+
+	// don't remove if comments or a header follow the bracket
+	if ((nextLine.compare(nextChar, 2, "/*") == 0)
+	        || (nextLine.compare(nextChar, 2, "//") == 0)
+	        || (isCharPotentialHeader(nextLine, nextChar)
+	            && ASBeautifier::findHeader(nextLine, nextChar, headers) != NULL))
+	{
+		if (needReset)
+			sourceIterator->peekReset();
+		return false;
+	}
+
+	// find the next semi-colon
+	size_t nextSemiColon = nextChar;
+	if (nextLine[nextChar] != ';')
+		nextSemiColon = findNextChar(nextLine, ';', nextChar+1);
+	if (nextSemiColon == string::npos)
+	{
+		if (needReset)
+			sourceIterator->peekReset();
+		return false;
+	}
+
+	// find the closing bracket
+	isFirstLine = true;
+	nextChar = nextSemiColon + 1;
+	while (sourceIterator->hasMoreLines() || isFirstLine)
+	{
+		if (isFirstLine)
+			isFirstLine = false;
+		else
+		{
+			nextLine = sourceIterator->peekNextLine();
+			nextChar = 0;
+			needReset = true;
+		}
+		nextChar = nextLine.find_first_not_of(" \t", nextChar);
+		if (nextChar != string::npos)
+			break;
+	}
+	if (nextLine.length() == 0 || nextLine[nextChar] != '}')
+	{
+		if (needReset)
+			sourceIterator->peekReset();
+		return false;
+	}
+
+	// remove opening bracket
+	currentLine[charNum] = currentChar = ' ';
+	assert(adjustChecksumIn(-'{'));
+	if (needReset)
+		sourceIterator->peekReset();
 	return true;
 }
 
@@ -5826,6 +5965,16 @@ bool ASFormatter::computeChecksumIn(const string &currentLine_)
 	for (size_t i = 0; i < currentLine_.length(); i++)
 		if (!isWhiteSpace(currentLine_[i]))
 			checksumIn += currentLine_[i];
+	return true;
+}
+
+/**
+ * Adjust the input checksum for deleted chars.
+ * This is called as an assert so it for is debug config only
+ */
+bool ASFormatter::adjustChecksumIn(int adjustment)
+{
+	checksumIn += adjustment;
 	return true;
 }
 

@@ -547,7 +547,8 @@ class ASEnhancer : protected ASBase
 
 		// struct used by ParseFormattedLine function
 		// contains variables used to unindent the case blocks
-		struct switchVariables {
+		struct switchVariables
+		{
 			int  switchBracketCount;
 			int  unindentDepth;
 			bool unindentCase;
@@ -594,6 +595,7 @@ class ASFormatter : public ASBeautifier
 		void setFormattingStyle(FormatStyle style);
 		void setAddBracketsMode(bool state);
 		void setAddOneLineBracketsMode(bool state);
+		void setRemoveBracketsMode(bool state);
 		void setAttachClass(bool state);
 		void setAttachNamespace(bool state);
 		void setAttachInline(bool state);
@@ -632,6 +634,7 @@ class ASFormatter : public ASBeautifier
 		char peekNextChar() const;
 		BracketType getBracketType();
 		bool addBracketsToStatement();
+		bool removeBracketsFromStatement();
 		bool commentAndHeaderFollows();
 		bool getNextChar();
 		bool getNextLine(bool emptyLineWasDeleted = false);
@@ -774,6 +777,7 @@ class ASFormatter : public ASBeautifier
 		PointerAlign pointerAlignment;
 		ReferenceAlign referenceAlignment;
 		LineEndFormat lineEnd;
+		bool adjustChecksumIn(int adjustment);
 		bool computeChecksumIn(const string &currentLine_);
 		bool computeChecksumOut(const string &beautifiedLine);
 		bool isVirgin;
@@ -842,6 +846,7 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostOperator;
 		bool isCharImmediatelyPostPointerOrReference;
 		bool breakCurrentOneLineBlock;
+		bool shouldRemoveNextClosingBracket;
 		bool isInHorstmannRunIn;
 		bool currentLineBeginsWithBracket;
 		bool shouldAttachClosingBracket;
@@ -853,6 +858,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakLineAfterLogical;
 		bool shouldAddBrackets;
 		bool shouldAddOneLineBrackets;
+		bool shouldRemoveBrackets;
 		bool shouldDeleteEmptyLines;
 		bool needHeaderOpeningBracket;
 		bool shouldBreakLineAtNextChar;

@@ -39,6 +39,7 @@
 #include <windows.h>
 #else
 #include <dirent.h>
+#include <iconv.h>
 #include <sys/stat.h>
 #ifdef __VMS
 #include <unixlib.h>
@@ -83,7 +84,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* g_version = "2.04 beta";
+const char*    g_version  =  "2.04 beta";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -281,11 +282,12 @@ bool ASStreamIterator<T>::getLineEndChange(int lineEndFormat) const
 	return lineEndChange;
 }
 
-#ifndef ASTYLE_LIB
 //-----------------------------------------------------------------------------
 // ASConsole class
 // main function will be included only in the console build
 //-----------------------------------------------------------------------------
+
+#ifndef ASTYLE_LIB
 
 // rewrite a stringstream converting the line ends
 void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
@@ -706,7 +708,7 @@ FileEncoding ASConsole::readFile(const string &fileName_, stringstream &in) cons
 		if (encoding == UTF_16LE || encoding == UTF_16BE)
 		{
 			// convert utf-16 to utf-8
-			size_t utf8Size = Utf8Length(data, dataSize, encoding);
+			size_t utf8Size = Utf8LengthFromUtf16(data, dataSize, encoding);
 			char* utf8Out = new(nothrow) char[utf8Size];
 			if (!utf8Out)
 				error("Cannot allocate memory for utf-8 conversion", fileName_.c_str());
@@ -1416,7 +1418,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    --attach-classes  OR  -xc\n";
 	(*_err) << "    Attach brackets to a class statement.\n";
 	(*_err) << endl;
-	(*_err) << "    --attach-inlines  OR  -xi\n";
+	(*_err) << "    --attach-inlines  OR  -xl\n";
 	(*_err) << "    Attach brackets to class inline function definitions.\n";
 	(*_err) << endl;
 	(*_err) << "Tab Options:\n";
@@ -1562,6 +1564,9 @@ void ASConsole::printHelp() const
 	(*_err) << "    Add one line brackets to unbracketed one line conditional\n";
 	(*_err) << "    statements.\n";
 	(*_err) << endl;
+	(*_err) << "    --remove-brackets  OR  -xj\n";
+	(*_err) << "    Remove brackets from a bracketed one line conditional statements.\n";
+	(*_err) << endl;
 	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
 	(*_err) << "    Don't break blocks residing completely on one line.\n";
 	(*_err) << endl;
@@ -1607,11 +1612,11 @@ void ASConsole::printHelp() const
 	(*_err) << "    --exclude=####\n";
 	(*_err) << "    Specify a file or directory #### to be excluded from processing.\n";
 	(*_err) << endl;
-	(*_err) << "    ignore-exclude-errors  OR  -i\n";
+	(*_err) << "    --ignore-exclude-errors  OR  -i\n";
 	(*_err) << "    Allow processing to continue if there are errors in the exclude=###\n";
 	(*_err) << "    options. It will display the unmatched excludes.\n";
 	(*_err) << endl;
-	(*_err) << "    ignore-exclude-errors-x  OR  -xi\n";
+	(*_err) << "    --ignore-exclude-errors-x  OR  -xi\n";
 	(*_err) << "    Allow processing to continue if there are errors in the exclude=###\n";
 	(*_err) << "    options. It will NOT display the unmatched excludes.\n";
 	(*_err) << endl;
@@ -2027,7 +2032,7 @@ void ASConsole::updateExcludeVector(string suffixParam)
 //
 // Compute the length of an output utf-8 file given a utf-16 file.
 // Input tlen is the size in BYTES (not wchar_t).
-size_t ASConsole::Utf8Length(const char* data, size_t tlen, FileEncoding encoding) const
+size_t ASConsole::Utf8LengthFromUtf16(const char* data, size_t tlen, FileEncoding encoding) const
 {
 	enum { SURROGATE_LEAD_FIRST = 0xD800 };
 	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
@@ -2063,6 +2068,8 @@ size_t ASConsole::Utf8Length(const char* data, size_t tlen, FileEncoding encodin
 // Adapted from SciTE Utf8_16.cxx.
 // Copyright (C) 2002 Scott Kirkwood.
 // Modified for Artistic Style by Jim Pattee.
+//
+// Convert a utf-8 file to utf-16.
 size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding, char* utf16Out) const
 {
 	typedef unsigned short utf16;	// 16 bits
@@ -2155,7 +2162,7 @@ size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding,
 //
 // Compute the length of an output utf-16 file given a utf-8 file.
 // Return value is the size in BYTES (not wchar_t).
-size_t ASConsole::Utf16Length(const char* data, size_t len) const
+size_t ASConsole::Utf16LengthFromUtf8(const char* data, size_t len) const
 {
 	size_t ulen = 0;
 	size_t charLen;
@@ -2183,6 +2190,8 @@ size_t ASConsole::Utf16Length(const char* data, size_t len) const
 // Adapted from SciTE Utf8_16.cxx.
 // Copyright (C) 2002 Scott Kirkwood.
 // Modified for Artistic Style by Jim Pattee.
+//
+// Convert a utf-16 file to utf-8.
 size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding,
                               bool firstBlock, char* utf8Out) const
 {
@@ -2384,7 +2393,7 @@ void ASConsole::writeFile(const string &fileName_, FileEncoding encoding, ostrin
 	if (encoding == UTF_16LE || encoding == UTF_16BE)
 	{
 		// convert utf-8 to utf-16
-		size_t utf16Size = Utf16Length(out.str().c_str(), out.str().length());
+		size_t utf16Size = Utf16LengthFromUtf8(out.str().c_str(), out.str().length());
 		char* utf16Out = new char[utf16Size];
 		size_t utf16Len = Utf8ToUtf16(const_cast<char*>(out.str().c_str()), out.str().length(), encoding, utf16Out);
 		assert(utf16Len == utf16Size);
@@ -2418,7 +2427,284 @@ void ASConsole::writeFile(const string &fileName_, FileEncoding encoding, ostrin
 	}
 }
 
-#endif	// ASConsole:
+//-----------------------------------------------------------------------------
+// ASLibrary class
+// used by shared object (DLL) calls
+//-----------------------------------------------------------------------------
+
+#else	// ASTYLE_LIB
+
+utf16_t* ASLibrary::formatUtf16(const utf16_t* pSourceIn,		// the source to be formatted
+                                const utf16_t* pOptions,		// AStyle options
+                                fpError fpErrorHandler,			// error handler function
+                                fpAlloc fpMemoryAlloc) const	// memory allocation function)
+{
+	const char* utf8In = convertUtf16ToUtf8(pSourceIn);
+	if (utf8In == NULL)
+	{
+		fpErrorHandler(121, "Cannot convert input utf-16 to utf-8.");
+		return NULL;
+	}
+	const char* utf8Options = convertUtf16ToUtf8(pOptions);
+	if (utf8Options == NULL)
+	{
+		delete [] utf8In;
+		fpErrorHandler(122, "Cannot convert options utf-16 to utf-8.");
+		return NULL;
+	}
+	// call the Artistic Style formatting function
+	// cannot use the callers memory allocation here
+	char* utf8Out = ::AStyleMain(utf8In,
+	                             utf8Options,
+	                             fpErrorHandler,
+	                             ASLibrary::tempMemoryAllocation);
+	// finished with these
+	delete [] utf8In;
+	delete [] utf8Options;
+	utf8In = NULL;
+	utf8Options = NULL;
+	// AStyle error has already been sent
+	if (utf8Out == NULL)
+		return NULL;
+	// convert text to wide char and return it
+	utf16_t* utf16Out = convertUtf8ToUtf16(utf8Out, fpMemoryAlloc);
+	delete [] utf8Out;
+	utf8Out = NULL;
+	if (utf16Out == NULL)
+	{
+		fpErrorHandler(123, "Cannot convert output utf-8 to utf-16.");
+		return NULL;
+	}
+	return utf16Out;
+}
+
+bool ASLibrary::getBigEndian() const
+{
+	short int word = 0x0001;
+	char* byte = (char*) &word;
+	return (byte[0] ? false : true);
+}
+
+// Swap the two low order bytes of a 16 bit integer value.
+int ASLibrary::swap16bit(int value) const
+{
+	return ( ((value & 0xff) << 8) | ((value & 0xff00) >> 8) );
+}
+
+// STATIC method to allocate temporary memory for AStyle formatting.
+// The data will be converted before being returned to the calling program.
+char* STDCALL ASLibrary::tempMemoryAllocation(unsigned long memoryNeeded)
+{
+	char* buffer = new(nothrow) char [memoryNeeded];
+	return buffer;
+}
+
+// Adapted from SciTE UniConversion.cxx.
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Modified for Artistic Style by Jim Pattee.
+//
+// Compute the length of an output utf-8 file given a utf-16 file.
+// Input tlen is the size in BYTES (not wchar_t).
+size_t ASLibrary::Utf8LengthFromUtf16(const char* data, size_t tlen, bool isBigEndian) const
+{
+	enum { SURROGATE_LEAD_FIRST = 0xD800 };
+	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
+
+	size_t len = 0;
+	size_t wcharLen = tlen / 2;
+	const short* uptr = reinterpret_cast<const short*>(data);
+	for (size_t i = 0; i < wcharLen && uptr[i];)
+	{
+		size_t uch = isBigEndian ? swap16bit(uptr[i]) : uptr[i];
+		if (uch < 0x80)
+		{
+			len++;
+		}
+		else if (uch < 0x800)
+		{
+			len += 2;
+		}
+		else if ((uch >= SURROGATE_LEAD_FIRST) && (uch <= SURROGATE_TRAIL_LAST))
+		{
+			len += 4;
+			i++;
+		}
+		else
+		{
+			len += 3;
+		}
+		i++;
+	}
+	return len;
+}
+
+// Adapted from SciTE UniConversion.cxx.
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Modified for Artistic Style by Jim Pattee.
+//
+// Compute the length of an output utf-16 file given a utf-8 file.
+// Return value is the size in BYTES (not wchar_t).
+size_t ASLibrary::Utf16LengthFromUtf8(const char* data, size_t len) const
+{
+	size_t ulen = 0;
+	size_t charLen;
+	for (size_t i = 0; i < len;)
+	{
+		unsigned char ch = static_cast<unsigned char>(data[i]);
+		if (ch < 0x80)
+			charLen = 1;
+		else if (ch < 0x80 + 0x40 + 0x20)
+			charLen = 2;
+		else if (ch < 0x80 + 0x40 + 0x20 + 0x10)
+			charLen = 3;
+		else
+		{
+			charLen = 4;
+			ulen++;
+		}
+		i += charLen;
+		ulen++;
+	}
+	// return value is the length in bytes (not wchar_t)
+	return ulen * 2;
+}
+
+#ifdef _WIN32
+
+/**
+ * WINDOWS function to convert utf-8 strings to wchar_t (utf16) strings.
+ * Windows wchar_t is utf-16.
+ * Memory is allocated by the calling program memory allocation function.
+ * The calling function must check for errors.
+ */
+wchar_t* ASLibrary::convertUtf8ToUtf16(const char* utf8In, fpAlloc fpMemoryAlloc) const
+{
+	int wideLen = MultiByteToWideChar(CP_UTF8, 0, utf8In, -1, 0, 0);
+	if (wideLen == 0)
+		return NULL;
+	wchar_t* wide = reinterpret_cast<wchar_t*>(fpMemoryAlloc(wideLen * 2));
+	if (wide == NULL)
+		return NULL;
+	MultiByteToWideChar(CP_UTF8, 0, utf8In, -1, wide, wideLen);
+	return wide;
+}
+
+/**
+ * WINDOWS function to convert wchar_t (utf16) strings to utf-8 strings.
+ * Windows wchar_t is utf-16.
+ * The calling function must check for errors and delete the
+ * allocated memory.
+ */
+char* ASLibrary::convertUtf16ToUtf8(const wchar_t* wcharIn) const
+{
+	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, wcharIn, -1, 0, 0, 0, 0);
+	if (utf8Len == 0)
+		return NULL;
+	char* utf8 = new(nothrow) char[utf8Len];
+	if (utf8 == NULL)
+		return NULL;
+	WideCharToMultiByte(CP_UTF8, 0, wcharIn, -1, utf8, utf8Len, 0, 0);
+	return utf8;
+}
+
+#else	// not _WIN32
+
+/**
+ * LINUX function to convert utf-8 strings to utf16.
+ * Linux wchar_t is utf-32.
+ * Memory is allocated by the calling program memory allocation function.
+ * The calling function must check for errors.
+ */
+utf16_t* ASLibrary::convertUtf8ToUtf16(const char* utf8In, fpAlloc fpMemoryAlloc) const
+{
+	if (utf8In == NULL)
+		return NULL;
+	iconv_t iconvh = iconv_open("UTF-16", "UTF-8//TRANSLIT");
+	if (iconvh == reinterpret_cast<iconv_t>(-1))
+		return NULL;
+	size_t utf16Len = Utf16LengthFromUtf8(utf8In, strlen(utf8In) + 1) + sizeof(utf16_t);
+	utf16_t* utf16Out = reinterpret_cast<utf16_t*>(fpMemoryAlloc(utf16Len));
+	if (utf16Out == NULL)
+		return NULL;
+	char* utf8Conv = const_cast<char*>(utf8In);
+	size_t inLeft = strlen(utf8In) + 1;		// converts the ending NULL
+	char* utf16Conv = reinterpret_cast<char*>(utf16Out);
+	size_t outLeft = utf16Len;
+	size_t iconvval = iconv(iconvh, &utf8Conv, &inLeft, &utf16Conv, &outLeft);
+	///////////////////////////////////////////////////////
+	bool showStats = false;
+	if (showStats && (inLeft != 0 || outLeft != 0))
+	{
+		cout << "-------- 8 to 16 --------" << endl;
+		cout << utf16Len << " utf16len allocated" << endl;
+		cout << inLeft << " inLeft  " << outLeft << " outLeft" << endl;
+		cout << utf16len(utf16Out) << " utf16len out" << endl;
+		cout << "-------------------------" << endl;
+	}
+	///////////////////////////////////////////////////////
+	if (iconvval == static_cast<size_t>(-1))
+		return NULL;
+	iconv_close(iconvh);
+	return utf16Out;
+}
+
+/**
+ * LINUX function to convert utf16 strings to utf-8.
+ * Linux wchar_t is utf-32.
+ * The calling function must check for errors and delete the
+ * allocated memory.
+ */
+char* ASLibrary::convertUtf16ToUtf8(const utf16_t* utf16In) const
+{
+	if (utf16In == NULL)
+		return NULL;
+	iconv_t iconvh = iconv_open("UTF-8", "UTF-16//TRANSLIT");
+	if (iconvh == reinterpret_cast<iconv_t>(-1))
+		return NULL;
+	// length must be in chars
+	size_t utf8Len = Utf8LengthFromUtf16(reinterpret_cast<char*>(const_cast<utf16_t*>(utf16In)),
+	                                     (utf16len(utf16In) * sizeof(utf16_t)), getBigEndian()) + 1;
+	char* utf8Out = new(nothrow) char[utf8Len];
+	if (utf8Out == NULL)
+		return NULL;
+	char* utf16Conv = reinterpret_cast<char*>(const_cast<utf16_t*>(utf16In));
+	// length must be in chars
+	size_t inLeft = (utf16len(utf16In) + 1) * sizeof(utf16_t);	// converts the ending NULL
+	char* utf8Conv = utf8Out;
+	size_t outLeft = utf8Len;
+	size_t iconvval = iconv(iconvh, &utf16Conv, &inLeft, &utf8Conv, &outLeft);
+	///////////////////////////////////////////////////////
+	bool showStats = false;
+	if (showStats && (inLeft != 0 || outLeft != 0))
+	{
+		cout << "-------- 16 to 8 --------" << endl;
+		cout << utf16len(utf16In) << " text16In" << endl;
+		cout << utf8Len << " utf8len allocated" << endl;
+		cout << inLeft << " inLeft  " << outLeft << " outLeft" << endl;
+		cout << strlen(utf8Out) << " utf8len out" << endl;
+		cout << "-------------------------" << endl;
+	}
+	///////////////////////////////////////////////////////
+	if (iconvval == static_cast<size_t>(-1))
+	{
+		perror("iconv error");
+		return NULL;
+	}
+	iconv_close(iconvh);
+	return utf8Out;
+}
+
+// LINUX function to return the length of a utf-16 C string.
+size_t ASLibrary::utf16len(const utf16_t* utf16In) const
+{
+	size_t length = 0;
+	while (*utf16In++ != '\0')
+		length++;
+	return length;
+}
+
+#endif	// _WIN32
+#endif	// ASTYLE_LIB
 
 //-----------------------------------------------------------------------------
 // ASOptions class
@@ -2788,6 +3074,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setAddOneLineBracketsMode(true);
 	}
+	else if ( isOption(arg, "xj", "remove-brackets") )
+	{
+		formatter.setRemoveBracketsMode(true);
+	}
 	else if ( isOption(arg, "Y", "indent-col1-comments") )
 	{
 		formatter.setIndentCol1CommentsMode(true);
@@ -2888,7 +3178,7 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setAttachNamespace(true);
 	}
-	else if ( isOption(arg, "xi", "attach-inlines") )
+	else if ( isOption(arg, "xl", "attach-inlines") )
 	{
 		formatter.setAttachInline(true);
 	}
@@ -3066,17 +3356,20 @@ bool ASOptions::isParamOption(const string &arg, const char* option1, const char
 	return isParamOption(arg, option1) || isParamOption(arg, option2);
 }
 
+//----------------------------------------------------------------------------
 
-// *******************   end of ASOptions functions   *********************************************
+}   // end of astyle namespace
 
-}   // end of namespace astyle
-
-// *******************   end of astyle namespace    ***********************************************
+//----------------------------------------------------------------------------
 
 using namespace astyle;
 
+//----------------------------------------------------------------------------
+// ASTYLE_JNI functions for calling AStyleMain
+//----------------------------------------------------------------------------
+
 #ifdef ASTYLE_JNI
-// *************************   JNI functions   ****************************************************
+
 // called by a java program to get the version number
 // the function name is constructed from method names in the calling java program
 extern "C"  EXPORT
@@ -3140,19 +3433,65 @@ char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded)
 	char* buffer = new(nothrow) char [memoryNeeded];
 	return buffer;
 }
-#endif
+#endif	// ASTYLE_JNI
+
+//----------------------------------------------------------------------------
+// Entry point for AStyleMainUtf16
+//----------------------------------------------------------------------------
 
 #ifdef ASTYLE_LIB
-// *************************   GUI functions   ****************************************************
+
+extern "C" EXPORT utf16_t* STDCALL AStyleMainUtf16(const utf16_t* pSourceIn,	// the source to be formatted
+                                                   const utf16_t* pOptions,		// AStyle options
+                                                   fpError fpErrorHandler,		// error handler function
+                                                   fpAlloc fpMemoryAlloc)		// memory allocation function
+{
+	if (fpErrorHandler == NULL)         // cannot display a message if no error handler
+		return NULL;
+
+	if (pSourceIn == NULL)
+	{
+		fpErrorHandler(101, "No pointer to source input.");
+		return NULL;
+	}
+	if (pOptions == NULL)
+	{
+		fpErrorHandler(102, "No pointer to AStyle options.");
+		return NULL;
+	}
+	if (fpMemoryAlloc == NULL)
+	{
+		fpErrorHandler(103, "No pointer to memory allocation function.");
+		return NULL;
+	}
+#ifndef _WIN32
+	// check size of utf16_t on Linux
+	int sizeCheck = 2;
+	if (sizeof(utf16_t) != sizeCheck)
+	{
+		fpErrorHandler(104, "Unsigned short is not the correct size.");
+		return NULL;
+	}
+#endif
+
+	ASLibrary library;
+	utf16_t* utf16Out = library.formatUtf16(pSourceIn, pOptions, fpErrorHandler, fpMemoryAlloc);
+	return utf16Out;
+}
+
+//----------------------------------------------------------------------------
+// ASTYLE_LIB functions for calling AStyleMain
+//----------------------------------------------------------------------------
 /*
+ * This is apparently no longer required.
  * IMPORTANT VC DLL linker for WIN32 must have the parameter  /EXPORT:AStyleMain=_AStyleMain@16
  *                                                            /EXPORT:AStyleGetVersion=_AStyleGetVersion@0
  * No /EXPORT is required for x64
  */
-extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,          // pointer to the source to be formatted
-                                           const char* pOptions,           // pointer to AStyle options, separated by \n
-                                           fpError fpErrorHandler,         // pointer to error handler function
-                                           fpAlloc fpMemoryAlloc)          // pointer to memory allocation function
+extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,		// the source to be formatted
+                                           const char* pOptions,		// AStyle options
+                                           fpError fpErrorHandler,		// error handler function
+                                           fpAlloc fpMemoryAlloc)		// memory allocation function
 {
 	if (fpErrorHandler == NULL)         // cannot display a message if no error handler
 		return NULL;
@@ -3181,11 +3520,9 @@ extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,          // po
 
 	options.importOptions(opt, optionsVector);
 
-	bool ok = options.parseOptions(optionsVector,
-	                               "Invalid Artistic Style options:");
-
+	bool ok = options.parseOptions(optionsVector, "Invalid Artistic Style options:");
 	if (!ok)
-		fpErrorHandler(210, options.getOptionErrors().c_str());
+		fpErrorHandler(130, options.getOptionErrors().c_str());
 
 	istringstream in(pSourceIn);
 	ASStreamIterator<istringstream> streamIterator(&in);
@@ -3210,10 +3547,9 @@ extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,          // po
 
 	unsigned long textSizeOut = out.str().length();
 	char* pTextOut = fpMemoryAlloc(textSizeOut + 1);     // call memory allocation function
-//    pTextOut = NULL;           // for testing
 	if (pTextOut == NULL)
 	{
-		fpErrorHandler(110, "Allocation failure on output.");
+		fpErrorHandler(120, "Allocation failure on output.");
 		return NULL;
 	}
 
@@ -3238,7 +3574,9 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 // ASTYLECON_LIB is defined to exclude "main" from the test programs
 #elif !defined(ASTYLECON_LIB)
 
-// *************************   main function   ****************************************************
+//----------------------------------------------------------------------------
+// main function functions for ASConsole build
+//----------------------------------------------------------------------------
 
 int main(int argc, char** argv)
 {

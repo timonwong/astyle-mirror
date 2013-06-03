@@ -65,7 +65,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/EXPORT:AStyleMain=_AStyleMain@16&#x0D;&#x0A;/EXPORT:AStyleGetVersion=_AStyleGetVersion@0"
 				OutputFile="$(OutDir)\AStyled.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
@@ -223,7 +222,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/EXPORT:AStyleMain=_AStyleMain@16&#x0D;&#x0A;/EXPORT:AStyleGetVersion=_AStyleGetVersion@0"
 				OutputFile="$(OutDir)\AStyle.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
@@ -387,7 +385,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/EXPORT:AStyleMain=_AStyleMain@16&#x0D;&#x0A;/EXPORT:AStyleGetVersion=_AStyleGetVersion@0"
 				OutputFile="$(OutDir)\AStyle.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"

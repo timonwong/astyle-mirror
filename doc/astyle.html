@@ -116,6 +116,7 @@
         <a class="contents" href="#_break-elseifs">break&#8209;elseifs</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_add-brackets">add&#8209;brackets</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_add-one-line-brackets">add&#8209;one&#8209;line&#8209;brackets</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_remove-brackets">remove&#8209;brackets</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-blocks">keep&#8209;one&#8209;line&#8209;blocks</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
@@ -640,7 +641,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         &nbsp;</p>
     <p id="_attach_inlines">
-        <code class="title">--attach-inlines / -xi</code><br />
+        <code class="title">--attach-inlines / -xl</code><br />
         Attach brackets to class and struct inline function definitions. This is not done for run-in type brackets (Horstmann
         and Pico styles). This option is effective for C++ files only.</p>
     <div class="code">
@@ -1437,6 +1438,24 @@ else
     </div>
     <p>
         &nbsp;</p>
+    <p id="_remove-brackets">
+        <code class="title">--remove-brackets / -xj</code><br />
+        Remove brackets from conditional statements (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).
+        The statement must be a single statement on a single line. If --add-brackets or --add-one-line-brackets is also
+        used the result will be to add brackets. Brackets will not be removed from "One True Brace Style", --style=1tbs.</p>
+    <div class="code">
+        <pre>if (isFoo)
+<span class="brace">{</span>
+    isFoo = false;
+<span class="brace">}</span></pre>
+        <p class="code">
+            becomes:</p>
+        <pre>if (isFoo)
+    isFoo = false;
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
     <p id="_keep-one-line-blocks">
         <code class="title">--keep-one-line-blocks / -O </code><br />
         Don't break one-line blocks.</p>
@@ -1571,13 +1590,13 @@ else
         Wildcards are NOT allowed. There may be more than one exclude statement. The filepath and name may be placed in
         double quotes (e.g. &#8209;&#8209;exclude="foo&nbsp;bar.cpp").</p>
     <p id="_ignore-exclude-errors">
-        <code class="title">ignore-exclude-errors / -i</code><br />
+        <code class="title">--ignore-exclude-errors / -i</code><br />
         Allow processing to continue if there are errors in the "exclude=###" options.<br />
         This option lets the excludes for several projects be entered in a single option file. This option may be placed
         in the same option file as the excludes. It will display the unmatched excludes. The following option will not
         display the unmatched excludes.</p>
     <p id="_ignore-exclude-errors-x">
-        <code class="title">ignore-exclude-errors-x / -xi</code><br />
+        <code class="title">--ignore-exclude-errors-x / -xi</code><br />
         <code class="title"></code>Allow processing to continue if there are errors in the "exclude=###" options.<br />
         This option lets the excludes for several projects be entered in a single option file. This option may be placed
         in the same option file as the excludes. It will NOT display the unmatched excludes. The preceding option will

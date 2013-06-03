@@ -36,9 +36,22 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
     <p>
-        Three new bracket modifier options, "attach-namespaces", "attach-classes", and "attach-inlines", can be
+        Three new bracket modifier options, "attach-namespaces"or "xn", "attach-classes"or "xc", and "attach-inlines"or
+        "xl", can be
         used to modify your selected bracket style.&nbsp;See the documentation for details. They are described in a new "Bracket
         Modifier Options" section.</p>
+    <p>
+        A new option, "remove-brackets" or "xj", will will remove brackets from conditional statements. The statement
+        must be a single statement on a single line. It is described in the "Formatting Options" section of the documentation.&nbsp;</p>
+    <p>
+        A new DLL entry point, AStyleMainUtf16, has been added for processing C# UTF-16 strings. C# does not have built
+        in functions for converting the UTF-16 strings to UTF-8 for processing by Artistic Style. This entry point will
+        accept UTF-16 strings, format the source code, and return UTF-16 strings. The error handling function and version
+        number still use ANSI strings. The C# example program in the Deleloper Information shows the procedure. Changes
+        from the previous release are marked in the example.</p>
+    <p>
+        C# strings are UTF-16 on both Windows and Linux. Linux does not use the UTF-32 wchar_t strings for C#. DOES Qt
+        USE 16 BIT ON LINUX?</p>
 
     <h3>
         Artistic Style 2.03&nbsp; (April 2013)</h3>
