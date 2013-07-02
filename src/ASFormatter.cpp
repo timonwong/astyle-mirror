@@ -201,6 +201,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	foundInterfaceHeader = false;
 	foundPreDefinitionHeader = false;
 	foundPreCommandHeader = false;
+	foundPreCommandMacro = false;
 	foundCastOperator = false;
 	foundQuestionMark = false;
 	isInLineBreak = false;
@@ -213,6 +214,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	isInAsmBlock = false;
 	isLineReady = false;
 	elseHeaderFollowsComments = false;
+	caseHeaderFollowsComments = false;
 	isPreviousBracketBlockRelated = false;
 	isInPotentialCalculation = false;
 	shouldReparseCurrentChar = false;
@@ -243,6 +245,8 @@ void ASFormatter::init(ASSourceIterator* si)
 	isCharImmediatelyPostCloseBlock = false;
 	isCharImmediatelyPostTemplate = false;
 	isCharImmediatelyPostPointerOrReference = false;
+	isInObjCMethodDefinition = false;
+	isInObjCInterface = false;
 	breakCurrentOneLineBlock = false;
 	shouldRemoveNextClosingBracket = false;
 	isInHorstmannRunIn = false;
@@ -486,7 +490,7 @@ string ASFormatter::nextLine()
 			continue;
 		}
 		// treat these preprocessor statements as a line comment
-		else if (currentChar =='#')
+		else if (currentChar == '#')
 		{
 			string preproc = trim(currentLine.c_str() + charNum + 1);
 			if (preproc.compare(0, 6, "region") == 0
@@ -563,12 +567,14 @@ string ASFormatter::nextLine()
 
 		if (isImmediatelyPostComment)
 		{
+			caseHeaderFollowsComments = false;
 			isImmediatelyPostComment = false;
 			isCharImmediatelyPostComment = true;
 		}
 
 		if (isImmediatelyPostLineComment)
 		{
+			caseHeaderFollowsComments = false;
 			isImmediatelyPostLineComment = false;
 			isCharImmediatelyPostLineComment = true;
 		}
@@ -760,7 +766,10 @@ string ASFormatter::nextLine()
 				foundInterfaceHeader = false;
 				foundPreDefinitionHeader = false;
 				foundPreCommandHeader = false;
+				foundPreCommandMacro = false;
 				isInPotentialCalculation = false;
+				isInObjCMethodDefinition = false;
+				isInObjCInterface = false;
 				isInEnum = false;
 				isJavaStaticConstructor = false;
 				isCharImmediatelyPostNonInStmt = false;
@@ -1115,10 +1124,13 @@ string ASFormatter::nextLine()
 			foundInterfaceHeader = false;
 			foundPreDefinitionHeader = false;
 			foundPreCommandHeader = false;
+			foundPreCommandMacro = false;
 			foundCastOperator = false;
 			isInPotentialCalculation = false;
 			isSharpAccessor = false;
 			isSharpDelegate = false;
+			isInObjCMethodDefinition = false;
+			isInObjCInterface = false;
 			isInEnum = false;
 			isInExtern = false;
 			elseHeaderFollowsComments = false;
@@ -1143,6 +1155,8 @@ string ASFormatter::nextLine()
 			         && previousCommandChar != ')'  // not immediately after closing paren of a method header, e.g. ASFormatter::ASFormatter(...) : ASBeautifier(...)
 			         && previousChar != ':'         // not part of '::'
 			         && peekNextChar() != ':'       // not part of '::'
+			         && !isInObjCMethodDefinition   // not objC '-' or '+' method
+			         && !isInObjCInterface          // not objC @interface
 			         && !isDigit(peekNextChar())    // not a bit field
 			         && !isInEnum                   // not an enum with a base type
 			         && !isInAsm                    // not in extended assembler
@@ -1167,20 +1181,26 @@ string ASFormatter::nextLine()
 				isImmediatelyPostReturn = true;
 			}
 
+			if (findKeyword(currentLine, charNum, AS_OPERATOR))
+				isImmediatelyPostOperator = true;
+
 			if (isCStyle()
 			        && findKeyword(currentLine, charNum, AS_THROW)
 			        && previousCommandChar != ')'
 			        && !foundPreCommandHeader)      // 'const' throw()
 				isImmediatelyPostThrow = true;
 
-			if (findKeyword(currentLine, charNum, AS_OPERATOR))
-				isImmediatelyPostOperator = true;
-
 			if (isCStyle() && findKeyword(currentLine, charNum, AS_ENUM))
 				isInEnum = true;
 
 			if (isCStyle() && findKeyword(currentLine, charNum, AS_EXTERN))
 				isInExtern = true;
+
+			// Objective-C NSException macros are preCommandHeaders
+			if (isCStyle() && findKeyword(currentLine, charNum, AS_NS_DURING))
+				foundPreCommandMacro = true;
+			if (isCStyle() && findKeyword(currentLine, charNum, AS_NS_HANDLER))
+				foundPreCommandMacro = true;
 
 			if (isCStyle() && isExecSQL(currentLine, charNum))
 				isInExecSQL = true;
@@ -1247,6 +1267,29 @@ string ASFormatter::nextLine()
 			continue;
 
 		}   // (isPotentialHeader &&  !isInTemplate)
+
+		// determine if this is an Objective-C statement
+
+		if (currentChar == '@'
+		        && isCharPotentialHeader(currentLine, charNum+1)
+		        && findKeyword(currentLine, charNum+1, AS_INTERFACE)
+		        && bracketTypeStack->back() == NULL_TYPE)
+		{
+			isInObjCInterface = true;
+			string name = '@' + AS_INTERFACE;
+			appendSequence(name);
+			goForward(name.length() - 1);
+			continue;
+		}
+		else if ((currentChar == '-' || currentChar == '+')
+		         && peekNextChar() == '('
+		         && bracketTypeStack->back() == NULL_TYPE
+		         && !isInPotentialCalculation)
+		{
+			isInObjCMethodDefinition = true;
+			appendCurrentChar();
+			continue;
+		}
 
 		// determine if this is a potential calculation
 
@@ -1384,6 +1427,7 @@ string ASFormatter::nextLine()
 		lineCommentNoBeautify = lineCommentNoIndent;
 		lineCommentNoIndent = false;
 		isElseHeaderIndent = elseHeaderFollowsComments;
+		isCaseHeaderCommentIndent = caseHeaderFollowsComments;
 		if (isCharImmediatelyPostNonInStmt)
 		{
 			isNonInStatementArray = false;
@@ -1934,7 +1978,7 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 		isInAsmOneLine = false;
 		isHeaderInMultiStatementLine = false;
 		isInQuoteContinuation = isInVerbatimQuote | haveLineContinuationChar;
-		haveLineContinuationChar= false;
+		haveLineContinuationChar = false;
 		isImmediatelyPostEmptyLine = lineIsEmpty;
 		previousChar = ' ';
 
@@ -2309,12 +2353,15 @@ BracketType ASFormatter::getBracketType()
 	else
 	{
 		bool isCommandType = (foundPreCommandHeader
+		                      || foundPreCommandMacro
 		                      || (currentHeader != NULL && isNonParenHeader)
 		                      || (previousCommandChar == ')')
 		                      || (previousCommandChar == ':' && !foundQuestionMark)
 		                      || (previousCommandChar == ';')
 		                      || ((previousCommandChar == '{' ||  previousCommandChar == '}')
 		                          && isPreviousBracketBlockRelated)
+		                      || isInObjCMethodDefinition
+		                      || isInObjCInterface
 		                      || isJavaStaticConstructor
 		                      || isSharpDelegate);
 
@@ -2393,6 +2440,9 @@ bool ASFormatter::isPointerOrReference() const
 	        || isDigit(nextChar)
 	        || nextChar == '!')
 		return false;
+
+	if (isPointerOrReferenceVariable(lastWord))
+		return true;
 
 	//check for rvalue reference
 	if (currentChar == '&' && nextChar == '&')
@@ -2558,6 +2608,9 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 	if (lastWord == "else" || lastWord == "delete")
 		return true;
 
+	if (isPointerOrReferenceVariable(lastWord))
+		return false;
+
 	bool isDA = (!(isLegalNameChar(previousNonWSChar) || previousNonWSChar == '>')
 	             || (nextText.length() > 0 && !isLegalNameChar(nextText[0]) && nextText[0] != '/')
 	             || (ispunct((unsigned char)previousNonWSChar) && previousNonWSChar != '.')
@@ -2614,6 +2667,24 @@ bool ASFormatter::isPointerOrReferenceCentered() const
 }
 
 /**
+ * Check if a word is a pointer or reference variable type.
+ *
+ * @return        whether word is a pointer or reference variable.
+ */
+bool ASFormatter::isPointerOrReferenceVariable(string &word) const
+{
+	if (word == "char"
+	        || word ==  "int"
+	        || word ==  "void"
+	        || (word.length() >= 6     // check end of word for _t
+	            && word.compare(word.length()-2, 2, "_t") == 0)
+	        || word ==  "INT"
+	        || word ==  "VOID")
+		return true;
+	return false;
+}
+
+/**
  * check if the currently reached '+' or '-' character is a unary operator
  * this method takes for granted that the current character
  * is a '+' or '-'.
@@ -2632,13 +2703,24 @@ bool ASFormatter::isUnaryOperator() const
 	        && previousCommandChar != ']');
 }
 
+/**
+ * check if the currently reached comment is in a 'switch' statement
+ *
+ * @return        whether the current '+' or '-' is in an exponent.
+ */
+bool ASFormatter::isInSwitchStatement() const
+{
+	assert(isInLineComment || isInComment);
+	if (preBracketHeaderStack->size() > 0)
+		for (size_t i = 1; i < preBracketHeaderStack->size(); i++)
+			if (preBracketHeaderStack->at(i) == &AS_SWITCH)
+				return true;
+	return false;
+}
 
 /**
  * check if the currently reached '+' or '-' character is
  * part of an exponent, i.e. 0.2E-5.
- *
- * this method takes for granted that the current character
- * is a '+' or '-'.
  *
  * @return        whether the current '+' or '-' is in an exponent.
  */
@@ -2832,7 +2914,7 @@ string ASFormatter::peekNextText(const string &firstLine, bool endOnEmptyLine /*
 	bool isFirstLine = true;
 	bool needReset = shouldReset;
 	string nextLine_ = firstLine;
-	size_t firstChar= string::npos;
+	size_t firstChar = string::npos;
 
 	// find the first non-blank text, bypassing all comments.
 	bool isInComment_ = false;
@@ -2963,7 +3045,7 @@ void ASFormatter::appendCharInsideComments(void)
 
 	// insert the bracket
 	if (end - beg < 3)                      // is there room to insert?
-		formattedLine.insert(beg, 3 - end+beg, ' ');
+		formattedLine.insert(beg, 3 - end + beg, ' ');
 	if (formattedLine[beg] == '\t')         // don't pad with a tab
 		formattedLine.insert(beg, 1, ' ');
 	formattedLine[beg+1] = currentChar;
@@ -3096,7 +3178,7 @@ void ASFormatter::formatPointerOrReference(void)
 			peekedChar = currentLine[nextChar];
 	}
 	// check for cast
-	if (peekedChar == ')' || peekedChar =='>' || peekedChar ==',')
+	if (peekedChar == ')' || peekedChar == '>' || peekedChar == ',')
 	{
 		formatPointerOrReferenceCast();
 		return;
@@ -4323,7 +4405,7 @@ const string* ASFormatter::checkForHeaderFollowingComment(const string &firstLin
 {
 	assert(isInComment || isInLineComment);
 	// this is called ONLY IF these are TRUE.
-	assert(shouldBreakElseIfs || shouldBreakBlocks);
+	assert(shouldBreakElseIfs || shouldBreakBlocks || isInSwitchStatement());
 	// look ahead to find the next non-comment text
 	bool endOnEmptyLine = (currentHeader == NULL);
 	string nextText = peekNextText(firstLine, endOnEmptyLine);
@@ -4559,6 +4641,7 @@ void ASFormatter::formatCommentOpener()
 	const string* followingHeader = NULL;
 	if ((doesLineStartComment && !isImmediatelyPostCommentOnly)
 	        && (shouldBreakElseIfs
+	            || isInSwitchStatement()
 	            || (shouldBreakBlocks
 	                && !isImmediatelyPostEmptyLine
 	                && previousCommandChar != '{')))
@@ -4596,9 +4679,11 @@ void ASFormatter::formatCommentOpener()
 	else if (!doesLineStartComment)
 		noTrimCommentContinuation = true;
 
-	// ASBeautifier needs to know the following statement
+	// ASBeautifier needs to know the following statements
 	if (shouldBreakElseIfs && followingHeader == &AS_ELSE)
 		elseHeaderFollowsComments = true;
+	if (followingHeader == &AS_CASE || followingHeader == &AS_DEFAULT)
+		caseHeaderFollowsComments = true;
 
 	// appendSequence will write the previous line
 	appendSequence(AS_OPEN_COMMENT);
@@ -4678,6 +4763,7 @@ void ASFormatter::formatLineCommentOpener()
 	const string* followingHeader = NULL;
 	if ((lineIsLineCommentOnly && !isImmediatelyPostCommentOnly)
 	        && (shouldBreakElseIfs
+	            || isInSwitchStatement()
 	            || (shouldBreakBlocks
 	                && !isImmediatelyPostEmptyLine
 	                && previousCommandChar != '{')))
@@ -4726,9 +4812,11 @@ void ASFormatter::formatLineCommentOpener()
 		}
 	}
 
-	// ASBeautifier needs to know the following statement
+	// ASBeautifier needs to know the following statements
 	if (shouldBreakElseIfs && followingHeader == &AS_ELSE)
 		elseHeaderFollowsComments = true;
+	if (followingHeader == &AS_CASE || followingHeader == &AS_DEFAULT)
+		caseHeaderFollowsComments = true;
 
 	// appendSequence will write the previous line
 	appendSequence(AS_OPEN_LINE_COMMENT);
@@ -5655,7 +5743,7 @@ void ASFormatter::updateFormattedLineSplitPointsOperator(const string &sequence)
 		return;
 
 	// check for logical conditional
-	if (sequence == "||" || sequence ==  "&&"|| sequence ==  "or"|| sequence ==  "and")
+	if (sequence == "||" || sequence ==  "&&" || sequence ==  "or" || sequence ==  "and")
 	{
 		if (shouldBreakLineAfterLogical)
 		{

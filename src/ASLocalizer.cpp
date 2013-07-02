@@ -164,7 +164,7 @@ void ASLocalizer::setLanguageFromLCID(size_t lcid)
 	size_t lang = PRIMARYLANGID(LANGIDFROMLCID(m_lcid));
 	size_t sublang = SUBLANGID(LANGIDFROMLCID(m_lcid));
 	// find language in the wlc table
-	size_t count = sizeof(wlc)/sizeof(wlc[0]);
+	size_t count = sizeof(wlc) / sizeof(wlc[0]);
 	for (size_t i = 0; i < count; i++ )
 	{
 		if (wlc[i].winLang == lang)

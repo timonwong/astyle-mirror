@@ -73,8 +73,8 @@ ifdef LDFLAGS
     LDFLAGSr   = $(LDFLAGS)
     LDFLAGSd   = $(LDFLAGS)
 else
-    LDFLAGSr   = -s
-    LDFLAGSd   =
+    LDFLAGSr   = -s -static-intel
+    LDFLAGSd   = -static-intel
 endif
 
 # object files are built from the source list $(SRC)

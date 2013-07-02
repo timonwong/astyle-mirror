@@ -1296,9 +1296,9 @@ bool ASConsole::isPathExclued(const string &subPath)
 		if (!g_isCaseSensitive)
 		{
 			// make it case insensitive for Windows
-			for (size_t j=0; j<compare.length(); j++)
+			for (size_t j = 0; j < compare.length(); j++)
 				compare[j] = (char)tolower(compare[j]);
-			for (size_t j=0; j<exclude.length(); j++)
+			for (size_t j = 0; j < exclude.length(); j++)
 				exclude[j] = (char)tolower(exclude[j]);
 		}
 		// compare sub directory to exclude data - must check them all
@@ -3393,7 +3393,7 @@ jstring STDCALL Java_AStyleInterface_AStyleMain(JNIEnv* env,
 
 	// get the method ID
 	jclass cls = env->GetObjectClass(obj);
-	g_mid = env->GetMethodID(cls, "ErrorHandler","(ILjava/lang/String;)V");
+	g_mid = env->GetMethodID(cls, "ErrorHandler", "(ILjava/lang/String;)V");
 	if (g_mid == 0)
 	{
 		cout << "Cannot find java method ErrorHandler" << endl;

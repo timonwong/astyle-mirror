@@ -307,7 +307,7 @@
 
     <p>
         These options start with '<strong>--</strong>', and must be written one at a time.<br />
-        (Example: '<code>--brackets=attach --indent=spaces=4</code>')</p>
+        (Example: '<code>--style=allman --indent=spaces=4</code>')</p>
 
     <h4>
         Short Options</h4>
@@ -347,8 +347,9 @@
     <p>
         Example of a default options file:</p>
     <div class="code">
-        <pre><span class="comment"># this line is a comment</span>
---brackets=attach   <span class="comment"># this is a line-end comment</span>
+        <pre>
+<span class="comment"># this line is a comment</span>
+--style=allman      <span class="comment"># this is a line-end comment</span>
 
 <span class="comment"># long options can be written without the preceding '--'</span>
 indent-switches     <span class="comment"># cannot do this on the command line</span>
@@ -357,7 +358,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 -t -p
 
 <span class="comment"># short options can be concatenated together</span>
--M65Ucv</pre>
+-M60Ucv</pre>
     </div>
     <p>
         &nbsp;</p>
@@ -1342,9 +1343,9 @@ String ^s1;</pre>
 
     <p id="_break-closing-brackets">
         <code class="title">--break-closing-brackets / -y </code><br />
-        When used with --brackets=attach, --brackets=linux, or --brackets=stroustrup, this breaks closing headers (e.g.
-        'else', 'catch', ...) from their immediately preceding closing brackets. Closing header brackets are always broken
-        with broken brackets, horstmann brackets, indented blocks, and indented brackets.</p>
+        When used with --style=java, --style=kr, --style=stroustrup, --style=linux, or --style=1tbs, this breaks closing
+        headers (e.g. 'else', 'catch', ...) from their immediately preceding closing brackets. Closing header brackets
+        are always broken with the other styles.</p>
     <div class="code">
         <pre>void Foo(bool isFoo) <span class="brace">{</span>
     if (isFoo) <span class="brace">{</span>

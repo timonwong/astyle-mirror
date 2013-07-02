@@ -156,6 +156,8 @@ const string ASResource::AS_DYNAMIC_CAST = string("dynamic_cast");
 const string ASResource::AS_REINTERPRET_CAST = string("reinterpret_cast");
 const string ASResource::AS_STATIC_CAST = string("static_cast");
 
+const string ASResource::AS_NS_DURING = string("NS_DURING");
+const string ASResource::AS_NS_HANDLER = string("NS_HANDLER");
 
 /**
  * Sort comparison function.
