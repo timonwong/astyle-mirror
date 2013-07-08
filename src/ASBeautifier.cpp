@@ -70,6 +70,7 @@ ASBeautifier::ASBeautifier()
 	setEmptyLineFill(false);
 	setCStyle();
 	setPreprocessorIndent(false);
+	setObjCAlignMethodColon(false);
 
 	// initialize ASBeautifier member vectors
 	beautifierFileType = 9;		// reset to an invalid type
@@ -182,6 +183,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInClassInitializer = other.isInClassInitializer;
 	isInClassHeaderTab = other.isInClassHeaderTab;
 	isInObjCMethodDefinition = other.isInObjCMethodDefinition;
+	isImmediatelyPostObjCMethodDefinition = other.isImmediatelyPostObjCMethodDefinition;
 	isInObjCInterface = other.isInObjCInterface;
 	isInEnum = other.isInEnum;
 	switchIndent = other.switchIndent;
@@ -207,9 +209,12 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInClass = other.isInClass;
 	isInSwitch = other.isInSwitch;
 	foundPreCommandHeader = other.foundPreCommandHeader;
-	foundPreCommandMacro = other.foundPreCommandMacro;;
+	foundPreCommandMacro = other.foundPreCommandMacro;
+	shouldAlignObjCMethodColon = other.shouldAlignObjCMethodColon;
 	indentCount = other.indentCount;
 	spaceIndentCount = other.spaceIndentCount;
+	spaceIndentObjCMethodDefinition = other.spaceIndentObjCMethodDefinition;
+	colonIndentObjCMethodDefinition = other.colonIndentObjCMethodDefinition;
 	lineOpeningBlocksNum = other.lineOpeningBlocksNum;
 	lineClosingBlocksNum = other.lineClosingBlocksNum;
 	fileType = other.fileType;
@@ -316,6 +321,7 @@ void ASBeautifier::init()
 	isInClassInitializer = false;
 	isInClassHeaderTab = false;
 	isInObjCMethodDefinition = false;
+	isImmediatelyPostObjCMethodDefinition = false;
 	isInObjCInterface = false;
 	isInEnum = false;
 	isInHeader = false;
@@ -324,6 +330,8 @@ void ASBeautifier::init()
 
 	indentCount = 0;
 	spaceIndentCount = 0;
+	spaceIndentObjCMethodDefinition = 0;
+	colonIndentObjCMethodDefinition = 0;
 	lineOpeningBlocksNum = 0;
 	lineClosingBlocksNum = 0;
 	templateDepth = 0;
@@ -612,6 +620,11 @@ void ASBeautifier::setEmptyLineFill(bool state)
 	emptyLineFill = state;
 }
 
+void ASBeautifier::setObjCAlignMethodColon(bool state)
+{
+	shouldAlignObjCMethodColon = state;
+}
+
 /**
  * get the file type.
  */
@@ -778,6 +791,8 @@ string ASBeautifier::beautify(const string &originalLine)
 	spaceIndentCount = 0;
 	lineOpeningBlocksNum = 0;
 	lineClosingBlocksNum = 0;
+	if (isImmediatelyPostObjCMethodDefinition)
+		clearObjCMethodDefinitionAlignment();
 
 	// handle and remove white spaces around the line:
 	// If not in comment, first find out size of white space before line,
@@ -965,6 +980,8 @@ string ASBeautifier::beautify(const string &originalLine)
 		--indentCount;
 	if (preprocessorCppExternCBracket >= 3)
 		--indentCount;
+	if (isInObjCMethodDefinition && !inStatementIndentStack->empty())
+		spaceIndentObjCMethodDefinition = inStatementIndentStack->back();
 
 	// parse characters in the current line.
 	// increment indentCount and spaceIndentCount for the current line
@@ -1044,6 +1061,33 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && line.length() > 0
 	        && (line[0] == '{' || line[0] == '}'))
 		indentCount++;
+
+	if (isInObjCMethodDefinition)
+	{
+		// register indent for Objective-C continuation line
+		if (line.length() > 0
+		        && (line[0] == '-' || line[0] == '+'))
+		{
+			if (shouldAlignObjCMethodColon)
+			{
+				colonIndentObjCMethodDefinition = line.find(':');
+			}
+			else if (inStatementIndentStack->empty()
+			         || inStatementIndentStack->back() == 0)
+			{
+				inStatementIndentStack->push_back(indentLength);
+				isInStatement = true;
+			}
+		}
+		// set indent for last definition line
+		else if (!lineBeginsWithBracket)
+		{
+			if (shouldAlignObjCMethodColon)
+				spaceIndentCount = computeObjCColonAlignment(line, colonIndentObjCMethodDefinition);
+			else if (inStatementIndentStack->empty())
+				spaceIndentCount = spaceIndentObjCMethodDefinition;
+		}
+	}
 
 	if (isInDefine)
 	{
@@ -1947,7 +1991,7 @@ void ASBeautifier::computePreliminaryIndentation()
 /**
  * Compute indentCount adjustment when in a series of else-if statements
  * and shouldBreakElseIfs is requested.
- * It increments by onr for each 'else' in the tempStack.
+ * It increments by one for each 'else' in the tempStack.
  */
 int ASBeautifier::adjustIndentCountForBreakElseIfComments() const
 {
@@ -1963,6 +2007,35 @@ int ASBeautifier::adjustIndentCountForBreakElseIfComments() const
 		}
 	}
 	return indentCountIncrement;
+}
+
+/**
+ * Clear the variables used to align the Objective-C method definitions.
+ */
+void ASBeautifier::clearObjCMethodDefinitionAlignment()
+{
+	assert(isImmediatelyPostObjCMethodDefinition);
+	spaceIndentCount = 0;
+	spaceIndentObjCMethodDefinition = 0;
+	colonIndentObjCMethodDefinition = 0;
+	isInObjCMethodDefinition = false;
+	isImmediatelyPostObjCMethodDefinition = false;
+	if (!inStatementIndentStack->empty())
+		inStatementIndentStack->pop_back();
+}
+
+/**
+ * Compute the spaceIncentCount necessary to align the current line colon
+ * with the colon position in the argument.
+ * If it cannot be aligned indentLength is returned and a new colon
+ * position is calculated.
+ */
+int ASBeautifier::computeObjCColonAlignment(string &line, int colonAlignPosition) const
+{
+	int colonPosition = line.find(':');
+	if (colonPosition < 0 || colonPosition > colonAlignPosition)
+		return indentLength;
+	return (colonAlignPosition - colonPosition);
 }
 
 /**
@@ -2307,6 +2380,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			// remove indent for preprocessor 'extern "C"' bracket
 			if (isCStyle() && preprocessorCppExternCBracket == 2)
 				++preprocessorCppExternCBracket;
+			if (isInObjCMethodDefinition)
+				isImmediatelyPostObjCMethodDefinition = true;
 
 			if (!isBlockOpener && currentHeader != NULL)
 			{
@@ -2383,10 +2458,10 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			blockTabCount += (isInStatement ? 1 : 0);
 			parenDepth = 0;
 			isInStatement = false;
+			isInQuestion = false;
 			foundPreCommandHeader = false;
 			foundPreCommandMacro = false;
 			isInObjCInterface = false;
-			isInObjCMethodDefinition = false;
 
 			tempStacks->push_back(new vector<const string*>);
 			headerStack->push_back(&AS_OPEN_BRACKET);
@@ -2579,7 +2654,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			}
 			else if (isInQuestion)
 			{
-				isInQuestion = false;
+				// do nothing special
 			}
 			else if (isCStyle() && isInEnum)
 			{
@@ -2813,11 +2888,14 @@ void ASBeautifier::parseCurrentLine(const string &line)
 
 			if (parenDepth == 0 && ch == ';')
 				isInStatement = false;
+			if (isInObjCMethodDefinition)
+				isImmediatelyPostObjCMethodDefinition = true;
 
 			previousLastLineHeader = NULL;
 			isInClassInitializer = false;
 			isInEnum = false;
 			isInQuestion = false;
+			isInObjCInterface = false;
 			foundPreCommandHeader = false;
 			foundPreCommandMacro = false;
 

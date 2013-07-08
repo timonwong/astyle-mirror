@@ -1774,7 +1774,6 @@ void ASFormatter::setDeleteEmptyLinesMode(bool state)
 
 /**
  * set the pointer alignment.
- * options:
  *
  * @param alignment    the pointer alignment.
  */
@@ -2478,12 +2477,13 @@ bool ASFormatter::isPointerOrReference() const
 	        && isLegalNameChar(nextChar))
 	{
 		// if followed by an assignment it is a pointer or reference
+		// if followed by semicolon it is a pointer or reference in range-based for
 		const string* followingOperator = getFollowingOperator();
 		if (followingOperator
 		        && followingOperator != &AS_MULT
 		        && followingOperator != &AS_BIT_AND)
 		{
-			if (followingOperator == &AS_ASSIGN)
+			if (followingOperator == &AS_ASSIGN || followingOperator == &AS_COLON)
 				return true;
 			else
 				return false;
@@ -3273,7 +3273,6 @@ void ASFormatter::formatPointerOrReferenceToMiddle()
 	assert(currentChar == '*' || currentChar == '&' || currentChar == '^');
 	assert(!isJavaStyle());
 
-	char peekedChar = peekNextChar();
 	// compute current whitespace before
 	size_t wsBefore = currentLine.find_last_not_of(" \t", charNum - 1);
 	if (wsBefore == string::npos)
@@ -3292,7 +3291,7 @@ void ASFormatter::formatPointerOrReferenceToMiddle()
 		goForward(1);
 	}
 	// if reference to a pointer check for conflicting alignment
-	else if (currentChar == '*' && peekedChar == '&'
+	else if (currentChar == '*' && peekNextChar() == '&'
 	         && (referenceAlignment == REF_ALIGN_TYPE
 	             || referenceAlignment == REF_ALIGN_MIDDLE
 	             || referenceAlignment == REF_SAME_AS_PTR))
@@ -3395,7 +3394,6 @@ void ASFormatter::formatPointerOrReferenceToName()
 
 	// do this before bumping charNum
 	bool isOldPRCentered = isPointerOrReferenceCentered();
-	char peekedChar = peekNextChar();
 
 	size_t startNum = formattedLine.find_last_not_of(" \t");
 	if (startNum == string::npos)
@@ -3411,14 +3409,15 @@ void ASFormatter::formatPointerOrReferenceToName()
 		sequenceToInsert = "&&";
 		goForward(1);
 	}
-	// if reference to a pointer align both to type
-	else if (currentChar == '*' && peekedChar == '&')
+	// if reference to a pointer align both to name
+	else if (currentChar == '*' && peekNextChar() == '&')
 	{
 		sequenceToInsert = "*&";
 		goForward(1);
 		for (size_t i = charNum; i < currentLine.length() - 1 && isWhiteSpace(currentLine[i]); i++)
 			goForward(1);
 	}
+	char peekedChar = peekNextChar();
 	bool isAfterScopeResolution = previousNonWSChar == ':';		// check for ::
 	// if this is not the last thing on the line
 	if (!isBeforeAnyComment()
@@ -3515,17 +3514,17 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	int itemAlignment = (currentChar == '*' || currentChar == '^') ? pa : ((ra == REF_SAME_AS_PTR) ? pa : ra);
 
 	string sequenceToInsert(1, currentChar);
-	if (isSequenceReached("**"))
+	if (isSequenceReached("**") || isSequenceReached("&&"))
 	{
-		sequenceToInsert = "**";
 		goForward(1);
+		sequenceToInsert.append(1, currentLine[charNum]);
 	}
 	if (itemAlignment == PTR_ALIGN_NONE)
 	{
 		appendSequence(sequenceToInsert, false);
 		return;
 	}
-	// remove trailing whitespace
+	// remove preceeding whitespace
 	size_t prevCh = formattedLine.find_last_not_of(" \t");
 	if (prevCh == string::npos)
 		prevCh = 0;
@@ -3547,6 +3546,16 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	}
 	else
 		appendSequence(sequenceToInsert, false);
+	// remove trailing whitespace if paren or comma follow
+	char nextChar = peekNextChar();
+	if (nextChar == ')' || nextChar == ',')
+	{
+		while (isWhiteSpace(currentLine[charNum + 1]))
+		{
+			goForward(1);
+			spacePadNum--;
+		}
+	}
 }
 
 /**

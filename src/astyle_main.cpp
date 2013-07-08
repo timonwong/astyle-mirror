@@ -1589,6 +1589,9 @@ void ASConsole::printHelp() const
 	(*_err) << "    cause the logical conditional to be placed last on the\n";
 	(*_err) << "    previous line.\n";
 	(*_err) << endl;
+	(*_err) << "    --oc-align-method-colon  OR  -xM\n";
+	(*_err) << "    Align the colons in an Objective-C method definition.\n";
+	(*_err) << endl;
 	(*_err) << "    --mode=c\n";
 	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
 	(*_err) << endl;
@@ -3181,6 +3184,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	else if ( isOption(arg, "xl", "attach-inlines") )
 	{
 		formatter.setAttachInline(true);
+	}
+	else if ( isOption(arg, "xM", "oc-align-method-colon") )
+	{
+		formatter.setObjCAlignMethodColon(true);
 	}
 	// depreciated options release 2.02 ///////////////////////////////////////////////////////////////////////////////
 	//

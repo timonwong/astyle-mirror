@@ -123,6 +123,7 @@
         <a class="contents" href="#_close-templates">close&#8209;templates</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-code-length">max&#8209;code&#8209;length</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-code-length">break&#8209;after&#8209;logical</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_oc-align-method-colon">oc&#8209;align&#8209;method&#8209;colon</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
@@ -248,7 +249,9 @@
 
     <p>
         If you have never used Artistic Style there are a couple of ways to start. One is to run it with no options at
-        all. This will format the file with 4 spaces per indent and will leave the brackets unchanged. Another is to use
+        all. This will format the file with 4 spaces per indent and will format the brackets using the default bracket
+        style. The opening brackets will not be changed and the closing brackets will be broken from the preceding line.
+        Another way is to use
         one of the bracket styles described in the "Bracket Style Options" section. Select one with a bracket formatting
         style you like. Once you are familiar with the options you can customize the format to your personal preference.</p>
     <p>
@@ -347,8 +350,7 @@
     <p>
         Example of a default options file:</p>
     <div class="code">
-        <pre>
-<span class="comment"># this line is a comment</span>
+        <pre><span class="comment"># this line is a comment</span>
 --style=allman      <span class="comment"># this is a line-end comment</span>
 
 <span class="comment"># long options can be written without the preceding '--'</span>
@@ -1547,8 +1549,24 @@ else
     <p>
         &nbsp;
     </p>
+    <p id="_oc-align-method-colon">
+        <code class="title">--oc-align-method-colon / -xM</code><br />
+        Align the colons in Objective-C method declarations and definitions. This option is effective for Objective-C files only.</p>
+    <div class="code">
+        <pre>-(BOOL)deleteKey:(id)key
+    atIndex:(int)index
+    ofNode:(Node*)node;</pre>
+        <p class="code">
+            becomes:</p>
+        <pre>-(BOOL)deleteKey:(id)key
+         atIndex:(int)index
+          ofNode:(Node*)node;</pre>
+    </div>
+    <p>
+        &nbsp;</p>
     <p id="_mode">
-        <code class="title">--mode=c</code><br /><code class="title">--mode=cs</code><br />
+        <code class="title">--mode=c</code><br />
+        <code class="title">--mode=cs</code><br />
         <code class="title">--mode=java</code><br />
         Indent a C/C++, C#, or Java file. The option is usually set from the file extension for each file. You can override
         the setting with this entry. It will be used for all files regardless of the file extension. It allows the formatter
