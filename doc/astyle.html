@@ -77,7 +77,7 @@
         <a class="contents" href="#_indent=spaces">indent=spaces</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent=tab">indent=tab</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent=force-tab">indent=force&#8209;tab</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_indent=force-tab-x">--indent=force&#8209;tab&#8209;x&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_indent=force-tab-x">--indent=force&#8209;tab&#8209;x</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
         <a class="contents" href="#_Indentation_Options">Indentation&nbsp;Options</a></p>
@@ -122,15 +122,21 @@
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_close-templates">close&#8209;templates</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-code-length">max&#8209;code&#8209;length</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_max-code-length">break&#8209;after&#8209;logical</a>&nbsp;&nbsp;&nbsp;
-        <a class="contents" href="#_oc-align-method-colon">oc&#8209;align&#8209;method&#8209;colon</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_max-code-length">break&#8209;after&#8209;logical</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
+        <a class="contents" href="#_Objective_C_Options">Objective&#8209;C&nbsp;Options</a></p>
+    <p class="contents2">
+        <a class="contents" href="#_align-method-colon">align&#8209;method&#8209;colon</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_pad-method-prefix">pad&#8209;method&#8209;prefix</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_unpad-method-prefix">unpad&#8209;method&#8209;prefix</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_pad-method-colon">pad&#8209;method&#8209;colon</a>&nbsp;&nbsp;&nbsp;
+        </p>
+    <p class="contents1">
         <a class="contents" href="#_Other_Options">Other&nbsp;Options</a></p>
     <p class="contents2">
-        <a class="contents" href="#_suffix">suffix</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_suffix=none">suffix=none</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_suffix">suffix</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_suffix=none">suffix=none</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_recursive">recursive</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_exclude">exclude</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_ignore-exclude-errors">ignore&#8209;exclude&#8209;errors</a>&nbsp;&nbsp;&nbsp;
@@ -1549,21 +1555,6 @@ else
     <p>
         &nbsp;
     </p>
-    <p id="_oc-align-method-colon">
-        <code class="title">--oc-align-method-colon / -xM</code><br />
-        Align the colons in Objective-C method declarations and definitions. This option is effective for Objective-C files only.</p>
-    <div class="code">
-        <pre>-(BOOL)deleteKey:(id)key
-    atIndex:(int)index
-    ofNode:(Node*)node;</pre>
-        <p class="code">
-            becomes:</p>
-        <pre>-(BOOL)deleteKey:(id)key
-         atIndex:(int)index
-          ofNode:(Node*)node;</pre>
-    </div>
-    <p>
-        &nbsp;</p>
     <p id="_mode">
         <code class="title">--mode=c</code><br />
         <code class="title">--mode=cs</code><br />
@@ -1571,6 +1562,86 @@ else
         Indent a C/C++, C#, or Java file. The option is usually set from the file extension for each file. You can override
         the setting with this entry. It will be used for all files regardless of the file extension. It allows the formatter
         to identify language specific syntax such as C++ classes, templates, and keywords.</p>
+    <p>
+        &nbsp;</p>
+    <hr />
+
+    <!--  * * * * * * * * * * * * *   Objective-C Options  * * * * * * * * * * * * *  -->
+
+    <h3 id="_Objective_C_Options">
+        Objective&#8209;C Options</h3>
+
+    <p>
+        Because of the longer indents sometimes needed for Objective&#8209;C, the option "max-instatement-indent" may
+        need to be increased. If you are not getting the paren and square bracket alignment you want, try increasing this
+        value. The option is described in the "Indentation Options" section.
+    </p>
+    <p id="_align-method-colon">
+        <code class="title">--align-method-colon / -xM</code><br />
+        Align the colons in Objective&#8209;C method declarations. This option is effective for Objective&#8209;C
+        files only.</p>
+    <div class="code">
+        <pre>-(void)deleteKey:(id)key
+    atIndex:(int)index
+    ofNode:(Node*)node;</pre>
+        <p class="code">
+            becomes:</p>
+        <pre>-(void)deleteKey:(id)key
+         atIndex:(int)index
+          ofNode:(Node*)node;</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_pad-method-prefix">
+        <code class="title">--pad-method-prefix / -xQ</code><br />
+        Insert space padding after the '-' or '+' Objective&#8209;C method prefix. This will add exactly one space. Any
+        additional spaces will be deleted. This option is effective for Objective&#8209;C files only.</p>
+    <div class="code">
+        <pre>-(void)foo1;
++(void)foo2;</pre>
+        <p class="code">
+            becomes:</p>
+        <pre>- (void)foo1;
++ (void)foo2;</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_unpad-method-prefix">
+        <code class="title">--unpad-method-prefix / -xR</code><br />
+        Remove all space padding after the '-' or '+' Objective&#8209;C method prefix. If used with pad-method-prefix,
+        this option will be ignored. This option is effective for Objective&#8209;C files only.</p>
+    <div class="code">
+        <pre>- (void)foo1;
++ (void)foo2;</pre>
+        <p class="code">
+            becomes:</p>
+        <pre>-(void)foo1;
++(void)foo2;</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_pad-method-colon">
+        <code class="title">--pad-method-colon=none&nbsp;&nbsp; / -xP0<br />
+            --pad-method-colon=all&nbsp;&nbsp;&nbsp; / -xP1<br />
+            --pad-method-colon=after&nbsp; / -xP2<br />
+            --pad-method-colon=before / -xP3</code><br />
+        Add or remove space padding before or after the colons in an Objective&#8209;C method call. These options will
+        pad exactly one space. Any additional spaces will be deleted. Colons immediarely preceeding a paren will not be
+        padded. This option is effective for Objective&#8209;C files only.</p>
+    <div class="code">
+        <p class="code">
+            with pad-method-colon=none:</p>
+        <pre>[node insertKey:key];</pre>
+        <p class="code">
+            with pad-method-colon=all:</p>
+        <pre>[node insertKey : key];</pre>
+        <p class="code">
+            with pad-method-colon=after:</p>
+        <pre>[node insertKey: key];</pre>
+        <p class="code">
+            with pad-method-colon=before:</p>
+        <pre>[node insertKey :key];</pre>
+    </div>
     <p>
         &nbsp;</p>
     <hr />

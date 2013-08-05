@@ -128,6 +128,23 @@ enum BracketType
 	SINGLE_LINE_TYPE = 512
 };
 
+enum MinConditional
+{
+	MINCOND_ZERO,
+	MINCOND_ONE,
+	MINCOND_TWO,
+	MINCOND_ONEHALF,
+	MINCOND_END
+};
+
+enum ObjCColonPad
+{
+	COLON_PAD_NONE,
+	COLON_PAD_ALL,
+	COLON_PAD_AFTER,
+	COLON_PAD_BEFORE,
+};
+
 enum PointerAlign
 {
 	PTR_ALIGN_NONE,
@@ -143,15 +160,6 @@ enum ReferenceAlign
 	REF_ALIGN_MIDDLE = PTR_ALIGN_MIDDLE,
 	REF_ALIGN_NAME = PTR_ALIGN_NAME,
 	REF_SAME_AS_PTR
-};
-
-enum MinConditional
-{
-	MINCOND_ZERO,
-	MINCOND_ONE,
-	MINCOND_TWO,
-	MINCOND_ONEHALF,
-	MINCOND_END
 };
 
 enum FileEncoding
@@ -223,6 +231,7 @@ class ASResource
 		static const string _AS_TRY, _AS_FINALLY, _AS_EXCEPT;
 		static const string AS_PUBLIC, AS_PROTECTED, AS_PRIVATE;
 		static const string AS_CLASS, AS_STRUCT, AS_UNION, AS_INTERFACE, AS_NAMESPACE;
+		static const string AS_SELECTOR;
 		static const string AS_EXTERN, AS_ENUM;
 		static const string AS_STATIC, AS_CONST, AS_SEALED, AS_OVERRIDE, AS_VOLATILE, AS_NEW;
 		static const string AS_WHERE, AS_SYNCHRONIZED;
@@ -354,7 +363,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setMinConditionalIndentLength();
 		void setModeManuallySet(bool state);
 		void setNamespaceIndent(bool state);
-		void setObjCAlignMethodColon(bool state);
+		void setAlignMethodColon(bool state);
 		void setSharpStyle();
 		void setSpaceIndentation(int length = 4);
 		void setSwitchIndent(bool state);
@@ -510,7 +519,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInSwitch;
 		bool foundPreCommandHeader;
 		bool foundPreCommandMacro;
-		bool shouldAlignObjCMethodColon;
+		bool shouldAlignMethodColon;
 		int  indentCount;
 		int  spaceIndentCount;
 		int  spaceIndentObjCMethodDefinition;
@@ -527,6 +536,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  maxInStatementIndent;
 		int  classInitializerIndents;
 		int  templateDepth;
+		int  squareBracketCount;
 		int  preprocessorCppExternCBracket;
 		int  prevFinalLineSpaceIndentCount;
 		int  prevFinalLineIndentCount;
@@ -636,11 +646,14 @@ class ASFormatter : public ASBeautifier
 		void setBreakClosingHeaderBlocksMode(bool state);
 		void setBreakElseIfsMode(bool state);
 		void setBreakOneLineBlocksMode(bool state);
+		void setMethodPrefixPaddingMode(bool state);
+		void setMethodPrefixUnPaddingMode(bool state);
 		void setCloseTemplatesMode(bool state);
 		void setDeleteEmptyLinesMode(bool state);
 		void setIndentCol1CommentsMode(bool state);
 		void setLineEndFormat(LineEndFormat fmt);
 		void setMaxCodeLength(int max);
+		void setObjCColonPaddingMode(ObjCColonPad mode);
 		void setOperatorPaddingMode(bool mode);
 		void setParensOutsidePaddingMode(bool mode);
 		void setParensFirstPaddingMode(bool mode);
@@ -733,9 +746,11 @@ class ASFormatter : public ASBeautifier
 		void isLineBreakBeforeClosingHeader();
 		void initContainer(vector<BracketType>* &container, vector<BracketType>* value);
 		void initNewLine();
+		void padObjCMethodColon();
 		void padOperators(const string* newOperator);
 		void padParens();
 		void processPreprocessor();
+		void resetEndOfStatement();
 		void setAttachClosingBracket(bool state);
 		void setBreakBlocksVariables();
 		void testForTimeToSplitFormattedLine();
@@ -765,6 +780,8 @@ class ASFormatter : public ASBeautifier
 		vector<BracketType>* bracketTypeStack;
 		vector<int>* parenStack;
 		vector<bool>* structStack;
+		vector<bool>* questionMarkStack;
+
 		string readyFormattedLine;
 		string currentLine;
 		string formattedLine;
@@ -783,6 +800,7 @@ class ASFormatter : public ASBeautifier
 		int  tabIncrementIn;
 		int  templateDepth;
 		int  traceLineNumber;
+		int  squareBracketCount;
 		size_t checksumIn;
 		size_t checksumOut;
 		size_t currentLineFirstBracketNum;	// first bracket location on currentLine
@@ -808,6 +826,7 @@ class ASFormatter : public ASBeautifier
 		BracketType previousBracketType;
 		PointerAlign pointerAlignment;
 		ReferenceAlign referenceAlignment;
+		ObjCColonPad objCColonPadMode;
 		LineEndFormat lineEnd;
 		bool adjustChecksumIn(int adjustment);
 		bool computeChecksumIn(const string &currentLine_);
@@ -842,7 +861,6 @@ class ASFormatter : public ASBeautifier
 		bool isInVerbatimQuote;
 		bool haveLineContinuationChar;
 		bool isInQuoteContinuation;
-		bool isInBlParen;
 		bool isHeaderInMultiStatementLine;
 		bool isSpecialChar;
 		bool isNonParenHeader;
@@ -881,6 +899,7 @@ class ASFormatter : public ASBeautifier
 		bool isCharImmediatelyPostPointerOrReference;
 		bool isInObjCMethodDefinition;
 		bool isInObjCInterface;
+		bool isInObjCSelector;
 		bool breakCurrentOneLineBlock;
 		bool shouldRemoveNextClosingBracket;
 		bool isInHorstmannRunIn;
@@ -895,6 +914,9 @@ class ASFormatter : public ASBeautifier
 		bool shouldAddBrackets;
 		bool shouldAddOneLineBrackets;
 		bool shouldRemoveBrackets;
+		bool shouldPadMethodColon;
+		bool shouldPadMethodPrefix;
+		bool shouldUnPadMethodPrefix;
 		bool shouldDeleteEmptyLines;
 		bool needHeaderOpeningBracket;
 		bool shouldBreakLineAtNextChar;

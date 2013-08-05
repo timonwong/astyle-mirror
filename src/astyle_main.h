@@ -267,7 +267,6 @@ class ASConsole
 		void setOptionsFileName(string name);
 		void setOrigSuffix(string suffix);
 		void setPreserveDate(bool state);
-		void setProgramLocale();
 		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
 		bool stringEndsWith(const string &str, const string &suffix) const;
 		void updateExcludeVector(string suffixParam);

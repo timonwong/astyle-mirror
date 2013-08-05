@@ -70,7 +70,7 @@ ASBeautifier::ASBeautifier()
 	setEmptyLineFill(false);
 	setCStyle();
 	setPreprocessorIndent(false);
-	setObjCAlignMethodColon(false);
+	setAlignMethodColon(false);
 
 	// initialize ASBeautifier member vectors
 	beautifierFileType = 9;		// reset to an invalid type
@@ -210,7 +210,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInSwitch = other.isInSwitch;
 	foundPreCommandHeader = other.foundPreCommandHeader;
 	foundPreCommandMacro = other.foundPreCommandMacro;
-	shouldAlignObjCMethodColon = other.shouldAlignObjCMethodColon;
+	shouldAlignMethodColon = other.shouldAlignMethodColon;
 	indentCount = other.indentCount;
 	spaceIndentCount = other.spaceIndentCount;
 	spaceIndentObjCMethodDefinition = other.spaceIndentObjCMethodDefinition;
@@ -227,6 +227,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	maxInStatementIndent = other.maxInStatementIndent;
 	classInitializerIndents = other.classInitializerIndents;
 	templateDepth = other.templateDepth;
+	squareBracketCount = other.squareBracketCount;
 	preprocessorCppExternCBracket = other.preprocessorCppExternCBracket;
 	prevFinalLineSpaceIndentCount = other.prevFinalLineSpaceIndentCount;
 	prevFinalLineIndentCount = other.prevFinalLineIndentCount;
@@ -335,6 +336,7 @@ void ASBeautifier::init()
 	lineOpeningBlocksNum = 0;
 	lineClosingBlocksNum = 0;
 	templateDepth = 0;
+	squareBracketCount = 0;
 	parenDepth = 0;
 	blockTabCount = 0;
 	preprocessorCppExternCBracket = 0;
@@ -620,9 +622,9 @@ void ASBeautifier::setEmptyLineFill(bool state)
 	emptyLineFill = state;
 }
 
-void ASBeautifier::setObjCAlignMethodColon(bool state)
+void ASBeautifier::setAlignMethodColon(bool state)
 {
-	shouldAlignObjCMethodColon = state;
+	shouldAlignMethodColon = state;
 }
 
 /**
@@ -1062,13 +1064,19 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && (line[0] == '{' || line[0] == '}'))
 		indentCount++;
 
+	if (isInObjCInterface && line.length() > 0 && line[0] != '@')
+	{
+		// in an Objective-C interface continuation line
+		spaceIndentCount += indentLength;
+	}
+
 	if (isInObjCMethodDefinition)
 	{
 		// register indent for Objective-C continuation line
 		if (line.length() > 0
 		        && (line[0] == '-' || line[0] == '+'))
 		{
-			if (shouldAlignObjCMethodColon)
+			if (shouldAlignMethodColon)
 			{
 				colonIndentObjCMethodDefinition = line.find(':');
 			}
@@ -1082,7 +1090,7 @@ string ASBeautifier::beautify(const string &originalLine)
 		// set indent for last definition line
 		else if (!lineBeginsWithBracket)
 		{
-			if (shouldAlignObjCMethodColon)
+			if (shouldAlignMethodColon)
 				spaceIndentCount = computeObjCColonAlignment(line, colonIndentObjCMethodDefinition);
 			else if (inStatementIndentStack->empty())
 				spaceIndentCount = spaceIndentObjCMethodDefinition;
@@ -1227,14 +1235,8 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	if (i > 0 && line[0] == '{')
 		inStatementIndent -= indentLength;
 
-//	if (i + nextNonWSChar < minIndent)
-//		inStatementIndent = minIndent + spaceTabCount_;
-
 	if (inStatementIndent < minIndent)
 		inStatementIndent = minIndent + spaceTabCount_;
-
-//	if (i + nextNonWSChar > maxInStatementIndent)
-//		inStatementIndent =  indentLength * 2 + spaceTabCount_;
 
 	// this is not done for an in-statement array
 	if (inStatementIndent > maxInStatementIndent
@@ -2303,6 +2305,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 					isInStatement = true;
 				}
 				parenDepth++;
+				if (ch == '[')
+					++squareBracketCount;
 
 				inStatementIndentStackSizeStack->push_back(inStatementIndentStack->size());
 
@@ -2313,6 +2317,10 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			}
 			else if (ch == ')' || ch == ']')
 			{
+				if (ch == ']')
+					--squareBracketCount;
+				if (squareBracketCount < 0)
+					squareBracketCount = 0;
 				foundPreCommandHeader = false;
 				parenDepth--;
 				if (parenDepth == 0)
@@ -2473,7 +2481,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 		//check if a header has been reached
 		bool isPotentialHeader = isCharPotentialHeader(line, i);
 
-		if (isPotentialHeader)
+		if (isPotentialHeader && !squareBracketCount)
 		{
 			const string* newHeader = findHeader(line, i, headers);
 
@@ -2656,30 +2664,33 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			{
 				// do nothing special
 			}
-			else if (isCStyle() && isInEnum)
+			else if (parenDepth > 0)
+			{
+				// found an objective-C statement
+				// so do nothing special
+			}
+			else if (isInEnum)
 			{
 				// found an enum with a base-type
 				// so do nothing special
 			}
-			else if (isCStyle()
-			         && !headerStack->empty()
+			else if (!headerStack->empty()
 			         && headerStack->back() == &AS_FOR
 			         && parenDepth > 0)
 			{
 				// found a range-based 'for' loop 'for (auto i : container)'
 				// so do nothing special
 			}
-			else if (isCStyle() && isInClassInitializer)
+			else if (isInClassInitializer)
 			{
 				// found a 'class A : public B' definition
 				// so do nothing special
 			}
-			else if (isCStyle()
-			         && (isInAsm || isInAsmOneLine || isInAsmBlock))
+			else if (isInAsm || isInAsmOneLine || isInAsmBlock)
 			{
 				// do nothing special
 			}
-			else if (isCStyle() && isDigit(peekNextChar(line, i)))
+			else if (isDigit(peekNextChar(line, i)))
 			{
 				// found a bit field
 				// so do nothing special
@@ -2708,11 +2719,6 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			else if (isJavaStyle() && lastLineHeader == &AS_FOR)
 			{
 				// found a java for-each statement
-				// so do nothing special
-			}
-			else if (parenDepth > 0)
-			{
-				// found an objective-C statement
 				// so do nothing special
 			}
 			else
@@ -2898,6 +2904,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			isInObjCInterface = false;
 			foundPreCommandHeader = false;
 			foundPreCommandMacro = false;
+			squareBracketCount = 0;
 
 			continue;
 		}
@@ -3004,6 +3011,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 		         && line.find_first_not_of(" \t")== i)
 		{
 			isInObjCMethodDefinition = true;
+			isInObjCInterface = false;
 			continue;
 		}
 

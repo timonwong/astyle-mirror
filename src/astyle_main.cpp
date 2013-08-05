@@ -1589,7 +1589,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    cause the logical conditional to be placed last on the\n";
 	(*_err) << "    previous line.\n";
 	(*_err) << endl;
-	(*_err) << "    --oc-align-method-colon  OR  -xM\n";
+	(*_err) << "    --align-method-colon  OR  -xM\n";
 	(*_err) << "    Align the colons in an Objective-C method definition.\n";
 	(*_err) << endl;
 	(*_err) << "    --mode=c\n";
@@ -2091,7 +2091,7 @@ size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding,
 	const utf16* pCurStart = pCur;
 	eState eState = eStart;
 
-	// the BOM will automaticallt be converted to utf-16
+	// the BOM will automatically be converted to utf-16
 	while (pRead < pEnd)
 	{
 		switch (eState)
@@ -2217,7 +2217,7 @@ size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding
 	if (firstBlock)
 		eState = eStart;
 
-	// the BOM will automaticallt be converted to utf-8
+	// the BOM will automatically be converted to utf-8
 	while (pRead < pEnd)
 	{
 		switch (eState)
@@ -3185,9 +3185,33 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setAttachInline(true);
 	}
-	else if ( isOption(arg, "xM", "oc-align-method-colon") )
+	else if ( isOption(arg, "xM", "align-method-colon") )
 	{
-		formatter.setObjCAlignMethodColon(true);
+		formatter.setAlignMethodColon(true);
+	}
+	else if ( isOption(arg, "xQ", "pad-method-prefix") )
+	{
+		formatter.setMethodPrefixPaddingMode(true);
+	}
+	else if ( isOption(arg, "xR", "unpad-method-prefix") )
+	{
+		formatter.setMethodPrefixUnPaddingMode(true);
+	}
+	else if ( isOption(arg, "xP0", "pad-method-colon=none") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_NONE);
+	}
+	else if ( isOption(arg, "xP1", "pad-method-colon=all") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_ALL);
+	}
+	else if ( isOption(arg, "xP2", "pad-method-colon=after") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_AFTER);
+	}
+	else if ( isOption(arg, "xP3", "pad-method-colon=before") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_BEFORE);
 	}
 	// depreciated options release 2.02 ///////////////////////////////////////////////////////////////////////////////
 	//
