@@ -250,7 +250,7 @@ class ASConsole
 		bool getLineEndsMixed();
 		bool getNoBackup();
 		string getLanguageID() const;
-		string getNumberFormat(int num, size_t=0) const ;
+		string getNumberFormat(int num, size_t = 0) const ;
 		string getNumberFormat(int num, const char* groupingArg, const char* separator) const;
 		string getOptionsFileName();
 		string getOrigSuffix();
@@ -267,7 +267,7 @@ class ASConsole
 		void setOptionsFileName(string name);
 		void setOrigSuffix(string suffix);
 		void setPreserveDate(bool state);
-		void standardizePath(string &path, bool removeBeginningSeparator=false) const;
+		void standardizePath(string &path, bool removeBeginningSeparator = false) const;
 		bool stringEndsWith(const string &str, const string &suffix) const;
 		void updateExcludeVector(string suffixParam);
 		size_t Utf8LengthFromUtf16(const char* data, size_t len, FileEncoding encoding) const;

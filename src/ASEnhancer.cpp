@@ -662,7 +662,7 @@ size_t ASEnhancer::processSwitchBlock(string &line, size_t index)
 			int lineUnindent = sw.unindentDepth;
 			if (line.find_first_not_of(" \t") == i
 			        && !switchStack.empty())
-				lineUnindent = switchStack[switchStack.size()-1].unindentDepth;
+				lineUnindent = switchStack[switchStack.size() - 1].unindentDepth;
 			if (shouldUnindentLine)
 			{
 				if (lineUnindent > 0)

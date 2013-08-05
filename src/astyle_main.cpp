@@ -300,7 +300,7 @@ void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
 	{
 		if (inStr[pos] == '\r')
 		{
-			if (inStr[pos+ 1] == '\n')
+			if (inStr[pos + 1] == '\n')
 			{
 				// CRLF
 				if (lineEnd == LINEEND_CR)
@@ -311,14 +311,14 @@ void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
 				}
 				else if (lineEnd == LINEEND_LF)
 				{
-					outStr += inStr[pos+1];		// Delete the CR
+					outStr += inStr[pos + 1];		// Delete the CR
 					pos++;
 					continue;
 				}
 				else
 				{
 					outStr += inStr[pos];		// Do not change
-					outStr += inStr[pos+1];
+					outStr += inStr[pos + 1];
 					pos++;
 					continue;
 				}
@@ -1124,7 +1124,7 @@ string ASConsole::getNumberFormat(int num, const char* groupingArg, const char* 
 		number.erase(i);
 		// update grouping
 		if (groupingArg[ig] != '\0'
-		        && groupingArg[ig+1] != '\0')
+		        && groupingArg[ig + 1] != '\0')
 			grouping = groupingArg[++ig];
 	}
 	return formattedNum;
@@ -1151,7 +1151,7 @@ void ASConsole::getFilePaths(string &filePath)
 	else
 	{
 		targetDirectory = filePath.substr(0, separator);
-		targetFilename  = filePath.substr(separator+1);
+		targetFilename  = filePath.substr(separator + 1);
 		mainDirectoryLength = targetDirectory.length() + 1;    // +1 includes trailing separator
 	}
 
@@ -1859,7 +1859,7 @@ void ASConsole::standardizePath(string &path, bool removeBeginningSeparator /*fa
 	// If we are on a VMS system, translate VMS style filenames to unix
 	// style.
 	fab = cc$rms_fab;
-	fab.fab$l_fna = (char*)-1;
+	fab.fab$l_fna = (char*) - 1;
 	fab.fab$b_fns = 0;
 	fab.fab$l_naml = &naml;
 	naml = cc$rms_naml;
@@ -2344,7 +2344,7 @@ int ASConsole::wildcmp(const char* wild, const char* data) const
 				return 1;
 			}
 			mp = wild;
-			cp = data+1;
+			cp = data + 1;
 		}
 		else
 		{
@@ -2740,7 +2740,7 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string &errorI
 			{
 				if (i > 1
 				        && isalpha((unsigned char)arg[i])
-				        && arg[i-1] != 'x')
+				        && arg[i - 1] != 'x')
 				{
 					// parse the previous option in subArg
 					parseOption(subArg, errorInfo);

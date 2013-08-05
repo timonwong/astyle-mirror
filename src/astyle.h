@@ -81,7 +81,7 @@ using namespace std;
 
 namespace astyle {
 
-enum FileType { C_TYPE=0, JAVA_TYPE=1, SHARP_TYPE=2 };
+enum FileType { C_TYPE = 0, JAVA_TYPE = 1, SHARP_TYPE = 2 };
 
 /* The enums below are not recognized by 'vectors' in Microsoft Visual C++
    V5 when they are part of a namespace!!!  Use Visual C++ V6 or higher.
@@ -213,10 +213,10 @@ class ASResource
 		virtual ~ASResource() {}
 		void buildAssignmentOperators(vector<const string*>* assignmentOperators);
 		void buildCastOperators(vector<const string*>* castOperators);
-		void buildHeaders(vector<const string*>* headers, int fileType, bool beautifier=false);
+		void buildHeaders(vector<const string*>* headers, int fileType, bool beautifier = false);
 		void buildIndentableHeaders(vector<const string*>* indentableHeaders);
 		void buildNonAssignmentOperators(vector<const string*>* nonAssignmentOperators);
-		void buildNonParenHeaders(vector<const string*>* nonParenHeaders, int fileType, bool beautifier=false);
+		void buildNonParenHeaders(vector<const string*>* nonParenHeaders, int fileType, bool beautifier = false);
 		void buildOperators(vector<const string*>* operators, int fileType);
 		void buildPreBlockStatements(vector<const string*>* preBlockStatements, int fileType);
 		void buildPreCommandHeaders(vector<const string*>* preCommandHeaders, int fileType);
@@ -305,7 +305,7 @@ class ASBase
 		bool isCharPotentialHeader(const string &line, size_t i) const {
 			assert(!isWhiteSpace(line[i]));
 			char prevCh = ' ';
-			if (i > 0) prevCh = line[i-1];
+			if (i > 0) prevCh = line[i - 1];
 			if (!isLegalNameChar(prevCh) && isLegalNameChar(line[i]))
 				return true;
 			return false;
@@ -717,7 +717,7 @@ class ASFormatter : public ASBeautifier
 		void appendSequence(const string &sequence, bool canBreakLine = true);
 		void appendSpacePad();
 		void appendSpaceAfter();
-		void breakLine(bool isSplitLine=false);
+		void breakLine(bool isSplitLine = false);
 		void buildLanguageVectors();
 		void updateFormattedLineSplitPoints(char appendedChar);
 		void updateFormattedLineSplitPointsOperator(const string &sequence);
@@ -761,7 +761,7 @@ class ASFormatter : public ASBeautifier
 		const string* checkForHeaderFollowingComment(const string &firstLine) const;
 		const string* getFollowingOperator() const;
 		string getPreviousWord(const string &line, int currPos) const;
-		string peekNextText(const string &firstLine, bool endOnEmptyLine=false, bool shouldReset=false) const;
+		string peekNextText(const string &firstLine, bool endOnEmptyLine = false, bool shouldReset = false) const;
 
 	private:  // variables
 		int formatterFileType;
