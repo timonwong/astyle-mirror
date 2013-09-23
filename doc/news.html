@@ -36,12 +36,33 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
     <p>
-        Three new bracket modifier options, "attach-namespaces", &nbsp;"attach-classes", and "attach-inlines", can be
-        used to modify your selected bracket style.&nbsp;See the documentation for details. They are described in a new
-        "Bracket Modifier Options" section.</p>
+        A new option, "indent-preproc-cond", will indent preprocessor conditional statements (#if #elif, #else, #endif).
+        It is described in the "Indentation Options" section of the documentation. The option "indent-preprocessor" has
+        been deprectated and will be removed in a future release. Use "indent-preproc-define" instead. The processing
+        of preprocessor #define statements has not changed.</p>
+    <p>
+        Four new bracket modifier options, "attach-namespaces", &nbsp;"attach-classes", "attach-inlines", and "attach-extern-c",
+        can be
+        used to modify your selected bracket style.&nbsp; They are described in a new
+        "Bracket Modifier Options" section
+        of the documentation.</p>
     <p>
         A new option, "remove-brackets", will will remove brackets from conditional statements. The statement must be
         a single statement on a single line. It is described in the "Formatting Options" section of the documentation.&nbsp;</p>
+    <p>
+        A new option, "remove-comment-prefix", will will remove a leading '*' from multi-line comments. It is described
+        in the "Formatting Options" section of the documentation. With the syntax coloring of modern editors the leading
+        '*' is not as useful as it once was. The current trend is toward code that is easier to maintain. The idea is
+        that a style that is hard to maintain will discourage modification and updating. &nbsp;The converted style should
+        retain most of the formatting within the comment and result in a comment that is easier to maintain. For consistency
+        the option also indents multi-line comments that are not preceeded by the '*'. This may slightly modify the indentation
+        of any commented-out code.&nbsp;</p>
+    <p>
+        Added processing of C++11 raw string literals.</p>
+    <p>
+        The option "pad-first-paren-out" was fixed to not pad if the following paren is empty. This makes the option
+        consistent with "pad-paren-out". To fix empty parens that have been padded run with the option "unpad-paren" in
+        addition to "pad-first-paren-out". This needs to be done only once.</p>
     <p>
         A new programming language, Objective&#8209;C, has been added to Artistic Style. Four new options, "align&#8209;method&#8209;colon",
         "pad&#8209;method&#8209;colon=", "pad&#8209;method&#8209;prefix", and "unpad&#8209;method&#8209;prefix" have been

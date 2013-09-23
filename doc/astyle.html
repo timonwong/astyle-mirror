@@ -63,13 +63,6 @@
         <a class="contents" href="#_style=lisp">style=lisp</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
-        <a class="contents" href="#_Bracket_Modifier_Options">Bracket&nbsp;Modifier&nbsp;Options</a></p>
-    <p class="contents2">
-        <a class="contents" href="#_attach_namespaces">attach&#8209;namespaces</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_attach_classes">attach&#8209;classes</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_attach_inlines">attach&#8209;inlines</a>&nbsp;&nbsp;&nbsp;
-    </p>
-    <p class="contents1">
         <a class="contents" href="#_Tab_Options">Tab&nbsp;Options</a>
     </p>
     <p class="contents2">
@@ -80,6 +73,14 @@
         <a class="contents" href="#_indent=force-tab-x">--indent=force&#8209;tab&#8209;x</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
+        <a class="contents" href="#_Bracket_Modifier_Options">Bracket&nbsp;Modifier&nbsp;Options</a></p>
+    <p class="contents2">
+        <a class="contents" href="#_attach_namespaces">attach&#8209;namespaces</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_attach_classes">attach&#8209;classes</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_attach_inlines">attach&#8209;inlines</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_attach-extern-c">attach&#8209;extern&#8209;c</a>&nbsp;&nbsp;&nbsp;
+    </p>
+    <p class="contents1">
         <a class="contents" href="#_Indentation_Options">Indentation&nbsp;Options</a></p>
     <p class="contents2">
         <a class="contents" href="#_indent-classes">indent&#8209;classes</a>&nbsp;&nbsp;&nbsp; 
@@ -87,7 +88,8 @@
         <a class="contents" href="#_indent-cases">indent&#8209;cases</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-namespaces">indent&#8209;namespaces</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent-labels">indent&#8209;labels</a>&nbsp;&nbsp;&nbsp; 
-        <a class="contents" href="#_indent-preprocessor">indent&#8209;preprocessor</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_indent-preproc-define">indent&#8209;preproc&#8209;define</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_indent-preproc-cond">indent&#8209;preproc&#8209;cond</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent-col1-comments">indent&#8209;col1&#8209;comments</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_min-conditional-indent">min&#8209;conditional&#8209;indent</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-instatement-indent">max&#8209;instatement&#8209;indent</a>&nbsp;&nbsp;&nbsp;
@@ -121,6 +123,7 @@
         <a class="contents" href="#_keep-one-line-statements">keep&#8209;one&#8209;line&#8209;statements</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_convert-tabs">convert&#8209;tabs</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_close-templates">close&#8209;templates</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_remove-comment-prefix">remove&#8209;comment&#8209;prefix</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-code-length">max&#8209;code&#8209;length</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_max-code-length">break&#8209;after&#8209;logical</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_mode">mode</a>&nbsp;&nbsp;&nbsp;
@@ -424,8 +427,10 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=kr">
         <code class="title">--style=kr / --style=k&amp;r / --style=k/r / -A3</code><br />
-        Kernighan &amp; Ritchie style formatting/indenting uses linux brackets. Brackets are broken from namespaces, classes,
-        and function definitions. Brackets are attached to statements within a function.</p>
+        Kernighan &amp; Ritchie style formatting/indenting uses linux brackets. Opening brackets are broken from namespaces,
+        classes, and function definitions. Brackets are attached to everything else including statements within a function,
+        arrays, structs, and enums.
+    </p>
     <p>
         Using the k&amp;r option may cause problems because of the &amp;. This can be resolved by enclosing the k&amp;r
         in quotes (e.g. &#8209;&#8209;style="k&amp;r") or by using one of the alternates &#8209;&#8209;style=kr or &#8209;&#8209;style=k/r.</p>
@@ -445,8 +450,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_style=stroustrup">
         <code class="title">--style=stroustrup / -A4</code><br />
         Stroustrup style formatting/indenting uses stroustrup brackets. Brackets are broken from function definitions
-        only. Brackets are attached to namespaces, classes, and statements within a function. This style frequently is
-        used with an indent of 5 spaces.
+        only. Brackets are attached to everything else including namespaces, classes, statements within a function, arrays,
+        structs, and enums. This style frequently is used with an indent of 5 spaces.
     </p>
     <div class="code">
         <pre>int Foo(bool isBar) 
@@ -522,11 +527,12 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         &nbsp;</p>
     <p id="_style=linux">
-        <code class="title">--style=linux / -A8</code><br />
-        Linux style formatting/indenting uses linux brackets. Brackets are broken from namespace, class, and function
-        definitions. Brackets are attached to statements within a function. <strong>Minimum conditional indent</strong>
-        is one-half indent. If you want a different minimum conditional indent use the K&amp;R style instead. This style
-        works best with a large indent. It frequently is used with an indent of 8 spaces.
+        <code class="title">--style=linux / --style=knf / -A8</code><br />
+        Linux style formatting/indenting uses linux brackets. Opening brackets are broken from namespace, class, and function
+        definitions. Brackets are attached to everything else including, statements within a function, arrays, structs,
+        and enums. <strong>Minimum conditional indent</strong> is one-half indent. If you want a different minimum conditional
+        indent use the K&amp;R style instead. This style works best with a large indent. It frequently is used with an
+        indent of 8 spaces.
     </p>
     <p>
         Also known as Kernel Normal Form (KNF) style, this is the style used in the Linux kernel.</p>
@@ -545,7 +551,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=horstmann">
         <code class="title">--style=horstmann / -A9</code><br />
-        Horstmann style formatting/indenting uses run-in brackets, brackets are broken and allow run-in statements.
+        Horstmann style formatting/indenting uses run-in brackets. Brackets are broken and allow run-in statements.
         Switches are indented to allow a run-in to the opening switch block. This style frequently is used with an indent
         of 3 spaces.</p>
     <div class="code">
@@ -562,9 +568,12 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=1tbs">
         <code class="title">--style=1tbs / --style=otbs / -A10</code><br />
-        "One True Brace Style" formatting/indenting uses linux brackets and adds brackets to unbracketed one line
-        conditional statements. In the following example brackets have been added to the "<code>return 0;</code>" statement.
-        The option &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets can also be used with this style.</p>
+        "One True Brace Style" formatting/indenting uses linux brackets and adds brackets to unbracketed one line conditional
+        statements. Opening brackets are broken from namespaces, classes, and function definitions. Brackets are attached
+        to everything else including statements within a function, arrays, structs, and enums.&nbsp;</p>
+    <p>
+        &nbsp;In the following example brackets have been added to the "<code>return 0;</code>" statement. The option
+        &#8209;&#8209;add&#8209;one&#8209;line&#8209;brackets can also be used with this style.</p>
     <div class="code">
         <pre>int Foo(bool isBar)
 <span class="brace">{</span>
@@ -581,10 +590,9 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=pico">
         <code class="title">--style=pico / -A11</code><br />
-        Pico style formatting/indenting uses run-in brackets, opening brackets are broken and allow run-in statements. The
+        Pico style formatting/indenting uses run-in brackets and attached closing brackets. Opening brackets are broken and allow run-in statements. The
         closing bracket is attached to the last line in the block. Switches are indented to allow a run-in to the opening
-        switch block. The style implies keep-one-line-blocks and keep-one-line-statements. This style does
-        not support multiple-line brackets. If add-brackets is used they will be added as one-line brackets. This style
+        switch block. The style implies keep-one-line-blocks and keep-one-line-statements. If add-brackets is used they will be added as one-line brackets. This style
         frequently is used with an indent of 2 spaces.
     </p>
     <div class="code">
@@ -600,7 +608,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=lisp">
         <code class="title">--style=lisp / --style=python / -A12</code><br />
-        Lisp style formatting/indenting uses attached brackets, opening brackets are attached at the end of the statement.
+        Lisp style formatting/indenting uses attached opening and closing brackets. Opening brackets are attached at the end of the statement.
         The
         closing bracket is attached to the last line in the block. The style implies keep-one-line-statements
         but NOT keep-one-line-blocks. This style does not support one-line brackets. If add-one-line-brackets is used
@@ -612,56 +620,6 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         return 1; <span class="brace">}
  </span>   else
         return 0; <span class="brace">}</span>
-</pre>
-    </div>
-    <p>
-        &nbsp;</p>
-    <hr />
-
-    <!--  * * * * * * * * * * * *   Bracket Modifier Options   * * * * * * * * * * * * -->
-
-    <h3 id="_Bracket_Modifier_Options">
-        Bracket Modifier Options</h3>
-
-    <p id="_attach_namespaces">
-        <code class="title">--attach-namespaces / -xn</code><br />
-        Attach brackets to a namespace statement. This is done regardless of the bracket style being used.</p>
-    <div class="code">
-        <p class="code">
-            the bracket is always attached to a namespace statement:</p>
-        <pre>namespace FooName <span class="brace">{</span>
-...
-<span class="brace">}</span>
-</pre>
-    </div>
-    <p>
-        &nbsp;</p>
-    <p id="_attach_classes">
-        <code class="title">--attach-classes / -xc</code><br />
-        Attach brackets to a class statement. This is done regardless of the bracket style being used.</p>
-    <div class="code">
-        <p class="code">
-            the bracket is always attached to a class statement:</p>
-        <pre>class FooClass <span class="brace">{</span>
-...
-<span class="brace">}</span>;
-</pre>
-    </div>
-    <p>
-        &nbsp;</p>
-    <p id="_attach_inlines">
-        <code class="title">--attach-inlines / -xl</code><br />
-        Attach brackets to class and struct inline function definitions. This is not done for run-in type brackets (Horstmann
-        and Pico styles). This option is effective for C++ files only.</p>
-    <div class="code">
-        <p class="code">
-            all brackets are always attached to class and struct inline function definitions:</p>
-        <pre>class FooClass
-<span class="brace">{</span>
-    void Foo() <span class="brace">{</span>
-    ...
-<span class="brace">    }</span>
-<span class="brace">}</span>;
 </pre>
     </div>
     <p>
@@ -775,6 +733,79 @@ indent-switches     <span class="comment"># cannot do this on the command line</
 &gt;       ....&amp;&amp; isBar2)    <span class="comment">// indent of this line can be changed with min-conditional-indent</span>
 >       bar();
 <span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <hr />
+
+    <!--  * * * * * * * * * * * *   Bracket Modifier Options   * * * * * * * * * * * * -->
+
+    <h3 id="_Bracket_Modifier_Options">
+        Bracket Modifier Options</h3>
+
+    <p id="_attach_namespaces">
+        <code class="title">--attach-namespaces / -xn</code><br />
+        Attach brackets to a namespace statement. This is done regardless of the bracket style being used.</p>
+    <div class="code">
+        <p class="code">
+            the bracket is always attached to a namespace statement:</p>
+        <pre>namespace FooName <span class="brace">{</span>
+...
+<span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_attach_classes">
+        <code class="title">--attach-classes / -xc</code><br />
+        Attach brackets to a class statement. This is done regardless of the bracket style being used.</p>
+    <div class="code">
+        <p class="code">
+            the bracket is always attached to a class statement:</p>
+        <pre>class FooClass <span class="brace">{</span>
+...
+<span class="brace">}</span>;
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_attach_inlines">
+        <code class="title">--attach-inlines / -xl</code><br />
+        Attach brackets to class and struct inline function definitions. This is not done for run-in type brackets (Horstmann
+        and Pico styles). This option is effective for C++ files only.</p>
+    <div class="code">
+        <p class="code">
+            all brackets are always attached to class and struct inline function definitions:</p>
+        <pre>class FooClass
+<span class="brace">{</span>
+    void Foo() <span class="brace">{</span>
+    ...
+<span class="brace">    }</span>
+<span class="brace">}</span>;
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_attach-extern-c">
+        <code class="title">--attach-extern-c / -xk</code><br />
+        Attach brackets to a bracketed extern "C" statement. This is done regardless of the bracket style being used.
+        This option is effective for C++ files only.</p>
+    <p>
+        An extern "C" statement that is part of a function definition is formatted according to the requested bracket
+        style. Bracketed extern "C" statements are unaffected by the bracket style and this option is the only way to
+        change them.</p>
+    <div class="code">
+        <p class="code">
+            this option attaches brackets to a bracketed extern "C" statement:</p>
+        <pre>#ifdef __cplusplus
+extern "C" <span class="brace">{</span>
+#endif
+</pre>
+        <p class="code">
+            but function definitions are formatted according to the requested bracket style:</p>
+        <pre>extern "C" EXPORT void STDCALL Foo()
+<span class="brace">{}</span>
 </pre>
     </div>
     <p>
@@ -942,8 +973,9 @@ error:
     </div>
     <p>
         &nbsp;</p>
-    <p id="_indent-preprocessor">
-        <code class="title">--indent-preprocessor / -w</code><br />
+    <p id="_indent-preproc-define">
+        <code class="title">--indent-preproc-define / -w</code><br />
+        <code class="title">--indent-preprocessor</code> has been depreciated and will be removed in a future release.<br />
         Indent multi-line preprocessor definitions ending with a backslash. Should be used with --convert-tabs for proper
         results. Does a pretty good job, but cannot perform miracles in obfuscated preprocessor definitions. Without this
         option the preprocessor statements remain unchanged.</p>
@@ -957,6 +989,28 @@ error:
         <pre>#define Is_Bar(arg,a,b) \
     (Is_Foo((arg), (a)) \
      || Is_Foo((arg), (b)))
+</pre>
+    </div>
+       <p>
+        &nbsp;</p>
+    <p id="_indent-preproc-cond">
+        <code class="title">--indent-preproc-cond / -xw</code><br />
+        Indent preprocessor conditional statements to the same level as the source code.</p>
+    <div class="code">
+        <pre>        isFoo = true;
+#ifdef UNICODE
+        text = wideBuff;
+#else
+        text = buff;
+#endif</pre>
+        <p class="code">
+            becomes:</p>
+        <pre>        isFoo = true;
+        #ifdef UNICODE
+        text = wideBuff;
+        #else
+        text = buff;
+        #endif
 </pre>
     </div>
     <p>
@@ -1155,7 +1209,8 @@ isBar = false;
         &nbsp;</p>
     <p id="_pad-paren-out">
         <code class="title">--pad-paren-out / -d </code><br />
-        Insert space padding around parenthesis on the <strong>outside</strong> only. Any end of line comments will remain
+        Insert space padding around parenthesis on the <strong>outside</strong> only. Parenthesis that are empty will
+        not be padded. Any end of line comments will remain
         in the original column, if possible. This can be used with unpad-paren below to remove unwanted spaces.</p>
     <div class="code">
         <pre>if (isFoo((a+2), b))
@@ -1172,7 +1227,7 @@ isBar = false;
     <p id="_pad-first-paren-out">
         <code class="title">--pad-first-paren-out / -xd </code><br />
         Insert space padding around the <strong>first</strong> parenthesis in a series on the <strong>outside</strong>
-        only. Any end of line comments will remain in the original column, if possible. This can be used with unpad-paren
+        only. Parenthesis that are empty will not be padded. Any end of line comments will remain in the original column, if possible. This can be used with unpad-paren
         below to remove unwanted spaces. If used with pad-paren or pad-paren-out, this option will be ignored. If used
         with pad-paren-in, the result will be the same as pad-paren.</p>
     <div class="code">
@@ -1515,6 +1570,30 @@ else
             becomes:
         </p>
         <pre>Stack&lt;int,List&lt;int&gt;&gt; stack1;</pre>
+    </div>
+        <p>
+            &nbsp;
+        </p>
+    <p id="_remove-comment-prefix">
+        <code class="title">--remove-comment-prefix / -xp</code><br />
+        Remove the preceding '*' in a multi-line comment that begins a line. A trailing '*', if present, is also removed.
+        Text that is less than one is indent is indented to
+        one indent. Text greater than one indent is not changed. Multi-line comments that begin a line but without the
+        preceeding '*' are indented to one indent for consistency. This can slightly modify the indentation of commented
+        out blocks of code. Lines containing all '*' are left unchanged.
+        Extra spacing is removed from the comment close '*/'.</p>
+    <div class="code">
+        <pre><em>/*
+ * comment line 1
+ * comment line 2
+ */</em></pre>
+        <p class="code">
+            becomes:
+        </p>
+        <pre><em>/*
+    comment line 1
+    comment line 2
+*/</em></pre>
     </div>
     <p>
         &nbsp;

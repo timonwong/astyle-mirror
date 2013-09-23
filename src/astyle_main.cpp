@@ -1388,7 +1388,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    GNU style formatting/indenting.\n";
 	(*_err) << "    Broken brackets, indented blocks.\n";
 	(*_err) << endl;
-	(*_err) << "    --style=linux  OR  -A8\n";
+	(*_err) << "    --style=linux  OR  --style=knf  OR  -A8\n";
 	(*_err) << "    Linux style formatting/indenting.\n";
 	(*_err) << "    Linux brackets, minimum conditional indent is one-half indent.\n";
 	(*_err) << endl;
@@ -1420,6 +1420,9 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --attach-inlines  OR  -xl\n";
 	(*_err) << "    Attach brackets to class inline function definitions.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-extern-c  OR  -xk\n";
+	(*_err) << "    Attach brackets to an extern \"C\" statement.\n";
 	(*_err) << endl;
 	(*_err) << "Tab Options:\n";
 	(*_err) << "------------\n";
@@ -1469,8 +1472,13 @@ void ASConsole::printHelp() const
 	(*_err) << "    the current indentation level, rather than being\n";
 	(*_err) << "    flushed completely to the left (which is the default).\n";
 	(*_err) << endl;
-	(*_err) << "    --indent-preprocessor  OR  -w\n";
-	(*_err) << "    Indent multi-line #define statements.\n";
+	(*_err) << "    --indent-preproc-define  OR  -w\n";
+	(*_err) << "    --indent-preprocessor has been depreciated.\n";
+	(*_err) << "    Indent multi-line preprocessor #define statements.\n";
+	(*_err) << endl;
+	(*_err) << "    --indent-preproc-cond  OR  -xw\n";
+	(*_err) << "    Indent preprocessor conditional statements #if/#else/#endif\n";
+	(*_err) << "    to the same level as the source code.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent-col1-comments  OR  -Y\n";
 	(*_err) << "    Indent line comments that start in column one.\n";
@@ -1551,8 +1559,8 @@ void ASConsole::printHelp() const
 	(*_err) << "-------------------\n";
 	(*_err) << "    --break-closing-brackets  OR  -y\n";
 	(*_err) << "    Break brackets before closing headers (e.g. 'else', 'catch', ...).\n";
-	(*_err) << "    Use with --brackets=attach, --brackets=linux, \n";
-	(*_err) << "    or --brackets=stroustrup.\n";
+	(*_err) << "    Use with --style=java, --style=kr, --style=stroustrup,\n";
+	(*_err) << "    --style=linux, or --style=1tbs.\n";
 	(*_err) << endl;
 	(*_err) << "    --break-elseifs  OR  -e\n";
 	(*_err) << "    Break 'else if()' statements into two different lines.\n";
@@ -1579,6 +1587,10 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --close-templates  OR  -xy\n";
 	(*_err) << "    Close ending angle brackets on template definitions.\n";
+	(*_err) << endl;
+	(*_err) << "    --remove-comment-prefix  OR  -xp\n";
+	(*_err) << "    Remove the leading '*' prefix on multi-line comments and\n";
+	(*_err) << "    indent the comment text one indent.\n";
 	(*_err) << endl;
 	(*_err) << "    --max-code-length=#    OR  -xC#\n";
 	(*_err) << "    --break-after-logical  OR  -xL\n";
@@ -2795,7 +2807,7 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setFormattingStyle(STYLE_GNU);
 	}
-	else if ( isOption(arg, "style=linux") )
+	else if ( isOption(arg, "style=linux") || isOption(arg, "style=knf") )
 	{
 		formatter.setFormattingStyle(STYLE_LINUX);
 	}
@@ -2975,29 +2987,17 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setLabelIndent(true);
 	}
+	else if ( isOption(arg, "w", "indent-preproc-define") )
+	{
+		formatter.setPreprocDefineIndent(true);
+	}
+	else if ( isOption(arg, "xw", "indent-preproc-cond") )
+	{
+		formatter.setPreprocConditionalIndent(true);
+	}
 	else if ( isOption(arg, "y", "break-closing-brackets") )
 	{
 		formatter.setBreakClosingHeaderBracketsMode(true);
-	}
-	else if ( isOption(arg, "b", "brackets=break") )
-	{
-		formatter.setBracketFormatMode(BREAK_MODE);
-	}
-	else if ( isOption(arg, "a", "brackets=attach") )
-	{
-		formatter.setBracketFormatMode(ATTACH_MODE);
-	}
-	else if ( isOption(arg, "l", "brackets=linux") )
-	{
-		formatter.setBracketFormatMode(LINUX_MODE);
-	}
-	else if ( isOption(arg, "u", "brackets=stroustrup") )
-	{
-		formatter.setBracketFormatMode(STROUSTRUP_MODE);
-	}
-	else if ( isOption(arg, "g", "brackets=run-in") )
-	{
-		formatter.setBracketFormatMode(RUN_IN_MODE);
 	}
 	else if ( isOption(arg, "O", "keep-one-line-blocks") )
 	{
@@ -3043,10 +3043,6 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	else if ( isOption(arg, "E", "fill-empty-lines") )
 	{
 		formatter.setEmptyLineFill(true);
-	}
-	else if ( isOption(arg, "w", "indent-preprocessor") )
-	{
-		formatter.setPreprocessorIndent(true);
 	}
 	else if ( isOption(arg, "c", "convert-tabs") )
 	{
@@ -3177,6 +3173,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setAttachClass(true);
 	}
+	else if ( isOption(arg, "xk", "attach-extern-c") )
+	{
+		formatter.setAttachExternC(true);
+	}
 	else if ( isOption(arg, "xn", "attach-namespaces") )
 	{
 		formatter.setAttachNamespace(true);
@@ -3185,6 +3185,11 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setAttachInline(true);
 	}
+	else if ( isOption(arg, "xp", "remove-comment-prefix") )
+	{
+		formatter.setStripCommentPrefix(true);
+	}
+	// Objective-C options
 	else if ( isOption(arg, "xM", "align-method-colon") )
 	{
 		formatter.setAlignMethodColon(true);
@@ -3213,8 +3218,32 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setObjCColonPaddingMode(COLON_PAD_BEFORE);
 	}
-	// depreciated options release 2.02 ///////////////////////////////////////////////////////////////////////////////
-	//
+	// depreciated options ////////////////////////////////////////////////////////////////////////////////////////////
+	else if ( isOption(arg, "indent-preprocessor") )	// depreciated release 2.04
+	{
+		formatter.setPreprocDefineIndent(true);
+	}
+//  NOTE: Removed in release 2.04.
+//	else if ( isOption(arg, "b", "brackets=break") )
+//	{
+//		formatter.setBracketFormatMode(BREAK_MODE);
+//	}
+//	else if ( isOption(arg, "a", "brackets=attach") )
+//	{
+//		formatter.setBracketFormatMode(ATTACH_MODE);
+//	}
+//	else if ( isOption(arg, "l", "brackets=linux") )
+//	{
+//		formatter.setBracketFormatMode(LINUX_MODE);
+//	}
+//	else if ( isOption(arg, "u", "brackets=stroustrup") )
+//	{
+//		formatter.setBracketFormatMode(STROUSTRUP_MODE);
+//	}
+//	else if ( isOption(arg, "g", "brackets=run-in") )
+//	{
+//		formatter.setBracketFormatMode(RUN_IN_MODE);
+//	}
 	// end depreciated options ////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ASTYLE_LIB
 	// End of options used by GUI /////////////////////////////////////////////////////////////////////////////////////

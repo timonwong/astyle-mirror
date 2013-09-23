@@ -49,7 +49,7 @@ ASFormatter::ASFormatter()
 	bracketFormatMode = NONE_MODE;
 	pointerAlignment = PTR_ALIGN_NONE;
 	referenceAlignment = REF_SAME_AS_PTR;
-	objCColonPadMode = COLON_PAD_NONE;
+	objCColonPadMode = COLON_PAD_NO_CHANGE;
 	lineEnd = LINEEND_DEFAULT;
 	maxCodeLength = string::npos;
 	shouldPadOperators = false;
@@ -57,6 +57,7 @@ ASFormatter::ASFormatter()
 	shouldPadFirstParen = false;
 	shouldPadParensInside = false;
 	shouldPadHeader = false;
+	shouldStripCommentPrefix = false;
 	shouldUnPadParens = false;
 	shouldAttachClosingBracket = false;
 	shouldBreakOneLineBlocks = true;
@@ -64,6 +65,7 @@ ASFormatter::ASFormatter()
 	shouldConvertTabs = false;
 	shouldIndentCol1Comments = false;
 	shouldCloseTemplates = false;
+	shouldAttachExternC = false;
 	shouldAttachNamespace = false;
 	shouldAttachClass = false;
 	shouldAttachInline = false;
@@ -142,7 +144,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	               getIndentString() == "\t" ? true : false,
 	               getForceTabIndentation(),
 	               getCaseIndent(),
-	               getPreprocessorIndent(),
+	               getPreprocDefineIndent(),
 	               getEmptyLineFill());
 	sourceIterator = si;
 
@@ -1213,8 +1215,8 @@ string ASFormatter::nextLine()
 			if (isCStyle() && findKeyword(currentLine, charNum, AS_ENUM))
 				isInEnum = true;
 
-			if (isCStyle() && findKeyword(currentLine, charNum, AS_EXTERN))
-				isInExtern = true;
+			if (isCStyle() && findKeyword(currentLine, charNum, AS_EXTERN) && isExternC())
+				isInExternC = true;
 
 			// Objective-C NSException macros are preCommandHeaders
 			if (isCStyle() && findKeyword(currentLine, charNum, AS_NS_DURING))
@@ -1687,6 +1689,19 @@ void ASFormatter::setParensUnPaddingMode(bool state)
 }
 
 /**
+ * Set strip comment prefix mode.
+ * options:
+ *    true     strip leading '*' in a comment.
+ *    false    leading '*' in a comment will be left unchanged.
+ *
+ * @param state         the strip comment prefix mode.
+ */
+void ASFormatter::setStripCommentPrefix(bool state)
+{
+	shouldStripCommentPrefix = state;
+}
+
+/**
  * set objective-c '-' or '+' class prefix padding mode.
  * options:
  *    true     class prefix will be padded a spaces after them.
@@ -1741,6 +1756,16 @@ void ASFormatter::setAttachClosingBracket(bool state)
 void ASFormatter::setAttachClass(bool state)
 {
 	shouldAttachClass = state;
+}
+
+/**
+ * set option to attach extern "C" brackets
+ *
+ * @param state        true = attach, false = use style default.
+ */
+void ASFormatter::setAttachExternC(bool state)
+{
+	shouldAttachExternC = state;
 }
 
 /**
@@ -2016,7 +2041,7 @@ bool ASFormatter::getNextChar()
 	{
 		currentChar = currentLine[++charNum];
 
-		if (shouldConvertTabs && currentChar == '\t')
+		if (currentChar == '\t' && shouldConvertTabs)
 			convertTabToSpaces();
 
 		return true;
@@ -2112,7 +2137,7 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 			isInLineBreak = false;
 		isInHorstmannRunIn = false;
 
-		if (shouldConvertTabs && currentChar == '\t')
+		if (currentChar == '\t' && shouldConvertTabs)
 			convertTabToSpaces();
 
 		// check for an empty line inside a command bracket.
@@ -2144,15 +2169,13 @@ bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
  */
 void ASFormatter::initNewLine()
 {
-	assert(getTabLength() > 0);
-
 	size_t len = currentLine.length();
 	size_t tabSize = getTabLength();
 	charNum = 0;
 
 	// don't trim these
 	if (isInQuoteContinuation
-	        || (isInPreprocessor && !getPreprocessorIndent()))
+	        || (isInPreprocessor && !getPreprocDefineIndent()))
 		return;
 
 	// SQL continuation lines must be adjusted so the leading spaces
@@ -2447,8 +2470,8 @@ BracketType ASFormatter::getBracketType()
 			isSharpAccessor = true;
 		}
 
-		if (!isCommandType && isInExtern)
-			returnVal = EXTERN_TYPE;
+		if (isInExternC)
+			returnVal = (isCommandType ? COMMAND_TYPE : EXTERN_TYPE);
 		else
 			returnVal = (isCommandType ? COMMAND_TYPE : ARRAY_TYPE);
 	}
@@ -2480,6 +2503,26 @@ BracketType ASFormatter::getBracketType()
 bool ASFormatter::isEmptyLine(const string &line) const
 {
 	return line.find_first_not_of(" \t") == string::npos;
+}
+
+/**
+ * Check if the following text is "C" as in extern "C".
+ *
+ * @return        whether the statement is extern "C"
+ */
+bool ASFormatter::isExternC() const
+{
+	// charNum should be at 'extern'
+	assert(!isWhiteSpace(currentLine[charNum]));
+	size_t startQuote = currentLine.find_first_of(" \t\"", charNum);
+	if (startQuote == string::npos)
+		return false;
+	startQuote = currentLine.find_first_not_of(" \t", startQuote);
+	if (startQuote == string::npos)
+		return false;
+	if (currentLine.compare(startQuote, 3, "\"C\"") != 0)
+		return false;
+	return true;
 }
 
 /**
@@ -3736,11 +3779,11 @@ void ASFormatter::padParens(void)
 		}
 
 		// pad open paren outside
-		if (shouldPadFirstParen && previousChar != '(')
+		char peekedCharOutside = peekNextChar();
+		if (shouldPadFirstParen && previousChar != '(' && peekedCharOutside != ')')
 			appendSpacePad();
 		else if (shouldPadParensOutside)
 		{
-			char peekedCharOutside = peekNextChar();
 			if (!(currentChar == '(' && peekedCharOutside == ')'))
 				appendSpacePad();
 		}
@@ -4276,9 +4319,7 @@ void ASFormatter::formatRunIn()
 	        && !preBracketHeaderStack->empty()
 	        && preBracketHeaderStack->back() == &AS_SWITCH
 	        && ((isLegalNameChar(currentChar)
-	             && !findKeyword(currentLine, charNum, AS_CASE))
-	            || isSequenceReached("//")
-	            || isSequenceReached("/*")))
+	             && !findKeyword(currentLine, charNum, AS_CASE))))
 		extraIndent = true;
 
 	isInLineBreak = false;
@@ -4431,7 +4472,6 @@ void ASFormatter::initContainer(T &container, T value)
 void ASFormatter::convertTabToSpaces()
 {
 	assert(currentLine[charNum] == '\t');
-	assert(getTabLength() > 0);
 
 	// do NOT replace if in quotes
 	if (isInQuote || isInQuoteContinuation)
@@ -4582,6 +4622,11 @@ bool ASFormatter::isCurrentBracketBroken() const
 	size_t stackEnd = bracketTypeStack->size() - 1;
 
 	// check bracket modifiers
+	if (shouldAttachExternC
+	        && isBracketType((*bracketTypeStack)[stackEnd], EXTERN_TYPE))
+	{
+		return false;
+	}
 	if (shouldAttachNamespace
 	        && isBracketType((*bracketTypeStack)[stackEnd], NAMESPACE_TYPE))
 	{
@@ -4664,40 +4709,22 @@ void ASFormatter::formatCommentBody()
 {
 	assert(isInComment);
 
-	if (isSequenceReached("*/"))
+	// append the comment
+	while (charNum < (int) currentLine.length())
 	{
-		isInComment = false;
-		noTrimCommentContinuation = false;
-		isImmediatelyPostComment = true;
-		appendSequence(AS_CLOSE_COMMENT);
-		goForward(1);
-		if (doesLineStartComment
-		        && (currentLine.find_first_not_of(" \t", charNum + 1) == string::npos))
-			lineEndsInCommentOnly = true;
-		if (peekNextChar() == '}'
-		        && previousCommandChar != ';'
-		        && !isBracketType(bracketTypeStack->back(),  ARRAY_TYPE)
-		        && !isInPreprocessor
-		        && isOkToBreakBlock(bracketTypeStack->back()))
+		currentChar = currentLine[charNum];
+		if (currentLine.compare(charNum, 2, "*/") == 0)
 		{
-			isInLineBreak = true;
-			shouldBreakLineAtNextChar = true;
+			formatCommentCloser();
+			break;
 		}
-	}
-	else
-	{
+		if (currentChar == '\t' && shouldConvertTabs)
+			convertTabToSpaces();
 		appendCurrentChar();
-		// append the comment up to the next tab or comment end
-		// tabs must be checked for convert-tabs before appending
-		while (charNum + 1 < (int) currentLine.length()
-//		        && !isLineReady	// commented out in release 2.04, causing 2 passes thru this function instead of 1
-		        && currentLine[charNum + 1] != '\t'
-		        && currentLine.compare(charNum + 1, 2, "*/") != 0)
-		{
-			currentChar = currentLine[++charNum];
-			appendCurrentChar();
-		}
+		++charNum;
 	}
+	if (shouldStripCommentPrefix)
+		stripCommentPrefix();
 }
 
 /**
@@ -4792,6 +4819,31 @@ void ASFormatter::formatCommentOpener()
 }
 
 /**
+ * format a comment closer
+ * the comment closer will be appended to the current formattedLine
+ */
+void ASFormatter::formatCommentCloser()
+{
+	isInComment = false;
+	noTrimCommentContinuation = false;
+	isImmediatelyPostComment = true;
+	appendSequence(AS_CLOSE_COMMENT);
+	goForward(1);
+	if (doesLineStartComment
+	        && (currentLine.find_first_not_of(" \t", charNum + 1) == string::npos))
+		lineEndsInCommentOnly = true;
+	if (peekNextChar() == '}'
+	        && previousCommandChar != ';'
+	        && !isBracketType(bracketTypeStack->back(),  ARRAY_TYPE)
+	        && !isInPreprocessor
+	        && isOkToBreakBlock(bracketTypeStack->back()))
+	{
+		isInLineBreak = true;
+		shouldBreakLineAtNextChar = true;
+	}
+}
+
+/**
  * format a line comment body
  * the calling function should have a continue statement after calling this method
  */
@@ -4799,19 +4851,19 @@ void ASFormatter::formatLineCommentBody()
 {
 	assert(isInLineComment);
 
-	appendCurrentChar();
-	// append the comment up to the next tab
-	// tabs must be checked for convert-tabs before appending
-	while (charNum + 1 < (int) currentLine.length()
+	// append the comment
+	while (charNum < (int) currentLine.length())
 //	        && !isLineReady	// commented out in release 2.04, unnecessary
-	        && currentLine[charNum + 1] != '\t')
 	{
-		currentChar = currentLine[++charNum];
+		currentChar = currentLine[charNum];
+		if (currentChar == '\t' && shouldConvertTabs)
+			convertTabToSpaces();
 		appendCurrentChar();
+		++charNum;
 	}
 
 	// explicitely break a line when a line comment's end is found.
-	if (charNum + 1 == (int) currentLine.length())
+	if (charNum == (int) currentLine.length())
 	{
 		isInLineBreak = true;
 		isInLineComment = false;
@@ -5529,8 +5581,6 @@ bool ASFormatter::isExecSQL(string  &line, size_t index) const
  */
 void ASFormatter::trimContinuationLine()
 {
-	assert(getTabLength() > 0);
-
 	size_t len = currentLine.length();
 	size_t tabSize = getTabLength();
 	charNum = 0;
@@ -6287,7 +6337,7 @@ void ASFormatter::resetEndOfStatement()
 	isInObjCInterface = false;
 	isInObjCSelector = false;
 	isInEnum = false;
-	isInExtern = false;
+	isInExternC = false;
 	elseHeaderFollowsComments = false;
 	nonInStatementBracket = 0;
 	while (!questionMarkStack->empty())
@@ -6334,6 +6384,105 @@ void ASFormatter::padObjCMethodColon()
 			currentLine.erase(i, 1);
 		if (((int) currentLine.length() > charNum + 1) && !isWhiteSpace(currentLine[charNum + 1]))
 			currentLine.insert(charNum + 1, " ");
+	}
+}
+
+// Remove the leading '*' from a comment line and indent to the next tab.
+void ASFormatter::stripCommentPrefix()
+{
+	int firstChar = formattedLine.find_first_not_of(" \t");
+	if (firstChar < 0)
+		return;
+
+	if (isInCommentStartLine)
+	{
+		// comment opener must begin the line
+		if (formattedLine.compare(firstChar, 2, "/*") != 0)
+			return;
+		int commentOpener = firstChar;
+		// ignore single line comments
+		int commentEnd = formattedLine.find("*/", firstChar + 2);
+		if (commentEnd != -1)
+			return;
+		// first char after the comment opener must be at least one indent
+		int followingText = formattedLine.find_first_not_of(" \t", commentOpener + 2);
+		if (followingText < 0)
+			return;
+		if (formattedLine[followingText] == '*' || formattedLine[followingText] == '!')
+			followingText = formattedLine.find_first_not_of(" \t", followingText + 1);
+		if (followingText < 0)
+			return;
+		if (formattedLine[followingText] == '*')
+			return;
+		int indentLength = getIndentLength();
+		int followingTextIndent = followingText - commentOpener;
+		if (followingTextIndent < indentLength)
+		{
+			string stringToInsert(indentLength - followingTextIndent, ' ');
+			formattedLine.insert(followingText, stringToInsert);
+		}
+		return;
+	}
+	// comment body including the closer
+	else if (formattedLine[firstChar] == '*')
+	{
+		if (formattedLine.compare(firstChar, 2, "*/") == 0)
+		{
+			// line starts with an end comment
+			formattedLine = "*/";
+		}
+		else
+		{
+			// build a new line with one indent
+			string newLine;
+			int secondChar = formattedLine.find_first_not_of(" \t", firstChar + 1);
+			if (secondChar < 0)
+			{
+				adjustChecksumIn(-'*');
+				formattedLine = newLine;
+				return;
+			}
+			if (formattedLine[secondChar] == '*')
+				return;
+			// replace the leading '*'
+			int indentLength = getIndentLength();
+			adjustChecksumIn(-'*');
+			// second char must be at least one indent
+			if (formattedLine.substr(0, secondChar).find('\t') != string::npos)
+			{
+				formattedLine.erase(firstChar, 1);
+			}
+			else
+			{
+				int spacesToInsert = 0;
+				if (secondChar >= indentLength)
+					spacesToInsert = secondChar;
+				else
+					spacesToInsert = indentLength;
+				formattedLine = string(spacesToInsert, ' ') + formattedLine.substr(secondChar);
+			}
+			// remove a trailing '*'
+			int lastChar = formattedLine.find_last_not_of(" \t");
+			if (lastChar > -1 && formattedLine[lastChar] == '*')
+			{
+				adjustChecksumIn(-'*');
+				formattedLine[lastChar] = ' ';
+			}
+		}
+	}
+	else
+	{
+		// first char not a '*'
+		// first char must be at least one indent
+		if (formattedLine.substr(0, firstChar).find('\t') == string::npos)
+		{
+			int indentLength = getIndentLength();
+			if (firstChar < indentLength)
+			{
+				string stringToInsert(indentLength, ' ');
+				formattedLine = stringToInsert + formattedLine.substr(firstChar);
+			}
+		}
 	}
 }
 
