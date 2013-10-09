@@ -3305,7 +3305,10 @@ void ASFormatter::formatPointerOrReference(void)
 	        && !isWhiteSpace(currentLine[charNum - 1])
 	        && formattedLine.length() > 0
 	        && isWhiteSpace(formattedLine[formattedLine.length() - 1]))
+	{
 		formattedLine.erase(formattedLine.length() - 1);
+		spacePadNum--;
+	}
 
 	if (itemAlignment == PTR_ALIGN_TYPE)
 	{
@@ -4112,8 +4115,11 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 			        || bracketFormatMode == LINUX_MODE
 			        || bracketFormatMode == STROUSTRUP_MODE)
 			{
-				// don't attach to a preprocessor directive
-				if (isImmediatelyPostPreprocessor && currentLineBeginsWithBracket)
+				// don't attach to a preprocessor directive or '\' line
+				if ((isImmediatelyPostPreprocessor
+				        || (formattedLine.length() > 0
+				            && formattedLine[formattedLine.length() - 1] == '\\'))
+				        && currentLineBeginsWithBracket)
 				{
 					isInLineBreak = true;
 					appendCurrentChar();                // don't attach
@@ -4521,10 +4527,11 @@ bool ASFormatter::isSharpStyleWithParen(const string* header) const
 const string* ASFormatter::checkForHeaderFollowingComment(const string &firstLine) const
 {
 	assert(isInComment || isInLineComment);
-	// this is called ONLY IF these are TRUE.
 	assert(shouldBreakElseIfs || shouldBreakBlocks || isInSwitchStatement());
 	// look ahead to find the next non-comment text
 	bool endOnEmptyLine = (currentHeader == NULL);
+	if (isInSwitchStatement())
+		endOnEmptyLine = false;
 	string nextText = peekNextText(firstLine, endOnEmptyLine);
 
 	if (nextText.length() == 0 || !isCharPotentialHeader(nextText, 0))
@@ -4745,7 +4752,9 @@ void ASFormatter::formatCommentOpener()
 	// For speed do not check multiple comment lines more than once.
 	// For speed do not check shouldBreakBlocks if previous line is empty, a comment, or a '{'.
 	const string* followingHeader = NULL;
-	if ((doesLineStartComment && !isImmediatelyPostCommentOnly)
+	if ((doesLineStartComment
+	        && !isImmediatelyPostCommentOnly
+	        && isBracketType(bracketTypeStack->back(), COMMAND_TYPE))
 	        && (shouldBreakElseIfs
 	            || isInSwitchStatement()
 	            || (shouldBreakBlocks
@@ -4894,7 +4903,9 @@ void ASFormatter::formatLineCommentOpener()
 	// For speed do not check multiple comment lines more than once.
 	// For speed do not check shouldBreakBlocks if previous line is empty, a comment, or a '{'.
 	const string* followingHeader = NULL;
-	if ((lineIsLineCommentOnly && !isImmediatelyPostCommentOnly)
+	if ((lineIsLineCommentOnly
+	        && !isImmediatelyPostCommentOnly
+	        && isBracketType(bracketTypeStack->back(), COMMAND_TYPE))
 	        && (shouldBreakElseIfs
 	            || isInSwitchStatement()
 	            || (shouldBreakBlocks
@@ -6289,7 +6300,7 @@ const string* ASFormatter::getFollowingOperator() const
 // Check following data to determine if the current character is an array operator.
 bool ASFormatter::isArrayOperator() const
 {
-	assert(currentChar == '*' || currentChar == '&');
+	assert(currentChar == '*' || currentChar == '&' || currentChar == '^');
 	assert(isBracketType(bracketTypeStack->back(), ARRAY_TYPE));
 
 	// find next word

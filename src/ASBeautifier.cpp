@@ -881,7 +881,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && ((line[0] == '#' && !isIndentedPreprocessor(line, 0))
 	            || backslashEndsPrevLine))
 	{
-		if (line.length() > 0 && line[0] == '#')
+		if (line.length() > 0 && line[0] == '#' && !isInDefine)
 		{
 			string preproc = extractPreprocessorStatement(line);
 			processPreprocessor(preproc, line);
@@ -971,8 +971,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	// The header in the header stack will be deleted by a one-line block.
 	bool isInExtraHeaderIndent = false;
 	if (!headerStack->empty()
-	        && line.length() > 0
-	        && line[0] == '{'
+	        && lineBeginsWithOpenBracket
 	        && (headerStack->back() != &AS_OPEN_BRACKET
 	            || probationHeader != NULL))
 		isInExtraHeaderIndent = true;
@@ -987,6 +986,10 @@ string ASBeautifier::beautify(const string &originalLine)
 
 	// handle special cases of indentation
 	adjustParsedLineIndentation(iPrelim, isInExtraHeaderIndent);
+
+	// continuation line begining with a dot
+	if (!isInComment && spaceIndentCount == 0 && line.length() > 0 && line[0] == '.')
+		spaceIndentCount += indentLength;
 
 	// Objective-C interface continuation line
 	if (isInObjCInterface && line.length() > 0 && line[0] != '@')

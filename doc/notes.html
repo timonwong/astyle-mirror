@@ -36,11 +36,13 @@
         <li>Add "style=knf" as an alternative to "style=linux".</li>
         <li>Remove depreciated "bracket=" options.</li>
         <li>Improve recognition and formatting of pointers and references. </li>
+        <li>Change to indent continuation lines beginning with a dot (.).</li>
         <li>Change "max-code-length" to include Objective&#8209;C methods.</li>
-        <li>Fix linux bracket styles to break the opening bracket in inline function definitions (185). </li>
-        <li>Fix indentation of switch block comments (164). </li>
-        <li>Fix enums to indent with tabs when requested (92, 121). </li>
-        <li>Fix formatting of rvalue reference without a name in a declaration (219).</li>
+        <li>Change "indent-elseifs" and "break-blocks" to look ahead only if in command-type brackets (speed improvement).</li>
+        <li>Fix linux bracket styles to break the opening bracket in inline function definitions (#185). </li>
+        <li>Fix indentation of switch block comments (#164). </li>
+        <li>Fix enums to indent with tabs when requested (#92, #121). </li>
+        <li>Fix formatting of rvalue reference without a name in a declaration (#219). </li>
         <li>Fix "pad-first-paren-out" to not pad if the following parens are empty (?????????????????????). </li>
         <li>Fix end-of-statement reset when comments follow closing bracket.</li>
         <li>Fix the ASBeautifier active and waiting stacks to delete the ASBeautifier objects before deleting the pointers.</li>
@@ -49,6 +51,12 @@
         <li>Fix to clear 'extern "C"' variables when the block is closed. </li>
         <li>Fix unindented 'extern "C"' to not indent when in a #else preprocessor directive.</li>
         <li>Fix not always correctly formatting linux type brackets for enum blocks.</li>
+        <li>Fix align-pointer in a range-based for statement (#217).</li>
+        <li>Fix pointer-reference argument alignment to correctly position a following comment (#235).</li>
+        <li>Fix to not attach a bracket to a '\' line (???????????????????).</li>
+        <li>Fix to allow '^' as an array operator (?????????????????????????????).</li>
+        <li>Fix to allow a preprocessor statement within a preprocessor define (#238).</li>
+        <li>Fix to allow Mac old CR line endings in the options file (?????????????????????????).</li>
         <li>Refactor to improve design and decomposition:
             <ul>
                 <li>Move ALL preliminary indentation calculations to computePreliminaryIndentation() in ASBeautifier.</li>

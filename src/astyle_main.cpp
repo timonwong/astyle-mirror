@@ -3351,12 +3351,12 @@ void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
 				while (in)
 				{
 					in.get(ch);
-					if (ch == '\n')
+					if (ch == '\n' || ch == '\r')
 						break;
 				}
 
 			// break options on spaces, tabs, commas, or new-lines
-			if (in.eof() || ch == ' ' || ch == '\t' || ch == ',' || ch == '\n')
+			if (in.eof() || ch == ' ' || ch == '\t' || ch == ',' || ch == '\n' || ch == '\r')
 				break;
 			else
 				currentToken.append(1, ch);

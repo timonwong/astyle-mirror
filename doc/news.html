@@ -64,12 +64,15 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         consistent with "pad-paren-out". To fix empty parens that have been padded run with the option "unpad-paren" in
         addition to "pad-first-paren-out". This needs to be done only once.</p>
     <p>
+        A change has been made to indent continuation lines beginning with a dot (.). This will allow for a long seuqences
+        of method calls such as those sometimes needed by Google Mock.</p>
+    <p>
         A new programming language, Objective&#8209;C, has been added to Artistic Style. Four new options, "align&#8209;method&#8209;colon",
         "pad&#8209;method&#8209;colon=", "pad&#8209;method&#8209;prefix", and "unpad&#8209;method&#8209;prefix" have been
         added to format the methods. The options are described in a new "Objective&#8209;C" section in the documentation.
         These new options affect only Objective&#8209;C source code. They have no effect on the other programming languages.</p>
     <p>
-        Because of the longer indents sometimes needed for Objective&#8209;C, the option "max-instatement-indent" may
+        Because of the longer continuation indents sometimes needed for Objective&#8209;C, the option "max-instatement-indent" may
         need to be increased. If you are not getting the paren and square bracket alignment you want, try increasing this
         value. The default minimum is 40 and the maximum is 120.
     </p>
