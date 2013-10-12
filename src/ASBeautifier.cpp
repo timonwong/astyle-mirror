@@ -881,7 +881,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && ((line[0] == '#' && !isIndentedPreprocessor(line, 0))
 	            || backslashEndsPrevLine))
 	{
-		if (line.length() > 0 && line[0] == '#' && !isInDefine)
+		if (line[0] == '#' && !isInDefine)
 		{
 			string preproc = extractPreprocessorStatement(line);
 			processPreprocessor(preproc, line);
@@ -988,8 +988,8 @@ string ASBeautifier::beautify(const string &originalLine)
 	adjustParsedLineIndentation(iPrelim, isInExtraHeaderIndent);
 
 	// continuation line begining with a dot
-	if (!isInComment && spaceIndentCount == 0 && line.length() > 0 && line[0] == '.')
-		spaceIndentCount += indentLength;
+//	if (!isInComment && spaceIndentCount == 0 && line.length() > 0 && line[0] == '.')
+//		spaceIndentCount += indentLength;
 
 	// Objective-C interface continuation line
 	if (isInObjCInterface && line.length() > 0 && line[0] != '@')
@@ -1976,7 +1976,7 @@ void ASBeautifier::computePreliminaryIndentation()
 
 	if (isInConditional)
 		--indentCount;
-	if (g_preprocessorCppExternCBracket >= 3)
+	if (g_preprocessorCppExternCBracket >= 4)
 		--indentCount;
 }
 
@@ -2187,6 +2187,9 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				}
 				else if (isSharpStyle() && prevCh == '@')
 					isInVerbatimQuote = true;
+				// check for "C" following "extern"
+				else if (g_preprocessorCppExternCBracket == 2 && line.compare(i, 3, "\"C\"") == 0)
+					++g_preprocessorCppExternCBracket;
 			}
 			else if (isInVerbatimQuote && ch == '"')
 			{
@@ -2477,9 +2480,6 @@ void ASBeautifier::parseCurrentLine(const string &line)
 					spaceIndentCount = 0;
 				isInClassInitializer = false;
 			}
-			// remove indent for preprocessor 'extern "C"' bracket
-			if (isCStyle() && g_preprocessorCppExternCBracket == 2)
-				++g_preprocessorCppExternCBracket;
 			if (isInObjCMethodDefinition)
 				isImmediatelyPostObjCMethodDefinition = true;
 
@@ -2556,6 +2556,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			}
 
 			blockTabCount += (isInStatement ? 1 : 0);
+			if (g_preprocessorCppExternCBracket == 3)
+				++g_preprocessorCppExternCBracket;
 			parenDepth = 0;
 			isInStatement = false;
 			isInQuestion = false;
@@ -2736,7 +2738,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				foundPreCommandMacro = true;
 
 			// this applies only to C enums
-			if (isCStyle() && findKeyword(line, i, AS_ENUM))
+			if (isCStyle() && parenDepth == 0 && findKeyword(line, i, AS_ENUM))
 				isInEnum = true;
 
 		}   // isPotentialHeader
@@ -3048,17 +3050,17 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			if (isCStyle() && findKeyword(line, i, AS_OPERATOR))
 				isInOperator = true;
 
-			if (isCStyle() && g_preprocessorCppExternCBracket == 1 && findKeyword(line, i, AS_EXTERN))
+			if (g_preprocessorCppExternCBracket == 1 && findKeyword(line, i, AS_EXTERN))
 				++g_preprocessorCppExternCBracket;
+
+			if (g_preprocessorCppExternCBracket == 3)	// extern "C" is not followed by a '{'
+				g_preprocessorCppExternCBracket = 0;
 
 			// "new" operator is a pointer, not a calculation
 			if (findKeyword(line, i, AS_NEW))
 			{
-				if (isInStatement && !inStatementIndentStack->empty())
-				{
-					if (prevNonSpaceCh == '=' && isInStatement && !inStatementIndentStack->empty())
-						inStatementIndentStack->back() = 0;
-				}
+				if (isInStatement && !inStatementIndentStack->empty() && prevNonSpaceCh == '=' )
+					inStatementIndentStack->back() = 0;
 			}
 
 			if (isCStyle())

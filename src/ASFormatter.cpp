@@ -2556,7 +2556,8 @@ bool ASFormatter::isPointerOrReference() const
 	char nextChar = nextText[0];
 	if (isDigit(lastWord[0])
 	        || isDigit(nextChar)
-	        || nextChar == '!')
+	        || nextChar == '!'
+	        || nextChar == '~')
 		return false;
 
 	if (isPointerOrReferenceVariable(lastWord))

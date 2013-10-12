@@ -21,7 +21,7 @@
         Artistic Style 2.04&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new option "indent-preproc-cond" (xw) to indent preprocessor conditional statements.</li>
+        <li>Add new option "indent-preproc-cond" (xw) to indent preprocessor conditional statements (#118). </li>
         <li>Add new bracket modifier options "attach-namespaces", "attach-classes", "attach-inlines", and "attach-extern-c".
         </li>
         <li>Add new option "remove-brackets" (-xj) to remove brackets from single line conditional statements.</li>
@@ -32,10 +32,11 @@
         <li>Add new options "pad-method-prefix" (-xQ), and "unpad-method-prefix" (-xR) to pad the Objective&#8209;C "-" and
             "+" method prefix. </li>
         <li>Add new dll entry point AStyleMainUtf16 for processing C# UTF-16 strings. </li>
-        <li>Add formatting of C++11 raw string literals (??????????????????????????????????????????).</li>
+        <li>Add formatting of C++11 raw string literals (#222). </li>
         <li>Add "style=knf" as an alternative to "style=linux".</li>
         <li>Remove depreciated "bracket=" options.</li>
-        <li>Improve recognition and formatting of pointers and references. </li>
+        <li>Improve recognition and formatting of pointers and references (#174 and other changes). </li>
+        <li>Improve code using static code analyzer (#195).</li>
         <li>Change to indent continuation lines beginning with a dot (.).</li>
         <li>Change "max-code-length" to include Objective&#8209;C methods.</li>
         <li>Change "indent-elseifs" and "break-blocks" to look ahead only if in command-type brackets (speed improvement).</li>
@@ -43,7 +44,7 @@
         <li>Fix indentation of switch block comments (#164). </li>
         <li>Fix enums to indent with tabs when requested (#92, #121). </li>
         <li>Fix formatting of rvalue reference without a name in a declaration (#219). </li>
-        <li>Fix "pad-first-paren-out" to not pad if the following parens are empty (?????????????????????). </li>
+        <li>Fix "pad-first-paren-out" to not pad if the following parens are empty (#232). </li>
         <li>Fix end-of-statement reset when comments follow closing bracket.</li>
         <li>Fix the ASBeautifier active and waiting stacks to delete the ASBeautifier objects before deleting the pointers.</li>
         <li>Fix Linux piping problem by changing "cin" input to build a stringstream before formatting. </li>
@@ -53,10 +54,13 @@
         <li>Fix not always correctly formatting linux type brackets for enum blocks.</li>
         <li>Fix align-pointer in a range-based for statement (#217).</li>
         <li>Fix pointer-reference argument alignment to correctly position a following comment (#235).</li>
-        <li>Fix to not attach a bracket to a '\' line (???????????????????).</li>
-        <li>Fix to allow '^' as an array operator (?????????????????????????????).</li>
+        <li>Fix to not attach a bracket to a line ending in a backslash '\' (#186, #214, #220). </li>
+        <li>Fix to allow '^' as an array operator (#233).</li>
+        <li>Fix an "enum" argument being mistaken for an enumeration (#211).</li>
+        <li>Fix recognition of an operator when the calculation contains a following ~ (#166).</li>
         <li>Fix to allow a preprocessor statement within a preprocessor define (#238).</li>
-        <li>Fix to allow Mac old CR line endings in the options file (?????????????????????????).</li>
+        <li>Fix "add-brackets" when a line contains more than one paren pairs (#181).</li>
+        <li>Fix to allow Mac old CR line endings in the options file (#129).</li>
         <li>Refactor to improve design and decomposition:
             <ul>
                 <li>Move ALL preliminary indentation calculations to computePreliminaryIndentation() in ASBeautifier.</li>
