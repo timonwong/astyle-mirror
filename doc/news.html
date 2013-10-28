@@ -36,57 +36,61 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
         Style. You may want to format your source before making program changes in order to bring it up to date.</p>
     <p>
-        A new option, "indent-preproc-cond", will indent preprocessor conditional statements (#if #elif, #else, #endif).
-        It is described in the "Indentation Options" section of the documentation. The option "indent-preprocessor" has
-        been deprectated and will be removed in a future release. Use "indent-preproc-define" instead. The processing
-        of preprocessor #define statements has not changed.</p>
-    <p>
-        Four new bracket modifier options, "attach-namespaces", &nbsp;"attach-classes", "attach-inlines", and "attach-extern-c",
-        can be
-        used to modify your selected bracket style.&nbsp; They are described in a new
-        "Bracket Modifier Options" section
-        of the documentation.</p>
-    <p>
-        A new option, "remove-brackets", will will remove brackets from conditional statements. The statement must be
-        a single statement on a single line. It is described in the "Formatting Options" section of the documentation.&nbsp;</p>
-    <p>
-        A new option, "remove-comment-prefix", will will remove a leading '*' from multi-line comments. It is described
-        in the "Formatting Options" section of the documentation. With the syntax coloring of modern editors the leading
-        '*' is not as useful as it once was. The current trend is toward code that is easier to maintain. The idea is
-        that a style that is hard to maintain will discourage modification and updating. &nbsp;The converted style should
-        retain most of the formatting within the comment and result in a comment that is easier to maintain. For consistency
-        the option also indents multi-line comments that are not preceeded by the '*'. This may slightly modify the indentation
-        of any commented-out code.&nbsp;</p>
-    <p>
-        Added processing of C++11 raw string literals.</p>
-    <p>
-        The option "pad-first-paren-out" was fixed to not pad if the following paren is empty. This makes the option
-        consistent with "pad-paren-out". To fix empty parens that have been padded run with the option "unpad-paren" in
-        addition to "pad-first-paren-out". This needs to be done only once.</p>
-    <p>
-        A change has been made to indent continuation lines beginning with a dot (.). This will allow for a long seuqences
-        of method calls such as those sometimes needed by Google Mock.</p>
-    <p>
         A new programming language, Objective&#8209;C, has been added to Artistic Style. Four new options, "align&#8209;method&#8209;colon",
         "pad&#8209;method&#8209;colon=", "pad&#8209;method&#8209;prefix", and "unpad&#8209;method&#8209;prefix" have been
         added to format the methods. The options are described in a new "Objective&#8209;C" section in the documentation.
         These new options affect only Objective&#8209;C source code. They have no effect on the other programming languages.</p>
     <p>
-        Because of the longer continuation indents sometimes needed for Objective&#8209;C, the option "max-instatement-indent" may
-        need to be increased. If you are not getting the paren and square bracket alignment you want, try increasing this
-        value. The default minimum is 40 and the maximum is 120.
-    </p>
+        Because of the longer continuation indents sometimes needed for Objective&#8209;C, the option "max-instatement-indent"
+        may need to be increased. If you are not getting the paren and square bracket alignment you want, try increasing
+        this value. The default minimum is 40 and the maximum is 120.</p>
+    <p>
+        A new bracket style option, "style=google", has been added. It uses attached brackets and indents the class access
+        modifiers one-half indent. A new "indent-modifiers" option is described below. A complete description of the Google
+        style is available at the <a href="https://code.google.com/p/google-styleguide/" target="_blank" title="open new window">
+            google&#8209;styleguide</a> website (https://code.google.com/p/google-styleguide/). The website has standards
+        for several programming languages along with a python program to verify the style and an emacs script for using
+        the style.</p>
+    <p>
+        A new option, "indent-preproc-cond", will indent preprocessor conditional statements (#if #elif, #else, #endif).
+        It is described in the "Indentation Options" section of the documentation. The option "indent-preprocessor" has
+        been deprecated and will be removed in a future release. Use "indent-preproc-define" instead. The processing of
+        preprocessor #define statements has not changed.</p>
+    <p>
+        Four new bracket modify options, "attach-namespaces", "attach-classes", "attach-inlines", and "attach-extern-c",
+        can be used to modify your selected bracket style. They are described in a new "Bracket Modify Options" section
+        of the documentation.</p>
+    <p>
+        A new option "indent-modifiers" will indent class access modifiers (public, protected, or 'private) one-half indent.
+        The rest of the class is not indented. It is described in the "Indentation Options" section of the documentation.</p>
+    <p>
+        A new option, "remove-brackets", will remove brackets from conditional statements. The statement must be a single
+        statement on a single line. It is described in the "Formatting Options" section of the documentation.</p>
+    <p>
+        A new option, "remove-comment-prefix", will remove a leading '*' from multi-line comments. It is described in
+        the "Formatting Options" section of the documentation. With the syntax coloring of modern editors the leading
+        '*' is not as useful as it once was. The current trend is toward code that is easier to maintain. The idea is
+        that a style that is hard to maintain will discourage modification and updating. The converted style should retain
+        most of the formatting within the comment and result in a comment that is easier to maintain. For consistency
+        the option also indents multi-line comments that are not preceded by the '*'. This may slightly modify the indentation
+        of any commented-out code.</p>
+    <p>
+        Processing of C++11 raw string literals has been added.</p>
+    <p>
+        The option "pad-first-paren-out" was fixed to not pad if the following paren is empty. This makes the option consistent
+        with "pad-paren-out". To fix empty parens that have been padded run with the option "unpad-paren" in addition
+        to "pad-first-paren-out". This needs to be done only once.</p>
     <p>
         A new shared object (DLL) entry point, AStyleMainUtf16, has been added for processing C# UTF-16 strings. C# does
         not have built in functions for converting the UTF-16 strings to UTF-8 for processing by Artistic Style. This
         entry point will accept UTF-16 strings, format the source code, and return UTF-16 strings. The error handling
-        function and version number still use UTF-8 strings. The C# example program in the "Deleloper Information" shows
+        function and version number still use UTF-8 strings. The C# example program in the "Developer Information" shows
         the new calling procedure. Changes from the previous release are marked in the example.</p>
     <p>
         C# strings are UTF-16 on both Windows and Linux. C# does not use the UTF-32 wchar_t strings on Linux. Qt also
         uses UTF-16 on both Windows and Linux, but has built in UTF-8 conversion functions. Qt strings can be converted
-        to UTF-8 by Qt, or the new entry point can be used. There may be other "managed code" applications
-        on Linux that use UTF-16.
+        to UTF-8 by Qt, or the new entry point can be used. There may be other "managed code" applications on Linux that
+        use UTF-16.
     </p>
     <p>
         The "Developer Information" section has a new example and download for calling Artistic Style from an Objective&#8209;C
@@ -96,7 +100,7 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         be close to working. The "Developer Information" section also has new page for "Objective&#8209;C on Windows and
         Linux" which has information on compiling and running the example on those systems.</p>
     <p>
-        Thanks to Evmenov Georgiy, beta100100, Matthew Woehlke, and Ruzzz for their contributions.</p>
+        Thanks to Evmenov Georgiy, Matthew Woehlke, Jiang, Ruzzz, and beta100100 for their contributions.</p>
 
     <h3>
         Artistic Style 2.03&nbsp; (April 2013)</h3>

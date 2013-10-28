@@ -402,7 +402,7 @@ ChineseSimplified::ChineseSimplified()	// 中文（简体）
 	addPair("Using default options file %s\n", L"使用默认配置文件 %s\n");
 	addPair("Invalid option file options:", L"无效的配置文件选项:");
 	addPair("Invalid command line options:", L"无效的命令行选项:");
-	addPair("For help on options type 'astyle -h'", L"输入'astyle -h'以获得有关命令行的帮助");
+	addPair("For help on options type 'astyle -h'", L"输入 'astyle -h' 以获得有关命令行的帮助");
 	addPair("Cannot open options file", L"无法打开配置文件");
 	addPair("Cannot open directory", L"无法打开目录");
 	addPair("Missing filename in %s\n", L"在%s缺少文件名\n");

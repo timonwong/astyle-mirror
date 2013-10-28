@@ -61,6 +61,7 @@
         <a class="contents" href="#_style=linux">style=linux</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=horstmann">style=horstmann</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=1tbs">style=1tbs</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_style=google">style=google</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=pico">style=pico</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=lisp">style=lisp</a>&nbsp;&nbsp;&nbsp;
     </p>
@@ -75,7 +76,7 @@
         <a class="contents" href="#_indent=force-tab-x">--indent=force&#8209;tab&#8209;x</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
-        <a class="contents" href="#_Bracket_Modifier_Options">Bracket&nbsp;Modifier&nbsp;Options</a></p>
+        <a class="contents" href="#_Bracket_Modify_Options">Bracket&nbsp;Modify&nbsp;Options</a></p>
     <p class="contents2">
         <a class="contents" href="#_attach_namespaces">attach&#8209;namespaces</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_attach_classes">attach&#8209;classes</a>&nbsp;&nbsp;&nbsp; 
@@ -86,6 +87,7 @@
         <a class="contents" href="#_Indentation_Options">Indentation&nbsp;Options</a></p>
     <p class="contents2">
         <a class="contents" href="#_indent-classes">indent&#8209;classes</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_indent-modifiers">indent&#8209;modifiers</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-switches">indent&#8209;switches</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent-cases">indent&#8209;cases</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-namespaces">indent&#8209;namespaces</a>&nbsp;&nbsp;&nbsp; 
@@ -397,15 +399,14 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         Bracket Style Options</h3>
 
     <p>
-        Bracket Style options define the bracket style to use. There are bracket modifier options that will silghtly alter
-        the selected style. By default, none of the styles indent namespaces or class blocks. All options default to 4
-        spaces per indent, indented with spaces.</p>
+        Bracket Style options define the bracket style to use. By default, none of the styles indent namespaces or class
+        blocks. All options default to 4 spaces per indent, indented with spaces.</p>
     <p>
         &nbsp;</p>
     <p id="_default_bracket_style">
         <code class="title">default bracket style</code><br />
         If no bracket style option is set, the opening brackets will not be changed and closing brackets will be broken
-        from the preceding line.</p>
+        from the preceding line. See the preceeding "Quick Start" section for more information.</p>
     <p>
         &nbsp;</p>
     <p id="_style=allman">
@@ -604,6 +605,23 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     </div>
     <p>
         &nbsp;</p>
+    <p id="_style=google">
+        <code class="title">--style=google / -A14</code><br />
+        Google style formatting/indenting uses attached brackets and indented class access modifiers.&nbsp;See the indent-modifiers
+        option for an example of the indented modifiers format. This style frequently is used with an indent of 2 spaces.
+    </p>
+    <div class="code">
+        <pre>int Foo(bool isBar) <span class="brace">{</span>
+    if (isBar) <span class="brace">{</span>
+        bar();
+        return 1;
+    <span class="brace">}</span> else
+        return 0;
+<span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
     <p id="_style=pico">
         <code class="title">--style=pico / -A11</code><br />
         Pico style formatting/indenting uses run-in brackets and attached closing brackets. Opening brackets are broken
@@ -738,8 +756,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         This option sets the <strong>tab length.</strong> Treat each tab as # spaces (e.g. <code>-xT<span class="option">6</span></code>
         / <code>--indent=<span lang="en-us">force-</span>tab-x=<span class="option">6</span></code>). # must be between
-        2 and 20. If no # is set, treats tabs as 8 spaces. To change the indent length "indent=force-tab" must also be
-        used.</p>
+        2 and 20. If no # is set, treats tabs as 8 spaces. To change the <strong>indent length</strong> from the default
+        of 4 spaces the option "indent=force-tab" must also be used.</p>
     <div class="code">
         <p class="code">
             with indent=force-tab-x (default tab length of 8 and default indent length of 4):</p>
@@ -754,10 +772,10 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <hr />
 
-    <!--  * * * * * * * * * * * *   Bracket Modifier Options   * * * * * * * * * * * * -->
+    <!--  * * * * * * * * * * * *   Bracket Modify Options   * * * * * * * * * * * * -->
 
-    <h3 id="_Bracket_Modifier_Options">
-        Bracket Modifier Options</h3>
+    <h3 id="_Bracket_Modify_Options">
+        Bracket Modify Options</h3>
 
     <p id="_attach_namespaces">
         <code class="title">--attach-namespaces / -xn</code><br />
@@ -834,9 +852,9 @@ extern "C" <span class="brace">{</span>
 
     <p id="_indent-classes">
         <code class="title">--indent-classes / -C</code><br />
-        Indent '<code>class</code>' and '<code>struct</code>' blocks so that the blocks '<code>public:</code>', '<code>protected:</code>'
-        and '<code>private:</code>' are indented. The struct blocks are indented only if an access modifier is declared
-        somewhere in the struct. The entire block is indented. This option is effective for C++ files only.</p>
+        Indent '<code>class</code>' and '<code>struct</code>' blocks so that the entire block is indented. The struct
+        blocks are indented only if an access modifier, '<code>public:</code>', '<code>protected:</code>' or '<code>private:</code>',
+        is declared somewhere in the struct. This option is effective for C++ files only.</p>
     <div class="code">
         <pre>class Foo
 <span class="brace">{</span>
@@ -852,6 +870,32 @@ public:
     public:
         Foo();
         virtual ~Foo();
+<span class="brace">}</span>;
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
+    <p id="_indent-modifiers">
+        <code class="title">--indent-modifiers / -xG</code><br />
+        Indent '<code>class</code>' and '<code>struct</code>' access modifiers, '<code>public:</code>', '<code>protected:</code>'
+        and '<code>private:</code>', one half indent. The rest of the class is not indented. This option is effective for
+        C++ files only. If used with indent&#8209;classes this option will be ignored.
+    </p>
+    <div class="code">
+        <pre>class Foo
+<span class="brace">{</span>
+public:
+    Foo();
+    virtual ~Foo();
+<span class="brace">}</span>;
+</pre>
+        <p class="code">
+            becomes:</p>
+        <pre>class Foo
+<span class="brace">{</span>
+  public:
+    Foo();
+    virtual ~Foo();
 <span class="brace">}</span>;
 </pre>
     </div>
@@ -1243,8 +1287,9 @@ isBar = false;
         <code class="title">--pad-first-paren-out / -xd </code><br />
         Insert space padding around the <strong>first</strong> parenthesis in a series on the <strong>outside</strong>
         only. Parenthesis that are empty will not be padded. Any end of line comments will remain in the original column,
-        if possible. This can be used with unpad-paren below to remove unwanted spaces. If used with pad-paren or pad-paren-out,
-        this option will be ignored. If used with pad-paren-in, the result will be the same as pad-paren.</p>
+        if possible. This can be used with unpad-paren below to remove unwanted spaces. If used with pad&#8209;paren or
+        pad&#8209;paren&#8209;out, this option will be ignored. If used with pad&#8209;paren&#8209;in, the result will
+        be the same as pad&#8209;paren.</p>
     <div class="code">
         <pre>if (isFoo((a+2), b))
     bar(a, b);
@@ -1703,7 +1748,7 @@ else
         &nbsp;</p>
     <p id="_unpad-method-prefix">
         <code class="title">--unpad-method-prefix / -xR</code><br />
-        Remove all space padding after the '-' or '+' Objective&#8209;C method prefix. If used with pad-method-prefix,
+        Remove all space padding after the '-' or '+' Objective&#8209;C method prefix. If used with pad&#8209;method&#8209;prefix,
         this option will be ignored. This option is effective for Objective&#8209;C files only.</p>
     <div class="code">
         <pre>- (void)foo1;

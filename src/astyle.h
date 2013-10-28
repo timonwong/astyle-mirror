@@ -99,6 +99,7 @@ enum FormatStyle
 	STYLE_LINUX,
 	STYLE_HORSTMANN,
 	STYLE_1TBS,
+	STYLE_GOOGLE,
 	STYLE_PICO,
 	STYLE_LISP
 };
@@ -143,7 +144,7 @@ enum ObjCColonPad
 	COLON_PAD_NONE,
 	COLON_PAD_ALL,
 	COLON_PAD_AFTER,
-	COLON_PAD_BEFORE,
+	COLON_PAD_BEFORE
 };
 
 enum PointerAlign
@@ -232,6 +233,7 @@ class ASResource
 		static const string _AS_TRY, _AS_FINALLY, _AS_EXCEPT;
 		static const string AS_PUBLIC, AS_PROTECTED, AS_PRIVATE;
 		static const string AS_CLASS, AS_STRUCT, AS_UNION, AS_INTERFACE, AS_NAMESPACE;
+		static const string AS_END;
 		static const string AS_SELECTOR;
 		static const string AS_EXTERN, AS_ENUM;
 		static const string AS_STATIC, AS_CONST, AS_SEALED, AS_OVERRIDE, AS_VOLATILE, AS_NEW;
@@ -250,7 +252,7 @@ class ASResource
 		static const string AS_LS_EQUAL, AS_LS_LS_LS, AS_LS_LS;
 		static const string AS_QUESTION_QUESTION, AS_LAMBDA;
 		static const string AS_ARROW, AS_AND, AS_OR;
-		static const string AS_COLON_COLON;
+		static const string AS_SCOPE_RESOLUTION;
 		static const string AS_PLUS, AS_MINUS, AS_MULT, AS_DIV, AS_MOD, AS_GR, AS_LS;
 		static const string AS_NOT, AS_BIT_XOR, AS_BIT_OR, AS_BIT_AND, AS_BIT_NOT;
 		static const string AS_QUESTION, AS_COLON, AS_SEMICOLON, AS_COMMA;
@@ -362,6 +364,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setMinConditionalIndentOption(int min);
 		void setMinConditionalIndentLength();
 		void setModeManuallySet(bool state);
+		void setModifierIndent(bool state);
 		void setNamespaceIndent(bool state);
 		void setAlignMethodColon(bool state);
 		void setSharpStyle();
@@ -500,6 +503,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isImmediatelyPostObjCMethodDefinition;
 		bool isInObjCInterface;
 		bool isInEnum;
+		bool modifierIndent;
 		bool switchIndent;
 		bool caseIndent;
 		bool namespaceIndent;

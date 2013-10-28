@@ -21,12 +21,14 @@
         Artistic Style 2.04&nbsp; (pending)</h3>
 
     <ul>
+        <li>Add new programming language Objective&#8209;C.</li>
+        <li>Add new bracket style option "style=google" (-A14). </li>
         <li>Add new option "indent-preproc-cond" (xw) to indent preprocessor conditional statements (#118). </li>
-        <li>Add new bracket modifier options "attach-namespaces", "attach-classes", "attach-inlines", and "attach-extern-c".
+        <li>Add new bracket modify options "attach-namespaces", "attach-classes", "attach-inlines", and "attach-extern-c".
         </li>
+        <li>Add new option "indent-modifiers" (-xG) to indent class access modifiers one-half indent (#130). </li>
         <li>Add new option "remove-brackets" (-xj) to remove brackets from single line conditional statements.</li>
         <li>Add new option "remove-comment-prefix" (-xp) to remove the leading '*' from multi-line comments. </li>
-        <li>Add new programming language Objective&#8209;C.</li>
         <li>Add new option "align-method-colon" (-xM) to align Objective&#8209;C method colons. </li>
         <li>Add new option "pad-method-colon=#" (-xP#) to space pad Objective&#8209;C method colons. </li>
         <li>Add new options "pad-method-prefix" (-xQ), and "unpad-method-prefix" (-xR) to pad the Objective&#8209;C "-" and
@@ -36,8 +38,8 @@
         <li>Add "style=knf" as an alternative to "style=linux".</li>
         <li>Remove depreciated "bracket=" options.</li>
         <li>Improve recognition and formatting of pointers and references (#174 and other changes). </li>
-        <li>Improve code using static code analyzer (#195).</li>
-        <li>Change to indent continuation lines beginning with a dot (.).</li>
+        <li>Improve the recognition of block-opening brackets.</li>
+        <li>Improve code using a static code analyzer (#195).</li>
         <li>Change "max-code-length" to include Objective&#8209;C methods.</li>
         <li>Change "indent-elseifs" and "break-blocks" to look ahead only if in command-type brackets (speed improvement).</li>
         <li>Fix linux bracket styles to break the opening bracket in inline function definitions (#185). </li>
@@ -55,13 +57,17 @@
         <li>Fix align-pointer in a range-based for statement (#217).</li>
         <li>Fix pointer-reference argument alignment to correctly position a following comment (#235).</li>
         <li>Fix to not attach a bracket to a line ending in a backslash '\' (#186, #214, #220). </li>
-        <li>Fix to allow '^' as an array operator (#233).</li>
+        <li>Fix to recognize templates using multiple lines (#85, #87, #136).</li>
+        <li>Fix formatting of template continuation lines (#85, #87, #136).</li>
+        <li>Fix to allow '^' as an array operator (#233). </li>
         <li>Fix an "enum" argument being mistaken for an enumeration (#211).</li>
-        <li>Fix recognition of an operator when the calculation contains a following ~ (#166).</li>
+        <li>Fix to recognize a non-instatement array after a "},{" sequence.</li>
+        <li>Fix "pad-oper" to not pad before a following comma. </li>
+        <li>Fix recognition of an operator when the calculation contains a bitwise "not" '~' (#166).</li>
         <li>Fix to allow a preprocessor statement within a preprocessor define (#238).</li>
         <li>Fix "add-brackets" when a line contains more than one paren pairs (#181).</li>
         <li>Fix to allow Mac old CR line endings in the options file (#129).</li>
-        <li>Refactor to improve design and decomposition:
+        <li>Refactor to aid debugging and improve design and decomposition:
             <ul>
                 <li>Move ALL preliminary indentation calculations to computePreliminaryIndentation() in ASBeautifier.</li>
                 <li>Move calculation of 'force tab' indents to preLineWS() in ASBeautifier. </li>

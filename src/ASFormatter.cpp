@@ -361,6 +361,12 @@ void ASFormatter::fixOptionVariableConflicts()
 		setAddBracketsMode(true);
 		setRemoveBracketsMode(false);
 	}
+	else if (formattingStyle == STYLE_GOOGLE)
+	{
+		setBracketFormatMode(ATTACH_MODE);
+		setModifierIndent(true);
+		setClassIndent(false);
+	}
 	else if (formattingStyle == STYLE_PICO)
 	{
 		setBracketFormatMode(RUN_IN_MODE);
@@ -396,6 +402,9 @@ void ASFormatter::fixOptionVariableConflicts()
 	// don't allow add-brackets and remove-brackets
 	if (shouldAddBrackets || shouldAddOneLineBrackets)
 		setRemoveBracketsMode(false);
+	// don't allow indent-classes and indent-modifiers
+	if (getClassIndent())
+		setModifierIndent(false);
 }
 
 /**
@@ -1270,8 +1279,8 @@ string ASFormatter::nextLine()
 					appendOperator(name);
 					goForward(name.length() - 1);
 					if (!isBeforeAnyComment()
-					        && !(currentLine.compare(charNum + 1, 1,  ";") == 0)
-					        && !(currentLine.compare(charNum + 1, 2, "::") == 0))
+					        && !(currentLine.compare(charNum + 1, 1, AS_SEMICOLON) == 0)
+					        && !(currentLine.compare(charNum + 1, 2, AS_SCOPE_RESOLUTION) == 0))
 						appendSpaceAfter();
 				}
 				else
@@ -1340,6 +1349,10 @@ string ASFormatter::nextLine()
 		if (isPotentialOperator)
 		{
 			newHeader = findOperator(operators);
+
+			// check for Java ? wildcard
+			if (newHeader == &AS_GCC_MIN_ASSIGN && isJavaStyle() && isInTemplate)
+				newHeader = NULL;
 
 			if (newHeader != NULL)
 			{
@@ -2254,7 +2267,7 @@ void ASFormatter::initNewLine()
 			{
 				// get the extra adjustment
 				size_t j;
-				for (j = charNum + 1; isWhiteSpace(currentLine[j]) && j < firstText; j++)
+				for (j = charNum + 1; j < firstText && isWhiteSpace(currentLine[j]); j++)
 				{
 					if (currentLine[j] == '\t')
 						tabIncrementIn += tabSize - 1 - ((tabIncrementIn + j) % tabSize);
@@ -2489,6 +2502,7 @@ BracketType ASFormatter::getBracketType()
 	{
 		returnVal = (BracketType)(returnVal | ARRAY_NIS_TYPE);
 		isNonInStatementArray = true;
+		isImmediatelyPostNonInStmt = false;		// in case of "},{"
 		nonInStatementBracket = formattedLine.length() - 1;
 	}
 
@@ -3185,7 +3199,7 @@ void ASFormatter::padOperators(const string* newOperator)
 	assert(shouldPadOperators);
 	assert(newOperator != NULL);
 
-	bool shouldPad = (newOperator != &AS_COLON_COLON
+	bool shouldPad = (newOperator != &AS_SCOPE_RESOLUTION
 	                  && newOperator != &AS_PLUS_PLUS
 	                  && newOperator != &AS_MINUS_MINUS
 	                  && newOperator != &AS_NOT
@@ -3240,8 +3254,9 @@ void ASFormatter::padOperators(const string* newOperator)
 	        && !isBeforeAnyComment()
 	        && !(newOperator == &AS_PLUS && isUnaryOperator())
 	        && !(newOperator == &AS_MINUS && isUnaryOperator())
-	        && !(currentLine.compare(charNum + 1, 1,  ";") == 0)
-	        && !(currentLine.compare(charNum + 1, 2, "::") == 0)
+	        && !(currentLine.compare(charNum + 1, 1, AS_SEMICOLON) == 0)
+	        && !(currentLine.compare(charNum + 1, 2, AS_SCOPE_RESOLUTION) == 0)
+	        && !(peekNextChar() == ',')
 	        && !(newOperator == &AS_QUESTION && isSharpStyle() // check for C# nullable type (e.g. int?)
 	             && peekNextChar() == '[')
 	   )
@@ -5318,10 +5333,10 @@ bool ASFormatter::removeBracketsFromStatement()
 
 	bool isFirstLine = true;
 	bool needReset = false;
-	string nextLine;
-	// leave nextline empty if end of line comment follows
+	string nextLine_;
+	// leave nextLine_ empty if end of line comment follows
 	if (!isBeforeAnyLineEndComment(charNum) || currentLineBeginsWithBracket)
-		nextLine = currentLine.substr(charNum + 1);
+		nextLine_ = currentLine.substr(charNum + 1);
 	size_t nextChar = 0;
 
 	// find the first non-blank text
@@ -5331,21 +5346,21 @@ bool ASFormatter::removeBracketsFromStatement()
 			isFirstLine = false;
 		else
 		{
-			nextLine = sourceIterator->peekNextLine();
+			nextLine_ = sourceIterator->peekNextLine();
 			nextChar = 0;
 			needReset = true;
 		}
 
-		nextChar = nextLine.find_first_not_of(" \t", nextChar);
+		nextChar = nextLine_.find_first_not_of(" \t", nextChar);
 		if (nextChar != string::npos)
 			break;
 	}
 
 	// don't remove if comments or a header follow the bracket
-	if ((nextLine.compare(nextChar, 2, "/*") == 0)
-	        || (nextLine.compare(nextChar, 2, "//") == 0)
-	        || (isCharPotentialHeader(nextLine, nextChar)
-	            && ASBeautifier::findHeader(nextLine, nextChar, headers) != NULL))
+	if ((nextLine_.compare(nextChar, 2, "/*") == 0)
+	        || (nextLine_.compare(nextChar, 2, "//") == 0)
+	        || (isCharPotentialHeader(nextLine_, nextChar)
+	            && ASBeautifier::findHeader(nextLine_, nextChar, headers) != NULL))
 	{
 		if (needReset)
 			sourceIterator->peekReset();
@@ -5354,8 +5369,8 @@ bool ASFormatter::removeBracketsFromStatement()
 
 	// find the next semi-colon
 	size_t nextSemiColon = nextChar;
-	if (nextLine[nextChar] != ';')
-		nextSemiColon = findNextChar(nextLine, ';', nextChar + 1);
+	if (nextLine_[nextChar] != ';')
+		nextSemiColon = findNextChar(nextLine_, ';', nextChar + 1);
 	if (nextSemiColon == string::npos)
 	{
 		if (needReset)
@@ -5372,15 +5387,15 @@ bool ASFormatter::removeBracketsFromStatement()
 			isFirstLine = false;
 		else
 		{
-			nextLine = sourceIterator->peekNextLine();
+			nextLine_ = sourceIterator->peekNextLine();
 			nextChar = 0;
 			needReset = true;
 		}
-		nextChar = nextLine.find_first_not_of(" \t", nextChar);
+		nextChar = nextLine_.find_first_not_of(" \t", nextChar);
 		if (nextChar != string::npos)
 			break;
 	}
-	if (nextLine.length() == 0 || nextLine[nextChar] != '}')
+	if (nextLine_.length() == 0 || nextLine_[nextChar] != '}')
 	{
 		if (needReset)
 			sourceIterator->peekReset();
@@ -5471,7 +5486,7 @@ bool ASFormatter::isStructAccessModified(string  &firstLine, size_t index) const
 	bool isInComment_ = false;
 	bool isInQuote_ = false;
 	char quoteChar_ = ' ';
-	while (sourceIterator->hasMoreLines())
+	while (sourceIterator->hasMoreLines() || isFirstLine)
 	{
 		if (isFirstLine)
 			isFirstLine = false;
@@ -5700,75 +5715,140 @@ void ASFormatter::checkIfTemplateOpener()
 		return;
 	}
 
-	// find the closing '>' operators
+	bool isFirstLine = true;
+	bool needReset = false;
 	int parenDepth_ = 0;
 	int maxTemplateDepth = 0;
 	templateDepth = 0;
-	for (size_t i = charNum; i < currentLine.length(); i++)
+	string nextLine_ = currentLine.substr(charNum);
+
+	// find the angle brackets, bypassing all comments and quotes.
+	bool isInComment_ = false;
+	bool isInQuote_ = false;
+	char quoteChar_ = ' ';
+	while (sourceIterator->hasMoreLines() || isFirstLine)
 	{
-		char currentChar_ = currentLine[i];
-
-		if (isWhiteSpace(currentChar_))
-			continue;
-
-		if (currentChar_ == '<')
+		if (isFirstLine)
+			isFirstLine = false;
+		else
 		{
-			templateDepth++;
-			maxTemplateDepth++;
+			nextLine_ = sourceIterator->peekNextLine();
+			needReset = true;
 		}
-		else if (currentChar_ == '>')
+		// parse the line
+		for (size_t i = 0; i < nextLine_.length(); i++)
 		{
-			templateDepth--;
-			if (templateDepth == 0)
-			{
-				if (parenDepth_ == 0)
-				{
-					// this is a template!
-					isInTemplate = true;
-					templateDepth = maxTemplateDepth;
-				}
-				return;
-			}
-		}
-		else if (currentChar_ == '(' || currentChar_ == ')')
-		{
-			if (currentChar_ == '(')
-				parenDepth_++;
-			else
-				parenDepth_--;
-			if (parenDepth_ >= 0)
+			char currentChar_ = nextLine_[i];
+			if (isWhiteSpace(currentChar_))
 				continue;
-			// this is not a template -> leave...
-			isInTemplate = false;
-			return;
-		}
-		else if (currentLine.compare(i, 2, "&&") == 0
-		         || currentLine.compare(i, 2, "||") == 0)
-		{
-			// this is not a template -> leave...
-			isInTemplate = false;
-			return;
-		}
-		else if (currentChar_ == ','       // comma,     e.g. A<int, char>
-		         || currentChar_ == '&'    // reference, e.g. A<int&>
-		         || currentChar_ == '*'    // pointer,   e.g. A<int*>
-		         || currentChar_ == '^'    // C++/CLI managed pointer, e.g. A<int^>
-		         || currentChar_ == ':'    // ::,        e.g. std::string
-		         || currentChar_ == '='    // assign     e.g. default parameter
-		         || currentChar_ == '['    // []         e.g. string[]
-		         || currentChar_ == ']'    // []         e.g. string[]
-		         || currentChar_ == '('    // (...)      e.g. function definition
-		         || currentChar_ == ')')   // (...)      e.g. function definition
-		{
-			continue;
-		}
-		else if (!isLegalNameChar(currentChar_) && currentChar_ != '?')
-		{
-			// this is not a template -> leave...
-			isInTemplate = false;
-			return;
-		}
-	}
+			if (nextLine_.compare(i, 2, "/*") == 0)
+				isInComment_ = true;
+			if (isInComment_)
+			{
+				if (nextLine_.compare(i, 2, "*/") == 0)
+				{
+					isInComment_ = false;
+					++i;
+				}
+				continue;
+			}
+			if (currentChar_ == '\\')
+			{
+				++i;
+				continue;
+			}
+
+			if (isInQuote_)
+			{
+				if (currentChar_ == quoteChar_)
+					isInQuote_ = false;
+				continue;
+			}
+
+			if (currentChar_ == '"' || currentChar_ == '\'')
+			{
+				isInQuote_ = true;
+				quoteChar_ = currentChar_;
+				continue;
+			}
+			if (nextLine_.compare(i, 2, "//") == 0)
+			{
+				i = nextLine_.length();
+				continue;
+			}
+
+			// not in a comment or quote
+			if (currentChar_ == '<')
+			{
+				++templateDepth;
+				++maxTemplateDepth;
+				continue;
+			}
+			else if (currentChar_ == '>')
+			{
+				--templateDepth;
+				if (templateDepth == 0)
+				{
+					if (parenDepth_ == 0)
+					{
+						// this is a template!
+						isInTemplate = true;
+						templateDepth = maxTemplateDepth;
+					}
+					goto exitFromSearch;
+				}
+				continue;
+			}
+			else if (currentChar_ == '(' || currentChar_ == ')')
+			{
+				if (currentChar_ == '(')
+					++parenDepth_;
+				else
+					--parenDepth_;
+				if (parenDepth_ >= 0)
+					continue;
+				// this is not a template -> leave...
+				isInTemplate = false;
+				goto exitFromSearch;
+			}
+			else if (parenStack->back() > 0  // checks the stack, not local parenDepth_
+			         && (nextLine_.compare(i, 2, "&&") == 0
+			             || nextLine_.compare(i, 2, "||") == 0))
+			{
+				// this is not a template -> leave...
+				isInTemplate = false;
+				goto exitFromSearch;
+			}
+			else if (currentChar_ == ','  // comma,     e.g. A<int, char>
+			         || currentChar_ == '&'    // reference, e.g. A<int&>
+			         || currentChar_ == '*'    // pointer,   e.g. A<int*>
+			         || currentChar_ == '^'    // C++/CLI managed pointer, e.g. A<int^>
+			         || currentChar_ == ':'    // ::,        e.g. std::string
+			         || currentChar_ == '='    // assign     e.g. default parameter
+			         || currentChar_ == '['    // []         e.g. string[]
+			         || currentChar_ == ']'    // []         e.g. string[]
+			         || currentChar_ == '('    // (...)      e.g. function definition
+			         || currentChar_ == ')'    // (...)      e.g. function definition
+			         || (isJavaStyle() && currentChar_ == '?')   // Java wildcard
+			        )
+			{
+				continue;
+			}
+			else if (!isLegalNameChar(currentChar_))
+			{
+				// this is not a template -> leave...
+				isInTemplate = false;
+				goto exitFromSearch;
+			}
+			string name = getCurrentWord(nextLine_, i);
+			i += name.length() - 1;
+		}	// end of for loop
+	}	// end of while loop
+
+	// goto needed to exit from two loops
+exitFromSearch:
+	if (needReset)
+		sourceIterator->peekReset();
 }
 
 void ASFormatter::updateFormattedLineSplitPoints(char appendedChar)
@@ -6426,11 +6506,11 @@ void ASFormatter::stripCommentPrefix()
 			return;
 		if (formattedLine[followingText] == '*')
 			return;
-		int indentLength = getIndentLength();
+		int indentLen = getIndentLength();
 		int followingTextIndent = followingText - commentOpener;
-		if (followingTextIndent < indentLength)
+		if (followingTextIndent < indentLen)
 		{
-			string stringToInsert(indentLength - followingTextIndent, ' ');
+			string stringToInsert(indentLen - followingTextIndent, ' ');
 			formattedLine.insert(followingText, stringToInsert);
 		}
 		return;
@@ -6457,7 +6537,7 @@ void ASFormatter::stripCommentPrefix()
 			if (formattedLine[secondChar] == '*')
 				return;
 			// replace the leading '*'
-			int indentLength = getIndentLength();
+			int indentLen = getIndentLength();
 			adjustChecksumIn(-'*');
 			// second char must be at least one indent
 			if (formattedLine.substr(0, secondChar).find('\t') != string::npos)
@@ -6467,10 +6547,10 @@ void ASFormatter::stripCommentPrefix()
 			else
 			{
 				int spacesToInsert = 0;
-				if (secondChar >= indentLength)
+				if (secondChar >= indentLen)
 					spacesToInsert = secondChar;
 				else
-					spacesToInsert = indentLength;
+					spacesToInsert = indentLen;
 				formattedLine = string(spacesToInsert, ' ') + formattedLine.substr(secondChar);
 			}
 			// remove a trailing '*'
@@ -6488,10 +6568,10 @@ void ASFormatter::stripCommentPrefix()
 		// first char must be at least one indent
 		if (formattedLine.substr(0, firstChar).find('\t') == string::npos)
 		{
-			int indentLength = getIndentLength();
-			if (firstChar < indentLength)
+			int indentLen = getIndentLength();
+			if (firstChar < indentLen)
 			{
-				string stringToInsert(indentLength, ' ');
+				string stringToInsert(indentLen, ' ');
 				formattedLine = stringToInsert + formattedLine.substr(firstChar);
 			}
 		}

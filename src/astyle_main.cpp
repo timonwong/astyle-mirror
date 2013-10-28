@@ -84,7 +84,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char*    g_version  =  "2.04 beta";
+const char*    g_version  =  "2.04";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -1315,9 +1315,9 @@ bool ASConsole::isPathExclued(const string &subPath)
 void ASConsole::printHelp() const
 {
 	(*_err) << endl;
-	(*_err) << "                            Artistic Style " << g_version << endl;
-	(*_err) << "                         Maintained by: Jim Pattee\n";
-	(*_err) << "                       Original Author: Tal Davidson\n";
+	(*_err) << "                     Artistic Style " << g_version << endl;
+	(*_err) << "                     Maintained by: Jim Pattee\n";
+	(*_err) << "                     Original Author: Tal Davidson\n";
 	(*_err) << endl;
 	(*_err) << "Usage  :  astyle [options] Source1.cpp Source2.cpp  [...]\n";
 	(*_err) << "          astyle [options] < Original > Beautified\n";
@@ -1400,6 +1400,10 @@ void ASConsole::printHelp() const
 	(*_err) << "    One True Brace Style formatting/indenting.\n";
 	(*_err) << "    Linux brackets, add brackets to all conditionals.\n";
 	(*_err) << endl;
+	(*_err) << "    --style=google  OR  -A14\n";
+	(*_err) << "    Google style formatting/indenting.\n";
+	(*_err) << "    Attached brackets, indented class modifiers.\n";
+	(*_err) << endl;
 	(*_err) << "    --style=pico  OR  -A11\n";
 	(*_err) << "    Pico style formatting/indenting.\n";
 	(*_err) << "    Run-in opening brackets and attached closing brackets.\n";
@@ -1410,7 +1414,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    Attached opening brackets and attached closing brackets.\n";
 	(*_err) << "    Uses keep one line statements.\n";
 	(*_err) << endl;
-	(*_err) << "Bracket Modifier Options:\n";
+	(*_err) << "Bracket Modify Options:\n";
 	(*_err) << "-------------------------\n";
 	(*_err) << "    --attach-namespaces  OR  -xn\n";
 	(*_err) << "    Attach brackets to a namespace statement.\n";
@@ -1452,9 +1456,12 @@ void ASConsole::printHelp() const
 	(*_err) << "Indentation options:\n";
 	(*_err) << "--------------------\n";
 	(*_err) << "    --indent-classes  OR  -C\n";
-	(*_err) << "    Indent 'class' blocks, so that the inner 'public:',\n";
-	(*_err) << "    'protected:' and 'private: headers are indented in\n";
-	(*_err) << "    relation to the class block.\n";
+	(*_err) << "    Indent 'class' blocks so that the entire block is indented.\n";
+	(*_err) << endl;
+	(*_err) << "    --indent-modifiers  OR  -xG\n";
+	(*_err) << "    Indent 'class' access modifiers, 'public:', 'protected:' or\n";
+	(*_err) << "    'private:', one half indent. The rest of the class is not\n";
+	(*_err) << "    indented. \n";
 	(*_err) << endl;
 	(*_err) << "    --indent-switches  OR  -S\n";
 	(*_err) << "    Indent 'switch' blocks, so that the inner 'case XXX:'\n";
@@ -1500,7 +1507,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    The default value is 40.\n";
 	(*_err) << endl;
 	(*_err) << "Padding options:\n";
-	(*_err) << "--------------------\n";
+	(*_err) << "----------------\n";
 	(*_err) << "    --break-blocks  OR  -f\n";
 	(*_err) << "    Insert empty lines around unrelated blocks, labels, classes, ...\n";
 	(*_err) << endl;
@@ -1646,7 +1653,8 @@ void ASConsole::printHelp() const
 	(*_err) << "    Verbose mode. Extra informational messages will be displayed.\n";
 	(*_err) << endl;
 	(*_err) << "    --formatted  OR  -Q\n";
-	(*_err) << "    Formatted display mode. Display only the files that have been formatted.\n";
+	(*_err) << "    Formatted display mode. Display only the files that have been\n";
+	(*_err) << "    formatted.\n";
 	(*_err) << endl;
 	(*_err) << "    --quiet  OR  -q\n";
 	(*_err) << "    Quiet mode. Suppress all output except error messages.\n";
@@ -2819,6 +2827,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setFormattingStyle(STYLE_1TBS);
 	}
+	else if ( isOption(arg, "style=google") )
+	{
+		formatter.setFormattingStyle(STYLE_GOOGLE);
+	}
 	else if ( isOption(arg, "style=pico") )
 	{
 		formatter.setFormattingStyle(STYLE_PICO);
@@ -2857,6 +2869,8 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 			formatter.setFormattingStyle(STYLE_PICO);
 		else if (style == 12)
 			formatter.setFormattingStyle(STYLE_LISP);
+		else if (style == 14)
+			formatter.setFormattingStyle(STYLE_GOOGLE);
 		else isOptionError(arg, errorInfo);
 	}
 	// must check for mode=cs before mode=c !!!
@@ -2974,6 +2988,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	else if ( isOption(arg, "C", "indent-classes") )
 	{
 		formatter.setClassIndent(true);
+	}
+	else if ( isOption(arg, "xG", "indent-modifiers") )
+	{
+		formatter.setModifierIndent(true);
 	}
 	else if ( isOption(arg, "S", "indent-switches") )
 	{
