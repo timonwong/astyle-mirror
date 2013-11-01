@@ -18,7 +18,7 @@
         &nbsp;</p>
 
     <h3 id="_2.04">
-        Artistic Style 2.04&nbsp; (pending)</h3>
+        Artistic Style 2.04&nbsp; (November 2013)</h3>
 
     <ul>
         <li>Add new programming language Objective&#8209;C.</li>
@@ -49,6 +49,7 @@
         <li>Fix "pad-first-paren-out" to not pad if the following parens are empty (#232). </li>
         <li>Fix end-of-statement reset when comments follow closing bracket.</li>
         <li>Fix the ASBeautifier active and waiting stacks to delete the ASBeautifier objects before deleting the pointers.</li>
+        <li>Fix ASBeautifier "init" to delete the tempStack vectors before deleting the tempStack.</li>
         <li>Fix Linux piping problem by changing "cin" input to build a stringstream before formatting. </li>
         <li>Fix to identify the correct bracket type when 'extern "C"' is part of the enum definition. </li>
         <li>Fix to clear 'extern "C"' variables when the block is closed. </li>
@@ -65,6 +66,7 @@
         <li>Fix "pad-oper" to not pad before a following comma. </li>
         <li>Fix recognition of an operator when the calculation contains a bitwise "not" '~' (#166).</li>
         <li>Fix to allow a preprocessor statement within a preprocessor define (#238).</li>
+        <li>Fix preprocessor comparison to check for whole words (#246).</li>
         <li>Fix "add-brackets" when a line contains more than one paren pairs (#181).</li>
         <li>Fix to allow Mac old CR line endings in the options file (#129).</li>
         <li>Refactor to aid debugging and improve design and decomposition:

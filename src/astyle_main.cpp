@@ -1062,7 +1062,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
  * This formats positive integers only, no float.
  *
  * @param num		The number to be formatted.
- * @param			For compatability with the Windows function.
+ * @param			For compatibility with the Windows function.
  * @return			The formatted number.
  */
 string ASConsole::getNumberFormat(int num, size_t) const
@@ -1334,13 +1334,13 @@ void ASConsole::printHelp() const
 	(*_err) << "statements, a minimum indentation of eight spaces inside conditional\n";
 	(*_err) << "statements, and NO formatting options.\n";
 	(*_err) << endl;
-	(*_err) << "Option's Format:\n";
-	(*_err) << "----------------\n";
+	(*_err) << "Option Format:\n";
+	(*_err) << "--------------\n";
 	(*_err) << "    Long options (starting with '--') must be written one at a time.\n";
 	(*_err) << "    Short options (starting with '-') may be appended together.\n";
 	(*_err) << "    Thus, -bps4 is the same as -b -p -s4.\n";
 	(*_err) << endl;
-	(*_err) << "Default options file:\n";
+	(*_err) << "Default Option File:\n";
 	(*_err) << "---------------------\n";
 	(*_err) << "    Artistic Style looks for a default options file in the\n";
 	(*_err) << "    following order:\n";
@@ -1357,8 +1357,8 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "Bracket Style Options:\n";
 	(*_err) << "----------------------\n";
-	(*_err) << "    --style=allman  OR  --style=ansi  OR  --style=bsd\n";
-	(*_err) << "	    OR  --style=break  OR  -A1\n";
+	(*_err) << "    --style=allman  OR  --style=ansi   OR  --style=bsd\n";
+	(*_err) << "                    OR  --style=break  OR  -A1\n";
 	(*_err) << "    Allman style formatting/indenting.\n";
 	(*_err) << "    Broken brackets.\n";
 	(*_err) << endl;
@@ -1414,20 +1414,6 @@ void ASConsole::printHelp() const
 	(*_err) << "    Attached opening brackets and attached closing brackets.\n";
 	(*_err) << "    Uses keep one line statements.\n";
 	(*_err) << endl;
-	(*_err) << "Bracket Modify Options:\n";
-	(*_err) << "-------------------------\n";
-	(*_err) << "    --attach-namespaces  OR  -xn\n";
-	(*_err) << "    Attach brackets to a namespace statement.\n";
-	(*_err) << endl;
-	(*_err) << "    --attach-classes  OR  -xc\n";
-	(*_err) << "    Attach brackets to a class statement.\n";
-	(*_err) << endl;
-	(*_err) << "    --attach-inlines  OR  -xl\n";
-	(*_err) << "    Attach brackets to class inline function definitions.\n";
-	(*_err) << endl;
-	(*_err) << "    --attach-extern-c  OR  -xk\n";
-	(*_err) << "    Attach brackets to an extern \"C\" statement.\n";
-	(*_err) << endl;
 	(*_err) << "Tab Options:\n";
 	(*_err) << "------------\n";
 	(*_err) << "    default indent option\n";
@@ -1453,7 +1439,21 @@ void ASConsole::printHelp() const
 	(*_err) << "    from the indent length. This may cause the indentation to be\n";
 	(*_err) << "    a mix of both spaces and tabs. This option sets the tab length.\n";
 	(*_err) << endl;
-	(*_err) << "Indentation options:\n";
+	(*_err) << "Bracket Modify Options:\n";
+	(*_err) << "-------------------------\n";
+	(*_err) << "    --attach-namespaces  OR  -xn\n";
+	(*_err) << "    Attach brackets to a namespace statement.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-classes  OR  -xc\n";
+	(*_err) << "    Attach brackets to a class statement.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-inlines  OR  -xl\n";
+	(*_err) << "    Attach brackets to class inline function definitions.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-extern-c  OR  -xk\n";
+	(*_err) << "    Attach brackets to an extern \"C\" statement.\n";
+	(*_err) << endl;
+	(*_err) << "Indentation Options:\n";
 	(*_err) << "--------------------\n";
 	(*_err) << "    --indent-classes  OR  -C\n";
 	(*_err) << "    Indent 'class' blocks so that the entire block is indented.\n";
@@ -1506,7 +1506,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    The valid values are 40 thru 120.\n";
 	(*_err) << "    The default value is 40.\n";
 	(*_err) << endl;
-	(*_err) << "Padding options:\n";
+	(*_err) << "Padding Options:\n";
 	(*_err) << "----------------\n";
 	(*_err) << "    --break-blocks  OR  -f\n";
 	(*_err) << "    Insert empty lines around unrelated blocks, labels, classes, ...\n";
@@ -1562,7 +1562,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    the operator type (left), middle, or operator name (right).\n";
 	(*_err) << "    If not set, follow pointer alignment.\n";
 	(*_err) << endl;
-	(*_err) << "Formatting options:\n";
+	(*_err) << "Formatting Options:\n";
 	(*_err) << "-------------------\n";
 	(*_err) << "    --break-closing-brackets  OR  -y\n";
 	(*_err) << "    Break brackets before closing headers (e.g. 'else', 'catch', ...).\n";
@@ -1608,9 +1608,6 @@ void ASConsole::printHelp() const
 	(*_err) << "    cause the logical conditional to be placed last on the\n";
 	(*_err) << "    previous line.\n";
 	(*_err) << endl;
-	(*_err) << "    --align-method-colon  OR  -xM\n";
-	(*_err) << "    Align the colons in an Objective-C method definition.\n";
-	(*_err) << endl;
 	(*_err) << "    --mode=c\n";
 	(*_err) << "    Indent a C or C++ source file (this is the default).\n";
 	(*_err) << endl;
@@ -1620,7 +1617,27 @@ void ASConsole::printHelp() const
 	(*_err) << "    --mode=cs\n";
 	(*_err) << "    Indent a C# source file.\n";
 	(*_err) << endl;
-	(*_err) << "Other options:\n";
+	(*_err) << "Objective-C Options:\n";
+	(*_err) << "--------------------\n";
+	(*_err) << "    --align-method-colon  OR  -xM\n";
+	(*_err) << "    Align the colons in an Objective-C method definition.\n";
+	(*_err) << endl;
+	(*_err) << "    --pad-method-prefix  OR  -xQ\n";
+	(*_err) << "    Insert space padding after the '-' or '+' Objective-C\n";
+	(*_err) << "    method prefix.\n";
+	(*_err) << endl;
+	(*_err) << "    --unpad-method-prefix  OR  -xR\n";
+	(*_err) << "    Remove all space padding after the '-' or '+' Objective-C\n";
+	(*_err) << "    method prefix.\n";
+	(*_err) << endl;
+	(*_err) << "    --pad-method-colon=none    OR  -xP\n";
+	(*_err) << "    --pad-method-colon=all     OR  -xP1\n";
+	(*_err) << "    --pad-method-colon=after   OR  -xP2\n";
+	(*_err) << "    --pad-method-colon=before  OR  -xP3\n";
+	(*_err) << "    Add or remove space padding before or after the colons in an\n";
+	(*_err) << "    Objective-C method call.\n";
+	(*_err) << endl;
+	(*_err) << "Other Options:\n";
 	(*_err) << "--------------\n";
 	(*_err) << "    --suffix=####\n";
 	(*_err) << "    Append the suffix #### instead of '.orig' to original filename.\n";
@@ -1647,7 +1664,8 @@ void ASConsole::printHelp() const
 	(*_err) << "    to standard-error.\n";
 	(*_err) << endl;
 	(*_err) << "    --preserve-date  OR  -Z\n";
-	(*_err) << "    The date and time modified will not be changed in the formatted file.\n";
+	(*_err) << "    Preserve the original file's date and time modified. The time\n";
+	(*_err) << "     modified will be changed a few micro seconds to force a compile.\n";
 	(*_err) << endl;
 	(*_err) << "    --verbose  OR  -v\n";
 	(*_err) << "    Verbose mode. Extra informational messages will be displayed.\n";

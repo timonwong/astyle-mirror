@@ -300,7 +300,7 @@ void ASBeautifier::init(ASSourceIterator* iter)
 
 	initContainer(headerStack,  new vector<const string*>);
 
-	initContainer(tempStacks, new vector<vector<const string*>*>);
+	initTempStacksContainer(tempStacks, new vector<vector<const string*>*>);
 	tempStacks->push_back(new vector<const string*>);
 
 	initContainer(blockParenDepthStack, new vector<int>);
@@ -1406,8 +1406,7 @@ void ASBeautifier::deleteContainer(T &container)
 
 /**
  * Delete the ASBeautifier vector object.
- * This is a vector of pointers to ASBeautifier objects allocated with
- * the 'new' operator.
+ * This is a vector of pointers to ASBeautifier objects allocated with the 'new' operator.
  * Therefore the ASBeautifier objects have to be deleted in addition to the
  * ASBeautifier pointer entries.
  */
@@ -1429,10 +1428,8 @@ void ASBeautifier::deleteBeautifierContainer(vector<ASBeautifier*>* &container)
 
 /**
  * Delete the tempStacks vector object.
- * The tempStacks is a vector of pointers to strings allocated with
- * the 'new' operator.
- * Therefore the strings have to be deleted in addition to the
- * tempStacks entries.
+ * The tempStacks is a vector of pointers to strings allocated with the 'new' operator.
+ * Therefore the strings have to be deleted in addition to the tempStacks entries.
  */
 void ASBeautifier::deleteTempStacksContainer(vector<vector<const string*>*>* &container)
 {
@@ -1452,8 +1449,7 @@ void ASBeautifier::deleteTempStacksContainer(vector<vector<const string*>*>* &co
 
 /**
  * initialize a vector object
- * T is the type of vector
- * used for all vectors
+ * T is the type of vector used for all vectors
  */
 template<typename T>
 void ASBeautifier::initContainer(T &container, T value)
@@ -1462,6 +1458,19 @@ void ASBeautifier::initContainer(T &container, T value)
 	// the existing vectors must be deleted before creating new ones
 	if (container != NULL )
 		deleteContainer(container);
+	container = value;
+}
+
+/**
+ * Initialize the tempStacks vector object.
+ * The tempStacks is a vector of pointers to strings allocated with the 'new' operator.
+ * Any residual entries are deleted before the vector is initialized.
+ */
+void ASBeautifier::initTempStacksContainer(vector<vector<const string*>*>* &container,
+                                           vector<vector<const string*>*>* value)
+{
+	if (container != NULL)
+		deleteTempStacksContainer(container);
 	container = value;
 }
 
@@ -2045,7 +2054,7 @@ void ASBeautifier::adjustParsedLineIndentation(size_t iPrelim, bool isInExtraHea
 	if (indentCount < 0)
 		indentCount = 0;
 
-	// take care of extra bracket indentatation option...
+	// take care of extra bracket indentation option...
 	if (!lineStartsInComment
 	        && bracketIndent
 	        && shouldIndentBrackettedLine
@@ -2107,7 +2116,7 @@ void ASBeautifier::clearObjCMethodDefinitionAlignment()
 }
 
 /**
- * Compute the spaceIncentCount necessary to align the current line colon
+ * Compute the spaceIndentCount necessary to align the current line colon
  * with the colon position in the argument.
  * If it cannot be aligned indentLength is returned and a new colon
  * position is calculated.
@@ -2380,7 +2389,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			}
 		}
 
-		// handle parenthesies
+		// handle parentheses
 		if (ch == '(' || ch == '[' || ch == ')' || ch == ']')
 		{
 			if (ch == '(' || ch == '[')
@@ -3005,7 +3014,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			/*
 			 * Create a temporary snapshot of the current block's header-list in the
 			 * uppermost inner stack in tempStacks, and clear the headerStack up to
-			 * the begining of the block.
+			 * the beginning of the block.
 			 * Thus, the next future statement will think it comes one indent past
 			 * the block's '{' unless it specifically checks for a companion-header
 			 * (such as a previous 'if' for an 'else' header) within the tempStacks,
@@ -3039,7 +3048,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 
 		if (isPotentialHeader)
 		{
-			// check for preBlockStatements in C/C++ ONLY if not within parenthesies
+			// check for preBlockStatements in C/C++ ONLY if not within parentheses
 			// (otherwise 'struct XXX' statements would be wrongly interpreted...)
 			if (!isInTemplate && !(isCStyle() && parenDepth > 0))
 			{
@@ -3184,7 +3193,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			if (isInTemplate && foundNonAssignmentOp == &AS_GR_GR)
 				foundNonAssignmentOp = NULL;
 
-			// Since findHeader's boundry checking was not used above, it is possible
+			// Since findHeader's boundary checking was not used above, it is possible
 			// that both an assignment op and a non-assignment op where found,
 			// e.g. '>>' and '>>='. If this is the case, treat the LONGER one as the
 			// found operator.

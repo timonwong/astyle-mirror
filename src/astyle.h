@@ -428,6 +428,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void registerInStatementIndent(const string &line, int i, int spaceIndentCount,
 		                               int tabIncrementIn, int minIndent, bool updateParenStack);
 		void initVectors();
+		void initTempStacksContainer(vector<vector<const string*>*>* &container,
+		                             vector<vector<const string*>*>* value);
 		void clearObjCMethodDefinitionAlignment();
 		void deleteBeautifierContainer(vector<ASBeautifier*>* &container);
 		void deleteTempStacksContainer(vector<vector<const string*>*>* &container);
@@ -682,7 +684,7 @@ class ASFormatter : public ASBeautifier
 		int  getFormatterFileType() const;
 
 	private:  // functions
-		ASFormatter(const ASFormatter &copy);       // copy constructor not to be imlpemented
+		ASFormatter(const ASFormatter &copy);       // copy constructor not to be implemented
 		ASFormatter &operator=(ASFormatter &);      // assignment operator not to be implemented
 		template<typename T> void deleteContainer(T &container);
 		template<typename T> void initContainer(T &container, T value);

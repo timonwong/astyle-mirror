@@ -127,7 +127,7 @@ ASFormatter::~ASFormatter()
  *
  * init() should be called every time a ASFormatter object is to start
  * formatting a NEW source file.
- * init() recieves a pointer to a ASSourceIterator object that will be
+ * init() receives a pointer to a ASSourceIterator object that will be
  * used to iterate through the source code.
  *
  * @param sourceIterator     a pointer to the ASSourceIterator or ASStreamIterator object.
@@ -304,7 +304,7 @@ void ASFormatter::buildLanguageVectors()
 }
 
 /**
- * set the variables for each preefined style.
+ * set the variables for each predefined style.
  * this will override any previous settings.
  */
 void ASFormatter::fixOptionVariableConflicts()
@@ -435,7 +435,7 @@ string ASFormatter::nextLine()
 		}
 		else // stuff to do when reading a new character...
 		{
-			// make sure that a virgin '{' at the begining of the file will be treated as a block...
+			// make sure that a virgin '{' at the beginning of the file will be treated as a block...
 			if (isInVirginLine && currentChar == '{'
 			        && currentLineBeginsWithBracket
 			        && previousCommandChar == ' ')
@@ -509,14 +509,17 @@ string ASFormatter::nextLine()
 			continue;
 		}
 		// treat these preprocessor statements as a line comment
-		else if (currentChar == '#')
+		else if (currentChar == '#'
+		         && currentLine.find_first_not_of(" \t") == (size_t) charNum)
 		{
 			string preproc = trim(currentLine.c_str() + charNum + 1);
-			if (preproc.compare(0, 6, "region") == 0
-			        || preproc.compare(0, 9, "endregion") == 0
-			        || preproc.compare(0, 5, "error") == 0
-			        || preproc.compare(0, 7, "warning") == 0
-			        || preproc.compare(0, 4, "line") == 0)
+			if (preproc.length() > 0
+			        && isCharPotentialHeader(preproc, 0)
+			        && (findKeyword(preproc, 0, "region")
+			            || findKeyword(preproc, 0, "endregion")
+			            || findKeyword(preproc, 0, "error")
+			            || findKeyword(preproc, 0, "warning")
+			            || findKeyword(preproc, 0, "line")))
 			{
 				currentLine = rtrim(currentLine);	// trim the end only
 				// check for horstmann run-in
@@ -567,7 +570,7 @@ string ASFormatter::nextLine()
 		/* not in MIDDLE of quote or comment or SQL or white-space of any type ... */
 
 		// check if in preprocessor
-		// ** isInPreprocessor will be automatically reset at the begining
+		// ** isInPreprocessor will be automatically reset at the beginning
 		//    of a new line in getnextChar()
 		if (currentChar == '#')
 		{
@@ -1380,7 +1383,7 @@ string ASFormatter::nextLine()
 		}
 
 		// process pointers and references
-		// check newHeader to elimnate things like '&&' sequence
+		// check newHeader to eliminate things like '&&' sequence
 		if (!isJavaStyle()
 		        && (newHeader == &AS_MULT
 		            || newHeader == &AS_BIT_AND
@@ -1639,8 +1642,8 @@ void ASFormatter::setOperatorPaddingMode(bool state)
 /**
  * set parenthesis outside padding mode.
  * options:
- *    true     statement parenthesiss will be padded with spaces around them.
- *    false    statement parenthesiss will not be padded.
+ *    true     statement parentheses will be padded with spaces around them.
+ *    false    statement parentheses will not be padded.
  *
  * @param state         the padding mode.
  */
@@ -2030,7 +2033,7 @@ bool ASFormatter::isBeforeMultipleLineEndComments(int startPos) const
  * get the next character, increasing the current placement in the process.
  * the new character is inserted into the variable currentChar.
  *
- * @return   whether succeded to recieve the new character.
+ * @return   whether succeeded to receive the new character.
  */
 bool ASFormatter::getNextChar()
 {
@@ -2068,7 +2071,7 @@ bool ASFormatter::getNextChar()
  * get the next line of input, increasing the current placement in the process.
  *
  * @param sequence         the sequence to append.
- * @return   whether succeded in reading the next line.
+ * @return   whether succeeded in reading the next line.
  */
 bool ASFormatter::getNextLine(bool emptyLineWasDeleted /*false*/)
 {
@@ -2905,7 +2908,7 @@ bool ASFormatter::isNonInStatementArrayBracket() const
 /**
  * check if a one-line bracket has been reached,
  * i.e. if the currently reached '{' character is closed
- * with a complimentry '}' elsewhere on the current line,
+ * with a complimentary '}' elsewhere on the current line,
  *.
  * @return     0 = one-line bracket has not been reached.
  *             1 = one-line bracket has been reached.
@@ -3659,7 +3662,7 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 		appendSequence(sequenceToInsert, false);
 		return;
 	}
-	// remove preceeding whitespace
+	// remove preceding whitespace
 	char prevCh = ' ';
 	size_t prevNum = formattedLine.find_last_not_of(" \t");
 	if (prevNum != string::npos)
@@ -3979,7 +3982,7 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 		}
 		else
 		{
-			// if a blank line preceeds this don't attach
+			// if a blank line precedes this don't attach
 			if (isEmptyLine(formattedLine))
 				appendCurrentChar();				// don't attach
 			else if (isOkToBreakBlock(bracketType)
@@ -4047,14 +4050,14 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 		parenStack->pop_back();
 
 	// mark state of immediately after empty block
-	// this state will be used for locating brackets that appear immedately AFTER an empty block (e.g. '{} \n}').
+	// this state will be used for locating brackets that appear immediately AFTER an empty block (e.g. '{} \n}').
 	if (previousCommandChar == '{')
 		isImmediatelyPostEmptyBlock = true;
 
 	if (shouldAttachClosingBracket)
 	{
 		// for now, namespaces and classes will be attached. Uncomment the lines below to break.
-		if ((isEmptyLine(formattedLine)			// if a blank line preceeds this
+		if ((isEmptyLine(formattedLine)			// if a blank line precedes this
 		        || isCharImmediatelyPostLineComment
 		        || isCharImmediatelyPostComment
 		        || (isImmediatelyPostPreprocessor && (int) currentLine.find_first_not_of(" \t") == charNum)
@@ -4151,7 +4154,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				}
 				else
 				{
-					// if a blank line preceeds this don't attach
+					// if a blank line precedes this don't attach
 					if (isEmptyLine(formattedLine))
 						appendCurrentChar();            // don't attach
 					else
@@ -4255,7 +4258,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 	{
 		if (shouldAttachClosingBracket)
 		{
-			if (isEmptyLine(formattedLine)			// if a blank line preceeds this
+			if (isEmptyLine(formattedLine)			// if a blank line precedes this
 			        || isImmediatelyPostPreprocessor
 			        || isCharImmediatelyPostLineComment
 			        || isCharImmediatelyPostComment)
@@ -4887,7 +4890,7 @@ void ASFormatter::formatLineCommentBody()
 		++charNum;
 	}
 
-	// explicitely break a line when a line comment's end is found.
+	// explicitly break a line when a line comment's end is found.
 	if (charNum == (int) currentLine.length())
 	{
 		isInLineBreak = true;
@@ -5235,7 +5238,7 @@ void ASFormatter::isLineBreakBeforeClosingHeader()
 		}
 		else
 		{
-			// if a blank line does not preceed this
+			// if a blank line does not precede this
 			// or last line is not a one line block, attach header
 			bool previousLineIsEmpty = isEmptyLine(formattedLine);
 			int previousLineIsOneLineBlock = 0;
@@ -5665,13 +5668,13 @@ bool ASFormatter::isClosingHeader(const string* header) const
 
 /**
  * Determine if a * following a closing paren is immediately.
- * after a cast. If so it is a dereference and not a multiply.
- * e.g. "(int*) *ptr" is a dereference.
+ * after a cast. If so it is a deference and not a multiply.
+ * e.g. "(int*) *ptr" is a deference.
  */
 bool ASFormatter::isImmediatelyPostCast() const
 {
 	assert(previousNonWSChar == ')' && currentChar == '*');
-	// find preceeding closing paren on currentLine or readyFormattedLine
+	// find preceding closing paren on currentLine or readyFormattedLine
 	string line;		// currentLine or readyFormattedLine
 	size_t paren = currentLine.rfind(")", charNum);
 	if (paren != string::npos)
@@ -5687,7 +5690,7 @@ bool ASFormatter::isImmediatelyPostCast() const
 	if (paren == 0)
 		return false;
 
-	// find character preceeding the closing paren
+	// find character preceding the closing paren
 	size_t lastChar = line.find_last_not_of(" \t", paren - 1);
 	if (lastChar == string::npos)
 		return false;
@@ -5811,9 +5814,8 @@ void ASFormatter::checkIfTemplateOpener()
 				isInTemplate = false;
 				goto exitFromSearch;
 			}
-			else if (parenStack->back() > 0  // checks the stack, not local parenDepth_
-			         && (nextLine_.compare(i, 2, "&&") == 0
-			             || nextLine_.compare(i, 2, "||") == 0))
+			else if (nextLine_.compare(i, 2, AS_AND) == 0
+			         || nextLine_.compare(i, 2, AS_OR) == 0)
 			{
 				// this is not a template -> leave...
 				isInTemplate = false;
