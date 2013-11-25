@@ -33,7 +33,7 @@
 namespace astyle {
 
 // this must be global
-int  g_preprocessorCppExternCBracket;
+static int g_preprocessorCppExternCBracket;
 
 /**
  * ASBeautifier's constructor
@@ -526,7 +526,8 @@ void ASBeautifier::setMinConditionalIndentLength()
 	else if (minConditionalOption == MINCOND_ONEHALF)
 		minConditionalIndent = indentLength / 2;
 	// minConditionalOption = INDENT_TWO
-	else minConditionalIndent = indentLength * 2;
+	else
+		minConditionalIndent = indentLength * 2;
 }
 
 /**
@@ -722,7 +723,7 @@ bool ASBeautifier::getBracketIndent(void) const
 }
 
 /**
- * get the state of the class indentation option. If true, blocks of
+ * Get the state of the class indentation option. If true, blocks of
  * the 'class' statement will be indented one additional indent.
  *
  * @return   state of classIndent option.
@@ -730,6 +731,17 @@ bool ASBeautifier::getBracketIndent(void) const
 bool ASBeautifier::getClassIndent(void) const
 {
 	return classIndent;
+}
+
+/**
+ * Get the state of the class access modifier indentation option.
+ * If true, the class access modifiers will be indented one-half indent.
+ *
+ * @return   state of modifierIndent option.
+ */
+bool ASBeautifier::getModifierIndent(void) const
+{
+	return modifierIndent;
 }
 
 /**
@@ -1071,7 +1083,6 @@ string ASBeautifier::beautify(const string &originalLine)
 	return outBuffer;
 }
 
-
 string ASBeautifier::preLineWS(int lineIndentCount, int lineSpaceIndentCount) const
 {
 	if (shouldForceTabIndentation)
@@ -1151,8 +1162,8 @@ void ASBeautifier::registerInStatementIndent(const string &line, int i, int spac
 	        && !(prevNonLegalCh == '=' && currentNonLegalCh == '{'))
 		inStatementIndent = indentLength * 2 + spaceTabCount_;
 
-	if (!inStatementIndentStack->empty() &&
-	        inStatementIndent < inStatementIndentStack->back())
+	if (!inStatementIndentStack->empty()
+	        && inStatementIndent < inStatementIndentStack->back())
 		inStatementIndent = inStatementIndentStack->back();
 
 	// the block opener is not indented for a NonInStatementArray
@@ -2444,7 +2455,6 @@ void ASBeautifier::parseCurrentLine(const string &line)
 						isInStatement = parenStatementStack->back();
 						parenStatementStack->pop_back();
 					}
-					ch = ' ';
 					isInAsm = false;
 					isInConditional = false;
 				}
@@ -2466,7 +2476,6 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			continue;
 		}
 
-
 		if (ch == '{')
 		{
 			// first, check if '{' is a block-opener or a static-array opener
@@ -2485,9 +2494,9 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			                      || isSharpDelegate
 			                      || isInExternC
 			                      || getNextWord(line, i) == AS_NEW
-			                      || (isInDefine &&
-			                          (prevNonSpaceCh == '('
-			                           || isLegalNameChar(prevNonSpaceCh))));
+			                      || (isInDefine
+			                          && (prevNonSpaceCh == '('
+			                              || isLegalNameChar(prevNonSpaceCh))));
 
 			// remove inStatementIndent for C++ class initializer
 			if (isInClassInitializer)
@@ -2728,9 +2737,9 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				else if (newHeader == &AS_STATIC
 				         || newHeader == &AS_SYNCHRONIZED)
 				{
-					if (!headerStack->empty() &&
-					        (headerStack->back() == &AS_STATIC
-					         || headerStack->back() == &AS_SYNCHRONIZED))
+					if (!headerStack->empty()
+					        && (headerStack->back() == &AS_STATIC
+					            || headerStack->back() == &AS_SYNCHRONIZED))
 					{
 						isIndentableHeader = false;
 					}
@@ -2788,7 +2797,6 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			if (line.length() > i + 1 && line[i + 1] == ':') // look for ::
 			{
 				++i;
-				ch = ' ';
 				continue;
 			}
 			else if (isInQuestion)
@@ -3216,8 +3224,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				if (!isInOperator
 				        && inStatementIndentStack->empty()
 				        && isCStyle()
-				        && (foundNonAssignmentOp == &AS_GR_GR ||
-				            foundNonAssignmentOp == &AS_LS_LS))
+				        && (foundNonAssignmentOp == &AS_GR_GR
+				            || foundNonAssignmentOp == &AS_LS_LS))
 				{
 					// this will be true if the line begins with the operator
 					if (i < 2 && spaceIndentCount == 0)

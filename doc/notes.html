@@ -17,7 +17,29 @@
     <p>
         &nbsp;</p>
 
-    <h3 id="_2.04">
+    <h3>
+        Artistic Style 2.05&nbsp; (pending)</h3>
+
+    <ul>
+        <li>Add new options, "html" (-!") and "html=###", and &nbsp;to display the HTML help documentation in the default
+            browser.</li>
+        <li>Remove option "style=ansi" and make it depreciated (?????????????). </li>
+        <li>Change "help" display to stdout to allow piping and redirection (#63).</li>
+        <li>Change "version" display to stdout. </li>
+        <li>Change compiler definition ASTYLE_NO_VCX (no Visual Studio exports) to ASTYLE_NO_EXPORTS.</li>
+        <li>Fix piping and redirection adding an extra character to the output (#245, #252). </li>
+        <li>Fix "indent-modifiers" to attach class access modifiers to Horstmann style brackets. </li>
+        <li>Fix file read to read 64K blocks of data.</li>
+        <li>Refactor:
+            <ul>
+                <li>Extract class Utf8_16 from ASConsole. </li>
+                <li>Move global "using" statements to the astyle namespace in astyle.h and ASLocalizer.h. </li>
+                <li>Minor changes to ASFormatter and ASBeautifier based on results of the Clang analyzer. </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>
         Artistic Style 2.04&nbsp; (November 2013)</h3>
 
     <ul>
@@ -81,7 +103,7 @@
         </li>
     </ul>
 
-    <h3 id="_2.03">
+    <h3>
         Artistic Style 2.03&nbsp; (April 2013)</h3>
 
     <ul>
@@ -147,7 +169,7 @@
         </li>
     </ul>
 
-    <h3 id="_2.02">
+    <h3>
         Artistic Style 2.02.1&nbsp; (November 2011)</h3>
 
     <ul>
@@ -220,7 +242,7 @@
         </li>
     </ul>
 
-    <h3 id="_2.01">
+    <h3>
         Artistic Style 2.01&nbsp; (November 2010)</h3>
 
     <ul>
@@ -295,10 +317,9 @@
     </ul>
     <p>
         &nbsp;</p>
-
     <p>
-        <strong>Previous releases are available in the <a href="http://astyle.sourceforge.net/notesArchives.html">Release Notes Archives</a>.</strong></p>
-
+        <strong>Previous releases are available in the <a href="http://astyle.sourceforge.net/notesArchives.html">Release
+            Notes Archives</a>.</strong></p>
     <p>
         &nbsp;</p>
 

@@ -30,6 +30,42 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         &nbsp;</p>
 
     <h3>
+        Artistic Style 2.05&nbsp; (pending)</h3>
+
+    <p>
+        With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
+        Style. You may want to format your source before making program changes in order to bring it up to date.</p>
+    <p>
+        The main documentation for Artistic Style is in HTML format. Until now there has not been a way to display it
+        from the astyle console program. A new option, "html" or "-!" will display the help documentation in the
+        default browser. This documentation is more complete than the astyle "help" option, it includes examples, and has
+        an index for easier navigation. Since astyle is typically run from a script this should allow an easy way to access
+        the documentation. The option is available only from the command line.</p>
+    <p>
+        The new "html" option assumes the documentation is installed in the standard install path. This is /usr/share/doc/astyle/html
+        for Linux and the path %programfiles%\AStyle\doc for Windows. If it is installed to a different directory, use the variation
+        "html=###",&nbsp; where #### is the install path. This option can also be used to open other HTML
+        files. More information is in the "Command Line Only" section of the documentation.</p>
+    <p>
+        The "html" option on Linux uses the script "xdg-open" from the install package "xdg-utils" to find the default
+        browser. This should be available on most systems. &nbsp;If it is not available on your system you can file a bug report
+        requesting a change. It would be helpful if you could determine how it is done before filing the report. You can
+        also file a bug report if the documentation is not installed to the above "default" directories. The HTML documentation
+        takes quite a bit of time to maintain and I would like to make it easily available.</p>
+    <p>
+        The "help" option has been changed to send the output to stdout instead of stderr. This will allow piping and
+        redirection of the output. A common way to use the option on Linux is "astyle --help&nbsp;|&nbsp;less", which
+        will page the display. The "version" option has also been changed to stdout.</p>
+    <p>
+        The "Indent Style" topic on Wikipedia states that the "ANSI" style correctly refers to K&amp;R style brackets and not
+        Allman style as used by Artistic Style. The option "style=ansi" is therefore being depreciated and will be removed
+        in a future release. Use one of the other long options instead (style=allman, style=bsd, or style=break).</p>
+    <p>
+        The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to ASTYLE_NO_EXPORTS.
+        It is needed by the Clang compiler to prevent errors. It is not needed on Linux since it does not use the __declspec(dllexport)
+        definition.</p>
+
+    <h3>
         Artistic Style 2.04&nbsp; (November 2013)</h3>
 
     <p>
@@ -46,14 +82,13 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         this value. The default minimum is 40 and the maximum is 120.</p>
     <p>
         A new bracket style option, "style=google", has been added. It uses attached brackets and indents the class access
-        modifiers one-half indent.&nbsp; A complete description of the Google
-        style is available at the <a href="https://code.google.com/p/google-styleguide/" target="_blank" title="open new window">
-            google&#8209;styleguide</a> website (https://code.google.com/p/google-styleguide/). The website has standards
-        for several programming languages along with a python program to verify the style and an emacs script for using
-        the style.</p>
+        modifiers one-half indent.&nbsp; A complete description of the Google style is available at the <a href="https://code.google.com/p/google-styleguide/"
+            target="_blank" title="open new window">google&#8209;styleguide</a> website (https://code.google.com/p/google-styleguide/).
+        The website has standards for several programming languages along with a python program to verify the style and
+        an emacs script for using the style.</p>
     <p>
-        A new indent option "indent-modifiers" will indent class access modifiers (public, protected, or 'private) one-half indent.
-        The rest of the class is not indented. It is described in the "Indentation Options" section of the documentation.</p>
+        A new indent option "indent-modifiers" will indent class access modifiers (public, protected, or 'private) one-half
+        indent. The rest of the class is not indented. It is described in the "Indentation Options" section of the documentation.</p>
     <p>
         Four new bracket modify options, "attach-namespaces", "attach-classes", "attach-inlines", and "attach-extern-c",
         can be used to modify your selected bracket style. They are described in a new "Bracket Modify Options" section
@@ -69,11 +104,11 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
     <p>
         A new option, "remove-comment-prefix", will remove a leading '*' from multi-line comments. It is described in
         the "Formatting Options" section of the documentation. With the syntax coloring of modern editors a leading '*'
-        for comment lines is not as useful as it once was. The current trend is toward code that is easier to maintain. The idea is
-        that a style that is hard to maintain will discourage modification and updating. The converted style should retain
-        most of the formatting within the comment and result in a comment that is easier to maintain. For consistency
-        the option also indents multi-line comments that are not preceded by the '*'. This may slightly modify the indentation
-        of any commented-out code.</p>
+        for comment lines is not as useful as it once was. The current trend is toward code that is easier to maintain.
+        The idea is that a style that is hard to maintain will discourage modification and updating. The converted style
+        should retain most of the formatting within the comment and result in a comment that is easier to maintain. For
+        consistency the option also indents multi-line comments that are not preceded by the '*'. This may slightly modify
+        the indentation of any commented-out code.</p>
     <p>
         The option "pad-first-paren-out" was fixed to not pad if the following paren is empty. This makes the option consistent
         with "pad-paren-out". To fix empty parens that have been padded run with the option "unpad-paren" in addition
@@ -81,11 +116,16 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
     <p>
         Processing of C++11 raw string literals has been added.</p>
     <p>
+        The compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to ASTYLE_NO_EXPORTS and can
+        be used with any Windows compiler. The Clang compiler needs this option to avoid errors on dynamic libraries.
+        It removes the "__declspec(dllexport)"
+        definition from exported functions. Linux compilers do not use this.</p>
+    <p>
         A new shared object (DLL) entry point, AStyleMainUtf16, has been added for processing C# UTF-16 strings. C# does
-        not have built in functions for converting the UTF-16 strings to UTF-8. This
-        entry point will accept UTF-16 strings, format the source code, and return UTF-16 strings. The error handling
-        function and version number still use UTF-8 strings. The C# example program in the "Developer Information" shows
-        the new calling procedure. Changes from the previous release are marked in the example.</p>
+        not have built in functions for converting the UTF-16 strings to UTF-8. This entry point will accept UTF-16 strings,
+        format the source code, and return UTF-16 strings. The error handling function and version number still use UTF-8
+        strings. The C# example program in the "Developer Information" shows the new calling procedure. Changes from the
+        previous release are marked in the example.</p>
     <p>
         C# strings are UTF-16 on both Windows and Linux. C# does not use the UTF-32 wchar_t strings on Linux. Qt also
         uses UTF-16 on both Windows and Linux, but has built in UTF-8 conversion functions. Qt strings can be converted
@@ -106,12 +146,11 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         The executable included in the Windows distribution was compiled with Visual Studio 2010 (platform toolset v100).
         Higher releases contain dependencies on Windows API functions that exist only on Windows Vista, Windows 7, and
         Windows 8. This means that applications built with a Visual Studio 2012 C++ compiler would fail to load and execute
-        on Windows XP. 
+        on Windows XP.
     </p>
     <p>
-        If you
-        are using Windows Vista or higher, and have a Visual Studio 2012 or higher compiler available, recompiling will
-        probably result in faster execution. If you use a compiler other than Visual Studio, you can probably get
+        If you are using Windows Vista or higher, and have a Visual Studio 2012 or higher compiler available, recompiling
+        will probably result in faster execution. If you use a compiler other than Visual Studio, you can probably get
         better execution by compiling using the C++11 standards. Artistic Style uses a lot of string vectors and the new
         move semantics will probably result in faster execution.</p>
     <p>

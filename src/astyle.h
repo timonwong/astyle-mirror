@@ -46,12 +46,12 @@
 
 // define STDCALL and EXPORT for Windows
 // MINGW defines STDCALL in Windows.h (actually windef.h)
-// EXPORT has no value for Visual C if ASTYLE_NO_VCX (no VC Exports) is defined
+// EXPORT has no value ASTYLE_NO_EXPORT is defined
 #ifdef _WIN32
 #ifndef STDCALL
 #define STDCALL __stdcall
 #endif
-#if defined(_MSC_VER) && defined(ASTYLE_NO_VCX)
+#ifdef ASTYLE_NO_EXPORT
 #define EXPORT
 #else
 #define EXPORT __declspec(dllexport)
@@ -77,9 +77,10 @@
 #pragma warning(disable:  981)  // operands are evaluated in unspecified order
 #endif
 
-using namespace std;
 
 namespace astyle {
+
+using namespace std;
 
 enum FileType { C_TYPE = 0, JAVA_TYPE = 1, SHARP_TYPE = 2 };
 
@@ -168,7 +169,7 @@ enum FileEncoding
 {
 	ENCODING_8BIT,
 	UTF_16BE,
-	UTF_16LE,
+	UTF_16LE,     // Windows default
 	UTF_32BE,
 	UTF_32LE
 };
@@ -183,7 +184,6 @@ enum LineEndFormat
 	LINEEND_LF   = LINEEND_LINUX,
 	LINEEND_CR   = LINEEND_MACOLD
 };
-
 
 //-----------------------------------------------------------------------------
 // Class ASSourceIterator
@@ -386,6 +386,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getEmptyLineFill(void) const;
 		bool getForceTabIndentation(void) const;
 		bool getModeManuallySet(void) const;
+		bool getModifierIndent(void) const;
 		bool getPreprocDefineIndent(void) const;
 		bool getSwitchIndent(void) const;
 

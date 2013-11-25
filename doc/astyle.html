@@ -28,7 +28,7 @@
 <body>
 
     <h1>
-        Artistic Style 2.04</h1>
+        Artistic Style 2.05</h1>
 
     <h2>
         A Free, Fast and Small Automatic Formatter<br />
@@ -164,6 +164,8 @@
         <a class="contents" href="#_ascii">ascii</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_version">version</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_help">help</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_html">html</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_html=">html=</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p>
         &nbsp;</p>
@@ -293,7 +295,7 @@
     <p>
         Artistic style is a console program that receives information from the command line. The format of the command
         line is:</p>
-    <pre>astyle&nbsp; [options]&nbsp; <em>SourceFile1&nbsp; SourceFile2&nbsp; SourceFile3</em>&nbsp; [ . . . ]
+    <pre>astyle&nbsp; [OPTIONS]&nbsp; <em>SourceFile1&nbsp; SourceFile2&nbsp; SourceFile3&nbsp; [ . . . ]</em>
 </pre>
     <p>
         The block parens [ ] indicate that more than one option or more than one filename can be entered. They are NOT
@@ -310,7 +312,7 @@
     </div>
     <p>
         Another option will format a single file and change the name:</p>
-    <pre>astyle [options] &lt; <em>OriginalSourceFile</em> &gt; <em>BeautifiedSourceFile</em>
+    <pre>astyle&nbsp; [OPTIONS] &lt; <em>OriginalSourceFile</em> &gt; <em>BeautifiedSourceFile</em>
 </pre>
     <p>
         The <span style="color: #0000a0">&lt;</span> and <span style="color: #0000a0">&gt;</span> characters are used
@@ -410,7 +412,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         &nbsp;</p>
     <p id="_style=allman">
-        <code class="title">--style=allman / --style=ansi / --style=bsd / --style=break / -A1</code><br />
+        <code class="title">--style=allman / --style=bsd / --style=break / -A1</code><br />
         Allman style formatting/indenting uses broken brackets.</p>
     <div class="code">
         <pre>int Foo(bool isBar)
@@ -1886,6 +1888,22 @@ else
     <p id="_help">
         <code class="title">--help / -h / -?</code><br />
         Print a help message and quit. The short option must be by itself, it cannot be concatenated with other options.</p>
+    <p id="_html">
+        <code class="title">--html / -!</code><br />
+        Open the HTML help 
+        file "astyle.html" in the default browser and quit. The short option must be by itself, it
+        cannot be concatenated with other options. The documentation must be installed in the standard install path (/usr/share/doc/astyle/html
+        for Linux or %PROGRAMFILES%\AStyle\doc for Windows). If installed to a different path use html=###.</p>
+    <p id="_html=">
+        <code class="title">--html=<span class="option">####</span></code><br />
+        Open a HTML help file in the default browser using the file path #### and quit. A HTML file other than "astyle.help"
+        may be specified. The path may include a directory path and a file name, or a file name only (e.g. html=install.html). If only a file name is used it is assumed to be in the standard install path (/usr/share/doc/astyle/html
+        for Linux or %PROGRAMFILES%\AStyle\doc for Windows). In both cases the file name must include the html extension. File paths containing spaces must be enclosed in quotes.</p>
+    <p>
+        On Linux the HTML file is opened using the script "xdg-open" from the install package "xdg-utils". This should be installed by default on most distributions. </p>
+    <p>
+        Any HTML file can be opened by this option. The files you are likely to need are astyle.html (the default), install.html,
+        and index.html.</p>
     <p>
         &nbsp;</p>
     <hr style="margin-left: -0.4in;" />
