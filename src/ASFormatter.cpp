@@ -5130,7 +5130,7 @@ void ASFormatter::formatQuoteOpener()
 /**
  * get the next line comment adjustment that results from breaking a closing bracket.
  * the bracket must be on the same line as the closing header.
- * i.e "} else" changed to "} \n else".
+ * i.e "} else" changed to "} <NL> else".
  */
 int ASFormatter::getNextLineCommentAdjustment()
 {
@@ -5154,7 +5154,7 @@ LineEndFormat ASFormatter::getLineEndFormat() const
  * a closing header to a closing bracket.
  * the bracket must be on the line previous to the closing header.
  * the adjustment is 2 chars, one for the bracket and one for the space.
- * i.e "} \n else" changed to "} else".
+ * i.e "} <NL> else" changed to "} else".
  */
 int ASFormatter::getCurrentLineCommentAdjustment()
 {

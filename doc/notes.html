@@ -21,9 +21,10 @@
         Artistic Style 2.05&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new options, "html" (-!") and "html=###", and &nbsp;to display the HTML help documentation in the default
+        <li>Add new options, "html" (-!") and "html=###" to display the HTML help documentation in the default
             browser.</li>
-        <li>Remove option "style=ansi" and make it depreciated (?????????????). </li>
+        <li>Remove option "style=ansi" and make it depreciated (#146). </li>
+        <li>Improve Korean translation (#256).</li>
         <li>Change "help" display to stdout to allow piping and redirection (#63).</li>
         <li>Change "version" display to stdout. </li>
         <li>Change compiler definition ASTYLE_NO_VCX (no Visual Studio exports) to ASTYLE_NO_EXPORTS.</li>
@@ -33,6 +34,7 @@
         <li>Refactor:
             <ul>
                 <li>Extract class Utf8_16 from ASConsole. </li>
+                <li>Use Utf8_16 class for ASLibrary and remove Linux dependency on iconv.</li>
                 <li>Move global "using" statements to the astyle namespace in astyle.h and ASLocalizer.h. </li>
                 <li>Minor changes to ASFormatter and ASBeautifier based on results of the Clang analyzer. </li>
             </ul>

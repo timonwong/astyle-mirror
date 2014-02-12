@@ -62,8 +62,15 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         in a future release. Use one of the other long options instead (style=allman, style=bsd, or style=break).</p>
     <p>
         The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to ASTYLE_NO_EXPORTS.
-        It is needed by the Clang compiler to prevent errors. It is not needed on Linux since it does not use the __declspec(dllexport)
+        It is needed by the some distributions of the Clang compiler to prevent errors. It is not needed on Linux since it does not use the __declspec(dllexport)
         definition.</p>
+    <p>
+        There are now build files available for Xcode on Mac. The makefile is still available for those who want it. 
+        Both now use the LLVM Clang compiler and create &quot;universal&quot; builds for the dynamic libraries. There has been a 
+        change to the makefile handing of the debug configuration. The &quot;Install Instructions&quot; have been updated for 
+        both.</p>
+    <p>
+        Thanks to HyungKi Jeong for their contributions.</p>
 
     <h3>
         Artistic Style 2.04&nbsp; (November 2013)</h3>
@@ -153,8 +160,6 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         will probably result in faster execution. If you use a compiler other than Visual Studio, you can probably get
         better execution by compiling using the C++11 standards. Artistic Style uses a lot of string vectors and the new
         move semantics will probably result in faster execution.</p>
-    <p>
-    </p>
     <p>
         Thanks to Evmenov Georgiy, Matthew Woehlke, Jiang, Ruzzz, and beta100100 for their contributions.</p>
 

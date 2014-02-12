@@ -1,14 +1,15 @@
 # Make file for Intel compiler on Linux or compatible OS
 # The license.html file describes the conditions under which this software may be distributed.
 #
+
 # Before running "make" the COMPILER environment variables must be set.
 # To set the environment variables "source" the compiler environment script:
-#     source /opt/intel/bin/iccvars.sh intel64
+#     source /opt/intel/bin/compilervars.sh  [ ia32 | intel64 ]
 # Refer to the install instructions for details.
-#
-# IF YOU GET AN ERROR MESSAGE:
-# *** No rule to make target `obj/astyle_main.o', needed by `astyle'.
-# SEE THE ABOVE INSTRUCTIONS.
+# If the environment variables are set, INTEL_LICENSE_FILE will be defined.
+ifndef INTEL_LICENSE_FILE
+    $(error The compiler environment variables are not set)
+endif
 
 # list of source files
 SRC = astyle_main.cpp \
@@ -42,10 +43,6 @@ bindir = bin
 objdir = obj
 ipath=$(prefix)/bin
 
-# if the intel compiler version doesn't support the current GCC headers use -gxx-name=g++-4.x where x is a previous GCC compiler 
-# the following were REMOVED in release 2011.1.107
-#     -vec-report0 turns off BLOCK WAS VECTORIZED warnings. To disable vectorization use -mia32 instead.
-#     -no-multibyte-chars is a temporary compiler bug work-around, http://software.intel.com/en-us/forums/intel-c-compiler/topic/56258
 CBASEFLAGS = -w2 -Wall -fno-rtti -fno-exceptions
 JAVAINCS   = -I$(JAVA_HOME)/include
 CXX = icpc
@@ -57,16 +54,16 @@ INSTALL=install -o $(USER) -g $(USER)
 ifdef CFLAGS
     CFLAGSr   = -DNDEBUG $(CBASEFLAGS) $(CFLAGS)
     CFLAGSd   = -g $(CBASEFLAGS) $(CFLAGS)
-else 
+else
     CFLAGSr   = -DNDEBUG -O3 $(CBASEFLAGS)
     CFLAGSd   = -g $(CBASEFLAGS)
 endif
-CFLAGSs   = -DASTYLE_LIB -fpic $(CFLAGSr)
-CFLAGSsd  = -DASTYLE_LIB -fpic $(CFLAGSd)
+CFLAGSs   = -DASTYLE_LIB -fpic -fvisibility=hidden $(CFLAGSr)
+CFLAGSsd  = -DASTYLE_LIB -fpic -fvisibility=hidden $(CFLAGSd)
 CFLAGSa   = -DASTYLE_LIB $(CFLAGSr)
 CFLAGSad  = -DASTYLE_LIB $(CFLAGSd)
-CFLAGSsj  = -DASTYLE_JNI -fpic $(CFLAGSr) $(JAVAINCS)
-CFLAGSsjd = -DASTYLE_JNI -fpic $(CFLAGSd) $(JAVAINCS)
+CFLAGSsj  = -DASTYLE_JNI -fpic -fvisibility=hidden $(CFLAGSr) $(JAVAINCS)
+CFLAGSsjd = -DASTYLE_JNI -fpic -fvisibility=hidden $(CFLAGSd) $(JAVAINCS)
 
 # define link options
 ifdef LDFLAGS

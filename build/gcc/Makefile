@@ -43,16 +43,16 @@ INSTALL=install -o $(USER) -g $(USER)
 ifdef CFLAGS
     CFLAGSr   = -DNDEBUG $(CBASEFLAGS) $(CFLAGS)
     CFLAGSd   = -g $(CBASEFLAGS) $(CFLAGS)
-else 
+else
     CFLAGSr   = -DNDEBUG -O3 $(CBASEFLAGS)
     CFLAGSd   = -g $(CBASEFLAGS)
 endif
-CFLAGSs   = -DASTYLE_LIB -fpic $(CFLAGSr)
-CFLAGSsd  = -DASTYLE_LIB -fpic $(CFLAGSd)
+CFLAGSs   = -DASTYLE_LIB -fpic -fvisibility=hidden $(CFLAGSr)
+CFLAGSsd  = -DASTYLE_LIB -fpic -fvisibility=hidden $(CFLAGSd)
 CFLAGSa   = -DASTYLE_LIB $(CFLAGSr)
 CFLAGSad  = -DASTYLE_LIB $(CFLAGSd)
-CFLAGSsj  = -DASTYLE_JNI -fpic $(CFLAGSr) $(JAVAINCS)
-CFLAGSsjd = -DASTYLE_JNI -fpic $(CFLAGSd) $(JAVAINCS)
+CFLAGSsj  = -DASTYLE_JNI -fpic -fvisibility=hidden $(CFLAGSr) $(JAVAINCS)
+CFLAGSsjd = -DASTYLE_JNI -fpic -fvisibility=hidden $(CFLAGSd) $(JAVAINCS)
 
 # define link options
 ifdef LDFLAGS

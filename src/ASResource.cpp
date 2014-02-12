@@ -166,7 +166,7 @@ const string ASResource::AS_NS_HANDLER = string("NS_HANDLER");
  * Compares the length of the value of pointers in the vectors.
  * The LONGEST strings will be first in the vector.
  *
- * @params the string pointers to be compared.
+ * @param a and b, the string pointers to be compared.
  */
 bool sortOnLength(const string* a, const string* b)
 {
@@ -177,7 +177,7 @@ bool sortOnLength(const string* a, const string* b)
  * Sort comparison function.
  * Compares the value of pointers in the vectors.
  *
- * @params the string pointers to be compared.
+ * @param a and b, the string pointers to be compared.
  */
 bool sortOnName(const string* a, const string* b)
 {

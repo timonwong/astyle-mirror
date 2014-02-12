@@ -115,7 +115,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.7.0\include;C:\Program Files\Java\jdk1.7.0\include\win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Java\jdk1.7.0_45\include;C:\Program Files (x86)\Java\jdk1.7.0_45\include\win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;ASTYLE_JNI</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -139,7 +139,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.7.0_07\include;C:\Program Files\Java\jdk1.7.0_07\include\win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Java\jdk1.7.0_45\include;C:\Program Files (x86)\Java\jdk1.7.0_45\include\win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;ASTYLE_JNI</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -161,7 +161,7 @@
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.7.0\include;C:\Program Files\Java\jdk1.7.0\include\win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Java\jdk1.7.0_45\include;C:\Program Files (x86)\Java\jdk1.7.0_45\include\win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;ASTYLE_JNI</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -186,7 +186,7 @@
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.7.0\include;C:\Program Files\Java\jdk1.7.0\include\win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Java\jdk1.7.0_45\include;C:\Program Files (x86)\Java\jdk1.7.0_45\include\win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;ASTYLE_JNI</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -211,7 +211,7 @@
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.7.0_07\include;C:\Program Files\Java\jdk1.7.0_07\include\win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Java\jdk1.7.0_45\include;C:\Program Files (x86)\Java\jdk1.7.0_45\include\win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;ASTYLE_JNI</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -236,7 +236,7 @@
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>C:\Program Files\Java\jdk1.7.0_07\include;C:\Program Files\Java\jdk1.7.0_07\include\win32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Java\jdk1.7.0_45\include;C:\Program Files (x86)\Java\jdk1.7.0_45\include\win32</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;ASTYLE_JNI</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>

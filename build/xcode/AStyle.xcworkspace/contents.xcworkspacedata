@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <Group
+      location = "container:"
+      name = "AStyle Workspace">
+      <FileRef
+         location = "group:../../src">
+      </FileRef>
+      <FileRef
+         location = "group:Build/Products">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:AStyle.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:AStyleA.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:AStyleDylib.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:AStyleJava.xcodeproj">
+   </FileRef>
+</Workspace>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="EC AStyle Dll" />
+		<Option pch_mode="2" />
+		<Option compiler="embarcadero_compiler_62" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/AStyled" prefix_auto="1" extension_auto="1" />
+				<Option object_output="objDlld/" />
+				<Option type="3" />
+				<Option compiler="embarcadero_compiler_62" />
+				<Compiler>
+					<Add option="-w" />
+					<Add option="-tWD" />
+					<Add option="-v" />
+					<Add option="-DASTYLE_LIB" />
+				</Compiler>
+				<Linker>
+					<Add option="-c" />
+					<Add option="-Gn" />
+					<Add option="-x" />
+					<Add library="cw32mt" />
+					<Add library="import32" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/AStyle" prefix_auto="1" extension_auto="1" />
+				<Option object_output="objDll/" />
+				<Option type="3" />
+				<Option compiler="embarcadero_compiler_62" />
+				<Compiler>
+					<Add option="-w" />
+					<Add option="-tWD" />
+					<Add option="-v-" />
+					<Add option="-O2" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DASTYLE_LIB" />
+				</Compiler>
+				<Linker>
+					<Add option="-c" />
+					<Add option="-Gn" />
+					<Add option="-x" />
+					<Add library="cw32mt" />
+					<Add library="import32" />
+				</Linker>
+			</Target>
+		</Build>
+		<ExtraCommands>
+			<Add after="cmd /c  del  bin\*.tds" />
+		</ExtraCommands>
+		<Unit filename="../../src/ASBeautifier.cpp" />
+		<Unit filename="../../src/ASEnhancer.cpp" />
+		<Unit filename="../../src/ASFormatter.cpp" />
+		<Unit filename="../../src/ASResource.cpp" />
+		<Unit filename="../../src/astyle.h" />
+		<Unit filename="../../src/astyle_main.cpp" />
+		<Unit filename="../../src/astyle_main.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

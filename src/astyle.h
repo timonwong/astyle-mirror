@@ -46,20 +46,24 @@
 
 // define STDCALL and EXPORT for Windows
 // MINGW defines STDCALL in Windows.h (actually windef.h)
-// EXPORT has no value ASTYLE_NO_EXPORT is defined
+// EXPORT has no value if ASTYLE_NO_EXPORT is defined
 #ifdef _WIN32
-#ifndef STDCALL
-#define STDCALL __stdcall
-#endif
-#ifdef ASTYLE_NO_EXPORT
-#define EXPORT
-#else
-#define EXPORT __declspec(dllexport)
+  #ifndef STDCALL
+    #define STDCALL __stdcall
+  #endif
+  #ifdef ASTYLE_NO_EXPORT
+    #define EXPORT
+  #else
+    #define EXPORT __declspec(dllexport)
 #endif
 // define STDCALL and EXPORT for non-Windows
 #else
-#define STDCALL
-#define EXPORT
+  #define STDCALL
+  #if __GNUC__ >= 4
+    #define EXPORT __attribute__ ((visibility ("default")))
+  #else
+    #define EXPORT
+  #endif
 #endif	// #ifdef _WIN32
 
 #ifdef _MSC_VER

@@ -63,9 +63,8 @@
 #include <windows.h>
 #else
 #include <dirent.h>
-#include <iconv.h>
-#include <sys/stat.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #ifdef __VMS
 #include <unixlib.h>
 #include <rms.h>
@@ -1020,7 +1019,10 @@ void ASConsole::launchDefaultBrowser(const char* filePathIn /*NULL*/) const
 	}
 	standardizePath(htmlFilePath);
 	if (stat(htmlFilePath.c_str(), &statbuf) != 0 || !(statbuf.st_mode & S_IFREG))
-		error(_("Cannot open HTML file"), htmlFilePath.c_str());
+	{
+		printf(_("Cannot open HTML file %s\n"), htmlFilePath.c_str());
+		return;
+	}
 
 	SHELLEXECUTEINFO sei = { sizeof(sei), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	sei.fMask = SEE_MASK_FLAG_NO_UI;
@@ -1150,7 +1152,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
  * This formats positive integers only, no float.
  *
  * @param num		The number to be formatted.
- * @param			For compatibility with the Windows function.
+ *                  size_t is for compatibility with the Windows function.
  * @return			The formatted number.
  */
 string ASConsole::getNumberFormat(int num, size_t) const
@@ -1243,7 +1245,10 @@ void ASConsole::launchDefaultBrowser(const char* filePathIn /*NULL*/) const
 	}
 	standardizePath(htmlFilePath);
 	if (stat(htmlFilePath.c_str(), &statbuf) != 0 || !(statbuf.st_mode & S_IFREG))
-		error(_("Cannot open HTML file"), htmlFilePath.c_str());
+	{
+		printf(_("Cannot open HTML file %s\n"), htmlFilePath.c_str());
+		return;
+	}
 
 	// get search paths
 	const char* envPaths = getenv("PATH");
@@ -1253,7 +1258,12 @@ void ASConsole::launchDefaultBrowser(const char* filePathIn /*NULL*/) const
 	char* paths = new char[envlen + 1];
 	strcpy(paths, envPaths);
 	// find xdg-open (usually in /usr/bin)
-	const char* XDG_OPEN = "xdg-open";
+	// Mac uses open instead
+#ifdef __APPLE__
+	const char* FILE_OPEN = "open";
+#else
+	const char* FILE_OPEN = "xdg-open";
+#endif
 	string searchPath;
 	char* searchDir = strtok(paths, ":");
 	while (searchDir != NULL)
@@ -1262,22 +1272,22 @@ void ASConsole::launchDefaultBrowser(const char* filePathIn /*NULL*/) const
 		if (searchPath.length() > 0
 		        && searchPath[searchPath.length() - 1] != g_fileSeparator)
 			searchPath.append(string(1, g_fileSeparator));
-		searchPath.append(XDG_OPEN);
+		searchPath.append(FILE_OPEN);
 		if (stat(searchPath.c_str(), &statbuf) == 0 && (statbuf.st_mode & S_IFREG))
 			break;
 		searchDir = strtok(NULL, ":");
 	}
 	delete[] paths;
 	if (searchDir == NULL)
-		error(_("xdg-utils is not installed"), "");
+		error(_("Command is not installed"), FILE_OPEN);
 
 	// browser open will be bypassed in test programs
 	printf(_("Opening HTML documentation %s\n"), htmlFilePath.c_str());
 	if (!bypassBrowserOpen)
 	{
-		execlp(XDG_OPEN, XDG_OPEN, htmlFilePath.c_str(), NULL);
+		execlp(FILE_OPEN, FILE_OPEN, htmlFilePath.c_str(), NULL);
 		// execlp will NOT return if successful
-		error(_("Command execute failure"), XDG_OPEN);
+		error(_("Command execute failure"), FILE_OPEN);
 	}
 }
 
@@ -2415,19 +2425,6 @@ utf16_t* ASLibrary::formatUtf16(const utf16_t* pSourceIn,		// the source to be f
 	return utf16Out;
 }
 
-bool ASLibrary::getBigEndian() const
-{
-	short int word = 0x0001;
-	char* byte = (char*) &word;
-	return (byte[0] ? false : true);
-}
-
-// Swap the two low order bytes of a 16 bit integer value.
-int ASLibrary::swap16bit(int value) const
-{
-	return ( ((value & 0xff) << 8) | ((value & 0xff00) >> 8) );
-}
-
 // STATIC method to allocate temporary memory for AStyle formatting.
 // The data will be converted before being returned to the calling program.
 char* STDCALL ASLibrary::tempMemoryAllocation(unsigned long memoryNeeded)
@@ -2436,119 +2433,8 @@ char* STDCALL ASLibrary::tempMemoryAllocation(unsigned long memoryNeeded)
 	return buffer;
 }
 
-// Adapted from SciTE UniConversion.cxx.
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
-// Modified for Artistic Style by Jim Pattee.
-//
-// Compute the length of an output utf-8 file given a utf-16 file.
-// Input inLen is the size in BYTES (not wchar_t).
-size_t ASLibrary::Utf8LengthFromUtf16(const char* data, size_t inLen, bool isBigEndian) const
-{
-	enum { SURROGATE_LEAD_FIRST = 0xD800 };
-	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
-
-	size_t len = 0;
-	size_t wcharLen = inLen / 2;
-	const short* uptr = reinterpret_cast<const short*>(data);
-	for (size_t i = 0; i < wcharLen && uptr[i];)
-	{
-		size_t uch = isBigEndian ? swap16bit(uptr[i]) : uptr[i];
-		if (uch < 0x80)
-		{
-			len++;
-		}
-		else if (uch < 0x800)
-		{
-			len += 2;
-		}
-		else if ((uch >= SURROGATE_LEAD_FIRST) && (uch <= SURROGATE_TRAIL_LAST))
-		{
-			len += 4;
-			i++;
-		}
-		else
-		{
-			len += 3;
-		}
-		i++;
-	}
-	return len;
-}
-
-// Adapted from SciTE UniConversion.cxx.
-// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
-// Modified for Artistic Style by Jim Pattee.
-//
-// Compute the length of an output utf-16 file given a utf-8 file.
-// Return value is the size in BYTES (not wchar_t).
-size_t ASLibrary::Utf16LengthFromUtf8(const char* data, size_t len) const
-{
-	size_t ulen = 0;
-	size_t charLen;
-	for (size_t i = 0; i < len;)
-	{
-		unsigned char ch = static_cast<unsigned char>(data[i]);
-		if (ch < 0x80)
-			charLen = 1;
-		else if (ch < 0x80 + 0x40 + 0x20)
-			charLen = 2;
-		else if (ch < 0x80 + 0x40 + 0x20 + 0x10)
-			charLen = 3;
-		else
-		{
-			charLen = 4;
-			ulen++;
-		}
-		i += charLen;
-		ulen++;
-	}
-	// return value is the length in bytes (not wchar_t)
-	return ulen * 2;
-}
-
-#ifdef _WIN32  // Windows specific
-
 /**
- * WINDOWS function to convert utf-8 strings to wchar_t (utf16) strings.
- * Windows wchar_t is utf-16.
- * Memory is allocated by the calling program memory allocation function.
- * The calling function must check for errors.
- */
-wchar_t* ASLibrary::convertUtf8ToUtf16(const char* utf8In, fpAlloc fpMemoryAlloc) const
-{
-	int wideLen = MultiByteToWideChar(CP_UTF8, 0, utf8In, -1, 0, 0);
-	if (wideLen == 0)
-		return NULL;
-	wchar_t* wide = reinterpret_cast<wchar_t*>(fpMemoryAlloc(wideLen * 2));
-	if (wide == NULL)
-		return NULL;
-	MultiByteToWideChar(CP_UTF8, 0, utf8In, -1, wide, wideLen);
-	return wide;
-}
-
-/**
- * WINDOWS function to convert wchar_t (utf16) strings to utf-8 strings.
- * Windows wchar_t is utf-16.
- * The calling function must check for errors and delete the
- * allocated memory.
- */
-char* ASLibrary::convertUtf16ToUtf8(const wchar_t* wcharIn) const
-{
-	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, wcharIn, -1, 0, 0, 0, 0);
-	if (utf8Len == 0)
-		return NULL;
-	char* utf8Out = new(nothrow) char[utf8Len];
-	if (utf8Out == NULL)
-		return NULL;
-	WideCharToMultiByte(CP_UTF8, 0, wcharIn, -1, utf8Out, utf8Len, 0, 0);
-	return utf8Out;
-}
-
-#else	// Linux specific
-
-/**
- * LINUX function to convert utf-8 strings to utf16.
- * Linux wchar_t is utf-32.
+ * Convert utf-8 strings to utf16 strings.
  * Memory is allocated by the calling program memory allocation function.
  * The calling function must check for errors.
  */
@@ -2556,38 +2442,26 @@ utf16_t* ASLibrary::convertUtf8ToUtf16(const char* utf8In, fpAlloc fpMemoryAlloc
 {
 	if (utf8In == NULL)
 		return NULL;
-	iconv_t iconvh = iconv_open("UTF-16", "UTF-8//TRANSLIT");
-	if (iconvh == reinterpret_cast<iconv_t>(-1))
-		return NULL;
-	size_t utf16Len = Utf16LengthFromUtf8(utf8In, strlen(utf8In) + 1) + sizeof(utf16_t);
-	utf16_t* utf16Out = reinterpret_cast<utf16_t*>(fpMemoryAlloc(utf16Len));
+	char* data = const_cast<char*>(utf8In);
+	size_t dataSize = strlen(utf8In);
+	bool isBigEndian = utf8_16.getBigEndian();
+	// return size is in number of CHARs, not utf16_t
+	size_t utf16Size = (utf8_16.Utf16LengthFromUtf8(data, dataSize) + sizeof(utf16_t));
+	char* utf16Out = fpMemoryAlloc(utf16Size);
 	if (utf16Out == NULL)
 		return NULL;
-	char* utf8Conv = const_cast<char*>(utf8In);
-	size_t inLeft = strlen(utf8In) + 1;		// converts the ending NULL
-	char* utf16Conv = reinterpret_cast<char*>(utf16Out);
-	size_t outLeft = utf16Len;
-	size_t iconvval = iconv(iconvh, &utf8Conv, &inLeft, &utf16Conv, &outLeft);
-	///////////////////////////////////////////////////////
-	bool showStats = false;
-	if (showStats && (inLeft != 0 || outLeft != 0))
-	{
-		cout << "-------- 8 to 16 --------" << endl;
-		cout << utf16Len << " utf16len allocated" << endl;
-		cout << inLeft << " inLeft  " << outLeft << " outLeft" << endl;
-		cout << utf16len(utf16Out) << " utf16len out" << endl;
-		cout << "-------------------------" << endl;
-	}
-	///////////////////////////////////////////////////////
-	if (iconvval == static_cast<size_t>(-1))
-		return NULL;
-	iconv_close(iconvh);
-	return utf16Out;
+#ifdef NDEBUG
+	utf8_16.Utf8ToUtf16(data, dataSize + 1, isBigEndian, utf16Out);
+#else
+	size_t utf16Len = utf8_16.Utf8ToUtf16(data, dataSize + 1, isBigEndian, utf16Out);
+	assert(utf16Len == utf16Size);
+#endif
+	assert(utf16Size == (utf8_16.utf16len(reinterpret_cast<utf16_t*>(utf16Out)) + 1) * sizeof(utf16_t));
+	return reinterpret_cast<utf16_t*>(utf16Out);
 }
 
 /**
- * LINUX function to convert utf16 strings to utf-8.
- * Linux wchar_t is utf-32.
+ * Convert utf16 strings to utf-8.
  * The calling function must check for errors and delete the
  * allocated memory.
  */
@@ -2595,52 +2469,24 @@ char* ASLibrary::convertUtf16ToUtf8(const utf16_t* utf16In) const
 {
 	if (utf16In == NULL)
 		return NULL;
-	iconv_t iconvh = iconv_open("UTF-8", "UTF-16//TRANSLIT");
-	if (iconvh == reinterpret_cast<iconv_t>(-1))
-		return NULL;
-	// length must be in chars
-	size_t utf8Len = Utf8LengthFromUtf16(reinterpret_cast<char*>(const_cast<utf16_t*>(utf16In)),
-	                                     (utf16len(utf16In) * sizeof(utf16_t)), getBigEndian()) + 1;
-	char* utf8Out = new(nothrow) char[utf8Len];
+	char* data = reinterpret_cast<char*>(const_cast<utf16_t*>(utf16In));
+	// size must be in chars
+	size_t dataSize = utf8_16.utf16len(utf16In) * sizeof(utf16_t);
+	bool isBigEndian = utf8_16.getBigEndian();
+	size_t utf8Size = utf8_16.Utf8LengthFromUtf16(data, dataSize, isBigEndian) + 1;
+	char* utf8Out = new(nothrow) char[utf8Size];
 	if (utf8Out == NULL)
 		return NULL;
-	char* utf16Conv = reinterpret_cast<char*>(const_cast<utf16_t*>(utf16In));
-	// length must be in chars
-	size_t inLeft = (utf16len(utf16In) + 1) * sizeof(utf16_t);	// converts the ending NULL
-	char* utf8Conv = utf8Out;
-	size_t outLeft = utf8Len;
-	size_t iconvval = iconv(iconvh, &utf16Conv, &inLeft, &utf8Conv, &outLeft);
-	///////////////////////////////////////////////////////
-	bool showStats = false;
-	if (showStats && (inLeft != 0 || outLeft != 0))
-	{
-		cout << "-------- 16 to 8 --------" << endl;
-		cout << utf16len(utf16In) << " text16In" << endl;
-		cout << utf8Len << " utf8len allocated" << endl;
-		cout << inLeft << " inLeft  " << outLeft << " outLeft" << endl;
-		cout << strlen(utf8Out) << " utf8len out" << endl;
-		cout << "-------------------------" << endl;
-	}
-	///////////////////////////////////////////////////////
-	if (iconvval == static_cast<size_t>(-1))
-	{
-		perror("iconv error");
-		return NULL;
-	}
-	iconv_close(iconvh);
+#ifdef NDEBUG
+	utf8_16.Utf16ToUtf8(data, dataSize + 1, isBigEndian, true, utf8Out);
+#else
+	size_t utf8Len = utf8_16.Utf16ToUtf8(data, dataSize + 1, isBigEndian, true, utf8Out);
+	assert(utf8Len == utf8Size);
+#endif
+	assert(utf8Size == strlen(utf8Out) + 1);
 	return utf8Out;
 }
 
-// LINUX function to return the length of a utf-16 C string.
-size_t ASLibrary::utf16len(const utf16_t* utf16In) const
-{
-	size_t length = 0;
-	while (*utf16In++ != '\0')
-		length++;
-	return length;
-}
-
-#endif	// _WIN32
 #endif	// ASTYLE_LIB
 
 //-----------------------------------------------------------------------------
@@ -3368,6 +3214,16 @@ bool Utf8_16::getBigEndian() const
 int Utf8_16::swap16bit(int value) const
 {
 	return ( ((value & 0xff) << 8) | ((value & 0xff00) >> 8) );
+}
+
+// Return the length of a utf-16 C string.
+// The length is in number of utf16_t.
+size_t Utf8_16::utf16len(const utf16* utf16In) const
+{
+	size_t length = 0;
+	while (*utf16In++ != '\0')
+		length++;
+	return length;
 }
 
 // Adapted from SciTE UniConversion.cxx.

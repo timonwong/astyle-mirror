@@ -66,11 +66,7 @@ using std::time_t;
 
 #ifdef ASTYLE_LIB
 // define utf-16 bit text for the platform
-#ifdef _WIN32
-typedef wchar_t utf16_t;
-#else
 typedef unsigned short utf16_t;
-#endif	// _WIN32
 #else
 // for console build only
 #include "ASLocalizer.h"
@@ -144,15 +140,6 @@ class ASStreamIterator : public ASSourceIterator
 
 class Utf8_16
 {
-	public:
-		bool   getBigEndian() const;
-		int    swap16bit(int value) const;
-		size_t Utf8LengthFromUtf16(const char* utf16In, size_t inLen, bool isBigEndian) const;
-		size_t Utf8ToUtf16(char* utf8In, size_t inLen, bool isBigEndian, char* utf16Out) const;
-		size_t Utf16LengthFromUtf8(const char* utf8In, size_t inLen) const;
-		size_t Utf16ToUtf8(char* utf16In, size_t inLen, bool isBigEndian,
-		                   bool firstBlock, char* utf8Out) const;
-
 	private:
 		typedef unsigned short utf16; // 16 bits
 		typedef unsigned char utf8;   // 8 bits
@@ -163,6 +150,16 @@ class Utf8_16
 		enum { SURROGATE_TRAIL_LAST = 0xDFFF };
 		enum { SURROGATE_FIRST_VALUE = 0x10000 };
 		enum eState { eStart, eSecondOf4Bytes, ePenultimate, eFinal };
+
+	public:
+		bool   getBigEndian() const;
+		int    swap16bit(int value) const;
+		size_t utf16len(const utf16* utf16In) const;
+		size_t Utf8LengthFromUtf16(const char* utf16In, size_t inLen, bool isBigEndian) const;
+		size_t Utf8ToUtf16(char* utf8In, size_t inLen, bool isBigEndian, char* utf16Out) const;
+		size_t Utf16LengthFromUtf8(const char* utf8In, size_t inLen) const;
+		size_t Utf16ToUtf8(char* utf16In, size_t inLen, bool isBigEndian,
+		                   bool firstBlock, char* utf8Out) const;
 };
 
 //----------------------------------------------------------------------------
@@ -366,12 +363,10 @@ class ASLibrary
 		virtual char* convertUtf16ToUtf8(const utf16_t* pSourceIn) const;
 
 	private:
-		bool getBigEndian() const;
-		int swap16bit(int value) const;
 		static char* STDCALL tempMemoryAllocation(unsigned long memoryNeeded);
-		size_t utf16len(const utf16_t* utf16In) const;
-		size_t Utf8LengthFromUtf16(const char* data, size_t tlen, bool isBigEndian) const;
-		size_t Utf16LengthFromUtf8(const char* data, size_t len) const;
+
+	private:
+		Utf8_16 utf8_16;            // utf8/16 conversion methods
 };
 
 #endif	// ASTYLE_LIB
