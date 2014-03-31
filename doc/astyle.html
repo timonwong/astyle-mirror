@@ -56,6 +56,7 @@
         <a class="contents" href="#_style=kr">style=kr</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=stroustrup">style=stroustrup</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=whitesmith">style=whitesmith</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_style=vtk">style=vtk</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_style=banner">style=banner</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=gnu">style=gnu</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_style=linux">style=linux</a>&nbsp;&nbsp;&nbsp;
@@ -139,9 +140,10 @@
         <a class="contents" href="#_pad-method-prefix">pad&#8209;method&#8209;prefix</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_unpad-method-prefix">unpad&#8209;method&#8209;prefix</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_pad-method-colon">pad&#8209;method&#8209;colon</a>&nbsp;&nbsp;&nbsp;
-        </p>
+    </p>
     <p class="contents1">
-        <a class="contents" href="#_Other_Options">Other&nbsp;Options</a></p>
+        <a class="contents" href="#_Other_Command_Line_Options">Other&nbsp;Command&nbsp;Line&nbsp;Options</a>&nbsp;&nbsp;&nbsp;
+    </p>
     <p class="contents2">
         <a class="contents" href="#_suffix">suffix</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_suffix=none">suffix=none</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_recursive">recursive</a>&nbsp;&nbsp;&nbsp; 
@@ -315,6 +317,10 @@
     <pre>astyle&nbsp; [OPTIONS] &lt; <em>OriginalSourceFile</em> &gt; <em>BeautifiedSourceFile</em>
 </pre>
     <p>
+        This option can be used to display the formatted file without updating:</p>
+    <pre>astyle&nbsp; [OPTIONS] &lt; <em>OriginalSourceFile | less</em>
+</pre>
+    <p>
         The <span style="color: #0000a0">&lt;</span> and <span style="color: #0000a0">&gt;</span> characters are used
         to redirect the files into standard input (cin) and out of standard output (cout) - don't forget them! With this
         option only one file at a time can be formatted. Wildcards are not recognized, there are no console messages,
@@ -401,19 +407,21 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         Bracket Style Options</h3>
 
     <p>
-        Bracket Style options define the bracket style to use. By default, none of the styles indent namespaces or class
-        blocks. All options default to 4 spaces per indent, indented with spaces.</p>
+        Bracket Style options define the bracket style to use. All options default to 4 spaces per indent, indented with spaces. 
+        By default, none of the styles indent namespaces. Other indentations are indicated in the individual style 
+        description.</p>
     <p>
         &nbsp;</p>
     <p id="_default_bracket_style">
         <code class="title">default bracket style</code><br />
-        If no bracket style option is set, the opening brackets will not be changed and closing brackets will be broken
+        If no bracket style option is 
+        requested, the opening brackets will not be changed and closing brackets will be broken
         from the preceding line. See the preceding "Quick Start" section for more information.</p>
     <p>
         &nbsp;</p>
     <p id="_style=allman">
         <code class="title">--style=allman / --style=bsd / --style=break / -A1</code><br />
-        Allman style formatting/indenting uses broken brackets.</p>
+        Allman style uses broken brackets.</p>
     <div class="code">
         <pre>int Foo(bool isBar)
 <span class="brace">{</span>
@@ -431,7 +439,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=java">
         <code class="title">--style=java / --style=attach / -A2</code><br />
-        Java style formatting/indenting uses attached brackets.</p>
+        Java style uses attached brackets.</p>
     <div class="code">
         <pre>int Foo(bool isBar) <span class="brace">{</span>
     if (isBar) <span class="brace">{</span>
@@ -446,7 +454,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=kr">
         <code class="title">--style=kr / --style=k&amp;r / --style=k/r / -A3</code><br />
-        Kernighan &amp; Ritchie style formatting/indenting uses linux brackets. Opening brackets are broken from namespaces,
+        Kernighan &amp; Ritchie style uses linux brackets. Opening brackets are broken from namespaces,
         classes, and function definitions. Brackets are attached to everything else including statements within a function,
         arrays, structs, and enums.
     </p>
@@ -468,7 +476,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=stroustrup">
         <code class="title">--style=stroustrup / -A4</code><br />
-        Stroustrup style formatting/indenting uses stroustrup brackets. Brackets are broken from function definitions
+        Stroustrup style uses stroustrup brackets. Brackets are broken from function definitions
         only. Brackets are attached to everything else including namespaces, classes, and statements within a function, arrays,
         structs, and enums. This style frequently is used with an indent of 5 spaces.
     </p>
@@ -487,8 +495,9 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=whitesmith">
         <code class="title">--style=whitesmith / -A5</code><br />
-        Whitesmith style formatting/indenting uses broken, indented brackets. Class blocks and switch blocks are indented
-        to prevent a 'hanging indent' with switch statements and C++ class modifiers (public, private, protected).&nbsp;</p>
+        Whitesmith style uses broken, indented brackets. 
+        Switch blocks and class blocks are indented
+        to prevent a 'hanging indent' with following case statements and C++ class modifiers (public, private, protected).&nbsp;</p>
     <div class="code">
         <pre>int Foo(bool isBar) 
     <span class="brace">{</span>
@@ -504,10 +513,29 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     </div>
     <p>
         &nbsp;</p>
+    <p id="_style=vtk">
+        <code class="title">--style=vtk / -A15</code><br />
+        VTK (Visualization Toolkit) style uses broken, indented brackets, except for the opening bracket. Switch blocks are indented to prevent a 'hanging
+        indent' with following case statements.&nbsp;</p>
+    <div class="code">
+        <pre>int Foo(bool isBar) 
+<span class="brace">{</span>
+    if (isBar)
+        <span class="brace">{</span>
+        bar();
+        return 1;
+        <span class="brace">}</span>
+    else
+        return 0;
+<span class="brace">}</span>
+</pre>
+    </div>
+    <p>
+        &nbsp;</p>
     <p id="_style=banner">
         <code class="title">--style=banner / -A6</code><br />
-        Banner style formatting/indenting uses attached, indented brackets. Class blocks and switch blocks are indented
-        to prevent a 'hanging indent' with switch statements and C++ class modifiers (public, private, protected).&nbsp;</p>
+        Banner style uses attached, indented brackets. Switch blocks and class blocks are indented to prevent a 'hanging
+        indent' with following case statements and C++ class modifiers (public, private, protected).&nbsp;</p>
     <div class="code">
         <pre>int Foo(bool isBar) <span class="brace">{</span>
     if (isBar) <span class="brace">{</span>
@@ -523,7 +551,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=gnu">
         <code class="title">--style=gnu / -A7</code><br />
-        GNU style formatting/indenting uses broken brackets and indented blocks. This style frequently is used with
+        GNU style uses broken brackets and indented blocks. This style frequently is used with
         an indent of 2 spaces.
     </p>
     <p>
@@ -547,7 +575,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=linux">
         <code class="title">--style=linux / --style=knf / -A8</code><br />
-        Linux style formatting/indenting uses linux brackets. Opening brackets are broken from namespace, class, and function
+        Linux style uses linux brackets. Opening brackets are broken from namespace, class, and function
         definitions. Brackets are attached to everything else including, statements within a function, arrays, structs,
         and enums. <strong>Minimum conditional indent</strong> is one-half indent. If you want a different minimum conditional
         indent use the K&amp;R style instead. This style works best with a large indent. It frequently is used with an
@@ -570,7 +598,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=horstmann">
         <code class="title">--style=horstmann / -A9</code><br />
-        Horstmann style formatting/indenting uses run-in brackets. Brackets are broken and allow run-in statements.
+        Horstmann style uses run-in brackets. Brackets are broken and allow run-in statements.
         Switches are indented to allow a run-in to the opening switch block. This style frequently is used with an indent
         of 3 spaces.</p>
     <div class="code">
@@ -587,7 +615,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=1tbs">
         <code class="title">--style=1tbs / --style=otbs / -A10</code><br />
-        "One True Brace Style" formatting/indenting uses linux brackets and adds brackets to unbracketed one line conditional
+        "One True Brace Style" uses linux brackets and adds brackets to unbracketed one line conditional
         statements. Opening brackets are broken from namespaces, classes, and function definitions. Brackets are attached
         to everything else including statements within a function, arrays, structs, and enums.&nbsp;</p>
     <p>
@@ -609,7 +637,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=google">
         <code class="title">--style=google / -A14</code><br />
-        Google style formatting/indenting uses attached brackets and indented class access modifiers.&nbsp;See the indent-modifiers
+        Google style uses attached brackets and indented class access modifiers.&nbsp;See the indent-modifiers
         option for an example of the indented modifiers format. This style frequently is used with an indent of 2 spaces.
     </p>
     <div class="code">
@@ -626,7 +654,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=pico">
         <code class="title">--style=pico / -A11</code><br />
-        Pico style formatting/indenting uses run-in brackets and attached closing brackets. Opening brackets are broken
+        Pico style uses run-in brackets and attached closing brackets. Opening brackets are broken
         and allow run-in statements. The closing bracket is attached to the last line in the block. Switches are indented
         to allow a run-in to the opening switch block. The style implies keep-one-line-blocks and keep-one-line-statements.
         If add-brackets is used they will be added as one-line brackets. This style frequently is used with an indent
@@ -645,7 +673,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;</p>
     <p id="_style=lisp">
         <code class="title">--style=lisp / --style=python / -A12</code><br />
-        Lisp style formatting/indenting uses attached opening and closing brackets. Opening brackets are attached at the
+        Lisp style uses attached opening and closing brackets. Opening brackets are attached at the
         end of the statement. The closing bracket is attached to the last line in the block. The style implies keep-one-line-statements
         but NOT keep-one-line-blocks. This style does not support one-line brackets. If add-one-line-brackets is used
         they will be added as multiple-line brackets.</p>
@@ -1788,10 +1816,13 @@ else
         &nbsp;</p>
     <hr />
 
-    <!--  * * * * * * * * * * * * *   Other Options  * * * * * * * * * * * * *  -->
+    <!--  * * * * * * * * * * * *  Other Command Line Options  * * * * * * * * * * * *  -->
 
-    <h3 id="_Other_Options">
-        Other Options</h3>
+    <h3 id="_Other_Command_Line_Options">
+        Other Command Line Options</h3>
+
+    <p>
+        These are non-formatting options available for the command-line. They can also be included in an options file.</p>
 
     <p id="_suffix">
         <code class="title">--suffix=<span class="option">####</span></code><br />

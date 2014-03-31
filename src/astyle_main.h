@@ -64,10 +64,7 @@ using std::time_t;
 #endif
 #endif  //  ASTYLE_JNI
 
-#ifdef ASTYLE_LIB
-// define utf-16 bit text for the platform
-typedef unsigned short utf16_t;
-#else
+#ifndef ASTYLE_LIB
 // for console build only
 #include "ASLocalizer.h"
 #define _(a) localizer.settext(a)
@@ -90,6 +87,47 @@ typedef unsigned short utf16_t;
 #endif
 #endif
 
+//----------------------------------------------------------------------------
+// definitions
+//----------------------------------------------------------------------------
+
+#ifdef ASTYLE_LIB
+
+// define STDCALL and EXPORT for Windows
+// MINGW defines STDCALL in Windows.h (actually windef.h)
+// EXPORT has no value if ASTYLE_NO_EXPORT is defined
+#ifdef _WIN32
+#ifndef STDCALL
+#define STDCALL __stdcall
+#endif
+// define this to prevent compiler warning and error messages
+#ifdef ASTYLE_NO_EXPORT
+#define EXPORT
+#else
+#define EXPORT __declspec(dllexport)
+#endif
+// define STDCALL and EXPORT for non-Windows
+// visibility attribute allows "-fvisibility=hidden" compiler option
+#else
+#define STDCALL
+#if __GNUC__ >= 4
+#define EXPORT __attribute__ ((visibility ("default")))
+#else
+#define EXPORT
+#endif
+#endif	// #ifdef _WIN32
+
+// define utf-16 bit text for the platform
+typedef unsigned short utf16_t;
+// define pointers to callback error handler and memory allocation
+typedef void (STDCALL* fpError)(int errorNumber, const char* errorMessage);
+typedef char* (STDCALL* fpAlloc)(unsigned long memoryNeeded);
+
+#endif  // #ifdef ASTYLE_LIB
+
+//----------------------------------------------------------------------------
+// astyle namespace
+//----------------------------------------------------------------------------
 
 namespace astyle {
 
@@ -377,7 +415,7 @@ class ASLibrary
 
 //----------------------------------------------------------------------------
 // declarations for java native interface (JNI) build
-// global because they are called externally and are NOT part of the namespace
+// they are called externally and are NOT part of the namespace
 //----------------------------------------------------------------------------
 #ifdef ASTYLE_JNI
 void  STDCALL javaErrorHandler(int errorNumber, const char* errorMessage);
@@ -392,12 +430,26 @@ jstring STDCALL Java_AStyleInterface_AStyleMain
 
 //----------------------------------------------------------------------------
 // declarations for UTF-16 interface
-// global because they are called externally
+// they are called externally and are NOT part of the namespace
 //----------------------------------------------------------------------------
 #ifdef ASTYLE_LIB
 extern "C"
 EXPORT utf16_t* STDCALL AStyleMainUtf16
 (const utf16_t* pSourceIn, const utf16_t* pOptions, fpError fpErrorHandler, fpAlloc fpMemoryAlloc);
 #endif	// ASTYLE_LIB
+
+//-----------------------------------------------------------------------------
+// declarations for standard DLL interface
+// they are called externally and are NOT part of the namespace
+//-----------------------------------------------------------------------------
+#ifdef ASTYLE_LIB
+extern "C" EXPORT char* STDCALL AStyleMain(const char* sourceIn,
+                                           const char* optionsIn,
+                                           fpError errorHandler,
+                                           fpAlloc memoryAlloc);
+extern "C" EXPORT const char* STDCALL AStyleGetVersion(void);
+#endif	// ASTYLE_LIB
+
+//-----------------------------------------------------------------------------
 
 #endif // closes ASTYLE_MAIN_H

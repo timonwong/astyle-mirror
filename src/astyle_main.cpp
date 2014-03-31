@@ -1522,6 +1522,10 @@ void ASConsole::printHelp() const
 	cout << endl;
 	cout << "Bracket Style Options:\n";
 	cout << "----------------------\n";
+	cout << "    default bracket style\n";
+	cout << "    If no bracket style is requested, the opening brackets will not be\n";
+	cout << "    changed and closing brackets will be broken from the preceding line.\n";
+	cout << endl;
 	cout << "    --style=allman  OR  --style=bsd  OR  --style=break  OR  -A1\n";
 	cout << "    Allman style formatting/indenting.\n";
 	cout << "    Broken brackets.\n";
@@ -1543,10 +1547,13 @@ void ASConsole::printHelp() const
 	cout << "    Broken, indented brackets.\n";
 	cout << "    Indented class blocks and switch blocks.\n";
 	cout << endl;
+	cout << "    --style=vtk  OR  -A15\n";
+	cout << "    VTK style formatting/indenting.\n";
+	cout << "    Broken, indented brackets, except for opening brackets.\n";
+	cout << endl;
 	cout << "    --style=banner  OR  -A6\n";
 	cout << "    Banner style formatting/indenting.\n";
 	cout << "    Attached, indented brackets.\n";
-	cout << "    Indented class blocks and switch blocks.\n";
 	cout << endl;
 	cout << "    --style=gnu  OR  -A7\n";
 	cout << "    GNU style formatting/indenting.\n";
@@ -2401,10 +2408,10 @@ utf16_t* ASLibrary::formatUtf16(const utf16_t* pSourceIn,		// the source to be f
 	}
 	// call the Artistic Style formatting function
 	// cannot use the callers memory allocation here
-	char* utf8Out = ::AStyleMain(utf8In,
-	                             utf8Options,
-	                             fpErrorHandler,
-	                             ASLibrary::tempMemoryAllocation);
+	char* utf8Out = AStyleMain(utf8In,
+	                           utf8Options,
+	                           fpErrorHandler,
+	                           ASLibrary::tempMemoryAllocation);
 	// finished with these
 	delete [] utf8In;
 	delete [] utf8Options;
@@ -2566,6 +2573,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setFormattingStyle(STYLE_WHITESMITH);
 	}
+	else if (isOption(arg, "style=vtk"))
+	{
+		formatter.setFormattingStyle(STYLE_VTK);
+	}
 	else if ( isOption(arg, "style=banner") )
 	{
 		formatter.setFormattingStyle(STYLE_BANNER);
@@ -2630,6 +2641,8 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 			formatter.setFormattingStyle(STYLE_LISP);
 		else if (style == 14)
 			formatter.setFormattingStyle(STYLE_GOOGLE);
+		else if (style == 15)
+			formatter.setFormattingStyle(STYLE_VTK);
 		else
 			isOptionError(arg, errorInfo);
 	}

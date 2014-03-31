@@ -44,43 +44,23 @@
 #include <string.h>		// need both string and string.h for GCC
 #endif
 
-// define STDCALL and EXPORT for Windows
-// MINGW defines STDCALL in Windows.h (actually windef.h)
-// EXPORT has no value if ASTYLE_NO_EXPORT is defined
-#ifdef _WIN32
-  #ifndef STDCALL
-    #define STDCALL __stdcall
-  #endif
-  #ifdef ASTYLE_NO_EXPORT
-    #define EXPORT
-  #else
-    #define EXPORT __declspec(dllexport)
-#endif
-// define STDCALL and EXPORT for non-Windows
-#else
-  #define STDCALL
-  #if __GNUC__ >= 4
-    #define EXPORT __attribute__ ((visibility ("default")))
-  #else
-    #define EXPORT
-  #endif
-#endif	// #ifdef _WIN32
-
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)  // secure version deprecation warnings
 #pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
 #endif
 
 #ifdef __BORLANDC__
-#pragma warn -8004	// variable is assigned a value that is never used
+#pragma warn -8004	            // variable is assigned a value that is never used
 #endif
 
 #ifdef __INTEL_COMPILER
 #pragma warning(disable:  383)  // value copied to temporary, reference to temporary used
-// #pragma warning(disable:  444)  // destructor for base class is not virtual
 #pragma warning(disable:  981)  // operands are evaluated in unspecified order
 #endif
 
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#endif
 
 namespace astyle {
 
@@ -99,6 +79,7 @@ enum FormatStyle
 	STYLE_KR,
 	STYLE_STROUSTRUP,
 	STYLE_WHITESMITH,
+	STYLE_VTK,
 	STYLE_BANNER,
 	STYLE_GNU,
 	STYLE_LINUX,
@@ -241,6 +222,7 @@ class ASResource
 		static const string AS_SELECTOR;
 		static const string AS_EXTERN, AS_ENUM;
 		static const string AS_STATIC, AS_CONST, AS_SEALED, AS_OVERRIDE, AS_VOLATILE, AS_NEW;
+		static const string AS_NOEXCEPT, AS_INTERRUPT, AS_AUTORELEASEPOOL;
 		static const string AS_WHERE, AS_SYNCHRONIZED;
 		static const string AS_OPERATOR, AS_TEMPLATE;
 		static const string AS_OPEN_BRACKET, AS_CLOSE_BRACKET;
@@ -404,6 +386,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  indexOf(vector<const string*> &container, const string* element) const;
 		void setBlockIndent(bool state);
 		void setBracketIndent(bool state);
+		void setBracketIndentVtk(bool state);
 		string trim(const string &str) const;
 		string rtrim(const string &str) const;
 
@@ -515,6 +498,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool caseIndent;
 		bool namespaceIndent;
 		bool bracketIndent;
+		bool bracketIndentVtk;
 		bool blockIndent;
 		bool labelIndent;
 		bool shouldIndentPreprocDefine;
@@ -807,6 +791,7 @@ class ASFormatter : public ASBeautifier
 		string readyFormattedLine;
 		string currentLine;
 		string formattedLine;
+		string verbatimDelimiter;
 		const string* currentHeader;
 		const string* previousOperator;    // used ONLY by pad-oper
 		char currentChar;
@@ -1003,17 +988,5 @@ bool sortOnName(const string* a, const string* b);
 }   // end of astyle namespace
 
 // end of astyle namespace  --------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-// declarations for library build
-// global because they are called externally and are NOT part of the namespace
-//-----------------------------------------------------------------------------
-
-typedef void (STDCALL* fpError)(int, const char*);      // pointer to callback error handler
-typedef char* (STDCALL* fpAlloc)(unsigned long);		// pointer to callback memory allocation
-extern "C" EXPORT char* STDCALL AStyleMain(const char*, const char*, fpError, fpAlloc);
-extern "C" EXPORT const char* STDCALL AStyleGetVersion (void);
-
 
 #endif // closes ASTYLE_H

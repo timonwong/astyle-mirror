@@ -73,6 +73,7 @@ ASBeautifier::ASBeautifier()
 	setCaseIndent(false);
 	setBlockIndent(false);
 	setBracketIndent(false);
+	setBracketIndentVtk(false);
 	setNamespaceIndent(false);
 	setLabelIndent(false);
 	setEmptyLineFill(false);
@@ -204,6 +205,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	caseIndent = other.caseIndent;
 	namespaceIndent = other.namespaceIndent;
 	bracketIndent = other.bracketIndent;
+	bracketIndentVtk = other.bracketIndentVtk;
 	blockIndent = other.blockIndent;
 	labelIndent = other.labelIndent;
 	isInConditional = other.isInConditional;
@@ -531,7 +533,7 @@ void ASBeautifier::setMinConditionalIndentLength()
 }
 
 /**
- * set the state of the bracket indentation option. If true, brackets will
+ * set the state of the bracket indent option. If true, brackets will
  * be indented one additional indent.
  *
  * @param   state             state of option.
@@ -540,6 +542,20 @@ void ASBeautifier::setBracketIndent(bool state)
 {
 	bracketIndent = state;
 }
+
+/**
+* set the state of the bracket indent VTK option. If true, brackets will
+* be indented one additional indent, except for the opening bracket.
+*
+* @param   state             state of option.
+*/
+void ASBeautifier::setBracketIndentVtk(bool state)
+{
+	// need to set both of these
+	setBracketIndent(state);
+	bracketIndentVtk = state;
+}
+
 
 /**
  * set the state of the block indentation option. If true, entire blocks
@@ -2070,7 +2086,35 @@ void ASBeautifier::adjustParsedLineIndentation(size_t iPrelim, bool isInExtraHea
 	        && bracketIndent
 	        && shouldIndentBrackettedLine
 	        && (lineBeginsWithOpenBracket || lineBeginsWithCloseBracket))
-		++indentCount;
+	{
+		if (!bracketIndentVtk)
+			++indentCount;
+		else
+		{
+			// determine if a style VTK bracket is indented
+			bool haveUnindentedBracket = false;
+			for (size_t i = 0; i < headerStack->size(); i++)
+			{
+				if (((*headerStack)[i] == &AS_NAMESPACE
+				        || (*headerStack)[i] == &AS_CLASS
+				        || (*headerStack)[i] == &AS_STRUCT)
+				        && i + 1 < headerStack->size()
+				        && (*headerStack)[i + 1] == &AS_OPEN_BRACKET)
+					i++;
+				else if (lineBeginsWithOpenBracket)
+				{
+					// don't double count the current bracket
+					if (i + 1 < headerStack->size()
+					        && (*headerStack)[i] == &AS_OPEN_BRACKET)
+						haveUnindentedBracket = true;
+				}
+				else if ((*headerStack)[i] == &AS_OPEN_BRACKET)
+					haveUnindentedBracket = true;
+			}	// end of for loop
+			if (haveUnindentedBracket)
+				++indentCount;
+		}
+	}
 }
 
 /**

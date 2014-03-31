@@ -329,15 +329,23 @@ void ASFormatter::fixOptionVariableConflicts()
 	{
 		setBracketFormatMode(BREAK_MODE);
 		setBracketIndent(true);
-		setClassIndent(true);
-		setSwitchIndent(true);
+		setClassIndent(true);			// avoid hanging indent with access modifiers
+		setSwitchIndent(true);			// avoid hanging indent with case statements
+	}
+	else if (formattingStyle == STYLE_VTK)
+	{
+		// the unindented class bracket does NOT cause a hanging indent like Whitesmith
+		setBracketFormatMode(BREAK_MODE);
+		setBracketIndentVtk(true);		// sets both bracketIndent and bracketIndentVtk
+		setSwitchIndent(true);			// avoid hanging indent with case statements
 	}
 	else if (formattingStyle == STYLE_BANNER)
 	{
+		// attached brackets can have hanging indents with the closing bracket
 		setBracketFormatMode(ATTACH_MODE);
 		setBracketIndent(true);
-		setClassIndent(true);
-		setSwitchIndent(true);
+		setClassIndent(true);			// avoid hanging indent with access modifiers
+		setSwitchIndent(true);			// avoid hanging indent with case statements
 	}
 	else if (formattingStyle == STYLE_GNU)
 	{
@@ -5048,16 +5056,29 @@ void ASFormatter::formatQuoteBody()
 	}
 	else if (isInVerbatimQuote && currentChar == '"')
 	{
-		if (peekNextChar() == '"')              // check consecutive quotes
+		if (isCStyle())
 		{
-			appendSequence("\"\"");
-			goForward(1);
-			return;
+			string delim = ')' + verbatimDelimiter;
+			int delimStart = charNum - delim.length();
+			if (delimStart > 0 && currentLine.substr(delimStart, delim.length()) == delim)
+			{
+				isInQuote = false;
+				isInVerbatimQuote = false;
+			}
 		}
-		else
+		else if (isSharpStyle())
 		{
-			isInQuote = false;
-			isInVerbatimQuote = false;
+			if (peekNextChar() == '"')              // check consecutive quotes
+			{
+				appendSequence("\"\"");
+				goForward(1);
+				return;
+			}
+			else
+			{
+				isInQuote = false;
+				isInVerbatimQuote = false;
+			}
 		}
 	}
 	else if (quoteChar == currentChar)
@@ -5092,7 +5113,16 @@ void ASFormatter::formatQuoteOpener()
 
 	isInQuote = true;
 	quoteChar = currentChar;
-	if (isSharpStyle() && previousChar == '@')
+	if (isCStyle() && previousChar == 'R')
+	{
+		int parenPos = currentLine.find('(', charNum);
+		if (parenPos != -1)
+		{
+			isInVerbatimQuote = true;
+			verbatimDelimiter = currentLine.substr(charNum + 1, parenPos - charNum - 1);
+		}
+	}
+	else if (isSharpStyle() && previousChar == '@')
 		isInVerbatimQuote = true;
 
 	// a quote following a bracket is an array

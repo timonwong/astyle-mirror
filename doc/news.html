@@ -33,8 +33,20 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         Artistic Style 2.05&nbsp; (pending)</h3>
 
     <p>
-        With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
-        Style. You may want to format your source before making program changes in order to bring it up to date.</p>
+        A new bracket style option, &quot;style=vtk&quot;, has been added. It uses indented brackets, like Whitesmith, except 
+        opening brackets for classes, functions, and methods are not indented. A complete description of the VTK style 
+        is available at the &quot;Visualization Toolkit&quot; website (http://www.vtk.org/). </p>
+    <p>
+        An attribute &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; has been added to Linux exported functions.
+        This allows the option &quot;-fvisibility=hidden&quot; to be used on dynamic library compiles. According to the
+        GNU documentation, &quot;Using this feature can very substantially improve linking and load times of shared object 
+        libraries, produce more optimized code, provide near-perfect API export and prevent symbol clashes. It is
+        <strong>strongly</strong> recommended that you use 
+        this in any shared objects you distribute.&quot;</p>
+    <p>
+        The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to 
+        ASTYLE_NO_EXPORTS. It is sometimes needed for static libraries on other compilers to prevent error and warning 
+        messages.</p>
     <p>
         The main documentation for Artistic Style is in HTML format. Until now there has not been a way to display it
         from the astyle console program. A new option, "html" or "-!" will display the help documentation in the
@@ -44,7 +56,7 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
     <p>
         The new "html" option assumes the documentation is installed in the standard install path. This is /usr/share/doc/astyle/html
         for Linux and the path %programfiles%\AStyle\doc for Windows. If it is installed to a different directory, use the variation
-        "html=###",&nbsp; where #### is the install path. This option can also be used to open other HTML
+        "html=&lt;actual_install_path&gt;astyle.html. This option can also be used to open other HTML
         files. More information is in the "Command Line Only" section of the documentation.</p>
     <p>
         The "html" option on Linux uses the script "xdg-open" from the install package "xdg-utils" to find the default
@@ -57,23 +69,22 @@ a.survey:hover { color:#0000A0; text-decoration:underline; }
         redirection of the output. A common way to use the option on Linux is "astyle --help&nbsp;|&nbsp;less", which
         will page the display. The "version" option has also been changed to stdout.</p>
     <p>
+        A shared library error handler argument has been changed from &quot;char*&quot; to &quot;const char*&quot;. In some cases this may 
+        cause compile errors until all references have been changed.</p>
+    <p>
         The "Indent Style" topic on Wikipedia states that the "ANSI" style correctly refers to K&amp;R style brackets and not
         Allman style as used by Artistic Style. The option "style=ansi" is therefore being depreciated and will be removed
         in a future release. Use one of the other long options instead (style=allman, style=bsd, or style=break).</p>
     <p>
-        The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to ASTYLE_NO_EXPORTS.
-        It is needed by the some distributions of the Clang compiler to prevent errors. It is not needed on Linux since it does not use the __declspec(dllexport)
-        definition.</p>
+        There are now build files available for Xcode on Mac. The makefile is still available for those who want it. Both
+        now use the LLVM Clang compiler and create 32-bit and 64-bit code for the dynamic libraries. There has been a
+        change to the makefile debug locations to make them similar to Xcode. The &quot;Install Instructions&quot; have
+        been updated for both.</p>
     <p>
-        There are now build files available for Xcode on Mac. The makefile is still available for those who want it. 
-        Both now use the LLVM Clang compiler and create &quot;universal&quot; builds for the dynamic libraries. There has been a 
-        change to the makefile handing of the debug configuration. The &quot;Install Instructions&quot; have been updated for 
-        both.</p>
-    <p>
-        Thanks to HyungKi Jeong for their contributions.</p>
+        Thanks to Peter A. Bigot and HyungKi Jeong for their contributions.</p>
 
     <h3>
-        Artistic Style 2.04&nbsp; (November 2013)</h3>
+        Artistic Style 2.04&nbsp; (November 2013)mber 2013)</h3>
 
     <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic

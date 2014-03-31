@@ -21,21 +21,26 @@
         Artistic Style 2.05&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new options, "html" (-!") and "html=###" to display the HTML help documentation in the default
-            browser.</li>
-        <li>Remove option "style=ansi" and make it depreciated (#146). </li>
+        <li>Add new bracket style option "style=vtk" (-A15).</li>
+        <li>Add new options, "html" (-!") and "html=###" to display the HTML help documentation in the default browser.</li>
+        <li>Add &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; to Linux exported functions.</li>
+        <li>Remove option &quot;style=ansi&quot; and make it depreciated (#146).</li>
         <li>Improve Korean translation (#256).</li>
         <li>Change "help" display to stdout to allow piping and redirection (#63).</li>
         <li>Change "version" display to stdout. </li>
         <li>Change compiler definition ASTYLE_NO_VCX (no Visual Studio exports) to ASTYLE_NO_EXPORTS.</li>
+        <li>Change shared library error handler argument from &quot;char*&quot; to &quot;const char*&quot;.</li>
+        <li>Fix not recognizing noexcept, interrupt, and autoreleasepool as pre-command headers (#225, #259).</li>
         <li>Fix piping and redirection adding an extra character to the output (#245, #252). </li>
         <li>Fix "indent-modifiers" to attach class access modifiers to Horstmann style brackets. </li>
+        <li>Fix ASFormatter to correctly recognize the end of a raw string literal (#261).</li>
         <li>Fix file read to read 64K blocks of data.</li>
         <li>Refactor:
             <ul>
                 <li>Extract class Utf8_16 from ASConsole. </li>
                 <li>Use Utf8_16 class for ASLibrary and remove Linux dependency on iconv.</li>
                 <li>Move global "using" statements to the astyle namespace in astyle.h and ASLocalizer.h. </li>
+                <li>Move shared library declarations from astyle.h to astyle_main.h.</li>
                 <li>Minor changes to ASFormatter and ASBeautifier based on results of the Clang analyzer. </li>
             </ul>
         </li>

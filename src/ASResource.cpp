@@ -41,6 +41,9 @@ const string ASResource::AS_CASE = string("case");
 const string ASResource::AS_DEFAULT = string("default");
 const string ASResource::AS_CLASS = string("class");
 const string ASResource::AS_VOLATILE = string("volatile");
+const string ASResource::AS_INTERRUPT = string("interrupt");
+const string ASResource::AS_NOEXCEPT = string("noexcept");
+const string ASResource::AS_AUTORELEASEPOOL = string("autoreleasepool");
 const string ASResource::AS_STRUCT = string("struct");
 const string ASResource::AS_UNION = string("union");
 const string ASResource::AS_INTERFACE = string("interface");
@@ -478,8 +481,11 @@ void ASResource::buildPreCommandHeaders(vector<const string*>* preCommandHeaders
 	{
 		preCommandHeaders->push_back(&AS_CONST);
 		preCommandHeaders->push_back(&AS_VOLATILE);
-		preCommandHeaders->push_back(&AS_SEALED);		// Visual C only
-		preCommandHeaders->push_back(&AS_OVERRIDE);		// Visual C only
+		preCommandHeaders->push_back(&AS_INTERRUPT);
+		preCommandHeaders->push_back(&AS_NOEXCEPT);
+		preCommandHeaders->push_back(&AS_OVERRIDE);
+		preCommandHeaders->push_back(&AS_SEALED);			// Visual C only
+		preCommandHeaders->push_back(&AS_AUTORELEASEPOOL);	// Obj-C only
 	}
 
 	if (fileType == JAVA_TYPE)

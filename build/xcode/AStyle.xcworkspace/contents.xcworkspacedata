@@ -7,9 +7,42 @@
       <FileRef
          location = "group:../../src">
       </FileRef>
-      <FileRef
-         location = "group:Build/Products">
-      </FileRef>
+      <Group
+         location = "group:DerivedData/Build/Products"
+         name = "Products">
+         <Group
+            location = "group:Debug"
+            name = "Debug">
+            <FileRef
+               location = "group:astyle">
+            </FileRef>
+            <FileRef
+               location = "group:libastyle.a">
+            </FileRef>
+            <FileRef
+               location = "group:libastyle.dylib">
+            </FileRef>
+            <FileRef
+               location = "group:libastylej.dylib">
+            </FileRef>
+         </Group>
+         <Group
+            location = "group:Release"
+            name = "Release">
+            <FileRef
+               location = "group:astyle">
+            </FileRef>
+            <FileRef
+               location = "group:libastyle.a">
+            </FileRef>
+            <FileRef
+               location = "group:libastyle.dylib">
+            </FileRef>
+            <FileRef
+               location = "group:libastylej.dylib">
+            </FileRef>
+         </Group>
+      </Group>
    </Group>
    <FileRef
       location = "group:AStyle.xcodeproj">

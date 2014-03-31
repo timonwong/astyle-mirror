@@ -220,16 +220,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				DSTROOT = /;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/bin;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OBJROOT = Build/Intermediates;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = astyle;
 				STRIP_INSTALLED_PRODUCT = NO;
-				SYMROOT = Build/Products;
 			};
 			name = Debug;
 		};
@@ -237,19 +236,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DSTROOT = /;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = "NDEBUG=1";
-				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/bin;
 				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
-				OBJROOT = Build/Intermediates;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = astyle;
-				SYMROOT = Build/Products;
 			};
 			name = Release;
 		};
