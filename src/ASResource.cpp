@@ -145,6 +145,9 @@ const string ASResource::AS_COLON = string(":");
 const string ASResource::AS_COMMA = string(",");
 const string ASResource::AS_SEMICOLON = string(";");
 
+const string ASResource::AS_QFOREACH = string("Q_FOREACH");
+const string ASResource::AS_QFOREVER = string("Q_FOREVER");
+const string ASResource::AS_FOREVER = string("forever");
 const string ASResource::AS_FOREACH = string("foreach");
 const string ASResource::AS_LOCK = string("lock");
 const string ASResource::AS_UNSAFE = string("unsafe");
@@ -248,6 +251,10 @@ void ASResource::buildHeaders(vector<const string*>* headers, int fileType, bool
 	headers->push_back(&AS_DEFAULT);
 	headers->push_back(&AS_TRY);
 	headers->push_back(&AS_CATCH);
+	headers->push_back(&AS_QFOREACH);		// QT
+	headers->push_back(&AS_QFOREVER);		// QT
+	headers->push_back(&AS_FOREACH);		// QT & C#
+	headers->push_back(&AS_FOREVER);		// Qt & Boost
 
 	if (fileType == C_TYPE)
 	{
@@ -264,7 +271,6 @@ void ASResource::buildHeaders(vector<const string*>* headers, int fileType, bool
 	if (fileType == SHARP_TYPE)
 	{
 		headers->push_back(&AS_FINALLY);
-		headers->push_back(&AS_FOREACH);
 		headers->push_back(&AS_LOCK);
 		headers->push_back(&AS_FIXED);
 		headers->push_back(&AS_GET);
@@ -342,6 +348,8 @@ void ASResource::buildNonParenHeaders(vector<const string*>* nonParenHeaders, in
 	nonParenHeaders->push_back(&AS_CATCH);		// can be paren or non-paren
 	nonParenHeaders->push_back(&AS_CASE);		// can be paren or non-paren
 	nonParenHeaders->push_back(&AS_DEFAULT);
+	nonParenHeaders->push_back(&AS_QFOREVER);	// QT
+	nonParenHeaders->push_back(&AS_FOREVER);	// Boost
 
 	if (fileType == C_TYPE)
 	{

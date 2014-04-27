@@ -556,7 +556,6 @@ void ASBeautifier::setBracketIndentVtk(bool state)
 	bracketIndentVtk = state;
 }
 
-
 /**
  * set the state of the block indentation option. If true, entire blocks
  * will be indented one additional indent, similar to the GNU indent style.

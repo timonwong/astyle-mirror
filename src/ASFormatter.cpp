@@ -161,6 +161,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	currentLine = "";
 	readyFormattedLine = "";
 	formattedLine = "";
+	verbatimDelimiter = "";
 	currentChar = ' ';
 	previousChar = ' ';
 	previousCommandChar = ' ';
@@ -2601,7 +2602,9 @@ bool ASFormatter::isPointerOrReference() const
 	        || isCharImmediatelyPostReturn
 	        || isInTemplate
 	        || isCharImmediatelyPostTemplate
-	        || currentHeader == &AS_CATCH)
+	        || currentHeader == &AS_CATCH
+	        || currentHeader == &AS_FOREACH
+	        || currentHeader == &AS_QFOREACH)
 		return true;
 
 	if (isBracketType(bracketTypeStack->back(), ARRAY_TYPE)
@@ -5302,7 +5305,10 @@ bool ASFormatter::addBracketsToStatement()
 	        && currentHeader != &AS_FOR
 	        && currentHeader != &AS_WHILE
 	        && currentHeader != &AS_DO
-	        && currentHeader != &AS_FOREACH)
+	        && currentHeader != &AS_FOREACH
+	        && currentHeader != &AS_QFOREACH
+	        && currentHeader != &AS_QFOREVER
+	        && currentHeader != &AS_FOREVER)
 		return false;
 
 	if (currentHeader == &AS_WHILE && foundClosingHeader)	// do-while
