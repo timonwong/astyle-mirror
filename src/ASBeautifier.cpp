@@ -78,6 +78,7 @@ ASBeautifier::ASBeautifier()
 	setLabelIndent(false);
 	setEmptyLineFill(false);
 	setCStyle();
+	setPreprocBlockIndent(false);
 	setPreprocDefineIndent(false);
 	setPreprocConditionalIndent(false);
 	setAlignMethodColon(false);
@@ -168,6 +169,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInExternC = other.isInExternC;
 	isInBeautifySQL = other.isInBeautifySQL;
 	isInIndentableStruct = other.isInIndentableStruct;
+	isInIndentablePreproc = other.isInIndentablePreproc;
 
 	// private variables
 	sourceIterator = other.sourceIterator;
@@ -198,6 +200,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInClassHeaderTab = other.isInClassHeaderTab;
 	isInObjCMethodDefinition = other.isInObjCMethodDefinition;
 	isImmediatelyPostObjCMethodDefinition = other.isImmediatelyPostObjCMethodDefinition;
+	isInIndentablePreprocBlock = other.isInIndentablePreprocBlock;
 	isInObjCInterface = other.isInObjCInterface;
 	isInEnum = other.isInEnum;
 	modifierIndent = other.modifierIndent;
@@ -227,6 +230,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	foundPreCommandHeader = other.foundPreCommandHeader;
 	foundPreCommandMacro = other.foundPreCommandMacro;
 	shouldAlignMethodColon = other.shouldAlignMethodColon;
+	shouldIndentPreprocBlock = other.shouldIndentPreprocBlock;
 	shouldIndentPreprocDefine = other.shouldIndentPreprocDefine;
 	shouldIndentPreprocConditional = other.shouldIndentPreprocConditional;
 	indentCount = other.indentCount;
@@ -249,6 +253,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	prevFinalLineSpaceIndentCount = other.prevFinalLineSpaceIndentCount;
 	prevFinalLineIndentCount = other.prevFinalLineIndentCount;
 	defineIndentCount = other.defineIndentCount;
+	preprocBlockIndent = other.preprocBlockIndent;
 	quoteChar = other.quoteChar;
 	prevNonSpaceCh = other.prevNonSpaceCh;
 	currentNonSpaceCh = other.currentNonSpaceCh;
@@ -283,7 +288,7 @@ ASBeautifier::~ASBeautifier()
  * This init() should be called every time a ABeautifier object is to start
  * beautifying a NEW source file.
  * It is called only when a new ASFormatter object is created.
- * init() recieves a pointer to a ASSourceIterator object that will be
+ * init() receives a pointer to a ASSourceIterator object that will be
  * used to iterate through the source code.
  *
  * @param iter     a pointer to the ASSourceIterator or ASStreamIterator object.
@@ -335,6 +340,7 @@ void ASBeautifier::init(ASSourceIterator* iter)
 	isInClassHeaderTab = false;
 	isInObjCMethodDefinition = false;
 	isImmediatelyPostObjCMethodDefinition = false;
+	isInIndentablePreprocBlock = false;
 	isInObjCInterface = false;
 	isInEnum = false;
 	isInHeader = false;
@@ -354,6 +360,7 @@ void ASBeautifier::init(ASSourceIterator* iter)
 	prevFinalLineSpaceIndentCount = 0;
 	prevFinalLineIndentCount = 0;
 	defineIndentCount = 0;
+	preprocBlockIndent = 0;
 	prevNonSpaceCh = '{';
 	currentNonSpaceCh = '{';
 	prevNonLegalCh = '{';
@@ -387,6 +394,7 @@ void ASBeautifier::init(ASSourceIterator* iter)
 	isInExternC = false;
 	isInBeautifySQL = false;
 	isInIndentableStruct = false;
+	isInIndentablePreproc = false;
 	inLineNumber = 0;
 	horstmannIndentInStatement = 0;
 	nonInStatementBracket = 0;
@@ -453,7 +461,7 @@ void ASBeautifier::setModeManuallySet(bool state)
 
 /**
  * set tabLength equal to indentLength.
- * This is done when tabLength is not explicitely set by
+ * This is done when tabLength is not explicitly set by
  * "indent=force-tab-x"
  *
  */
@@ -638,6 +646,17 @@ void ASBeautifier::setLabelIndent(bool state)
 }
 
 /**
+* set the state of the preprocessor indentation option.
+* If true, #ifdef blocks at level 0 will be indented.
+*
+* @param   state             state of option.
+*/
+void ASBeautifier::setPreprocBlockIndent(bool state)
+{
+	shouldIndentPreprocBlock = state;
+}
+
+/**
  * set the state of the preprocessor indentation option.
  * If true, multiline #define statements will be indented.
  *
@@ -738,6 +757,17 @@ bool ASBeautifier::getBracketIndent(void) const
 }
 
 /**
+* Get the state of the namespace indentation option. If true, blocks
+* of the 'namespace' statement will be indented one additional indent.
+*
+* @return   state of namespaceIndent option.
+*/
+bool ASBeautifier::getNamespaceIndent(void) const
+{
+	return namespaceIndent;
+}
+
+/**
  * Get the state of the class indentation option. If true, blocks of
  * the 'class' statement will be indented one additional indent.
  *
@@ -792,6 +822,18 @@ bool ASBeautifier::getCaseIndent(void) const
 bool ASBeautifier::getEmptyLineFill(void) const
 {
 	return emptyLineFill;
+}
+
+/**
+* get the state of the preprocessor block indentation option.
+* If true, preprocessor "if" blocks will be indented.
+* If false, preprocessor "if" blocks will be unchanged.
+*
+* @return   state of shouldIndentPreprocDefine option.
+*/
+bool ASBeautifier::getPreprocBlockIndent(void) const
+{
+	return shouldIndentPreprocBlock;
 }
 
 /**
@@ -906,15 +948,33 @@ string ASBeautifier::beautify(const string &originalLine)
 	if (line.length() == 0)
 	{
 		if (backslashEndsPrevLine)  // must continue to clear variables
-			line = ' ';
-		else if (emptyLineFill && !isInQuoteContinuation
-		         && (!headerStack->empty() || isInEnum))
-			return preLineWS(prevFinalLineIndentCount, prevFinalLineSpaceIndentCount);
+		{
+			backslashEndsPrevLine = false;
+			isInDefine = false;
+			isInDefineDefinition = false;
+		}
+		if (emptyLineFill && !isInQuoteContinuation)
+		{
+			if (isInIndentablePreprocBlock)
+				return preLineWS(preprocBlockIndent, 0);
+			else if (!headerStack->empty() || isInEnum)
+				return preLineWS(prevFinalLineIndentCount, prevFinalLineSpaceIndentCount);
+			// must fall thru here
+		}
 		else
 			return line;
 	}
 
 	// handle preprocessor commands
+	if (isInIndentablePreprocBlock
+	        && line.length() > 0
+	        && line[0] != '#')
+	{
+		if (isInClassHeaderTab)
+			return preLineWS(prevFinalLineIndentCount, prevFinalLineSpaceIndentCount) + line;
+		else
+			return preLineWS(preprocBlockIndent, 0) + line;
+	}
 	if (!isInComment
 	        && !isInQuoteContinuation
 	        && line.length() > 0
@@ -925,11 +985,35 @@ string ASBeautifier::beautify(const string &originalLine)
 		{
 			string preproc = extractPreprocessorStatement(line);
 			processPreprocessor(preproc, line);
+			if (isInIndentablePreprocBlock || isInIndentablePreproc)
+			{
+				string indentedLine;
+				if ((preproc.length() >= 2 && preproc.substr(0, 2) == "if")) // #if, #ifdef, #ifndef
+				{
+					indentedLine = preLineWS(preprocBlockIndent, 0) + line;
+					preprocBlockIndent += 1;
+					isInIndentablePreprocBlock = true;
+				}
+				else if (preproc == "else" || preproc == "elif")
+				{
+					indentedLine = preLineWS(preprocBlockIndent - 1, 0) + line;
+				}
+				else if (preproc == "endif")
+				{
+					preprocBlockIndent -= 1;
+					indentedLine = preLineWS(preprocBlockIndent, 0) + line;
+					if (preprocBlockIndent == 0)
+						isInIndentablePreprocBlock = false;
+				}
+				else
+					indentedLine = preLineWS(preprocBlockIndent, 0) + line;
+				return indentedLine;
+			}
 			if (shouldIndentPreprocConditional && preproc.length() > 0)
 			{
-				if (preproc.length() >= 2 && preproc.substr(0, 2) == "if")
+				if (preproc.length() >= 2 && preproc.substr(0, 2) == "if") // #if, #ifdef, #ifndef
 				{
-					pair<int, int> entry;
+					pair<int, int> entry;	// indentCount, spaceIndentCount
 					if (!isInDefine && activeBeautifierStack != NULL && !activeBeautifierStack->empty())
 						entry = activeBeautifierStack->back()->computePreprocessorIndent();
 					else
@@ -1003,6 +1087,7 @@ string ASBeautifier::beautify(const string &originalLine)
 		activeBeautifierStack->back()->isInExternC = isInExternC;
 		activeBeautifierStack->back()->isInBeautifySQL = isInBeautifySQL;
 		activeBeautifierStack->back()->isInIndentableStruct = isInIndentableStruct;
+		activeBeautifierStack->back()->isInIndentablePreproc = isInIndentablePreproc;
 		// must return originalLine not the trimmed line
 		return activeBeautifierStack->back()->beautify(originalLine);
 	}
@@ -1085,7 +1170,7 @@ string ASBeautifier::beautify(const string &originalLine)
 	if (lineCommentNoBeautify || blockCommentNoBeautify || isInQuoteContinuation)
 		indentCount = spaceIndentCount = 0;
 
-	// finally, insert indentations into begining of line
+	// finally, insert indentations into beginning of line
 
 	string outBuffer = preLineWS(indentCount, spaceIndentCount) + line;
 
@@ -2536,6 +2621,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			                      || isSharpAccessor
 			                      || isSharpDelegate
 			                      || isInExternC
+			                      || isInAsmBlock
 			                      || getNextWord(line, i) == AS_NEW
 			                      || (isInDefine
 			                          && (prevNonSpaceCh == '('
@@ -3028,8 +3114,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				closingBracketReached = true;
 				if (i == 0)
 					spaceIndentCount = 0;
-				// close these just in case
-				isInAsm = isInAsmOneLine = isInQuote = false;
+				isInAsmBlock = false;
+				isInAsm = isInAsmOneLine = isInQuote = false;	// close these just in case
 
 				int headerPlace = indexOf(*headerStack, &AS_OPEN_BRACKET);
 				if (headerPlace != -1)

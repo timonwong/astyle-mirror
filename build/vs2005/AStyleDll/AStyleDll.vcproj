@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\AStyled.dll"
+				OutputFile="$(OutDir)\AStyle-2.05d.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\AStyled.dll"
+				OutputFile="$(OutDir)\AStyle-2.05d.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(ProjectDir)$(PlatformName)\$(ConfigurationName)\$(TargetName).pdb"
@@ -223,7 +223,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\AStyle.dll"
+				OutputFile="$(OutDir)\AStyle-2.05.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
@@ -306,7 +306,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\AStyle.dll"
+				OutputFile="$(OutDir)\AStyle-2.05.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				ProgramDatabaseFile="$(ProjectDir)$(PlatformName)\$(ConfigurationName)\$(TargetName).pdb"
@@ -388,7 +388,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\AStyle.dll"
+				OutputFile="$(OutDir)\AStyle-2.05.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				ProgramDatabaseFile="$(ProjectDir)$(ConfigurationName)\$(TargetName).pdb"
@@ -471,7 +471,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)\AStyle.dll"
+				OutputFile="$(OutDir)\AStyle-2.05.dll"
 				LinkIncremental="1"
 				GenerateDebugInformation="false"
 				ProgramDatabaseFile="$(ProjectDir)$(PlatformName)\$(ConfigurationName)\$(TargetName).pdb"

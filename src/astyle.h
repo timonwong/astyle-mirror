@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-#if defined(__GNUC__)
+#ifdef __GNUC__
 #include <string.h>		// need both string and string.h for GCC
 #endif
 
@@ -102,7 +102,7 @@ enum BracketMode
 
 enum BracketType
 {
-	NULL_TYPE = 0,
+	NULL_TYPE = 0,				// do NOT use isBracketType() to check
 	NAMESPACE_TYPE = 1,			// also a DEFINITION_TYPE
 	CLASS_TYPE = 2,				// also a DEFINITION_TYPE
 	STRUCT_TYPE = 4,			// also a DEFINITION_TYPE
@@ -183,10 +183,12 @@ class ASSourceIterator
 	public:
 		ASSourceIterator() {}
 		virtual ~ASSourceIterator() {}
+		virtual int getStreamLength() const = 0;
 		virtual bool hasMoreLines() const = 0;
 		virtual string nextLine(bool emptyLineWasDeleted = false) = 0;
 		virtual string peekNextLine() = 0;
 		virtual void peekReset() = 0;
+		virtual streamoff tellg() = 0;
 };
 
 //-----------------------------------------------------------------------------
@@ -201,6 +203,7 @@ class ASResource
 		void buildAssignmentOperators(vector<const string*>* assignmentOperators);
 		void buildCastOperators(vector<const string*>* castOperators);
 		void buildHeaders(vector<const string*>* headers, int fileType, bool beautifier = false);
+		void buildIndentableMacros(vector<const pair<const string, const string>* >* indentableMacros);
 		void buildIndentableHeaders(vector<const string*>* indentableHeaders);
 		void buildNonAssignmentOperators(vector<const string*>* nonAssignmentOperators);
 		void buildNonParenHeaders(vector<const string*>* nonParenHeaders, int fileType, bool beautifier = false);
@@ -358,6 +361,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setSpaceIndentation(int length = 4);
 		void setSwitchIndent(bool state);
 		void setTabIndentation(int length = 4, bool forceTabs = false);
+		void setPreprocBlockIndent(bool state);
 		void setPreprocDefineIndent(bool state);
 		void setPreprocConditionalIndent(bool state);
 		int  getBeautifierFileType() const;
@@ -374,6 +378,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getForceTabIndentation(void) const;
 		bool getModeManuallySet(void) const;
 		bool getModifierIndent(void) const;
+		bool getNamespaceIndent(void) const;
+		bool getPreprocBlockIndent(void) const;
 		bool getPreprocDefineIndent(void) const;
 		bool getSwitchIndent(void) const;
 
@@ -383,11 +389,12 @@ class ASBeautifier : protected ASResource, protected ASBase
 		                         const vector<const string*>* possibleHeaders) const;
 		const string* findOperator(const string &line, int i,
 		                           const vector<const string*>* possibleOperators) const;
-		int getNextProgramCharDistance(const string &line, int i) const;
+		int  getNextProgramCharDistance(const string &line, int i) const;
 		int  indexOf(vector<const string*> &container, const string* element) const;
 		void setBlockIndent(bool state);
 		void setBracketIndent(bool state);
 		void setBracketIndentVtk(bool state);
+		string extractPreprocessorStatement(const string &line) const;
 		string trim(const string &str) const;
 		string rtrim(const string &str) const;
 
@@ -404,6 +411,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInExternC;
 		bool isInBeautifySQL;
 		bool isInIndentableStruct;
+		bool isInIndentablePreproc;
 
 	private:  // functions
 		ASBeautifier(const ASBeautifier &copy);
@@ -432,7 +440,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isPreprocessorConditionalCplusplus(const string &line) const;
 		bool isInPreprocessorUnterminatedComment(const string &line);
 		bool statementEndsWithComma(const string &line, int index) const;
-		string extractPreprocessorStatement(const string &line) const;
 		string preLineWS(int lineIndentCount, int lineSpaceIndentCount) const;
 		template<typename T> void deleteContainer(T &container);
 		template<typename T> void initContainer(T &container, T value);
@@ -492,6 +499,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInClassHeaderTab;
 		bool isInObjCMethodDefinition;
 		bool isImmediatelyPostObjCMethodDefinition;
+		bool isInIndentablePreprocBlock;
 		bool isInObjCInterface;
 		bool isInEnum;
 		bool modifierIndent;
@@ -502,6 +510,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool bracketIndentVtk;
 		bool blockIndent;
 		bool labelIndent;
+		bool shouldIndentPreprocBlock;
 		bool shouldIndentPreprocDefine;
 		bool isInConditional;
 		bool isModeManuallySet;
@@ -543,6 +552,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		int  prevFinalLineSpaceIndentCount;
 		int  prevFinalLineIndentCount;
 		int  defineIndentCount;
+		int  preprocBlockIndent;
 		char quoteChar;
 		char prevNonSpaceCh;
 		char currentNonSpaceCh;
@@ -559,8 +569,9 @@ class ASEnhancer : protected ASBase
 	public:  // functions
 		ASEnhancer();
 		virtual ~ASEnhancer();
-		void init(int, int, int, bool, bool, bool, bool, bool);
-		void enhance(string &line, bool isInPreprocessor, bool isInSQL);
+		void init(int, int, int, bool, bool, bool, bool, bool, bool, bool,
+		          vector<const pair<const string, const string>* >*);
+		void enhance(string &line, bool isInNamespace, bool isInPreprocessor, bool isInSQL);
 
 	private:  // functions
 		void    convertForceTabIndentToSpaces(string  &line) const;
@@ -580,8 +591,10 @@ class ASEnhancer : protected ASBase
 		int  tabLength;
 		bool useTabs;
 		bool forceTab;
+		bool namespaceIndent;
 		bool caseIndent;
-		bool preprocessorIndent;
+		bool preprocBlockIndent;
+		bool preprocDefineIndent;
 		bool emptyLineFill;
 
 		// parsing variables
@@ -593,6 +606,7 @@ class ASEnhancer : protected ASBase
 		// unindent variables
 		int  bracketCount;
 		int  switchDepth;
+		int  eventPreprocDepth;
 		bool lookingForCaseBracket;
 		bool unindentNextLine;
 		bool shouldUnindentLine;
@@ -613,6 +627,7 @@ class ASEnhancer : protected ASBase
 		// event table variables
 		bool nextLineIsEventIndent;             // begin event table indent is reached
 		bool isInEventTable;                    // need to indent an event table
+		vector<const pair<const string, const string>* >* indentableMacros;
 
 		// SQL variables
 		bool nextLineIsDeclareIndent;           // begin declare section indent is reached
@@ -705,6 +720,7 @@ class ASFormatter : public ASBeautifier
 		bool isPointerOrReferenceVariable(string &word) const;
 		bool isSharpStyleWithParen(const string* header) const;
 		bool isStructAccessModified(string  &firstLine, size_t index) const;
+		bool isIndentablePreprocessorBlock(string  &firstLine, size_t index);
 		bool isUnaryOperator() const;
 		bool isImmediatelyPostCast() const;
 		bool isInExponent() const;
@@ -779,6 +795,7 @@ class ASFormatter : public ASBeautifier
 		vector<const string*>* operators;
 		vector<const string*>* assignmentOperators;
 		vector<const string*>* castOperators;
+		vector<const pair<const string, const string>* >* indentableMacros;	// for ASEnhancer
 
 		ASSourceIterator* sourceIterator;
 		ASEnhancer* enhancer;
@@ -800,6 +817,7 @@ class ASFormatter : public ASBeautifier
 		char previousNonWSChar;
 		char previousCommandChar;
 		char quoteChar;
+		streamoff preprocBlockEnd;
 		int  charNum;
 		int  horstmannIndentChars;
 		int  nextLineSpacePadNum;
@@ -948,12 +966,16 @@ class ASFormatter : public ASBeautifier
 		bool shouldBreakClosingHeaderBlocks;
 		bool isPrependPostBlockEmptyLineRequested;
 		bool isAppendPostBlockEmptyLineRequested;
+		bool isIndentableProprocessor;
+		bool isIndentableProprocessorBlock;
 		bool prependEmptyLine;
 		bool appendOpeningBracket;
 		bool foundClosingHeader;
 		bool isInHeader;
 		bool isImmediatelyPostHeader;
 		bool isInCase;
+		bool isFirstPreprocConditional;
+		bool processedFirstConditional;
 		bool isJavaStaticConstructor;
 
 	private:  // inline functions

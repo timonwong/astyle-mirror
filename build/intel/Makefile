@@ -142,14 +142,14 @@ astyled:  $(OBJd)
 	$(CXX) $(LDFLAGSd) -o $(bindir)/$@ $^
 	@ echo
 
-shared:  libastyle.so
-libastyle.so:  $(OBJs)
+shared:  libastyle-2.05.so
+libastyle-2.05.so:  $(OBJs)
 	@ mkdir -p $(bindir)
 	$(CXX) -shared $(LDFLAGSr) -o $(bindir)/$@ $^
 	@ echo
 
-shareddebug:  libastyled.so
-libastyled.so:  $(OBJsd)
+shareddebug:  libastyle-2.05d.so
+libastyle-2.05d.so:  $(OBJsd)
 	@ mkdir -p $(bindir)
 	$(CXX) -shared $(LDFLAGSd) -o $(bindir)/$@ $^
 	@ echo
@@ -166,14 +166,14 @@ libastyled.a:  $(OBJad)
 	ar crs $(bindir)/$@ $^
 	@ echo
 
-java:  libastylej.so
-libastylej.so:  $(OBJsj)
+java:  libastyle-2.05j.so
+libastyle-2.05j.so:  $(OBJsj)
 	@ mkdir -p $(bindir)
 	$(CXX) -shared $(LDFLAGSr) -o $(bindir)/$@ $^
 	@ echo
 
-javadebug:  libastylejd.so
-libastylejd.so:  $(OBJsjd)
+javadebug:  libastyle-2.05jd.so
+libastyle-2.05jd.so:  $(OBJsjd)
 	@ mkdir -p $(bindir)
 	$(CXX) -shared $(LDFLAGSd) -o $(bindir)/$@ $^
 	@ echo

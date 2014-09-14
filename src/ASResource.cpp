@@ -308,6 +308,32 @@ void ASResource::buildIndentableHeaders(vector<const string*>* indentableHeaders
 }
 
 /**
+* Build the vector of indentable macros pairs.
+* Initialized by ASFormatter, used by ONLY ASEnhancer.cpp
+*
+* @param indentableMacros       a reference to the vector to be built.
+*/
+void ASResource::buildIndentableMacros(vector<const pair<const string, const string>* >* indentableMacros)
+{
+	// the pairs must be retained in memory
+	static const struct pair<const string, const string> macros[] =
+	{
+		// wxWidgets
+		make_pair("BEGIN_EVENT_TABLE", "END_EVENT_TABLE"),
+		make_pair("wxBEGIN_EVENT_TABLE", "wxEND_EVENT_TABLE"),
+		// MFC
+		make_pair("BEGIN_DISPATCH_MAP", "END_DISPATCH_MAP"),
+		make_pair("BEGIN_EVENT_MAP", "END_EVENT_MAP"),
+		make_pair("BEGIN_MESSAGE_MAP", "END_MESSAGE_MAP"),
+		make_pair("BEGIN_PROPPAGEIDS", "END_PROPPAGEIDS"),
+	};
+
+	size_t elements = sizeof(macros) / sizeof(macros[0]);
+	for (size_t i = 0; i < elements; i++)
+		indentableMacros->push_back(&macros[i]);
+}
+
+/**
  * Build the vector of non-assignment operators.
  * Used by ONLY ASBeautifier.cpp
  *

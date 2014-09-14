@@ -112,7 +112,7 @@
 		BF4E3ECD188B1A45005C5AD0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = BF4E3ED0188B1A45005C5AD0 /* Build configuration list for PBXProject "AStyle" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -219,25 +219,26 @@
 		BF4E3EDF188B1A45005C5AD0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				DSTROOT = /;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				INSTALL_PATH = /usr/bin;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OBJROOT = Build/Intermediates;
 				PRODUCT_NAME = astyle;
 				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = Build/Products;
 			};
 			name = Debug;
 		};
 		BF4E3EE0188B1A45005C5AD0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DSTROOT = /;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -247,7 +248,9 @@
 				INSTALL_PATH = /usr/bin;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OBJROOT = Build/Intermediates;
 				PRODUCT_NAME = astyle;
+				SYMROOT = Build/Products;
 			};
 			name = Release;
 		};

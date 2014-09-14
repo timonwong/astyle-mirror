@@ -26,6 +26,13 @@
         is available at the &quot;Visualization Toolkit&quot; website (http://www.vtk.org/).
     </p>
     <p>
+        A new options, "dry-run", will run Artistic Style without updating the files. The report will be output as usual.
+    </p>
+    <p>
+        The version number has been added to the filename of shared library (DLL) compiles. This will allow multiple versions of 
+        a shared library on the same system without conflicts.
+    </p>
+    <p>
         An attribute &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; has been added to Linux exported functions.
         This allows the option &quot;-fvisibility=hidden&quot; to be used on dynamic library compiles. According to the
         GNU documentation, &quot;Using this feature can very substantially improve linking and load times of shared object 
@@ -87,7 +94,11 @@
         the ctypes module works differently. The example script documents the differences. If you use Python Tools for Visual 
         Studio, it now installs in the Express editions (beginning with release 2.1 Beta). There is now a Visual Studio install for Node.js.</p>
     <p>
-        Thanks to Peter A. Bigot, HyungKi Jeong, and David Faure for their contributions.
+        The executable in the Windows distribution package is now compiled with Visual Studio 2013 and will no longer work on 
+        XP. If you are using XP Artistic Style will need to be recompiled on the XP machine. </p>
+    <p>
+        Thanks to Peter A. Bigot, HyungKi Jeong, David Faure, 
+        and Carl Moore for their contributions.
     </p>
 
     <h3>Artistic Style 2.04&nbsp; (November 2013)mber 2013)</h3>

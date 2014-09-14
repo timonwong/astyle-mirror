@@ -2,13 +2,13 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Clang Astyle So" />
+		<Option title="Clang AStyle So" />
 		<Option pch_mode="2" />
 		<Option compiler="clang" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/astyled" prefix_auto="1" extension_auto="1" />
-				<Option object_output="objSod/" />
+				<Option output="bin/libastyle-2.05d.so" prefix_auto="0" extension_auto="0" />
+				<Option object_output="objSo/Debug/" />
 				<Option type="3" />
 				<Option compiler="clang" />
 				<Compiler>
@@ -19,7 +19,6 @@
 					<Add option="-fno-rtti" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fpic" />
-					<Add option="-Weverything" />
 					<Add option="-fvisibility=hidden" />
 					<Add option="-Wno-exit-time-destructors" />
 					<Add option="-Wno-global-constructors" />
@@ -32,8 +31,8 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/astyle" prefix_auto="1" extension_auto="1" />
-				<Option object_output="objSo/" />
+				<Option output="bin/libastyle-2.05.so" prefix_auto="0" extension_auto="0" />
+				<Option object_output="objSo/Release/" />
 				<Option type="3" />
 				<Option compiler="clang" />
 				<Compiler>
@@ -45,7 +44,6 @@
 					<Add option="-fno-exceptions" />
 					<Add option="-fpic" />
 					<Add option="-fvisibility=hidden" />
-					<Add option="-Weverything" />
 					<Add option="-Wno-exit-time-destructors" />
 					<Add option="-Wno-global-constructors" />
 					<Add option="-Wno-missing-variable-declarations" />

@@ -32,20 +32,15 @@
 // headers
 //----------------------------------------------------------------------------
 
-// use this to test the Linux compile with MinGW
-#ifdef MINGW_LINUX
-#undef _WIN32
-#endif
-
 #include "astyle.h"
 
 #include <sstream>
 #include <ctime>
 
-#ifdef __BORLANDC__
+#if defined(__BORLANDC__) && __BORLANDC__ < 0x0650
 // Embarcadero needs this for the following utime.h
 // otherwise "struct utimbuf" gets an error on time_t
-// can maybe be removed in the future
+// 0x0650 for C++Builder XE3
 using std::time_t;
 #endif
 
@@ -147,23 +142,26 @@ class ASStreamIterator : public ASSourceIterator
 		ASStreamIterator(T* in);
 		virtual ~ASStreamIterator();
 		bool getLineEndChange(int lineEndFormat) const;
+		int  getStreamLength() const;
 		string nextLine(bool emptyLineWasDeleted);
 		string peekNextLine();
 		void peekReset();
 		void saveLastInputLine();
+		streamoff tellg();
 
 	private:
-		ASStreamIterator(const ASStreamIterator &copy);       // copy constructor not to be imlpemented
+		ASStreamIterator(const ASStreamIterator &copy);       // copy constructor not to be implemented
 		ASStreamIterator &operator=(ASStreamIterator &);      // assignment operator not to be implemented
-		T* inStream;           // pointer to the input stream
-		string buffer;         // current input line
-		string prevBuffer;     // previous input line
-		int eolWindows;        // number of Windows line endings, CRLF
-		int eolLinux;          // number of Linux line endings, LF
-		int eolMacOld;         // number of old Mac line endings. CR
-		char outputEOL[4];     // next output end of line char
-		streamoff peekStart;   // starting position for peekNextLine
-		bool prevLineDeleted;  // the previous input line was deleted
+		T* inStream;            // pointer to the input stream
+		string buffer;          // current input line
+		string prevBuffer;      // previous input line
+		int eolWindows;         // number of Windows line endings, CRLF
+		int eolLinux;           // number of Linux line endings, LF
+		int eolMacOld;          // number of old Mac line endings. CR
+		char outputEOL[4];      // next output end of line char
+		streamoff streamLength; // length of the input file stream
+		streamoff peekStart;    // starting position for peekNextLine
+		bool prevLineDeleted;   // the previous input line was deleted
 
 	public:	// inline functions
 		bool compareToInputBuffer(const string &nextLine_) const
@@ -209,7 +207,7 @@ class ASOptions
 {
 	public:
 		ASOptions(ASFormatter &formatterArg) : formatter(formatterArg) {}
-		string getOptionErrors();
+		string getOptionErrors() const;
 		void importOptions(istream &in, vector<string> &optionsVector);
 		bool parseOptions(vector<string> &optionsVector, const string &errorInfo);
 
@@ -243,7 +241,7 @@ class ASConsole
 		ASLocalizer localizer;              // ASLocalizer object
 		// command line options
 		bool isRecursive;                   // recursive option
-		string origSuffix;                  // suffix= option
+		bool isDryRun;                      // dry-run option
 		bool noBackup;                      // suffix=none option
 		bool preserveDate;                  // preserve-date option
 		bool isVerbose;                     // verbose option
@@ -268,6 +266,7 @@ class ASConsole
 		Utf8_16 utf8_16;                    // utf8/16 conversion methods
 
 		string optionsFileName;             // file path and name of the options file to use
+		string origSuffix;                  // suffix= option
 		string targetDirectory;             // path to the directory being processed
 		string targetFilename;              // file name being processed
 
@@ -282,7 +281,7 @@ class ASConsole
 		ASConsole(ASFormatter &formatterArg) : formatter(formatterArg) {
 			// command line options
 			isRecursive = false;
-			origSuffix = ".orig";
+			isDryRun = false;
 			noBackup = false;
 			preserveDate = false;
 			isVerbose = false;
@@ -299,6 +298,7 @@ class ASConsole
 			lineEndsMixed = false;
 			outputEOL[0] = '\0';
 			prevEOL[0] = '\0';
+			origSuffix = ".orig";
 			mainDirectoryLength = 0;
 			filesFormatted = 0;
 			filesUnchanged = 0;
@@ -312,27 +312,29 @@ class ASConsole
 		void error(const char* why, const char* what) const;
 		void formatCinToCout();
 		vector<string> getArgvOptions(int argc, char** argv) const;
-		bool fileNameVectorIsEmpty();
-		int  getFilesFormatted();
-		bool getIgnoreExcludeErrors();
-		bool getIgnoreExcludeErrorsDisplay();
-		bool getIsFormattedOnly();
-		bool getIsQuiet();
-		bool getIsRecursive();
-		bool getIsVerbose();
-		bool getLineEndsMixed();
-		bool getNoBackup();
+		bool fileNameVectorIsEmpty() const;
+		int  getFilesFormatted() const;
+		bool getIgnoreExcludeErrors() const;
+		bool getIgnoreExcludeErrorsDisplay() const;
+		bool getIsDryRun() const;
+		bool getIsFormattedOnly() const;
+		bool getIsQuiet() const;
+		bool getIsRecursive() const;
+		bool getIsVerbose() const;
+		bool getLineEndsMixed() const;
+		bool getNoBackup() const;
+		bool getPreserveDate() const;
 		string getLanguageID() const;
 		string getNumberFormat(int num, size_t = 0) const;
 		string getNumberFormat(int num, const char* groupingArg, const char* separator) const;
-		string getOptionsFileName();
-		string getOrigSuffix();
-		bool getPreserveDate();
+		string getOptionsFileName() const;
+		string getOrigSuffix() const;
 		void processFiles();
 		void processOptions(vector<string> &argvOptions);
 		void setBypassBrowserOpen(bool state);
 		void setIgnoreExcludeErrors(bool state);
 		void setIgnoreExcludeErrorsAndDisplay(bool state);
+		void setIsDryRun(bool state);
 		void setIsFormattedOnly(bool state);
 		void setIsQuiet(bool state);
 		void setIsRecursive(bool state);
@@ -344,14 +346,12 @@ class ASConsole
 		void standardizePath(string &path, bool removeBeginningSeparator = false) const;
 		bool stringEndsWith(const string &str, const string &suffix) const;
 		void updateExcludeVector(string suffixParam);
-
-		// for unit testing
-		vector<string> getExcludeVector();
-		vector<bool>   getExcludeHitsVector();
-		vector<string> getFileNameVector();
-		vector<string> getOptionsVector();
-		vector<string> getFileOptionsVector();
-		vector<string> getFileName();
+		vector<string> getExcludeVector() const;
+		vector<bool>   getExcludeHitsVector() const;
+		vector<string> getFileNameVector() const;
+		vector<string> getOptionsVector() const;
+		vector<string> getFileOptionsVector() const;
+		vector<string> getFileName() const;
 
 	private:	// functions
 		ASConsole &operator=(ASConsole &);         // not to be implemented
@@ -372,7 +372,7 @@ class ASConsole
 		void printSeparatingLine() const;
 		void printVerboseHeader() const;
 		void printVerboseStats(clock_t startTime) const;
-		FileEncoding readFile(const string &fileName, stringstream &in) const;
+		FileEncoding readFile(const string &fileName_, stringstream &in) const;
 		void removeFile(const char* fileName_, const char* errMsg) const;
 		void renameFile(const char* oldFileName, const char* newFileName, const char* errMsg) const;
 		void setOutputEOL(LineEndFormat lineEndFormat, const char* currentEOL);

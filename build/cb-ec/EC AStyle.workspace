@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<CodeBlocks_workspace_file>
-	<Workspace title="EC AStyle Workspace">
-		<Project filename="EC AStyle.cbp" />
-		<Project filename="EC AStyle Dll.cbp" />
-		<Project filename="EC AStyle Java.cbp" />
-		<Project filename="EC AStyle Lib.cbp" />
-	</Workspace>
-</CodeBlocks_workspace_file>

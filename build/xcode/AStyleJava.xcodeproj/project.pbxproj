@@ -19,7 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BF4E3EB5188B19F4005C5AD0 /* libastylej.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libastylej.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF4E3EB5188B19F4005C5AD0 /* libastyle-2.05j.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "libastyle-2.05j.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFAB842E188B1C4A00DFE955 /* ASBeautifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASBeautifier.cpp; sourceTree = "<group>"; };
 		BFAB842F188B1C4A00DFE955 /* ASEnhancer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASEnhancer.cpp; sourceTree = "<group>"; };
 		BFAB8430188B1C4A00DFE955 /* ASFormatter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASFormatter.cpp; sourceTree = "<group>"; };
@@ -55,7 +55,7 @@
 		BF4E3EB6188B19F4005C5AD0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BF4E3EB5188B19F4005C5AD0 /* libastylej.dylib */,
+				BF4E3EB5188B19F4005C5AD0 /* libastyle-2.05j.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,7 +107,7 @@
 			);
 			name = AStyleJava;
 			productName = AStyleJava;
-			productReference = BF4E3EB5188B19F4005C5AD0 /* libastylej.dylib */;
+			productReference = BF4E3EB5188B19F4005C5AD0 /* libastyle-2.05j.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -116,7 +116,7 @@
 		BF4E3EAD188B19F4005C5AD0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 			};
 			buildConfigurationList = BF4E3EB0188B19F4005C5AD0 /* Build configuration list for PBXProject "AStyleJava" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -225,7 +225,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				EXECUTABLE_PREFIX = lib;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -240,10 +240,12 @@
 					/System/Library/Frameworks/JavaVM.framework/Headers,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OBJROOT = Build/Intermediates;
 				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = astylej;
+				PRODUCT_NAME = "astyle-2.05j";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = Build/Products;
 			};
 			name = Debug;
 		};
@@ -252,7 +254,8 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				EXECUTABLE_PREFIX = lib;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -270,9 +273,11 @@
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OBJROOT = Build/Intermediates;
 				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = astylej;
+				PRODUCT_NAME = "astyle-2.05j";
 				SKIP_INSTALL = YES;
+				SYMROOT = Build/Products;
 			};
 			name = Release;
 		};

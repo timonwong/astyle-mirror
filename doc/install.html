@@ -117,7 +117,7 @@
         </li>
         <li><b>staticdebug </b>builds the Artistic Style program as a static library with debugging information (libastyled.a).
         </li>
-        <li><b>all </b>builds all of the above configurations.
+        <li><b>all </b>builds all the above configurations.
             <p>
                 The following Java shared library builds are separate from the above. They include a Java Native Interface (JNI)
                 and require that the Java Development Kit (JDK) be installed. The environment variable JAVA_HOME should be defined.
@@ -128,10 +128,10 @@
         <li><b>java </b>builds the Artistic Style program as a shared library which includes the JNI (libastylej.so).</li>
         <li><b>javadebug </b>builds the Artistic Style program as a shared library which includes the JNI and debugging information
             (libastylejd.so).</li>
-        <li><span style="font-weight: bold;">javaall </span>builds all of the above java configurations.</li>
+        <li><span style="font-weight: bold;">javaall </span>builds all the above java configurations.</li>
     </ul>
     <p>
-        More than one configuration can be built at the same time. For example, to build all of the release configurations
+        More than one configuration can be built at the same time. For example, to build all the release configurations
         enter:
     </p>
     <pre>cd astyle/build/gcc<br />make release shared static</pre>
@@ -226,7 +226,7 @@
     <p>
         To build the other astyle configurations you can enter the file name or a symbolic name. The configurations for
         Clang are the same as for the <a href="#_GCC_Compiler">GCC compiler</a>. More than one configuration can be
-        built at the same time. For example, to build all of the release configurations enter:
+        built at the same time. For example, to build all the release configurations enter:
     </p>
     <pre>cd astyle/build/clang<br />make release shared static
 </pre>
@@ -350,7 +350,7 @@ sudo xcodebuild install -project AStyle.xcodeproj
     <p>
         To build the other astyle configurations you can enter the file name or a symbolic name. The configurations for
         Mac are the same as for the <a href="#_GCC_Compiler">Linux GCC compiler</a>. More than one configuration can be
-        built at the same time. For example, to build all of the release configurations enter:
+        built at the same time. For example, to build all the release configurations enter:
     </p>
     <pre>cd astyle/build/mac<br />make release shared static
 </pre>
@@ -380,7 +380,7 @@ sudo xcodebuild install -project AStyle.xcodeproj
         directory. Static file output will be in the "binstatic" directory. The following solution files are available.
     </p>
     <ul>
-        <li><b>All AStyle </b>builds the release and the debug configurations for all of the following.</li>
+        <li><b>All AStyle </b>builds the release and the debug configurations for all the following.</li>
         <li><b>AStyle </b>builds the Artistic Style command line program (AStyle.exe). This project has an extra "Static" option.
             It is the same as the "Release" build except that it is linked with a static runtime library. This is needed if
             the executable is to be run on a system without Visual Studio installed. The builds for this configuration are
@@ -404,7 +404,7 @@ sudo xcodebuild install -project AStyle.xcodeproj
         To use other compilers a project file must be built using a development environment.
     </p>
     <ul>
-        <li>Create a project using the compiler's development environment</li>
+        <li>Create a project using the compiler's development environment.</li>
         <li>Add to the project all the .cpp and .h files in the "src" directory.</li>
         <li>The Compiler Options section discusses the compiler options to use.</li>
         <li>Compile.</li>

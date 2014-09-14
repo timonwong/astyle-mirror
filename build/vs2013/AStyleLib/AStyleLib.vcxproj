@@ -94,42 +94,36 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)debug\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
     <TargetName>AStyleLibd</TargetName>
     <TargetExt>.lib</TargetExt>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)\debug\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>AStyleLibd</TargetName>
     <TargetExt>.lib</TargetExt>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
     <TargetName>AStyleLib</TargetName>
     <TargetExt>.lib</TargetExt>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Platform)\bin\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>AStyleLib</TargetName>
     <TargetExt>.lib</TargetExt>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">
     <OutDir>$(SolutionDir)binstatic\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
     <TargetName>AStyleLib</TargetName>
     <TargetExt>.lib</TargetExt>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|x64'">
     <OutDir>$(SolutionDir)$(Platform)\binstatic\</OutDir>
-    <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>AStyleLib</TargetName>
     <TargetExt>.lib</TargetExt>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -144,7 +138,6 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Lib>
     </Lib>
@@ -162,7 +155,6 @@
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PrecompiledHeader />
       <WarningLevel>Level4</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -7,8 +7,8 @@
 		<Option compiler="icc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/astyled" prefix_auto="1" extension_auto="1" />
-				<Option object_output="objSod/" />
+				<Option output="bin/libastyle-2.05d.so" prefix_auto="0" extension_auto="0" />
+				<Option object_output="objSo/Debug/" />
 				<Option type="3" />
 				<Option compiler="icc" />
 				<Compiler>
@@ -26,8 +26,8 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/astyle" prefix_auto="1" extension_auto="1" />
-				<Option object_output="objSo/" />
+				<Option output="bin/libastyle-2.05.so" prefix_auto="0" extension_auto="0" />
+				<Option object_output="objSo/Release/" />
 				<Option type="3" />
 				<Option compiler="icc" />
 				<Compiler>

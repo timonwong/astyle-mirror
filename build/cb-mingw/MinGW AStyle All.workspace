@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
-	<Workspace title="MinGW AStyle Workspace">
-		<Project filename="MinGW AStyle.cbp" active="1" />
+	<Workspace title="MinGW AStyle All">
+		<Project filename="MinGW AStyle.cbp" />
 		<Project filename="MinGW AStyle Java.cbp" />
 		<Project filename="MinGW AStyle Dll.cbp" />
 		<Project filename="MinGW AStyle Lib.cbp" />

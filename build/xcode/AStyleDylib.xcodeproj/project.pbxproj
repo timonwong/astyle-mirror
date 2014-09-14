@@ -19,7 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BF4E3EA5188B19C8005C5AD0 /* libastyle.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libastyle.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF4E3EA5188B19C8005C5AD0 /* libastyle-2.05.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = "libastyle-2.05.dylib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFAB841B188B1ACD00DFE955 /* ASBeautifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASBeautifier.cpp; sourceTree = "<group>"; };
 		BFAB841C188B1ACD00DFE955 /* ASEnhancer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASEnhancer.cpp; sourceTree = "<group>"; };
 		BFAB841D188B1ACD00DFE955 /* ASFormatter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASFormatter.cpp; sourceTree = "<group>"; };
@@ -55,7 +55,7 @@
 		BF4E3EA6188B19C8005C5AD0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BF4E3EA5188B19C8005C5AD0 /* libastyle.dylib */,
+				BF4E3EA5188B19C8005C5AD0 /* libastyle-2.05.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,7 +107,7 @@
 			);
 			name = AStyleDylib;
 			productName = AStyleDylib;
-			productReference = BF4E3EA5188B19C8005C5AD0 /* libastyle.dylib */;
+			productReference = BF4E3EA5188B19C8005C5AD0 /* libastyle-2.05.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -116,7 +116,7 @@
 		BF4E3E9D188B19C8005C5AD0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = Jim;
 			};
 			buildConfigurationList = BF4E3EA0188B19C8005C5AD0 /* Build configuration list for PBXProject "AStyleDylib" */;
@@ -226,7 +226,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				EXECUTABLE_PREFIX = lib;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -235,11 +235,14 @@
 					"ASTYLE_LIB=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OBJROOT = Build/Intermediates;
 				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = astyle;
+				PRODUCT_NAME = "astyle-2.05";
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = Build/Products;
 			};
 			name = Debug;
 		};
@@ -248,7 +251,8 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "compiler-default";
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				EXECUTABLE_PREFIX = lib;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -259,11 +263,14 @@
 					"ASTYLE_LIB=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				LIBRARY_SEARCH_PATHS = "";
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				OBJROOT = Build/Intermediates;
 				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_NAME = astyle;
+				PRODUCT_NAME = "astyle-2.05";
 				SKIP_INSTALL = YES;
+				SYMROOT = Build/Products;
 			};
 			name = Release;
 		};

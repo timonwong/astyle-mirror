@@ -48,13 +48,11 @@
 #include <windows.h>
 #endif
 
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)  // secure version deprecation warnings
-// #pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
-#endif
-
 #ifdef __DMC__
 #include <locale.h>
+// digital mars doesn't have these
+const size_t SUBLANG_CHINESE_MACAU = 5;
+const size_t LANG_HINDI = 57;
 #endif
 
 #ifdef __VMS
@@ -68,6 +66,15 @@
 #include <iostream>
 #include <stdlib.h>
 #include <typeinfo>
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)  // secure version deprecation warnings
+// #pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
+#endif
+
+#ifdef __BORLANDC__
+#pragma warn -8104	    // Local Static with constructor dangerous for multi-threaded apps
+#endif
 
 namespace astyle {
 
@@ -116,12 +123,6 @@ ASLocalizer::~ASLocalizer()
 }
 
 #ifdef _WIN32
-
-#ifdef __DMC__
-// digital mars doesn't have these
-const size_t SUBLANG_CHINESE_MACAU = 5;
-const size_t LANG_HINDI = 57;
-#endif
 
 struct WinLangCode
 {

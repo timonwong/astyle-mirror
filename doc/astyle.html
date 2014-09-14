@@ -101,6 +101,7 @@
         <a class="contents" href="#_indent-cases">indent&#8209;cases</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_indent-namespaces">indent&#8209;namespaces</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent-labels">indent&#8209;labels</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_indent-preproc-block">indent&#8209;preproc&#8209;block</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent-preproc-define">indent&#8209;preproc&#8209;define</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent-preproc-cond">indent&#8209;preproc&#8209;cond</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_indent-col1-comments">indent&#8209;col1&#8209;comments</a>&nbsp;&nbsp;&nbsp;
@@ -153,11 +154,12 @@
         <a class="contents" href="#_pad-method-colon">pad&#8209;method&#8209;colon</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents1">
-        <a class="contents" href="#_Other_Command_Line_Options">Other&nbsp;Command&nbsp;Line&nbsp;Options</a>&nbsp;&nbsp;&nbsp;
+        <a class="contents" href="#_Other_Options">Other&nbsp;Options</a>&nbsp;&nbsp;&nbsp;
     </p>
     <p class="contents2">
         <a class="contents" href="#_suffix">suffix</a>&nbsp;&nbsp;&nbsp; <a class="contents" href="#_suffix=none">suffix=none</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_recursive">recursive</a>&nbsp;&nbsp;&nbsp; 
+        <a class="contents" href="#_dry-run">dry-run</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_exclude">exclude</a>&nbsp;&nbsp;&nbsp; 
         <a class="contents" href="#_ignore-exclude-errors">ignore&#8209;exclude&#8209;errors</a>&nbsp;&nbsp;&nbsp;
         <a class="contents" href="#_ignore-exclude-errors-x">ignore&#8209;exclude&#8209;errors&#8209;x</a>&nbsp;&nbsp;&nbsp;
@@ -210,7 +212,8 @@
         Artistic Style can process directories recursively. Wildcards (such as "*.cpp" or "*.c??") are processed internally.
         If a shell is used it should pass the wildcards to Artistic Style instead of resolving them first. For Linux use
         double quotes around paths whose filename contains wildcards. For Windows use double quotes around paths whose
-        filename contains spaces. The "Other Options" section contains information on recursive processing.
+        filename contains spaces. The <a href="#_recursive">recursive</a> option in the 
+        <a href="#_Other_Options">Other Options</a> section contains information on recursive processing.
     </p>
 
     <h4>File Names</h4>
@@ -274,8 +277,8 @@
         Embedded statements that are multiple-line and are NOT in a C type format, such as Python, are usually mal-formatted.
         (A C type format has blocks enclosed by brackets and statements terminated by a semi-colon). Macros that define
         functions may cause the following code to be mal-formatted because the macro is missing the brackets and semi-colons
-        from the definition. If you have source code with these types of statements, exclude them with the <code>--exclude=</code>
-        statement described in the "Other Options" section.
+        from the definition. If you have source code with these types of statements, exclude them with the 
+        <a href="#_exclude">exclude=####</a> option described in the <a href="#_Other_Options">Other Options</a> section.
     </p>
     <p>
         &nbsp;
@@ -290,16 +293,18 @@
         If you have never used Artistic Style there are a couple of ways to start.
     </p>
     <p>
-        One is to run it with no options at all. This will format the file with 4 spaces per indent and will format the
-        brackets using the default bracket style. The opening brackets will not be changed and the closing brackets will
-        be broken from the preceding line. The default option will break the brackets for one line blocks and will break
-        one line statements. To change this you may want to use the option keep-one-line-blocks and/or keep-one-line-statements.
+        One is to run it with no options at all. This will use the <a href="#_default_bracket_style">default bracket 
+        style</a>, 4 spaces per indent, and no formatting changes.  This will break the brackets for one 
+        line blocks and will break one line statements. To change this use the option 
+        <a href="#_keep-one-line-blocks">keep-one-line-blocks</a> and/or 
+        <a href="#_keep-one-line-statements">keep-one-line-statements</a> described in the
+        <a href="#_Formatting_Options">Formatting Options</a> section
     </p>
     <p>
-        Another way is to use one of the bracket styles described in the "Bracket Style Options" section. Select one with
-        a bracket formatting style you like. If no indentation option is set, the default option of 4 spaces will be used.
-        These options also break one line blocks and one line statements as described
-        above.
+        Another way is to use one of the bracket styles described in the <a href="#_Bracket_Style_Options">Bracket Style 
+        Options</a> section. Select one with a bracket formatting style you like. If no indentation option is set, the 
+        default option of 4 spaces will be used. These options also break one line blocks and one line statements as 
+        described above.
     </p>
     <p>
         Once you are familiar with the options you can customize the format to your personal preference.
@@ -361,8 +366,8 @@
     <h3 id="_Options">Options</h3>
 
     <p>
-        Not specifying any option will result in 4 spaces per indent, no change in bracket placement, and no formatting
-        changes.
+        Not specifying any options will result in the <a href="#_default_bracket_style">default bracket style</a>, 
+        4 spaces per indent, and no formatting changes.
     </p>
     <p>
         Options may be written in two different ways.
@@ -439,16 +444,17 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         Bracket Style options define the bracket style to use. All options default to 4 spaces per indent, indented with spaces.
         By default, none of the styles indent namespaces. Other indentations are indicated in the individual style 
-        description.
+        description. All options will break the brackets for one line blocks and will break one line statements. To change this
+        use the option <a href="#_keep-one-line-blocks">keep-one-line-blocks</a> and/or <a href="#_keep-one-line-statements">
+        keep-one-line-statements</a> described in the <a href="#_Formatting_Options">Formatting Options</a> section 
     </p>
     <p>
         &nbsp;
     </p>
     <p id="_default_bracket_style">
         <code class="title">default bracket style</code><br />
-        If no bracket style option is 
-        requested, the opening brackets will not be changed and closing brackets will be broken
-        from the preceding line. See the preceding "Quick Start" section for more information.
+        If no bracket style is requested, the default bracket style will be used. The opening brackets are not changed
+        and the closing brackets will be broken from the preceding line. There are a few exceptions to this. 
     </p>
     <p>
         &nbsp;
@@ -1166,10 +1172,39 @@ error:
     <p>
         &nbsp;
     </p>
-    <p id="_indent-preproc-define">
-        <code class="title">--indent-preproc-define / -w</code><br />
-        <code class="title">--indent-preprocessor</code> has been depreciated and will be removed in a future release.<br />
-        Indent multi-line preprocessor definitions ending with a backslash. Should be used with --convert-tabs for proper
+
+    <p id="_indent-preproc-block">
+        <code class="title">--indent-preproc-block / -xW</code><br />
+        Indent preprocessor 
+        blocks at bracket level 0.&nbsp; Without this
+        option the preprocessor block is not indented.
+    </p>
+    <div class="code">
+        <pre>#ifdef ASTYLE_JNI
+#include &lt;jni.h&gt; 
+#ifndef ASTYLE_LIB
+#define ASTYLE_LIB
+#endif
+#endif
+</pre>
+        <p class="code">
+            becomes:
+        </p>
+        <pre>#ifdef ASTYLE_JNI
+  #include &lt;jni.h&gt; 
+  #ifndef ASTYLE_LIB
+    #define ASTYLE_LIB
+  #endif
+#endif
+</pre>
+    </div>
+    <p>
+        &nbsp;
+    </p>
+
+        <p id="_indent-preproc-define">
+            <code class="title">--indent-preproc-define / -w</code><br />
+            Indent multi-line preprocessor definitions ending with a backslash. Should be used with --convert-tabs for proper
         results. Does a pretty good job, but cannot perform miracles in obfuscated preprocessor definitions. Without this
         option the preprocessor statements remain unchanged.
     </p>
@@ -2032,7 +2067,7 @@ else
 
     <!--  * * * * * * * * * * * *  Other Command Line Options  * * * * * * * * * * * *  -->
 
-    <h3 id="_Other_Command_Line_Options">Other Command Line Options</h3>
+    <h3 id="_Other_Options">Other Options</h3>
 
     <p>
         These are non-formatting options available for the command-line. They can also be included in an options file.
@@ -2055,6 +2090,10 @@ else
         so the shell will not resolve the wildcards (e.g. "$HOME/src/*.cpp"). Windows users should place the filepath
         and name in double quotes if the path or name contains spaces.
     </p>
+    <p id="_dry-run">
+        <code class="title">--dry-run</code><br />
+        Perform a trial run with no changes made to the files.
+        The report will be output as usual.</p>
     <p id="_exclude">
         <code class="title">--exclude=<span class="option">####</span></code><br />
         Specify a file or sub directory #### to be excluded from processing.&nbsp;
@@ -2090,7 +2129,7 @@ else
     <p id="_errors-to-stdout">
         <code class="title">--errors-to-stdout / -X</code><br />
         Print errors to standard-output rather than to standard-error.<br />
-        This option should be helpful for systems/shells that do not have this option, such as in Windows95.
+        This option should be helpful for systems/shells that do not have a separate output to standard-error, such as in Windows95.
     </p>
     <p id="_preserve-date">
         <code class="title">--preserve-date / -Z</code><br />

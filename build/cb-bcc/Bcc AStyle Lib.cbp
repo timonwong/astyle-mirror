@@ -2,14 +2,14 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="EC AStyle Lib" />
+		<Option title="Bcc AStyle Lib" />
 		<Option pch_mode="2" />
 		<Option compiler="embarcadero_compiler_680" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/libastyled" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/AStyleLibd" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
-				<Option object_output="objLibd/" />
+				<Option object_output="objLib/Debug/" />
 				<Option type="2" />
 				<Option compiler="embarcadero_compiler_680" />
 				<Option createDefFile="1" />
@@ -19,9 +19,9 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/libastyle" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/AStyleLib" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
-				<Option object_output="objLib/" />
+				<Option object_output="objLib/Release/" />
 				<Option type="2" />
 				<Option compiler="embarcadero_compiler_680" />
 				<Option createDefFile="1" />

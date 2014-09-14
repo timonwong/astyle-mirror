@@ -20,11 +20,15 @@
     <h3>Artistic Style 2.05&nbsp; (pending)</h3>
 
     <ul>
-        <li>Add new bracket style option "style=vtk" (-A15).</li>
-        <li>Add new options, "html" (-!") and "html=###" to display the HTML help documentation in the default browser.</li>
+        <li>Add new bracket style option "style=vtk" (-A15) (#155).</li>
+        <li>Add new option "indent-preproc-block" to indent blocks of 
+            preprocessor directives (#114, #229, #242, #249).</li>
+        <li>Add new option, "dry-run", to run AStyle without updating the files (#184, #285).</li>
+        <li>Add new options, "html" (-!") and "html=###", to display the HTML help documentation in the default browser.</li>
         <li>Add &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; to Linux exported functions.</li>
         <li>Remove option &quot;style=ansi&quot; and make it depreciated (#146).</li>
         <li>Improve Korean translation (#256).</li>
+        <li>Change shared libraries to include the version number as part of the file name (#264)</li>
         <li>Change "help" display to stdout to allow piping and redirection (#63).</li>
         <li>Change "version" display to stdout. </li>
         <li>Change headers to include foreach, forever, Q_FOREACH, and Q_FOREVER (#98, #154).</li>
@@ -34,6 +38,8 @@
         <li>Fix piping and redirection adding an extra character to the output (#245, #252). </li>
         <li>Fix "indent-modifiers" to attach class access modifiers to Horstmann style brackets. </li>
         <li>Fix ASFormatter to correctly recognize the end of a raw string literal (#261).</li>
+        <li>Fix _asm blocks not being identified as a block opener or the variable cleared on exit (#163).</li>
+        <li>Fix a few omissions with &quot;fill-empty-lines&quot;.</li>
         <li>Fix file read to read 64K blocks of data.</li>
         <li>Refactor:
             <ul>
@@ -41,7 +47,9 @@
                 <li>Use Utf8_16 class for ASLibrary and remove Linux dependency on iconv.</li>
                 <li>Move global "using" statements to the astyle namespace in astyle.h and ASLocalizer.h. </li>
                 <li>Move shared library declarations from astyle.h to astyle_main.h.</li>
+                <li>Move indentable macros from ASEnhancer to ASResource and create static pairs.</li>
                 <li>Minor changes to ASFormatter and ASBeautifier based on results of the Clang analyzer. </li>
+                <li>Change several methods in astyle_main.cpp to &quot;const&quot;.</li>
             </ul>
         </li>
     </ul>

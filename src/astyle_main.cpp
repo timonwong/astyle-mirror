@@ -130,11 +130,27 @@ ASStreamIterator<T>::ASStreamIterator(T* in)
 	peekStart = 0;
 	prevLineDeleted = false;
 	checkForEmptyLine = false;
+	// get length of stream
+	inStream->seekg(0, inStream->end);
+	streamLength = inStream->tellg();
+	inStream->seekg(0, inStream->beg);
 }
 
 template<typename T>
 ASStreamIterator<T>::~ASStreamIterator()
 {
+}
+
+/**
+* get the length of the input stream.
+* streamLength variable is set by the constructor.
+*
+* @return     length of the input file stream, converted to an int.
+*/
+template<typename T>
+int ASStreamIterator<T>::getStreamLength() const
+{
+	return static_cast<int>(streamLength);
 }
 
 /**
@@ -279,6 +295,13 @@ void ASStreamIterator<T>::saveLastInputLine()
 {
 	assert(inStream->eof());
 	prevBuffer = buffer;
+}
+
+// return position of the get pointer
+template<typename T>
+streamoff ASStreamIterator<T>::tellg()
+{
+	return inStream->tellg();
 }
 
 // check for a change in line ends
@@ -584,7 +607,8 @@ void ASConsole::formatFile(const string &fileName_)
 	// if file has changed, write the new file
 	if (!filesAreIdentical || streamIterator.getLineEndChange(lineEndFormat))
 	{
-		writeFile(fileName_, encoding, out);
+		if (!isDryRun)
+			writeFile(fileName_, encoding, out);
 		printMsg(_("Formatted  %s\n"), displayName);
 		filesFormatted++;
 	}
@@ -611,39 +635,43 @@ vector<string> ASConsole::getArgvOptions(int argc, char** argv) const
 }
 
 // for unit testing
-vector<bool> ASConsole::getExcludeHitsVector()
+vector<bool> ASConsole::getExcludeHitsVector() const
 { return excludeHitsVector; }
 
 // for unit testing
-vector<string> ASConsole::getExcludeVector()
+vector<string> ASConsole::getExcludeVector() const
 { return excludeVector; }
 
 // for unit testing
-vector<string> ASConsole::getFileName()
+vector<string> ASConsole::getFileName() const
 { return fileName; }
 
 // for unit testing
-vector<string> ASConsole::getFileNameVector()
+vector<string> ASConsole::getFileNameVector() const
 { return fileNameVector; }
 
 // for unit testing
-vector<string> ASConsole::getFileOptionsVector()
+vector<string> ASConsole::getFileOptionsVector() const
 { return fileOptionsVector; }
 
 // for unit testing
-int ASConsole::getFilesFormatted()
+int ASConsole::getFilesFormatted() const
 { return filesFormatted; }
 
 // for unit testing
-bool ASConsole::getIgnoreExcludeErrors()
+bool ASConsole::getIgnoreExcludeErrors() const
 { return ignoreExcludeErrors; }
 
 // for unit testing
-bool ASConsole::getIgnoreExcludeErrorsDisplay()
+bool ASConsole::getIgnoreExcludeErrorsDisplay() const
 { return ignoreExcludeErrorsDisplay; }
 
 // for unit testing
-bool ASConsole::getIsFormattedOnly()
+bool ASConsole::getIsDryRun() const
+{ return isDryRun; }
+
+// for unit testing
+bool ASConsole::getIsFormattedOnly() const
 { return isFormattedOnly; }
 
 // for unit testing
@@ -651,39 +679,39 @@ string ASConsole::getLanguageID() const
 { return localizer.getLanguageID(); }
 
 // for unit testing
-bool ASConsole::getIsQuiet()
+bool ASConsole::getIsQuiet() const
 { return isQuiet; }
 
 // for unit testing
-bool ASConsole::getIsRecursive()
+bool ASConsole::getIsRecursive() const
 { return isRecursive; }
 
 // for unit testing
-bool ASConsole::getIsVerbose()
+bool ASConsole::getIsVerbose() const
 { return isVerbose; }
 
 // for unit testing
-bool ASConsole::getLineEndsMixed()
+bool ASConsole::getLineEndsMixed() const
 { return lineEndsMixed; }
 
 // for unit testing
-bool ASConsole::getNoBackup()
+bool ASConsole::getNoBackup() const
 { return noBackup; }
 
 // for unit testing
-string ASConsole::getOptionsFileName()
+string ASConsole::getOptionsFileName() const
 { return optionsFileName; }
 
 // for unit testing
-vector<string> ASConsole::getOptionsVector()
+vector<string> ASConsole::getOptionsVector() const
 { return optionsVector; }
 
 // for unit testing
-string ASConsole::getOrigSuffix()
+string ASConsole::getOrigSuffix() const
 { return origSuffix; }
 
 // for unit testing
-bool ASConsole::getPreserveDate()
+bool ASConsole::getPreserveDate() const
 { return preserveDate; }
 
 // for unit testing
@@ -776,6 +804,9 @@ void ASConsole::setIsQuiet(bool state)
 
 void ASConsole::setIsRecursive(bool state)
 { isRecursive = state; }
+
+void ASConsole::setIsDryRun(bool state)
+{ isDryRun = state; }
 
 void ASConsole::setIsVerbose(bool state)
 { isVerbose = state; }
@@ -1403,7 +1434,7 @@ void ASConsole::getFilePaths(string &filePath)
 		printSeparatingLine();
 }
 
-bool ASConsole::fileNameVectorIsEmpty()
+bool ASConsole::fileNameVectorIsEmpty() const
 {
 	return fileNameVector.empty();
 }
@@ -1650,8 +1681,11 @@ void ASConsole::printHelp() const
 	cout << "    the current indentation level, rather than being\n";
 	cout << "    flushed completely to the left (which is the default).\n";
 	cout << endl;
+	cout << "    --indent-preproc-block  OR  -xW\n";
+	cout << "    Indent preprocessor blocks at bracket level 0.\n";
+	cout << "    Without this option the preprocessor block is not indented.\n";
+	cout << endl;
 	cout << "    --indent-preproc-define  OR  -w\n";
-	cout << "    --indent-preprocessor has been depreciated.\n";
 	cout << "    Indent multi-line preprocessor #define statements.\n";
 	cout << endl;
 	cout << "    --indent-preproc-cond  OR  -xw\n";
@@ -1818,6 +1852,9 @@ void ASConsole::printHelp() const
 	cout << endl;
 	cout << "    --recursive  OR  -r  OR  -R\n";
 	cout << "    Process subdirectories recursively.\n";
+	cout << endl;
+	cout << "    --dry-run\n";
+	cout << "    Perform a trial run with no changes made (for checking if formatted).\n";
 	cout << endl;
 	cout << "    --exclude=####\n";
 	cout << "    Specify a file or directory #### to be excluded from processing.\n";
@@ -2367,7 +2404,7 @@ void ASConsole::writeFile(const string &fileName_, FileEncoding encoding, ostrin
 		{
 			struct utimbuf outBuf;
 			outBuf.actime = stBuf.st_atime;
-			// add ticks so 'make' will recoginze a change
+			// add ticks so 'make' will recognize a change
 			// Visual Studio 2008 needs more than 1
 			outBuf.modtime = stBuf.st_mtime + 10;
 			if (utime(fileName_.c_str(), &outBuf) == -1)
@@ -2778,6 +2815,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setLabelIndent(true);
 	}
+	else if (isOption(arg, "xW", "indent-preproc-block"))
+	{
+		formatter.setPreprocBlockIndent(true);
+	}
 	else if ( isOption(arg, "w", "indent-preproc-define") )
 	{
 		formatter.setPreprocDefineIndent(true);
@@ -3068,6 +3109,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		g_console->setIsRecursive(true);
 	}
+	else if (isOption(arg, "dry-run"))
+	{
+		g_console->setIsDryRun(true);
+	}
 	else if ( isOption(arg, "Z", "preserve-date") )
 	{
 		g_console->setPreserveDate(true);
@@ -3164,7 +3209,7 @@ void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
 	}
 }
 
-string ASOptions::getOptionErrors()
+string ASOptions::getOptionErrors() const
 {
 	return optionErrors.str();
 }
@@ -3279,51 +3324,51 @@ size_t Utf8_16::Utf8ToUtf16(char* utf8In, size_t inLen, bool isBigEndian, char* 
 	utf16* pCur = reinterpret_cast<utf16*>(utf16Out);
 	const ubyte* pEnd = pRead + inLen;
 	const utf16* pCurStart = pCur;
-	eState eState = eStart;
+	eState state = eStart;
 
 	// the BOM will automatically be converted to utf-16
 	while (pRead < pEnd)
 	{
-		switch (eState)
+		switch (state)
 		{
 		case eStart:
 			if ((0xF0 & *pRead) == 0xF0)
 			{
 				nCur = (0x7 & *pRead) << 18;
-				eState = eSecondOf4Bytes;
+				state = eSecondOf4Bytes;
 			}
 			else if ((0xE0 & *pRead) == 0xE0)
 			{
 				nCur = (~0xE0 & *pRead) << 12;
-				eState = ePenultimate;
+				state = ePenultimate;
 			}
 			else if ((0xC0 & *pRead) == 0xC0)
 			{
 				nCur = (~0xC0 & *pRead) << 6;
-				eState = eFinal;
+				state = eFinal;
 			}
 			else
 			{
 				nCur = *pRead;
-				eState = eStart;
+				state = eStart;
 			}
 			break;
 		case eSecondOf4Bytes:
 			nCur |= (0x3F & *pRead) << 12;
-			eState = ePenultimate;
+			state = ePenultimate;
 			break;
 		case ePenultimate:
 			nCur |= (0x3F & *pRead) << 6;
-			eState = eFinal;
+			state = eFinal;
 			break;
 		case eFinal:
 			nCur |= (0x3F & *pRead);
-			eState = eStart;
+			state = eStart;
 			break;
 		}
 		++pRead;
 
-		if (eState == eStart)
+		if (state == eStart)
 		{
 			int codePoint = nCur;
 			if (codePoint >= SURROGATE_FIRST_VALUE)
@@ -3385,14 +3430,14 @@ size_t Utf8_16::Utf16ToUtf8(char* utf16In, size_t inLen, bool isBigEndian,
 	ubyte* pCur = reinterpret_cast<ubyte*>(utf8Out);
 	const ubyte* pEnd = pRead + inLen;
 	const ubyte* pCurStart = pCur;
-	static eState eState = eStart;	// eState is retained for subsequent blocks
+	static eState state = eStart;	// state is retained for subsequent blocks
 	if (firstBlock)
-		eState = eStart;
+		state = eStart;
 
 	// the BOM will automatically be converted to utf-8
 	while (pRead < pEnd)
 	{
-		switch (eState)
+		switch (state)
 		{
 		case eStart:
 			if (pRead >= pEnd)
@@ -3431,35 +3476,35 @@ size_t Utf8_16::Utf16ToUtf8(char* utf16In, size_t inLen, bool isBigEndian,
 			if (nCur16 < 0x80)
 			{
 				nCur = static_cast<ubyte>(nCur16 & 0xFF);
-				eState = eStart;
+				state = eStart;
 			}
 			else if (nCur16 < 0x800)
 			{
 				nCur = static_cast<ubyte>(0xC0 | (nCur16 >> 6));
-				eState = eFinal;
+				state = eFinal;
 			}
 			else if (nCur16 < SURROGATE_FIRST_VALUE)
 			{
 				nCur = static_cast<ubyte>(0xE0 | (nCur16 >> 12));
-				eState = ePenultimate;
+				state = ePenultimate;
 			}
 			else
 			{
 				nCur = static_cast<ubyte>(0xF0 | (nCur16 >> 18));
-				eState = eSecondOf4Bytes;
+				state = eSecondOf4Bytes;
 			}
 			break;
 		case eSecondOf4Bytes:
 			nCur = static_cast<ubyte>(0x80 | ((nCur16 >> 12) & 0x3F));
-			eState = ePenultimate;
+			state = ePenultimate;
 			break;
 		case ePenultimate:
 			nCur = static_cast<ubyte>(0x80 | ((nCur16 >> 6) & 0x3F));
-			eState = eFinal;
+			state = eFinal;
 			break;
 		case eFinal:
 			nCur = static_cast<ubyte>(0x80 | (nCur16 & 0x3F));
-			eState = eStart;
+			state = eStart;
 			break;
 		}
 		*pCur++ = static_cast<ubyte>(nCur);
@@ -3676,7 +3721,7 @@ extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,		// the source
 	return pTextOut;
 }
 
-extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
+extern "C" EXPORT const char* STDCALL AStyleGetVersion(void)
 {
 	return g_version;
 }
