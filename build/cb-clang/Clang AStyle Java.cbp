@@ -18,7 +18,7 @@
 					<Add option="-Wextra" />
 					<Add option="-fno-rtti" />
 					<Add option="-fno-exceptions" />
-					<Add option="-fpic" />
+					<Add option="-fPIC" />
 					<Add option="-fvisibility=hidden" />
 					<Add option="-Wno-exit-time-destructors" />
 					<Add option="-Wno-global-constructors" />
@@ -43,7 +43,7 @@
 					<Add option="-Wextra" />
 					<Add option="-fno-rtti" />
 					<Add option="-fno-exceptions" />
-					<Add option="-fpic" />
+					<Add option="-fPIC" />
 					<Add option="-fvisibility=hidden" />
 					<Add option="-Wno-exit-time-destructors" />
 					<Add option="-Wno-global-constructors" />

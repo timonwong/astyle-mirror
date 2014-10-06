@@ -17,7 +17,7 @@
 					<Add option="-g" />
 					<Add option="-fno-rtti" />
 					<Add option="-fno-exceptions" />
-					<Add option="-fpic" />
+					<Add option="-fPIC" />
 					<Add option="-fvisibility=hidden" />
 					<Add option="-DASTYLE_JNI" />
 					<Add directory="/usr/lib/jvm/default-java/include" />
@@ -34,7 +34,7 @@
 					<Add option="-Wall" />
 					<Add option="-fno-rtti" />
 					<Add option="-fno-exceptions" />
-					<Add option="-fpic" />
+					<Add option="-fPIC" />
 					<Add option="-fvisibility=hidden" />
 					<Add option="-DASTYLE_JNI" />
 					<Add option="-DNDEBUG" />

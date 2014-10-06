@@ -78,7 +78,6 @@ ASBeautifier::ASBeautifier()
 	setLabelIndent(false);
 	setEmptyLineFill(false);
 	setCStyle();
-	setPreprocBlockIndent(false);
 	setPreprocDefineIndent(false);
 	setPreprocConditionalIndent(false);
 	setAlignMethodColon(false);
@@ -196,13 +195,16 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInDefine = other.isInDefine;
 	isInDefineDefinition = other.isInDefineDefinition;
 	classIndent = other.classIndent;
-	isInClassInitializer = other.isInClassInitializer;
+	isInClassHeader = other.isInClassHeader;
 	isInClassHeaderTab = other.isInClassHeaderTab;
+	isInClassInitializer = other.isInClassInitializer;
+	isInClass = other.isInClass;
 	isInObjCMethodDefinition = other.isInObjCMethodDefinition;
 	isImmediatelyPostObjCMethodDefinition = other.isImmediatelyPostObjCMethodDefinition;
 	isInIndentablePreprocBlock = other.isInIndentablePreprocBlock;
 	isInObjCInterface = other.isInObjCInterface;
 	isInEnum = other.isInEnum;
+	isInLet = other.isInLet;
 	modifierIndent = other.modifierIndent;
 	switchIndent = other.switchIndent;
 	caseIndent = other.caseIndent;
@@ -225,12 +227,10 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	lineBeginsWithOpenBracket = other.lineBeginsWithOpenBracket;
 	lineBeginsWithCloseBracket = other.lineBeginsWithCloseBracket;
 	shouldIndentBrackettedLine = other.shouldIndentBrackettedLine;
-	isInClass = other.isInClass;
 	isInSwitch = other.isInSwitch;
 	foundPreCommandHeader = other.foundPreCommandHeader;
 	foundPreCommandMacro = other.foundPreCommandMacro;
 	shouldAlignMethodColon = other.shouldAlignMethodColon;
-	shouldIndentPreprocBlock = other.shouldIndentPreprocBlock;
 	shouldIndentPreprocDefine = other.shouldIndentPreprocDefine;
 	shouldIndentPreprocConditional = other.shouldIndentPreprocConditional;
 	indentCount = other.indentCount;
@@ -336,13 +336,16 @@ void ASBeautifier::init(ASSourceIterator* iter)
 	isInStatement = false;
 	isInCase = false;
 	isInQuestion = false;
-	isInClassInitializer = false;
+	isInClassHeader = false;
 	isInClassHeaderTab = false;
+	isInClassInitializer = false;
+	isInClass = false;
 	isInObjCMethodDefinition = false;
 	isImmediatelyPostObjCMethodDefinition = false;
 	isInIndentablePreprocBlock = false;
 	isInObjCInterface = false;
 	isInEnum = false;
+	isInLet = false;
 	isInHeader = false;
 	isInTemplate = false;
 	isInConditional = false;
@@ -383,7 +386,6 @@ void ASBeautifier::init(ASSourceIterator* iter)
 	lineBeginsWithOpenBracket = false;
 	lineBeginsWithCloseBracket = false;
 	shouldIndentBrackettedLine = true;
-	isInClass = false;
 	isInSwitch = false;
 	foundPreCommandHeader = false;
 	foundPreCommandMacro = false;
@@ -646,17 +648,6 @@ void ASBeautifier::setLabelIndent(bool state)
 }
 
 /**
-* set the state of the preprocessor indentation option.
-* If true, #ifdef blocks at level 0 will be indented.
-*
-* @param   state             state of option.
-*/
-void ASBeautifier::setPreprocBlockIndent(bool state)
-{
-	shouldIndentPreprocBlock = state;
-}
-
-/**
  * set the state of the preprocessor indentation option.
  * If true, multiline #define statements will be indented.
  *
@@ -822,18 +813,6 @@ bool ASBeautifier::getCaseIndent(void) const
 bool ASBeautifier::getEmptyLineFill(void) const
 {
 	return emptyLineFill;
-}
-
-/**
-* get the state of the preprocessor block indentation option.
-* If true, preprocessor "if" blocks will be indented.
-* If false, preprocessor "if" blocks will be unchanged.
-*
-* @return   state of shouldIndentPreprocDefine option.
-*/
-bool ASBeautifier::getPreprocBlockIndent(void) const
-{
-	return shouldIndentPreprocBlock;
 }
 
 /**
@@ -1993,6 +1972,7 @@ void ASBeautifier::computePreliminaryIndentation()
 {
 	indentCount = 0;
 	spaceIndentCount = 0;
+	isInClassHeaderTab = false;
 
 	if (isInObjCMethodDefinition && !inStatementIndentStack->empty())
 		spaceIndentObjCMethodDefinition = inStatementIndentStack->back();
@@ -2045,25 +2025,27 @@ void ASBeautifier::computePreliminaryIndentation()
 
 	}	// end of for loop
 
-	if (isInClassInitializer)
+	if (isInClassHeader)
 	{
-		if (lineStartsInComment || lineOpensWithComment)
+		if (isInClassHeaderTab)
+			indentCount += classInitializerIndents;
+		else if (!isJavaStyle())
+			isInClassHeaderTab = true;
+		if (lineOpensWithLineComment || lineStartsInComment || lineOpensWithComment)
 		{
 			if (!lineBeginsWithOpenBracket)
 				--indentCount;
-		}
-		// is this class initializer (not in a class) or class definition?
-		else if (isCStyle()
-		         && (headerStack->empty() || headerStack->back() != &AS_CLASS))
-		{
-			isInClassHeaderTab = true;
-			indentCount += classInitializerIndents;
 		}
 		else if (blockIndent)
 		{
 			if (!lineBeginsWithOpenBracket)
 				++indentCount;
 		}
+	}
+
+	if (isInClassInitializer)
+	{
+		indentCount += classInitializerIndents;
 	}
 
 	// Objective-C interface continuation line
@@ -2151,15 +2133,6 @@ void ASBeautifier::adjustParsedLineIndentation(size_t iPrelim, bool isInExtraHea
 	else if (lineOpeningBlocksNum > 0
 	         && lineOpeningBlocksNum == lineClosingBlocksNum
 	         && previousLineProbationTab)
-		--indentCount;
-
-	// correctly indent class continuation lines...
-	else if (!lineOpensWithComment
-	         && isInClassHeaderTab
-	         && !blockIndent
-	         && lineOpeningBlocksNum == 0
-	         && lineOpeningBlocksNum == lineClosingBlocksNum
-	         && (!headerStack->empty() && headerStack->back() == &AS_CLASS))
 		--indentCount;
 
 	if (indentCount < 0)
@@ -2536,18 +2509,13 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				isInOperator = false;
 				// if have a struct header, this is a declaration not a definition
 				if (ch == '('
-				        && (isInClassInitializer || isInClassHeaderTab)
 				        && !headerStack->empty()
 				        && headerStack->back() == &AS_STRUCT)
 				{
 					headerStack->pop_back();
-					isInClassInitializer = false;
-					// -1 for isInClassInitializer, -2 for isInClassHeaderTab
-					if (isInClassHeaderTab)
-					{
-						indentCount -= (1 + classInitializerIndents);
-						isInClassHeaderTab = false;
-					}
+					isInClassHeader = false;
+					if (line.find(AS_STRUCT, 0) > i)	// if not on this line
+						indentCount -= classInitializerIndents;
 					if (indentCount < 0)
 						indentCount = 0;
 				}
@@ -2614,7 +2582,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			                      || peekNextChar(line, i) == '{'
 			                      || foundPreCommandHeader
 			                      || foundPreCommandMacro
-			                      || isInClassInitializer
+			                      || isInClassHeader			/////////////////////////////////////////
+			                      || isInClassInitializer		/////////////////////////////////////////
 			                      || isNonInStatementArray
 			                      || isInObjCMethodDefinition
 			                      || isInObjCInterface
@@ -2628,14 +2597,13 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			                              || isLegalNameChar(prevNonSpaceCh))));
 
 			// remove inStatementIndent for C++ class initializer
-			if (isInClassInitializer)
+			if (isInClassHeader || isInClassInitializer)
 			{
 				if (!inStatementIndentStack->empty())
 					inStatementIndentStack->pop_back();
 				isInStatement = false;
 				if (lineBeginsWithOpenBracket)
 					spaceIndentCount = 0;
-				isInClassInitializer = false;
 			}
 
 			if (isInObjCMethodDefinition)
@@ -2647,7 +2615,9 @@ void ASBeautifier::parseCurrentLine(const string &line)
 					isBlockOpener = true;
 				else if (headerStack->back() == &AS_NAMESPACE
 				         || headerStack->back() == &AS_CLASS
-				         || headerStack->back() == &AS_STRUCT)
+				         || headerStack->back() == &AS_INTERFACE
+				         || headerStack->back() == &AS_STRUCT
+				         || headerStack->back() == &AS_UNION)
 					isBlockOpener = true;
 			}
 
@@ -2678,9 +2648,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 
 			++lineOpeningBlocksNum;
 
-			if (isInClassHeaderTab)
+			if (isInClassInitializer)
 			{
-				isInClassHeaderTab = false;
 				// decrease tab count if bracket is broken
 				size_t firstChar = line.find_first_not_of(" \t");
 				if (firstChar != string::npos
@@ -2734,8 +2703,12 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			if (g_preprocessorCppExternCBracket == 3)
 				++g_preprocessorCppExternCBracket;
 			parenDepth = 0;
+			isInClassHeader = false;
+			isInClassHeaderTab = false;
+			isInClassInitializer = false;
 			isInStatement = false;
 			isInQuestion = false;
+			isInLet = false;
 			foundPreCommandHeader = false;
 			foundPreCommandMacro = false;
 			isInExternC = false;
@@ -2911,9 +2884,11 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			if (isCStyle() && findKeyword(line, i, AS_NS_HANDLER))
 				foundPreCommandMacro = true;
 
-			// this applies only to C enums
 			if (isCStyle() && parenDepth == 0 && findKeyword(line, i, AS_ENUM))
 				isInEnum = true;
+
+			if (isSharpStyle() && findKeyword(line, i, AS_LET))
+				isInLet = true;
 
 		}   // isPotentialHeader
 
@@ -2940,7 +2915,10 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			else if (isInEnum)
 			{
 				// found an enum with a base-type
-				// so do nothing special
+				// handle as a 'class' initializer
+				isInClassInitializer = true;
+				if (i == 0)
+					indentCount += classInitializerIndents;
 			}
 			else if (!headerStack->empty()
 			         && headerStack->back() == &AS_FOR
@@ -2949,10 +2927,20 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				// found a range-based 'for' loop 'for (auto i : container)'
 				// so do nothing special
 			}
-			else if (isInClassInitializer || isInObjCInterface)
+			else if (isCStyle()
+			         && !isInCase
+			         && (prevNonSpaceCh == ')' || foundPreCommandHeader))
+			{
+				// found a 'class' c'tor initializer
+				isInClassInitializer = true;
+				isInStatement = false;			// so an inStatement indent will register
+				if (i == 0)
+					indentCount += classInitializerIndents;
+			}
+			else if (isInClassHeader || isInObjCInterface)
 			{
 				// is in a 'class A : public B' definition
-				// so do nothing special
+				isInClassHeaderTab = true;
 			}
 			else if (isInAsm || isInAsmOneLine || isInAsmBlock)
 			{
@@ -2978,14 +2966,6 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				// found a 'private:' or 'public:' inside a class definition
 				// and on the same line as the class opening bracket
 				// do nothing
-			}
-			else if (isCStyle() && prevNonSpaceCh == ')' && !isInCase)
-			{
-				// found a 'class A : public B' definition
-				isInClassInitializer = true;
-				isInStatement = false;			// so an inStatement indent will register
-				if (i == 0)
-					indentCount += classInitializerIndents;
 			}
 			else if (isJavaStyle() && lastLineHeader == &AS_FOR)
 			{
@@ -3035,8 +3015,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			// register indent
 			if (nextChar == string::npos)
 			{
-				// register indent at first word after the colon of a C++ class initializer
-				if (isInClassInitializer)
+				// register indent at first word after the colon
+				if (isInClassInitializer || isInClassHeaderTab)
 				{
 					size_t firstChar = line.find_first_not_of(" \t");
 					if (firstChar != string::npos && line[firstChar] == ':')
@@ -3051,6 +3031,11 @@ void ASBeautifier::parseCurrentLine(const string &line)
 					}
 				}
 				// register indent at previous word
+				else if (isJavaStyle() && isInClassHeader)
+				{
+					// do nothing for now
+				}
+				// register indent at second word on the line
 				else if (!isInTemplate)
 				{
 					int prevWord = getInStatementIndentComma(line, i);
@@ -3172,7 +3157,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 				isImmediatelyPostObjCMethodDefinition = true;
 
 			previousLastLineHeader = NULL;
-			isInClassInitializer = false;
+			isInClassHeader = false;		// for 'friend' class
 			isInEnum = false;
 			isInQuestion = false;
 			isInObjCInterface = false;
@@ -3191,10 +3176,8 @@ void ASBeautifier::parseCurrentLine(const string &line)
 			{
 				const string* newHeader = findHeader(line, i, preBlockStatements);
 				if (newHeader != NULL
-				        && !(isCStyle() && newHeader == &AS_CLASS && isInEnum))	// is it 'enum class'
+				        && !(isCStyle() && newHeader == &AS_CLASS && isInEnum))	// is not 'enum class'
 				{
-					isInClassInitializer = true;
-
 					if (!isSharpStyle())
 						headerStack->push_back(newHeader);
 					// do not need 'where' in the headerStack
@@ -3204,6 +3187,23 @@ void ASBeautifier::parseCurrentLine(const string &line)
 					               && !headerStack->empty()
 					               && headerStack->back() == &AS_CLASS)))
 						headerStack->push_back(newHeader);
+
+					if (!headerStack->empty())
+					{
+						if ((*headerStack).back() == &AS_CLASS
+						        || (*headerStack).back() == &AS_STRUCT
+						        || (*headerStack).back() == &AS_INTERFACE)
+						{
+							isInClassHeader = true;
+						}
+						else if ((*headerStack).back() == &AS_NAMESPACE)
+						{
+							// remove inStatementIndent from namespace
+							if (!inStatementIndentStack->empty())
+								inStatementIndentStack->pop_back();
+							isInStatement = false;
+						}
+					}
 
 					i += newHeader->length() - 1;
 					continue;
@@ -3386,15 +3386,21 @@ void ASBeautifier::parseCurrentLine(const string &line)
 							int prevWordIndex = getInStatementIndentAssign(line, i);
 							int inStatementIndent = prevWordIndex + spaceIndentCount + tabIncrementIn;
 							inStatementIndentStack->push_back(inStatementIndent);
+							isInStatement = true;
 						}
+					}
+					// don't indent an assignment if 'let'
+					else if (isInLet)
+					{
+						isInLet = false;
 					}
 					else
 					{
 						if (i == 0 && spaceIndentCount == 0)
 							spaceIndentCount += indentLength;
 						registerInStatementIndent(line, i, spaceIndentCount, tabIncrementIn, 0, false);
+						isInStatement = true;
 					}
-					isInStatement = true;
 				}
 			}
 		}

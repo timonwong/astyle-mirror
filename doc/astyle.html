@@ -211,8 +211,8 @@
     <p>
         Artistic Style can process directories recursively. Wildcards (such as "*.cpp" or "*.c??") are processed internally.
         If a shell is used it should pass the wildcards to Artistic Style instead of resolving them first. For Linux use
-        double quotes around paths whose filename contains wildcards. For Windows use double quotes around paths whose
-        filename contains spaces. The <a href="#_recursive">recursive</a> option in the 
+        double quotes around paths whose file name contains wildcards. For Windows use double quotes around paths whose
+        file name contains spaces. The <a href="#_recursive">recursive</a> option in the 
         <a href="#_Other_Options">Other Options</a> section contains information on recursive processing.
     </p>
 
@@ -250,7 +250,16 @@
     </p>
 
     <h4>Other Considerations</h4>
-
+    <p>
+        The names of special characters used in programming vary by region. The terminology used by Artistic Style, 
+        followed by other common names, is<strong>:</strong>
+    </p>
+    <blockquote>
+        brackets { } — also called  braces, curly brackets, or curly braces.<br />
+        parens ( ) — also called parentheses, brackets, round brackets, circle brackets, or soft brackets.<br />
+        block parens [ ] — also called brackets, square brackets, closed brackets, or hard brackets.<br />
+        angle brackets < > — also called brackets, pointy brackets, triangular brackets, diamond brackets, tuples, or chevrons.
+    </blockquote>
     <p>
         Artistic Style can format standard class library statements such as Open GL, wxWidgets, Qt, and MFC.
     </p>
@@ -274,8 +283,8 @@
         can convert files to UTF&#8209;8.
     </p>
     <p>
-        Embedded statements that are multiple-line and are NOT in a C type format, such as Python, are usually mal-formatted.
-        (A C type format has blocks enclosed by brackets and statements terminated by a semi-colon). Macros that define
+        Embedded statements that are multiple-line and are NOT in a C-type format, such as Python, are usually mal-formatted
+        (a C-type format has blocks enclosed by brackets and statements terminated by a semi-colon). Macros that define
         functions may cause the following code to be mal-formatted because the macro is missing the brackets and semi-colons
         from the definition. If you have source code with these types of statements, exclude them with the 
         <a href="#_exclude">exclude=####</a> option described in the <a href="#_Other_Options">Other Options</a> section.
@@ -325,7 +334,7 @@
     <pre>astyle&nbsp; [OPTIONS]&nbsp; <em>SourceFile1&nbsp; SourceFile2&nbsp; SourceFile3&nbsp; [ . . . ]</em>
 </pre>
     <p>
-        The block parens [ ] indicate that more than one option or more than one filename can be entered. They are NOT
+        The block parens [ ] indicate that more than one option or more than one file name can be entered. They are NOT
         actually included in the command. For the options format see the following Options section.
     </p>
     <div class="code">
@@ -631,7 +640,7 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p id="_style=linux">
         <code class="title">--style=linux / --style=knf / -A8</code><br />
         Linux style uses linux brackets. Opening brackets are broken from namespace, class, and function
-        definitions. Brackets are attached to everything else including, statements within a function, arrays, structs,
+        definitions. Brackets are attached to everything else including statements within a function, arrays, structs,
         and enums. <strong>Minimum conditional indent</strong> is one-half indent. If you want a different minimum conditional
         indent use the K&amp;R style instead. This style works best with a large indent. It frequently is used with an
         indent of 8 spaces.
@@ -1175,26 +1184,26 @@ error:
 
     <p id="_indent-preproc-block">
         <code class="title">--indent-preproc-block / -xW</code><br />
-        Indent preprocessor 
-        blocks at bracket level 0.&nbsp; Without this
-        option the preprocessor block is not indented.
+        Indent preprocessor blocks at bracket level zero, and immediately within a namespace. There are restrictions on what
+        will be indented. Blocks within methods, classes, arrays, etc, will not be indented. Blocks containing brackets or multi-line
+        define statements will not be indented. Without this option the preprocessor block is not indented.
     </p>
     <div class="code">
-        <pre>#ifdef ASTYLE_JNI
-#include &lt;jni.h&gt; 
-#ifndef ASTYLE_LIB
-#define ASTYLE_LIB
+        <pre>#ifdef _WIN32
+#include &lt;windows.h&gt;  
+#ifndef NO_EXPORT
+#define EXPORT
 #endif
 #endif
 </pre>
         <p class="code">
             becomes:
         </p>
-        <pre>#ifdef ASTYLE_JNI
-  #include &lt;jni.h&gt; 
-  #ifndef ASTYLE_LIB
-    #define ASTYLE_LIB
-  #endif
+        <pre>#ifdef _WIN32
+    #include &lt;windows.h&gt; 
+    #ifndef NO_EXPORT
+        #define EXPORT
+    #endif
 #endif
 </pre>
     </div>
@@ -1528,9 +1537,9 @@ isBar = false;
     <p id="_pad-header">
         <code class="title">--pad-header / -H </code>
         <br />
-        Insert space padding after paren headers only (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...).
-        Any end of line comments will remain in the original column, if possible. This can be used with unpad-paren to
-        remove unwanted spaces.
+        Insert space padding between a header (e.g. '<code>if</code>', '<code>for</code>', '<code>while</code>'...) 
+        and the following paren. Any end of line comments will remain in the original column, if possible. This can 
+        be used with unpad-paren to remove unwanted spaces.
     </p>
     <div class="code">
         <pre>if(isFoo((a+2), b))
@@ -1658,7 +1667,7 @@ String ^s1;</pre>
             --align-reference=type&nbsp;&nbsp; / -W1<br />
             --align-reference=middle / -W2<br />
             --align-reference=name&nbsp;&nbsp; / -W3</code><br />
-        This option will align references separate from pointers. Pointers are not changes by this option. If pointers
+        This option will align references separate from pointers. Pointers are not changed by this option. If pointers
         and references are to be aligned the same, use the previous align-pointer option. The option align-reference=none
         will not change the reference alignment. The other options are the same as for align-pointer. This option is for
         C/C++, C++/CLI, and C# files.
@@ -1740,7 +1749,7 @@ String ^s1;</pre>
 else if (isFoo1()) <span class="brace">{</span>
     bar1();
 <span class="brace">}</span>
-else if (isFoo2()) <span class="brace">}</span>
+else if (isFoo2()) <span class="brace">{</span>
     bar2;
 <span class="brace">}</span>
 </pre>
@@ -1789,7 +1798,7 @@ else
     <p id="_add-one-line-brackets">
         <code class="title">--add-one-line-brackets / -J </code>
         <br />
-        Add one line brackets to unbracketed one line conditional statements&nbsp; (e.g. '<code>if</code>', '<code>for</code>',
+        Add one line brackets to unbracketed one line conditional statements (e.g. '<code>if</code>', '<code>for</code>',
         '<code>while</code>'...). The statement must be on a single line. The option implies --keep-one-line-blocks and
         will not break the one line blocks.
     </p>
@@ -1895,7 +1904,7 @@ else
     <p id="_remove-comment-prefix">
         <code class="title">--remove-comment-prefix / -xp</code><br />
         Remove the preceding '*' in a multi-line comment that begins a line. A trailing '*', if present, is also removed.
-        Text that is less than one is indent is indented to one indent. Text greater than one indent is not changed. Multi-line
+        Text that is less than one indent is indented to one indent. Text greater than one indent is not changed. Multi-line
         comments that begin a line but without the preceding '*' are indented to one indent for consistency. This can
         slightly modify the indentation of commented out blocks of code. Lines containing all '*' are left unchanged.
         Extra spacing is removed from the comment close '*/'.
@@ -2075,7 +2084,7 @@ else
 
     <p id="_suffix">
         <code class="title">--suffix=<span class="option">####</span></code><br />
-        Append the suffix #### instead of '.orig' to original filename (e.g. <code>--suffix=<span class="option">.bak</span></code>).
+        Append the suffix #### instead of '.orig' to original file name (e.g. <code>--suffix=<span class="option">.bak</span></code>).
         If this is to be a file extension, the dot '.' must be included. Otherwise the suffix will be appended to the
         current file extension.
     </p>
@@ -2086,8 +2095,8 @@ else
     <p id="_recursive">
         <code class="title">--recursive / -r / -R</code><br />
         For each directory in the command line, process all subdirectories recursively. When using the recursive option
-        the file name statement should contain a wildcard. Linux users should place the filepath and name in double quotes
-        so the shell will not resolve the wildcards (e.g. "$HOME/src/*.cpp"). Windows users should place the filepath
+        the file name statement should contain a wildcard. Linux users should place the file path and name in double quotes
+        so the shell will not resolve the wildcards (e.g. "$HOME/src/*.cpp"). Windows users should place the file path
         and name in double quotes if the path or name contains spaces.
     </p>
     <p id="_dry-run">
@@ -2099,7 +2108,7 @@ else
         Specify a file or sub directory #### to be excluded from processing.&nbsp;
     </p>
     <p>
-        Excludes are matched from the end of the filepath. An exclude option of "templates" will exclude ALL directories
+        Excludes are matched from the end of the file path. An exclude option of "templates" will exclude ALL directories
         named "templates". An exclude option of "cpp/templates" will exclude ALL "cpp/templates" directories. You may
         proceed backwards in the directory tree to exclude only the required directories.
     </p>
@@ -2109,7 +2118,7 @@ else
         in a "python" subdirectory. You may proceed backwards in the directory tree to exclude only the required files.
     </p>
     <p>
-        Wildcards are NOT allowed. There may be more than one exclude statement. The filepath and name may be placed in
+        Wildcards are NOT allowed. There may be more than one exclude statement. The file path and name may be placed in
         double quotes (e.g. &#8209;&#8209;exclude="foo&nbsp;bar.cpp").
     </p>
     <p id="_ignore-exclude-errors">

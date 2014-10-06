@@ -110,9 +110,10 @@ enum BracketType
 	DEFINITION_TYPE = 16,
 	COMMAND_TYPE = 32,
 	ARRAY_NIS_TYPE = 64,		// also an ARRAY_TYPE
-	ARRAY_TYPE = 128,			// arrays and enums
-	EXTERN_TYPE = 256,			// extern "C", not a command type extern
-	SINGLE_LINE_TYPE = 512
+	ENUM_TYPE = 128,			// also an ARRAY_TYPE
+	ARRAY_TYPE = 256,			// arrays and enums
+	EXTERN_TYPE = 512,			// extern "C", not a command type extern
+	SINGLE_LINE_TYPE = 1024
 };
 
 enum MinConditional
@@ -226,7 +227,7 @@ class ASResource
 		static const string AS_EXTERN, AS_ENUM;
 		static const string AS_STATIC, AS_CONST, AS_SEALED, AS_OVERRIDE, AS_VOLATILE, AS_NEW;
 		static const string AS_NOEXCEPT, AS_INTERRUPT, AS_AUTORELEASEPOOL;
-		static const string AS_WHERE, AS_SYNCHRONIZED;
+		static const string AS_WHERE, AS_LET, AS_SYNCHRONIZED;
 		static const string AS_OPERATOR, AS_TEMPLATE;
 		static const string AS_OPEN_BRACKET, AS_CLOSE_BRACKET;
 		static const string AS_OPEN_LINE_COMMENT, AS_OPEN_COMMENT, AS_CLOSE_COMMENT;
@@ -361,7 +362,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void setSpaceIndentation(int length = 4);
 		void setSwitchIndent(bool state);
 		void setTabIndentation(int length = 4, bool forceTabs = false);
-		void setPreprocBlockIndent(bool state);
 		void setPreprocDefineIndent(bool state);
 		void setPreprocConditionalIndent(bool state);
 		int  getBeautifierFileType() const;
@@ -379,7 +379,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool getModeManuallySet(void) const;
 		bool getModifierIndent(void) const;
 		bool getNamespaceIndent(void) const;
-		bool getPreprocBlockIndent(void) const;
 		bool getPreprocDefineIndent(void) const;
 		bool getSwitchIndent(void) const;
 
@@ -495,13 +494,16 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInDefine;
 		bool isInDefineDefinition;
 		bool classIndent;
-		bool isInClassInitializer;
-		bool isInClassHeaderTab;
+		bool isInClassHeader;			// is in a class before the opening bracket
+		bool isInClassHeaderTab;		// is in an indentable class header line
+		bool isInClassInitializer;		// is in a class after the ':' initializer
+		bool isInClass;					// is in a class after the opening bracket
 		bool isInObjCMethodDefinition;
 		bool isImmediatelyPostObjCMethodDefinition;
 		bool isInIndentablePreprocBlock;
 		bool isInObjCInterface;
 		bool isInEnum;
+		bool isInLet;
 		bool modifierIndent;
 		bool switchIndent;
 		bool caseIndent;
@@ -510,7 +512,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool bracketIndentVtk;
 		bool blockIndent;
 		bool labelIndent;
-		bool shouldIndentPreprocBlock;
 		bool shouldIndentPreprocDefine;
 		bool isInConditional;
 		bool isModeManuallySet;
@@ -526,7 +527,6 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool lineBeginsWithOpenBracket;
 		bool lineBeginsWithCloseBracket;
 		bool shouldIndentBrackettedLine;
-		bool isInClass;
 		bool isInSwitch;
 		bool foundPreCommandHeader;
 		bool foundPreCommandMacro;
@@ -679,6 +679,7 @@ class ASFormatter : public ASBeautifier
 		void setParensHeaderPaddingMode(bool mode);
 		void setParensUnPaddingMode(bool state);
 		void setPointerAlignment(PointerAlign alignment);
+		void setPreprocBlockIndent(bool state);
 		void setReferenceAlignment(ReferenceAlign alignment);
 		void setSingleStatementsMode(bool state);
 		void setStripCommentPrefix(bool state);
@@ -825,7 +826,6 @@ class ASFormatter : public ASBeautifier
 		int  spacePadNum;
 		int  tabIncrementIn;
 		int  templateDepth;
-		int  traceLineNumber;
 		int  squareBracketCount;
 		size_t checksumIn;
 		size_t checksumOut;
@@ -867,6 +867,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldUnPadParens;
 		bool shouldConvertTabs;
 		bool shouldIndentCol1Comments;
+		bool shouldIndentPreprocBlock;
 		bool shouldCloseTemplates;
 		bool shouldAttachExternC;
 		bool shouldAttachNamespace;
