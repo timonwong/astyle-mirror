@@ -45,21 +45,21 @@
 #include "ASLocalizer.h"
 
 #ifdef _WIN32
-#include <windows.h>
+	#include <windows.h>
 #endif
 
 #ifdef __DMC__
-#include <locale.h>
-// digital mars doesn't have these
-const size_t SUBLANG_CHINESE_MACAU = 5;
-const size_t LANG_HINDI = 57;
+	#include <locale.h>
+	// digital mars doesn't have these
+	const size_t SUBLANG_CHINESE_MACAU = 5;
+	const size_t LANG_HINDI = 57;
 #endif
 
 #ifdef __VMS
-#define __USE_STD_IOSTREAM 1
-#include <assert>
+	#define __USE_STD_IOSTREAM 1
+	#include <assert>
 #else
-#include <cassert>
+	#include <cassert>
 #endif
 
 #include <cstdio>
@@ -68,12 +68,12 @@ const size_t LANG_HINDI = 57;
 #include <typeinfo>
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4996)  // secure version deprecation warnings
-// #pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
+	#pragma warning(disable: 4996)  // secure version deprecation warnings
+	// #pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
 #endif
 
 #ifdef __BORLANDC__
-#pragma warn -8104	    // Local Static with constructor dangerous for multi-threaded apps
+	#pragma warn -8104	    // Local Static with constructor dangerous for multi-threaded apps
 #endif
 
 namespace astyle {

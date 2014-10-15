@@ -29,10 +29,10 @@
 #define ASTYLE_H
 
 #ifdef __VMS
-#define __USE_STD_IOSTREAM 1
-#include <assert>
+	#define __USE_STD_IOSTREAM 1
+	#include <assert>
 #else
-#include <cassert>
+	#include <cassert>
 #endif
 
 #include <cctype>
@@ -41,25 +41,25 @@
 #include <vector>
 
 #ifdef __GNUC__
-#include <string.h>		// need both string and string.h for GCC
+	#include <string.h>		// need both string and string.h for GCC
 #endif
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4996)  // secure version deprecation warnings
-#pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
+	#pragma warning(disable: 4996)  // secure version deprecation warnings
+	#pragma warning(disable: 4267)  // 64 bit signed/unsigned loss of data
 #endif
 
 #ifdef __BORLANDC__
-#pragma warn -8004	            // variable is assigned a value that is never used
+	#pragma warn -8004	            // variable is assigned a value that is never used
 #endif
 
 #ifdef __INTEL_COMPILER
-#pragma warning(disable:  383)  // value copied to temporary, reference to temporary used
-#pragma warning(disable:  981)  // operands are evaluated in unspecified order
+	#pragma warning(disable:  383)  // value copied to temporary, reference to temporary used
+	#pragma warning(disable:  981)  // operands are evaluated in unspecified order
 #endif
 
 #ifdef __clang__
-#pragma clang diagnostic ignored "-Wshorten-64-to-32"
+	#pragma clang diagnostic ignored "-Wshorten-64-to-32"
 #endif
 
 namespace astyle {

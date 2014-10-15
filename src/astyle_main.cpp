@@ -59,30 +59,30 @@
 
 // includes for recursive getFileNames() function
 #ifdef _WIN32
-#undef UNICODE		// use ASCII windows functions
-#include <windows.h>
+	#undef UNICODE		// use ASCII windows functions
+	#include <windows.h>
 #else
-#include <dirent.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#ifdef __VMS
-#include <unixlib.h>
-#include <rms.h>
-#include <ssdef.h>
-#include <stsdef.h>
-#include <lib$routines.h>
-#include <starlet.h>
-#endif /* __VMS */
+	#include <dirent.h>
+	#include <unistd.h>
+	#include <sys/stat.h>
+	#ifdef __VMS
+		#include <unixlib.h>
+		#include <rms.h>
+		#include <ssdef.h>
+		#include <stsdef.h>
+		#include <lib$routines.h>
+		#include <starlet.h>
+	#endif /* __VMS */
 #endif
 
 #ifdef __DMC__
-#include <locale.h>
+	#include <locale.h>
 #endif
 
 // turn off MinGW automatic file globbing
 // this CANNOT be in the astyle namespace
 #ifndef ASTYLE_LIB
-int _CRT_glob = 0;
+	int _CRT_glob = 0;
 #endif
 
 //----------------------------------------------------------------------------
@@ -93,22 +93,22 @@ namespace astyle {
 
 // console build variables
 #ifndef ASTYLE_LIB
-ASConsole* g_console = NULL;     // class to encapsulate console variables
-ostream* _err = &cerr;           // direct error messages to cerr
-#ifdef _WIN32
-char g_fileSeparator = '\\';     // Windows file separator
-bool g_isCaseSensitive = false;  // Windows IS case sensitive
-#else
-char g_fileSeparator = '/';      // Linux file separator
-bool g_isCaseSensitive = true;   // Linux IS NOT case sensitive
-#endif	// _WIN32
+	ASConsole* g_console = NULL;     // class to encapsulate console variables
+	ostream* _err = &cerr;           // direct error messages to cerr
+	#ifdef _WIN32
+		char g_fileSeparator = '\\';     // Windows file separator
+		bool g_isCaseSensitive = false;  // Windows IS case sensitive
+	#else
+		char g_fileSeparator = '/';      // Linux file separator
+		bool g_isCaseSensitive = true;   // Linux IS NOT case sensitive
+	#endif	// _WIN32
 #endif	// ASTYLE_LIB
 
-#ifdef ASTYLE_JNI
 // java library build variables
-JNIEnv*   g_env;
-jobject   g_obj;
-jmethodID g_mid;
+#ifdef ASTYLE_JNI
+	JNIEnv*   g_env;
+	jobject   g_obj;
+	jmethodID g_mid;
 #endif
 
 const char* g_version = "2.05 beta";
