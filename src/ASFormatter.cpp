@@ -208,6 +208,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	lineIsEmpty = false;
 	isImmediatelyPostCommentOnly = false;
 	isImmediatelyPostEmptyLine = false;
+	isInClassInitializer = false;
 	isInQuote = false;
 	isInVerbatimQuote = false;
 	haveLineContinuationChar = false;
@@ -461,6 +462,9 @@ string ASFormatter::nextLine()
 			        && currentLineBeginsWithBracket
 			        && previousCommandChar == ' ')
 				previousCommandChar = '{';
+			if (isInClassInitializer
+			        && isBracketType(bracketTypeStack->back(), COMMAND_TYPE))
+				isInClassInitializer = false;
 			if (isInHorstmannRunIn)
 				isInLineBreak = false;
 			if (!isWhiteSpace(currentChar))
@@ -604,11 +608,11 @@ string ASFormatter::nextLine()
 			}
 			processPreprocessor();
 			// if top level it is potentially indentable
-			// do NOT use isBracketType() to check for a NULL_TYPE
 			if (shouldIndentPreprocBlock
-			        && (bracketTypeStack->back() == NULL_TYPE
+			        && (isBracketType(bracketTypeStack->back(), NULL_TYPE)
 			            || isBracketType(bracketTypeStack->back(), NAMESPACE_TYPE))
 			        && !foundClassHeader
+			        && !isInClassInitializer
 			        && sourceIterator->tellg() > preprocBlockEnd)
 			{
 				// indent the #if preprocessor blocks
@@ -1212,11 +1216,11 @@ string ASFormatter::nextLine()
 			resetEndOfStatement();
 		}
 
-		if (currentChar == ':')
+		if (currentChar == ':'
+		        && previousChar != ':'         // not part of '::'
+		        && peekNextChar() != ':')      // not part of '::'
 		{
-			if (isInCase
-			        && previousChar != ':'          // not part of '::'
-			        && peekNextChar() != ':')       // not part of '::'
+			if (isInCase)
 			{
 				isInCase = false;
 				if (shouldBreakOneLineStatements)
@@ -1228,8 +1232,6 @@ string ASFormatter::nextLine()
 			         && !foundQuestionMark          // not in a ?: sequence
 			         && !foundPreDefinitionHeader   // not in a definition block (e.g. class foo : public bar
 			         && previousCommandChar != ')'  // not immediately after closing paren of a method header, e.g. ASFormatter::ASFormatter(...) : ASBeautifier(...)
-			         && previousChar != ':'         // not part of '::'
-			         && peekNextChar() != ':'       // not part of '::'
 			         && !foundPreCommandHeader      // not after a 'noexcept'
 			         && !squareBracketCount         // not in objC method call
 			         && !isInObjCMethodDefinition   // not objC '-' or '+' method
@@ -1247,8 +1249,6 @@ string ASFormatter::nextLine()
 			if (isCStyle()
 			        && shouldPadMethodColon
 			        && (squareBracketCount > 0 || isInObjCMethodDefinition || isInObjCSelector)
-			        && previousChar != ':'			// not part of '::'
-			        && peekNextChar() != ':'		// not part of '::'
 			        && !foundQuestionMark)			// not in a ?: sequence
 				padObjCMethodColon();
 
@@ -1258,6 +1258,9 @@ string ASFormatter::nextLine()
 				if ((int) currentLine.length() > charNum + 1 && !isWhiteSpace(currentLine[charNum + 1]))
 					currentLine.insert(charNum + 1, " ");
 			}
+
+			if (isClassInitializer())
+				isInClassInitializer = true;
 		}
 
 		if (currentChar == '?')
@@ -1366,7 +1369,7 @@ string ASFormatter::nextLine()
 		if (currentChar == '@'
 		        && isCharPotentialHeader(currentLine, charNum + 1)
 		        && findKeyword(currentLine, charNum + 1, AS_INTERFACE)
-		        && bracketTypeStack->back() == NULL_TYPE)
+		        && isBracketType(bracketTypeStack->back(), NULL_TYPE))
 		{
 			isInObjCInterface = true;
 			string name = '@' + AS_INTERFACE;
@@ -1386,7 +1389,7 @@ string ASFormatter::nextLine()
 		}
 		else if ((currentChar == '-' || currentChar == '+')
 		         && peekNextChar() == '('
-		         && bracketTypeStack->back() == NULL_TYPE
+		         && isBracketType(bracketTypeStack->back(), NULL_TYPE)
 		         && !isInPotentialCalculation)
 		{
 			isInObjCMethodDefinition = true;
@@ -1576,6 +1579,8 @@ bool ASFormatter::hasMoreLines() const
  */
 bool ASFormatter::isBracketType(BracketType a, BracketType b) const
 {
+	if (a == NULL_TYPE || b == NULL_TYPE)
+		return (a == b);
 	return ((a & b) == b);
 }
 
@@ -2526,6 +2531,8 @@ BracketType ASFormatter::getBracketType()
 		                      || (previousCommandChar == ';')
 		                      || ((previousCommandChar == '{' ||  previousCommandChar == '}')
 		                          && isPreviousBracketBlockRelated)
+		                      || (isInClassInitializer
+		                          && (!isLegalNameChar(previousNonWSChar) || foundPreCommandHeader))
 		                      || isInObjCMethodDefinition
 		                      || isInObjCInterface
 		                      || isJavaStaticConstructor
@@ -2553,15 +2560,56 @@ BracketType ASFormatter::getBracketType()
 	if (foundOneLineBlock > 0)		// found one line block
 		returnVal = (BracketType)(returnVal | SINGLE_LINE_TYPE);
 
-	if (isBracketType(returnVal, ARRAY_TYPE) && isNonInStatementArrayBracket())
+	if (isBracketType(returnVal, ARRAY_TYPE))
 	{
-		returnVal = (BracketType)(returnVal | ARRAY_NIS_TYPE);
-		isNonInStatementArray = true;
-		isImmediatelyPostNonInStmt = false;		// in case of "},{"
-		nonInStatementBracket = formattedLine.length() - 1;
+		if (isNonInStatementArrayBracket())
+		{
+			returnVal = (BracketType)(returnVal | ARRAY_NIS_TYPE);
+			isNonInStatementArray = true;
+			isImmediatelyPostNonInStmt = false;		// in case of "},{"
+			nonInStatementBracket = formattedLine.length() - 1;
+		}
+		if (isUniformInitializerBracket())
+			returnVal = (BracketType)(returnVal | INIT_TYPE);
 	}
 
 	return returnVal;
+}
+
+/**
+* check if a colon is a class initializer separator
+*
+* @return        whether it is a class initializer separator
+*/
+bool ASFormatter::isClassInitializer() const
+{
+	assert(currentLine[charNum] == ':');
+	assert(previousChar != ':' && peekNextChar() != ':');	// not part of '::'
+
+	// this should be similar to ASBeautifier::parseCurrentLine()
+	bool foundClassInitializer = false;
+
+	if (foundQuestionMark)
+	{
+		// do nothing special
+	}
+	else if (parenStack->back() > 0)
+	{
+		// found a 'for' loop or an objective-C statement
+		// so do nothing special
+	}
+	else if (isInEnum)
+	{
+		// found an enum with a base-type
+	}
+	else if (isCStyle()
+	         && !isInCase
+	         && (previousCommandChar == ')' || foundPreCommandHeader))
+	{
+		// found a 'class' c'tor initializer
+		foundClassInitializer = true;
+	}
+	return foundClassInitializer;
 }
 
 /**
@@ -3096,6 +3144,21 @@ bool ASFormatter::isNextCharOpeningBracket(int startChar) const
 	        && nextText.compare(0, 1, "{") == 0)
 		retVal = true;
 	return retVal;
+}
+
+/**
+* Determine if an opening array-type bracket should have a leading space pad.
+* This is to identify C++11 uniform initializers.
+*/
+bool ASFormatter::isUniformInitializerBracket() const
+{
+	if (isCStyle() && !isInEnum && !isImmediatelyPostPreprocessor)
+	{
+		if (isInClassInitializer
+		        || isLegalNameChar(previousNonWSChar))
+			return true;
+	}
+	return false;
 }
 
 /**
@@ -4018,7 +4081,7 @@ void ASFormatter::formatOpeningBracket(BracketType bracketType)
 			}
 		}
 		else if (previousCommandChar == '{'
-		         || previousCommandChar == '}'
+		         || (previousCommandChar == '}' && !isInClassInitializer)
 		         || previousCommandChar == ';')		// '}' , ';' chars added for proper handling of '{' immediately after a '}' or ';'
 		{
 			appendCurrentChar();					// don't attach
@@ -4220,9 +4283,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 							if (previousNonWSChar != '(')
 							{
 								// don't space pad C++11 uniform initialization
-								if (isBracketType(bracketTypeStack->back(), ENUM_TYPE)
-								        || !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE)
-								        || !isLegalNameChar(previousNonWSChar))
+								if (!isBracketType(bracketType, INIT_TYPE))
 									appendSpacePad();
 							}
 							appendCurrentChar();
@@ -4246,9 +4307,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				if (!isInLineBreak && previousNonWSChar != '(')
 				{
 					// don't space pad C++11 uniform initialization
-					if (isBracketType(bracketTypeStack->back(), ENUM_TYPE)
-					        || !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE)
-					        || !isLegalNameChar(previousNonWSChar))
+					if (!isBracketType(bracketType, INIT_TYPE))
 						appendSpacePad();
 				}
 				appendCurrentChar();
@@ -4274,9 +4333,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 				if (!isInLineBreak && previousNonWSChar != '(')
 				{
 					// don't space pad C++11 uniform initialization
-					if (isBracketType(bracketTypeStack->back(), ENUM_TYPE)
-					        || !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE)
-					        || !isLegalNameChar(previousNonWSChar))
+					if (!isBracketType(bracketType, INIT_TYPE))
 						appendSpacePad();
 				}
 				appendCurrentChar();
@@ -4293,9 +4350,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 					if (previousNonWSChar != '(')
 					{
 						// don't space pad C++11 uniform initialization
-						if (isBracketType(bracketTypeStack->back(), ENUM_TYPE)
-						        || !isBracketType(bracketTypeStack->back(), SINGLE_LINE_TYPE)
-						        || !isLegalNameChar(previousNonWSChar))
+						if (!isBracketType(bracketType, INIT_TYPE))
 							appendSpacePad();
 					}
 					appendCurrentChar(false);           // OK to attach
@@ -4340,8 +4395,9 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 		{
 			// does this close the first opening bracket in the array?
 			// must check if the block is still a single line because of anonymous statements
-			if (!isBracketType(bracketType, SINGLE_LINE_TYPE)
-			        || formattedLine.find('{') == string::npos)
+			if (!isBracketType(bracketType, INIT_TYPE)
+			        && (!isBracketType(bracketType, SINGLE_LINE_TYPE)
+			            || formattedLine.find('{') == string::npos))
 				breakLine();
 			appendCurrentChar();
 		}

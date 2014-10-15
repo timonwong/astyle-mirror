@@ -102,7 +102,7 @@ enum BracketMode
 
 enum BracketType
 {
-	NULL_TYPE = 0,				// do NOT use isBracketType() to check
+	NULL_TYPE = 0,
 	NAMESPACE_TYPE = 1,			// also a DEFINITION_TYPE
 	CLASS_TYPE = 2,				// also a DEFINITION_TYPE
 	STRUCT_TYPE = 4,			// also a DEFINITION_TYPE
@@ -111,9 +111,10 @@ enum BracketType
 	COMMAND_TYPE = 32,
 	ARRAY_NIS_TYPE = 64,		// also an ARRAY_TYPE
 	ENUM_TYPE = 128,			// also an ARRAY_TYPE
-	ARRAY_TYPE = 256,			// arrays and enums
-	EXTERN_TYPE = 512,			// extern "C", not a command type extern
-	SINGLE_LINE_TYPE = 1024
+	INIT_TYPE = 256,			// also an ARRAY_TYPE
+	ARRAY_TYPE = 512,			// arrays and enums
+	EXTERN_TYPE = 1024,			// extern "C", not a command type extern
+	SINGLE_LINE_TYPE = 2048
 };
 
 enum MinConditional
@@ -423,6 +424,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		void processPreprocessor(const string &preproc, const string &line);
 		void registerInStatementIndent(const string &line, int i, int spaceIndentCount,
 		                               int tabIncrementIn, int minIndent, bool updateParenStack);
+		void registerInStatementIndentColon(const string &line, int i, int tabIncrementIn);
 		void initVectors();
 		void initTempStacksContainer(vector<vector<const string*>*>* &container,
 		                             vector<vector<const string*>*>* value);
@@ -503,6 +505,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInIndentablePreprocBlock;
 		bool isInObjCInterface;
 		bool isInEnum;
+		bool isInEnumTypeID;
 		bool isInLet;
 		bool modifierIndent;
 		bool switchIndent;
@@ -526,6 +529,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool previousLineProbationTab;
 		bool lineBeginsWithOpenBracket;
 		bool lineBeginsWithCloseBracket;
+		bool lineBeginsWithComma;
 		bool shouldIndentBrackettedLine;
 		bool isInSwitch;
 		bool foundPreCommandHeader;
@@ -707,6 +711,7 @@ class ASFormatter : public ASBeautifier
 		bool isBeforeAnyLineEndComment(int startPos) const;
 		bool isBeforeMultipleLineEndComments(int startPos) const;
 		bool isBracketType(BracketType a, BracketType b) const;
+		bool isClassInitializer() const;
 		bool isClosingHeader(const string* header) const;
 		bool isCurrentBracketBroken() const;
 		bool isDereferenceOrAddressOf() const;
@@ -723,6 +728,7 @@ class ASFormatter : public ASBeautifier
 		bool isStructAccessModified(string  &firstLine, size_t index) const;
 		bool isIndentablePreprocessorBlock(string  &firstLine, size_t index);
 		bool isUnaryOperator() const;
+		bool isUniformInitializerBracket() const;
 		bool isImmediatelyPostCast() const;
 		bool isInExponent() const;
 		bool isInSwitchStatement() const;
@@ -886,6 +892,7 @@ class ASFormatter : public ASBeautifier
 		bool lineIsEmpty;
 		bool isImmediatelyPostCommentOnly;
 		bool isImmediatelyPostEmptyLine;
+		bool isInClassInitializer;
 		bool isInQuote;
 		bool isInVerbatimQuote;
 		bool haveLineContinuationChar;

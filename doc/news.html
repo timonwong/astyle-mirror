@@ -46,6 +46,11 @@
         this in any shared objects you distribute.&quot;
     </p>
     <p>
+        Improvements have been made in the formatting of C++11 uniform initializers (enclosed by brackets). The opening bracket 
+        will not be space padded unless it is padded initially. The closing bracket will not be broken from the final line 
+        unless it is broken initially. And the known problems with uniform initializers in class constructor initializers have 
+        been fixed.</p>
+    <p>
         The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to 
         ASTYLE_NO_EXPORTS. It is sometimes needed for static libraries on other compilers to prevent error and warning 
         messages.
