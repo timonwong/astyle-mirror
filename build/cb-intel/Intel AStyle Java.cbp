@@ -14,7 +14,7 @@
 				<Compiler>
 					<Add option="-fno-rtti" />
 					<Add option="-Wall" />
-					<Add option="-w2" />
+					<Add option="-w3" />
 					<Add option="-g" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fPIC" />
@@ -35,7 +35,7 @@
 					<Add option="-fno-rtti" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
-					<Add option="-w2" />
+					<Add option="-w3" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fPIC" />
 					<Add option="-fvisibility=hidden" />

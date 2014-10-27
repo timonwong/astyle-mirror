@@ -16,7 +16,7 @@
 				<Compiler>
 					<Add option="-fno-rtti" />
 					<Add option="-Wall" />
-					<Add option="-w2" />
+					<Add option="-w3" />
 					<Add option="-g" />
 					<Add option="-fno-exceptions" />
 					<Add option="-DASTYLE_LIB" />
@@ -33,7 +33,7 @@
 					<Add option="-fno-rtti" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
-					<Add option="-w2" />
+					<Add option="-w3" />
 					<Add option="-fno-exceptions" />
 					<Add option="-DNDEBUG" />
 					<Add option="-DASTYLE_LIB" />

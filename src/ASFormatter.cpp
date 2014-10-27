@@ -59,7 +59,7 @@ ASFormatter::ASFormatter()
 	shouldPadHeader = false;
 	shouldStripCommentPrefix = false;
 	shouldUnPadParens = false;
-	shouldAttachClosingBracket = false;
+	attachClosingBracketMode = false;
 	shouldBreakOneLineBlocks = true;
 	shouldBreakOneLineStatements = true;
 	shouldConvertTabs = false;
@@ -393,7 +393,7 @@ void ASFormatter::fixOptionVariableConflicts()
 	else if (formattingStyle == STYLE_PICO)
 	{
 		setBracketFormatMode(RUN_IN_MODE);
-		setAttachClosingBracket(true);
+		setAttachClosingBracketMode(true);
 		setSwitchIndent(true);
 		setBreakOneLineBlocksMode(false);
 		setSingleStatementsMode(false);
@@ -405,7 +405,7 @@ void ASFormatter::fixOptionVariableConflicts()
 	else if (formattingStyle == STYLE_LISP)
 	{
 		setBracketFormatMode(ATTACH_MODE);
-		setAttachClosingBracket(true);
+		setAttachClosingBracketMode(true);
 		setSingleStatementsMode(false);
 		// add-one-line-brackets won't work for lisp
 		// only shouldAddBrackets should be set to true
@@ -1194,7 +1194,7 @@ string ASFormatter::nextLine()
 				if (((shouldBreakOneLineStatements
 				        || isBracketType(bracketTypeStack->back(),  SINGLE_LINE_TYPE))
 				        && isOkToBreakBlock(bracketTypeStack->back()))
-				        && !(shouldAttachClosingBracket && peekNextChar() == '}'))
+				        && !(attachClosingBracketMode && peekNextChar() == '}'))
 				{
 					passedSemicolon = true;
 				}
@@ -1438,7 +1438,8 @@ string ASFormatter::nextLine()
 						foundPreCommandHeader = false;
 						char peekedChar = peekNextChar();
 						isInPotentialCalculation = (!(newHeader == &AS_EQUAL && peekedChar == '*')
-						                            && !(newHeader == &AS_EQUAL && peekedChar == '&'));
+						                            && !(newHeader == &AS_EQUAL && peekedChar == '&')
+						                            && getPreviousWord(currentLine, charNum) != "operator");
 					}
 				}
 			}
@@ -1836,9 +1837,9 @@ void ASFormatter::setObjCColonPaddingMode(ObjCColonPad mode)
  *
  * @param state        true = attach, false = don't attach.
  */
-void ASFormatter::setAttachClosingBracket(bool state)
+void ASFormatter::setAttachClosingBracketMode(bool state)
 {
-	shouldAttachClosingBracket = state;
+	attachClosingBracketMode = state;
 }
 
 /**
@@ -2690,6 +2691,9 @@ bool ASFormatter::isPointerOrReference() const
 	//check for rvalue reference
 	if (currentChar == '&' && nextChar == '&')
 	{
+		string followingText = peekNextText(currentLine.substr(charNum + 2));
+		if (followingText.length() > 0 && followingText[0] == ')')
+			return true;
 		if (currentHeader != NULL || isInPotentialCalculation)
 			return false;
 		if (parenStack->back() > 0 && isBracketType(bracketTypeStack->back(), COMMAND_TYPE))
@@ -2735,10 +2739,11 @@ bool ASFormatter::isPointerOrReference() const
 				return false;
 		}
 
-		if (!isBracketType(bracketTypeStack->back(), COMMAND_TYPE))
-			return true;
-		else
+		if (isBracketType(bracketTypeStack->back(), COMMAND_TYPE)
+		        || squareBracketCount > 0)
 			return false;
+		else
+			return true;
 	}
 
 	// checks on operators in parens with following '('
@@ -2821,7 +2826,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 	}
 	if (currentChar == '&' && nextChar == '&')
 	{
-		if (previousNonWSChar == '(' || templateDepth > 0)
+		if (previousNonWSChar == '(' || isInTemplate)
 			return true;
 		if ((int) currentLine.length() < charNum + 2)
 			return true;
@@ -2897,9 +2902,9 @@ bool ASFormatter::isPointerOrReferenceCentered() const
 	        || currentLine[prNum - 2] == ' ')
 		return false;
 
-	// check for **
+	// check for ** or &&
 	if (prNum + 1 < lineLength
-	        && currentLine[prNum + 1] == '*')
+	        && (currentLine[prNum + 1] == '*' || currentLine[prNum + 1] == '&'))
 		prNum++;
 
 	// check space after
@@ -4160,7 +4165,7 @@ void ASFormatter::formatClosingBracket(BracketType bracketType)
 	if (previousCommandChar == '{')
 		isImmediatelyPostEmptyBlock = true;
 
-	if (shouldAttachClosingBracket)
+	if (attachClosingBracketMode)
 	{
 		// for now, namespaces and classes will be attached. Uncomment the lines below to break.
 		if ((isEmptyLine(formattedLine)			// if a blank line precedes this
@@ -4378,7 +4383,7 @@ void ASFormatter::formatArrayBrackets(BracketType bracketType, bool isOpeningArr
 	}
 	else if (currentChar == '}')
 	{
-		if (shouldAttachClosingBracket)
+		if (attachClosingBracketMode)
 		{
 			if (isEmptyLine(formattedLine)			// if a blank line precedes this
 			        || isImmediatelyPostPreprocessor
@@ -5361,7 +5366,7 @@ void ASFormatter::isLineBreakBeforeClosingHeader()
 	assert(foundClosingHeader && previousNonWSChar == '}');
 	if (bracketFormatMode == BREAK_MODE
 	        || bracketFormatMode == RUN_IN_MODE
-	        || shouldAttachClosingBracket)
+	        || attachClosingBracketMode)
 	{
 		isInLineBreak = true;
 	}
@@ -6144,6 +6149,7 @@ void ASFormatter::checkIfTemplateOpener()
 			{
 				// this is not a template -> leave...
 				isInTemplate = false;
+				templateDepth = 0;
 				goto exitFromSearch;
 			}
 			string name = getCurrentWord(nextLine_, i);

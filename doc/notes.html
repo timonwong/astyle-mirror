@@ -36,15 +36,21 @@
         <li>Change compiler definition ASTYLE_NO_VCX (no Visual Studio exports) to ASTYLE_NO_EXPORTS.</li>
         <li>Change shared library error handler argument from &quot;char*&quot; to &quot;const char*&quot;.</li>
         <li>Fix not recognizing noexcept, interrupt, and autoreleasepool as pre-command headers (#225, #259).</li>
-        <li>Fix formatting of C++11 uniform initializer brackets (#253, 257, 260, 284).</li>
+        <li>Fix formatting of C++11 uniform initializer brackets (#253, #257, #260, #284).</li>
+        <li>Fix formatting of enums with leading commas (#159, #179, #270).</li>
         <li>Fix to not space pad C++11 uniform initializer brackets (#275).</li>
         <li>Fix flagging a &#39;const&#39; variable as a &#39;const&#39; method (#275).</li>
         <li>Fix piping and redirection adding an extra character to the output (#245, #252, #305). </li>
         <li>Fix "indent-modifiers" to attach class access modifiers to Horstmann style brackets. </li>
         <li>Fix ASFormatter to correctly recognize the end of a raw string literal (#261).</li>
         <li>Fix to recognize C++11 &quot;enum class&quot; as an enum (#303).</li>
-        <li>Fix concateneing multiplication with a pointer dereference (#291).</li>
         <li>Fix indent of C++11 &quot;noexecpt&quot; statements within a class (#260, #304).</li>
+        <li>Fix not resetting templateDepth when a template was not found (#295).</li>
+        <li>Fix formatting of multiplication in a block paren (#144).</li>
+        <li>Fix whitespace padding when formatting an rvalue references (#297).</li>
+        <li>Fix to recognize an rvalue reference withhout a name (#265).</li>
+        <li>Fix to not identify an operator overload method as a calculation (#296).</li>
+        <li>Fix concateneing multiplication with a pointer dereference (#291).</li>
         <li>Fix extra space after a trailing reference type (#300).</li>
         <li>Fix _asm blocks not being identified as a block opener and the variable not cleared on exit (#163).</li>
         <li>Fix indentation of line comments before a &quot;class&quot; opening bracket.</li>
@@ -61,8 +67,7 @@
                 <li>Move shared library declarations from astyle.h to astyle_main.h.</li>
                 <li>Move indentable macros from ASEnhancer to ASResource and create static pairs.</li>
                 <li>Simplify ASBeautifier procedure to identify the colon (:) type.</li>
-                <li>Major refactoring in ASBeautifier to create separate variables for an enum, a class statement and a class initializer.<br />
-                    This was needed to fix the processing of C++11 uniform initializers in a class initializer.
+                <li>Major refactoring in ASBeautifier to create separate variables for an enum, a class statement and a class initializer.<br />This was needed to fix the processing of C++11 uniform initializers in a class initializer.
                 </li>
                 <li>Minor changes to ASFormatter and ASBeautifier based on results of the Clang analyzer. </li>
                 <li>Change several methods in astyle_main to &quot;const&quot;.</li>
@@ -357,7 +362,7 @@
 
     <center style="margin-left: -0.4in;">
         <a href="http://sourceforge.net/projects/astyle">
-            <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&type=16" width="150" height="40" alt="[SourceForge.net]" /></a>
+            <img src="http://sflogo.sourceforge.net/sflogo.php?group_id=2319&type=16" alt="" /></a>
     </center>
 
     <p>

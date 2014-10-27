@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 
-
 namespace astyle {
 
 using namespace std;

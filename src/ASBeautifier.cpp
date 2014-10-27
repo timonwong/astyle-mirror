@@ -1271,7 +1271,7 @@ void ASBeautifier::registerInStatementIndentColon(const string &line, int i, int
 
 	// register indent at first word after the colon
 	size_t firstChar = line.find_first_not_of(" \t");
-	if (firstChar != string::npos && line[firstChar] == ':')
+	if (firstChar == (size_t)i)		// firstChar is ':'
 	{
 		size_t firstWord = line.find_first_not_of(" \t", firstChar + 1);
 		if (firstChar != string::npos)
@@ -2077,6 +2077,14 @@ void ASBeautifier::computePreliminaryIndentation()
 	if (isInClassInitializer || isInEnumTypeID)
 	{
 		indentCount += classInitializerIndents;
+	}
+
+	if (isInEnum && lineBeginsWithComma && !inStatementIndentStack->empty())
+	{
+		// unregister '=' indent from the previous line
+		inStatementIndentStack->pop_back();
+		isInStatement = false;
+		spaceIndentCount = 0;
 	}
 
 	// Objective-C interface continuation line

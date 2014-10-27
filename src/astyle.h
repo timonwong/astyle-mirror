@@ -112,7 +112,7 @@ enum BracketType
 	ARRAY_NIS_TYPE = 64,		// also an ARRAY_TYPE
 	ENUM_TYPE = 128,			// also an ARRAY_TYPE
 	INIT_TYPE = 256,			// also an ARRAY_TYPE
-	ARRAY_TYPE = 512,			// arrays and enums
+	ARRAY_TYPE = 512,
 	EXTERN_TYPE = 1024,			// extern "C", not a command type extern
 	SINGLE_LINE_TYPE = 2048
 };
@@ -700,6 +700,9 @@ class ASFormatter : public ASBeautifier
 		template<typename T> void initContainer(T &container, T value);
 		char peekNextChar() const;
 		BracketType getBracketType();
+		bool adjustChecksumIn(int adjustment);
+		bool computeChecksumIn(const string &currentLine_);
+		bool computeChecksumOut(const string &beautifiedLine);
 		bool addBracketsToStatement();
 		bool removeBracketsFromStatement();
 		bool commentAndHeaderFollows();
@@ -780,7 +783,7 @@ class ASFormatter : public ASBeautifier
 		void padParens();
 		void processPreprocessor();
 		void resetEndOfStatement();
-		void setAttachClosingBracket(bool state);
+		void setAttachClosingBracketMode(bool state);
 		void setBreakBlocksVariables();
 		void stripCommentPrefix();
 		void testForTimeToSplitFormattedLine();
@@ -860,9 +863,6 @@ class ASFormatter : public ASBeautifier
 		ReferenceAlign referenceAlignment;
 		ObjCColonPad objCColonPadMode;
 		LineEndFormat lineEnd;
-		bool adjustChecksumIn(int adjustment);
-		bool computeChecksumIn(const string &currentLine_);
-		bool computeChecksumOut(const string &beautifiedLine);
 		bool isVirgin;
 		bool shouldPadOperators;
 		bool shouldPadParensOutside;
@@ -940,7 +940,7 @@ class ASFormatter : public ASBeautifier
 		bool shouldRemoveNextClosingBracket;
 		bool isInHorstmannRunIn;
 		bool currentLineBeginsWithBracket;
-		bool shouldAttachClosingBracket;
+		bool attachClosingBracketMode;
 		bool shouldBreakOneLineBlocks;
 		bool shouldReparseCurrentChar;
 		bool shouldBreakOneLineStatements;

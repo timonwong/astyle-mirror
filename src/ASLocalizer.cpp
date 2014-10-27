@@ -76,6 +76,11 @@
 	#pragma warn -8104	    // Local Static with constructor dangerous for multi-threaded apps
 #endif
 
+#ifdef __INTEL_COMPILER
+	#pragma warning(disable:  383)  // value copied to temporary, reference to temporary used
+	#pragma warning(disable:  981)  // operands are evaluated in unspecified order
+#endif
+
 namespace astyle {
 
 #ifndef ASTYLE_LIB

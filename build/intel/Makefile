@@ -43,7 +43,7 @@ bindir = bin
 objdir = obj
 ipath=$(prefix)/bin
 
-CBASEFLAGS = -w2 -Wall -fno-rtti -fno-exceptions
+CBASEFLAGS = -w3 -Wall -fno-rtti -fno-exceptions
 JAVAINCS   = -I$(JAVA_HOME)/include
 CXX = icpc
 INSTALL=install -o $(USER) -g $(USER)
