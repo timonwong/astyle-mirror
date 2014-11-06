@@ -1551,6 +1551,16 @@ void ASConsole::printHelp() const
 	cout << "    Long options within the default option file may be written without\n";
 	cout << "    the preliminary '--'.\n";
 	cout << endl;
+	cout << "Disable Formatting:\n";
+	cout << "----------------------\n";
+	cout << "    Disable Block\n";
+	cout << "    Blocks of code can be disabled with the comment tags *INDENT-OFF*\n";
+	cout << "    and *INDENT-ON*. It must be contained in a one-line comment.\n";
+	cout << endl;
+	cout << "    Disable Line\n";
+	cout << "    Padding of operators can be disabled on a single line using the\n";
+	cout << "    comment tag *NOPAD*. It must be contained in a line-end comment.\n";
+	cout << endl;
 	cout << "Bracket Style Options:\n";
 	cout << "----------------------\n";
 	cout << "    default bracket style\n";
@@ -1854,7 +1864,7 @@ void ASConsole::printHelp() const
 	cout << "    Process subdirectories recursively.\n";
 	cout << endl;
 	cout << "    --dry-run\n";
-	cout << "    Perform a trial run with no changes made (for checking if formatted).\n";
+	cout << "    Perform a trial run with no changes made to check for formatting.\n";
 	cout << endl;
 	cout << "    --exclude=####\n";
 	cout << "    Specify a file or directory #### to be excluded from processing.\n";

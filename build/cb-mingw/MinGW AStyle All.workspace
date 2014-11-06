@@ -2,8 +2,8 @@
 <CodeBlocks_workspace_file>
 	<Workspace title="MinGW AStyle All">
 		<Project filename="MinGW AStyle.cbp" />
-		<Project filename="MinGW AStyle Java.cbp" />
 		<Project filename="MinGW AStyle Dll.cbp" />
+		<Project filename="MinGW AStyle Java.cbp" />
 		<Project filename="MinGW AStyle Lib.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

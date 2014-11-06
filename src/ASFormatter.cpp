@@ -204,6 +204,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	isInPreprocessorBeautify = false;
 	doesLineStartComment = false;
 	lineEndsInCommentOnly = false;
+	lineIsCommentOnly = false;
 	lineIsLineCommentOnly = false;
 	lineIsEmpty = false;
 	isImmediatelyPostCommentOnly = false;
@@ -228,6 +229,7 @@ void ASFormatter::init(ASSourceIterator* si)
 	isInLineBreak = false;
 	endOfAsmReached = false;
 	endOfCodeReached = false;
+	isFormattingModeOff = false;
 	isInEnum = false;
 	isInExecSQL = false;
 	isInAsm = false;
@@ -478,6 +480,35 @@ string ASFormatter::nextLine()
 			isCharImmediatelyPostPointerOrReference = false;
 			isCharImmediatelyPostOpenBlock = false;
 			isCharImmediatelyPostCloseBlock = false;
+		}
+
+		if ((lineIsLineCommentOnly || lineIsCommentOnly)
+		        && currentLine.find("*INDENT-ON*", charNum) != string::npos
+		        && isFormattingModeOff)
+		{
+			isFormattingModeOff = false;
+			isInLineComment = false;
+			isInComment = false;
+			isInLineBreak = true;
+			formattedLine = currentLine;
+			charNum = (int)currentLine.length() - 1;
+			continue;
+		}
+		if (isFormattingModeOff)
+		{
+			formattedLine = currentLine;
+			breakLine();
+			charNum = (int)currentLine.length() - 1;
+			// in case there is no indent-on tag
+			if (!sourceIterator->hasMoreLines())
+				endOfCodeReached = true;
+			continue;
+		}
+		if ((lineIsLineCommentOnly || lineIsCommentOnly)
+		        && currentLine.find("*INDENT-OFF*", charNum) != string::npos)
+		{
+			isFormattingModeOff = true;
+			// fall thru to write readyFormattedLine
 		}
 
 		if (shouldBreakLineAtNextChar)
@@ -1437,9 +1468,9 @@ string ASFormatter::nextLine()
 					{
 						foundPreCommandHeader = false;
 						char peekedChar = peekNextChar();
-						isInPotentialCalculation = (!(newHeader == &AS_EQUAL && peekedChar == '*')
-						                            && !(newHeader == &AS_EQUAL && peekedChar == '&')
-						                            && getPreviousWord(currentLine, charNum) != "operator");
+						isInPotentialCalculation = !(newHeader == &AS_EQUAL && peekedChar == '*')
+						                           && !(newHeader == &AS_EQUAL && peekedChar == '&')
+						                           && !isCharImmediatelyPostOperator;
 					}
 				}
 			}
@@ -1454,7 +1485,7 @@ string ASFormatter::nextLine()
 		            || newHeader == &AS_AND)
 		        && isPointerOrReference())
 		{
-			if (!isDereferenceOrAddressOf())
+			if (!isDereferenceOrAddressOf() && !isOperatorPaddingDisabled())
 				formatPointerOrReference();
 			else
 			{
@@ -1465,7 +1496,7 @@ string ASFormatter::nextLine()
 			continue;
 		}
 
-		if (shouldPadOperators && newHeader != NULL)
+		if (shouldPadOperators && newHeader != NULL && !isOperatorPaddingDisabled())
 		{
 			padOperators(newHeader);
 			continue;
@@ -1525,24 +1556,24 @@ string ASFormatter::nextLine()
 	size_t readyFormattedLineLength = trim(readyFormattedLine).length();
 	bool isInNamespace = isBracketType(bracketTypeStack->back(), NAMESPACE_TYPE);
 
-	if (prependEmptyLine                // prepend a blank line before this formatted line
+	if (prependEmptyLine		// prepend a blank line before this formatted line
 	        && readyFormattedLineLength > 0
 	        && previousReadyFormattedLineLength > 0)
 	{
-		isLineReady = true;             // signal a waiting readyFormattedLine
+		isLineReady = true;		// signal a waiting readyFormattedLine
 		beautifiedLine = beautify("");
 		previousReadyFormattedLineLength = 0;
 		// call the enhancer for new empty lines
 		enhancer->enhance(beautifiedLine, isInNamespace, isInPreprocessorBeautify, isInBeautifySQL);
 	}
-	else                                // format the current formatted line
+	else		// format the current formatted line
 	{
 		isLineReady = false;
 		horstmannIndentInStatement = horstmannIndentChars;
 		beautifiedLine = beautify(readyFormattedLine);
 		previousReadyFormattedLineLength = readyFormattedLineLength;
 		// the enhancer is not called for no-indent line comments
-		if (!lineCommentNoBeautify)
+		if (!lineCommentNoBeautify && !isFormattingModeOff)
 			enhancer->enhance(beautifiedLine, isInNamespace, isInPreprocessorBeautify, isInBeautifySQL);
 		horstmannIndentChars = 0;
 		lineCommentNoBeautify = lineCommentNoIndent;
@@ -2285,6 +2316,7 @@ void ASFormatter::initNewLine()
 
 	// compute leading spaces
 	isImmediatelyPostCommentOnly = lineIsLineCommentOnly || lineEndsInCommentOnly;
+	lineIsCommentOnly = false;
 	lineIsLineCommentOnly = false;
 	lineEndsInCommentOnly = false;
 	doesLineStartComment = false;
@@ -2305,6 +2337,9 @@ void ASFormatter::initNewLine()
 	if (isSequenceReached("/*"))
 	{
 		doesLineStartComment = true;
+		if ((int) currentLine.length() > charNum + 2
+		        && currentLine.find("*/", charNum + 2) != string::npos)
+			lineIsCommentOnly = true;
 	}
 	else if (isSequenceReached("//"))
 	{
@@ -2465,8 +2500,8 @@ void ASFormatter::breakLine(bool isSplitLine /*false*/)
 	isInLineBreak = false;
 	spacePadNum = nextLineSpacePadNum;
 	nextLineSpacePadNum = 0;
-	readyFormattedLine =  formattedLine;
-	formattedLine = "";
+	readyFormattedLine = formattedLine;
+	formattedLine.erase();
 	// queue an empty line prepend request if one exists
 	prependEmptyLine = isPrependPostBlockEmptyLineRequested;
 
@@ -2688,6 +2723,14 @@ bool ASFormatter::isPointerOrReference() const
 	if (isPointerOrReferenceVariable(lastWord))
 		return true;
 
+	if (isInClassInitializer
+	        && previousNonWSChar != '('
+	        && previousNonWSChar != '{'
+	        && previousCommandChar != ','
+	        && nextChar != ')'
+	        && nextChar != '}')
+		return false;
+
 	//check for rvalue reference
 	if (currentChar == '&' && nextChar == '&')
 	{
@@ -2770,21 +2813,16 @@ bool ASFormatter::isPointerOrReference() const
 	}
 
 	bool isPR = (!isInPotentialCalculation
-	             || isBracketType(bracketTypeStack->back(), DEFINITION_TYPE)
 	             || (!isLegalNameChar(previousNonWSChar)
 	                 && !(previousNonWSChar == ')' && nextChar == '(')
 	                 && !(previousNonWSChar == ')' && currentChar == '*' && !isImmediatelyPostCast())
 	                 && previousNonWSChar != ']')
+	             || (!isWhiteSpace(nextChar)
+	                 && nextChar != '-'
+	                 && nextChar != '('
+	                 && nextChar != '['
+	                 && !isLegalNameChar(nextChar))
 	            );
-
-	if (!isPR)
-	{
-		isPR |= (!isWhiteSpace(nextChar)
-		         && nextChar != '-'
-		         && nextChar != '('
-		         && nextChar != '['
-		         && !isLegalNameChar(nextChar));
-	}
 
 	return isPR;
 }
@@ -2810,6 +2848,7 @@ bool ASFormatter::isDereferenceOrAddressOf() const
 	        || previousNonWSChar == '{'
 	        || previousNonWSChar == '>'
 	        || previousNonWSChar == '<'
+	        || previousNonWSChar == '?'
 	        || isCharImmediatelyPostLineComment
 	        || isCharImmediatelyPostComment
 	        || isCharImmediatelyPostReturn)
@@ -2888,7 +2927,7 @@ bool ASFormatter::isPointerOrReferenceCentered() const
 	int prNum = charNum;
 	int lineLength = (int) currentLine.length();
 
-	// check for end of  line
+	// check for end of line
 	if (peekNextChar() == ' ')
 		return false;
 
@@ -3152,6 +3191,34 @@ bool ASFormatter::isNextCharOpeningBracket(int startChar) const
 }
 
 /**
+* Check if operator and, pointer, and reference padding is disabled.
+* Disabling is done thru a NOPAD tag in an ending comment.
+*
+* @return              true if the formatting on this line is disabled.
+*/
+bool ASFormatter::isOperatorPaddingDisabled() const
+{
+	size_t commentStart = currentLine.find("//", charNum);
+	if (commentStart == string::npos)
+	{
+		commentStart = currentLine.find("/*", charNum);
+		// comment must end on this line
+		if (commentStart != string::npos)
+		{
+			size_t commentEnd = currentLine.find("*/", commentStart + 2);
+			if (commentEnd == string::npos)
+				commentStart = string::npos;
+		}
+	}
+	if (commentStart == string::npos)
+		return false;
+	size_t noPadStart = currentLine.find("*NOPAD*", commentStart);
+	if (noPadStart == string::npos)
+		return false;
+	return true;
+}
+
+/**
 * Determine if an opening array-type bracket should have a leading space pad.
 * This is to identify C++11 uniform initializers.
 */
@@ -3322,7 +3389,6 @@ void ASFormatter::appendCharInsideComments(void)
 
 /**
  * add or remove space padding to operators
- * currentChar contains the paren
  * the operators and necessary padding will be appended to formattedLine
  * the calling function should have a continue statement after calling this method
  *
@@ -3867,18 +3933,26 @@ void ASFormatter::padParens(void)
 						prevIsParenHeader = true;
 					// don't unpad variables
 					else if (prevWord == "bool"
-					         || prevWord ==  "int"
-					         || prevWord ==  "void"
-					         || prevWord ==  "void*"
-					         || (prevWord.length() >= 6     // check end of word for _t
+					         || prevWord == "int"
+					         || prevWord == "void"
+					         || prevWord == "void*"
+					         || prevWord == "char"
+					         || prevWord == "long"
+					         || prevWord == "double"
+					         || prevWord == "float"
+					         || (prevWord.length() >= 4     // check end of word for _t
 					             && prevWord.compare(prevWord.length() - 2, 2, "_t") == 0)
-					         || prevWord ==  "BOOL"
-					         || prevWord ==  "DWORD"
-					         || prevWord ==  "HWND"
-					         || prevWord ==  "INT"
-					         || prevWord ==  "LPSTR"
-					         || prevWord ==  "VOID"
-					         || prevWord ==  "LPVOID"
+					         || prevWord == "Int32"
+					         || prevWord == "UInt32"
+					         || prevWord == "Int64"
+					         || prevWord == "UInt64"
+					         || prevWord == "BOOL"
+					         || prevWord == "DWORD"
+					         || prevWord == "HWND"
+					         || prevWord == "INT"
+					         || prevWord == "LPSTR"
+					         || prevWord == "VOID"
+					         || prevWord == "LPVOID"
 					        )
 					{
 						prevIsParenHeader = true;
@@ -5867,7 +5941,7 @@ EndOfWhileLoop:
 	if (isFirstPreprocConditional)
 	{
 		isFirstPreprocConditional = false;
-		if (nextText.empty() && sourceIterator->getStreamLength() > 300)
+		if (nextText.empty() && sourceIterator->getStreamLength() > 250)
 		{
 			isInIndentableBlock = false;
 			preprocBlockEnd = 0;

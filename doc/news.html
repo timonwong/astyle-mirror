@@ -21,62 +21,67 @@
     <h3>Artistic Style 2.05&nbsp; (pending)</h3>
 
     <p>
-        A new bracket style option, &quot;style=vtk&quot;, has been added. It uses indented brackets, like Whitesmith, except 
-        opening brackets for classes, functions, and methods are not indented. A complete description of the VTK style 
-        is available at the &quot;Visualization Toolkit&quot; website (http://www.vtk.org/).
+        A new bracket style option, &quot;style=vtk&quot;, has been added. It uses indented brackets, like Whitesmith,
+        except opening brackets for classes, functions, and methods are not indented. A complete description of the VTK
+        style is available at the &quot;Visualization Toolkit&quot; website (http://www.vtk.org/).
     </p>
     <p>
-        A new 
-        preprocessor indent option "indent-preproc-block" will indent 
-        preprocessor block statements one additional
-        indent. The block must be top-level (including within a namespace) and there are restrictions on what can be indented. It is described in the "Indentation Options" section of the documentation.
+        A new preprocessor indent option "indent-preproc-block" will indent preprocessor block statements one additional
+        indent. The block must be top-level (including within a namespace) and there are restrictions on what can be indented.
+        It is described in the "Indentation Options" section of the documentation.
     </p>
     <p>
-        A new options, "dry-run", will run Artistic Style without updating the files. The report will be output as usual.
-    >
-        The version number has been added to the filename of shared library (DLL) compiles. This will allow multiple versions of 
-        a shared library on the same system without conflicts.
+        A new option, "dry-run", will run Artistic Style without updating the files. The report will be output as usual.
+    </p>
+    <p>
+        Formatting of source code may now be disabled for portions of a program by embedding special comment tags in the
+        program. These are described in a new &quot;Disable Formatting&quot; section of the documentation. They work the
+        same as in other formatters. There are tags to disable formatting for a block of code and a tag to disable formatting
+        of a single line. This should allow any custom formatting to be retained.
+    </p>
+    <p>
+        The product version number has been added to the filename of shared library (DLL) compiles. This will allow multiple
+        versions of a shared library on the same system without conflicts.
     </p>
     <p>
         An attribute &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; has been added to Linux exported functions.
         This allows the option &quot;-fvisibility=hidden&quot; to be used on dynamic library compiles. According to the
-        GNU documentation, &quot;Using this feature can very substantially improve linking and load times of shared object 
-        libraries, produce more optimized code, provide near-perfect API export and prevent symbol clashes. It is
-        <strong>strongly</strong> recommended that you use 
-        this in any shared objects you distribute.&quot;
+        GNU documentation, &quot;Using this feature can very substantially improve linking and load times of shared object
+        libraries, produce more optimized code, provide near-perfect API export and prevent symbol clashes. It is <strong>
+            strongly</strong> recommended that you use this in any shared objects you distribute.&quot;
     </p>
     <p>
-        Improvements have been made in the formatting of C++11 uniform initializers (enclosed by brackets). The opening bracket 
-        will not be space padded unless it is padded initially. The closing bracket will not be broken from the final line 
-        unless it is broken initially. And the known problems with uniform initializers in class constructor initializers have 
-        been fixed.</p>
+        Improvements have been made in the formatting of C++11 uniform initializers (enclosed by brackets). The opening
+        bracket will not be space padded unless it is padded initially. The closing bracket will not be broken from the
+        final line unless it is broken initially. And the known problems with uniform initializers in class constructor
+        initializers have been fixed.
+    </p>
     <p>
-        The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to 
-        ASTYLE_NO_EXPORTS. It is sometimes needed for static libraries on other compilers to prevent error and warning 
-        messages.
+        The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to ASTYLE_NO_EXPORTS.
+        It is sometimes needed for static libraries on other compilers to prevent error and warning messages.
     </p>
     <p>
         Qt and Boost macros foreach, forever, Q_FOREACH, and Q_FOREVER will now be recognized as headers.
     </p>
     <p>
         The main documentation for Artistic Style is in HTML format. Until now there has not been a way to display it
-        from the astyle console program. A new option, "html" or "-!" will display the help documentation in the
-        default browser. This documentation is more complete than the astyle "help" option, it includes examples, and has
-        an index for easier navigation. Since astyle is typically run from a script this should allow an easy way to access
-        the documentation. The option is available only from the command line.
+        from the astyle console program. A new option, "html" or "-!" will display the help documentation in the default
+        browser. This documentation is more complete than the astyle "help" option. It includes examples, and has an index
+        for easier navigation. Since astyle is typically run from a script this should allow an easy way to access the
+        documentation. The option is available only from the command line.
     </p>
     <p>
         The new "html" option assumes the documentation is installed in the standard install path. This is /usr/share/doc/astyle/html
-        for Linux and the path %programfiles%\AStyle\doc for Windows. If it is installed to a different directory, use the variation
-        "html=&lt;actual_install_path&gt;astyle.html. This option can also be used to open other HTML
-        files. More information is in the "Command Line Only" section of the documentation.
+        for Linux and the path %programfiles%\AStyle\doc for Windows. If it is installed to a different directory, use
+        the variation "html=&lt;actual_install_path&gt;astyle.html. This option can also be used to open other HTML files.
+        More information is in the "Command Line Only" section of the documentation.
     </p>
     <p>
         The "html" option on Linux uses the script "xdg-open" from the install package "xdg-utils" to find the default
-        browser. This should be available on most systems. &nbsp;If it is not available on your system you can file a bug report
-        requesting a change. It would be helpful if you could determine how it is done before filing the report. You can
-        also file a bug report if the documentation is not installed to the above "default" directories. The HTML documentation
-        takes quite a bit of time to maintain and I would like to make it easily available.
+        browser. This should be available on most systems. &nbsp;If it is not available on your system you can file a
+        bug report requesting a change. It would be helpful if you could determine how it is done before filing the report.
+        You can also file a bug report if the documentation is not installed to the above "default" directories. The HTML
+        documentation takes quite a bit of time to maintain and I would like to make it easily available.
     </p>
     <p>
         The "help" option has been changed to send the output to stdout instead of stderr. This will allow piping and
@@ -84,14 +89,13 @@
         will page the display. The "version" option has also been changed to stdout.
     </p>
     <p>
-        A shared library error handler argument has been changed from &quot;char*&quot; to &quot;const char*&quot;. In some cases
-        this may 
-        cause compile errors until all references have been changed.
+        A shared library error handler argument has been changed from &quot;char*&quot; to &quot;const char*&quot;. In
+        some cases this may cause compile errors in a user program until all references have been changed.
     </p>
     <p>
-        The "Indent Style" topic on Wikipedia states that the "ANSI" style correctly refers to K&amp;R style brackets and not
-        Allman style as used by Artistic Style. The option "style=ansi" is therefore being depreciated and will be removed
-        in a future release. Use one of the other long options instead (style=allman, style=bsd, or style=break).
+        The "Indent Style" topic on Wikipedia states that the "ANSI" style correctly refers to K&amp;R style brackets
+        and not Allman style as used by Artistic Style. The option "style=ansi" is therefore being depreciated and will
+        be removed in a future release. Use one of the other long options instead (style=allman, style=bsd, or style=break).
     </p>
     <p>
         There are now build files available for Xcode on Mac. The makefile is still available for those who want it. Both
@@ -100,15 +104,17 @@
         been updated for both.
     </p>
     <p>
-        The Python Example in the Developer Information now supports Iron Python. The procedures are sometimes different since 
-        the ctypes module works differently. The example script documents the differences. If you use Python Tools for Visual 
-        Studio, it now installs in the Express editions (beginning with release 2.1 Beta). There is now a Visual Studio install for Node.js.</p>
+        The Python Example in the Developer Information now supports Iron Python. The procedures are sometimes different
+        since the ctypes module works differently. The example script documents the differences. If you use Python Tools
+        for Visual Studio, it now installs in the Express editions (beginning with release 2.1 Beta). Node.js can now
+        also be installed on Visual Studio Express..
+    </p>
     <p>
-        The executable in the Windows distribution package is now compiled with Visual Studio 2013 and will no longer work on 
-        XP. If you are using XP Artistic Style will need to be recompiled on the XP machine. </p>
+        The executable in the Windows distribution package is now compiled with Visual Studio 2013 and will no longer
+        work on XP. If you are using XP, Artistic Style will need to be recompiled on the XP machine.
+    </p>
     <p>
-        Thanks to Peter A. Bigot, HyungKi Jeong, David Faure, 
-        and Carl Moore for their contributions.
+        Thanks to Peter A. Bigot, HyungKi Jeong, David Faure, and Carl Moore for their contributions.
     </p>
 
     <h3>Artistic Style 2.04&nbsp; (November 2013)mber 2013)</h3>
@@ -343,8 +349,7 @@
         and references are now processed for C# files. See the "Release Notes" for more information and additional changes.
     </p>
 
-    <h4>
-        <strong>The following information is for the original 2.02 release.</strong></h4>
+    <h4><strong>The following information is for the original 2.02 release.</strong></h4>
 
     <h4>Translations</h4>
 
@@ -496,7 +501,8 @@
         Things that stand out to me in the multiple&#8209;choice sections:
     </p>
     <ul>
-        <li>The predefined styles and brackets options were each used about 50% each. That will change with this release.</li>
+        <li>The predefined styles and brackets options were each used about 50% each. That will change with this release.
+        </li>
         <li>Over 50% of the survey uses Artistic Style for Windows. I have been working for a couple of years on a new program
             based on wxWidgets. I will try to give this more priority in the future. </li>
         <li>Over 75% of the survey uses Artistic Style to format entire projects.</li>
@@ -522,8 +528,7 @@
         &nbsp;
     </p>
 
-    <h3>Artistic Style 2.01&nbsp; (November 2010)
-    </h3>
+    <h3>Artistic Style 2.01&nbsp; (November 2010)</h3>
 
     <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic

@@ -32,8 +32,10 @@
 
     <h1>Artistic Style 2.05</h1>
 
-    <h2>A Free, Fast and Small Automatic Formatter<br />
-        for C, C++, C++/CLI, Objective&#8209;C, C#, and Java Source Code</h2>
+    <h2>
+        A Free, Fast and Small Automatic Formatter<br />
+        for C, C++, C++/CLI, Objective&#8209;C, C#, and Java Source Code
+    </h2>
 
     <h3 id="Contents">Contents</h3>
 
@@ -51,6 +53,9 @@
     </p>
     <p class="contents1">
         <a class="contents" href="#_Options_File">Options&nbsp;File</a>
+    </p>
+    <p class="contents1">
+        <a class="contents" href="#_Disable_Formatting">Disable&nbsp;Formatting</a>
     </p>
     <p class="contents1">
         <a class="contents" href="#_Bracket_Style_Options">Bracket&nbsp;Style&nbsp;Options</a>
@@ -250,15 +255,17 @@
     </p>
 
     <h4>Other Considerations</h4>
+
     <p>
         The names of special characters used in programming vary by region. The terminology used by Artistic Style, 
         followed by other common names, is<strong>:</strong>
     </p>
     <blockquote>
-        brackets { } — also called  braces, curly brackets, or curly braces.<br />
-        parens ( ) — also called parentheses, brackets, round brackets, circle brackets, or soft brackets.<br />
-        block parens [ ] — also called brackets, square brackets, closed brackets, or hard brackets.<br />
-        angle brackets < > — also called brackets, pointy brackets, triangular brackets, diamond brackets, tuples, or chevrons.
+        brackets { } &#8209; also called  braces, curly brackets, or curly braces.<br />
+        parens ( ) &#8209; also called parentheses, brackets, round brackets, circle brackets, or soft brackets.<br />
+        block parens [ ] &#8209; also called brackets, square brackets, closed brackets, or hard brackets.<br />
+        angle brackets < > &#8209; also called brackets, pointy brackets, triangular brackets, diamond brackets, tuples,
+        or chevrons.
     </blockquote>
     <p>
         Artistic Style can format standard class library statements such as Open GL, wxWidgets, Qt, and MFC.
@@ -311,7 +318,7 @@
     </p>
     <p>
         Another way is to use one of the bracket styles described in the <a href="#_Bracket_Style_Options">Bracket Style 
-        Options</a> section. Select one with a bracket formatting style you like. If no indentation option is set, the 
+        Options</a> section. Select one with a bracket formatting style you like. If no indentation option is set, the
         default option of 4 spaces will be used. These options also break one line blocks and one line statements as 
         described above.
     </p>
@@ -444,6 +451,74 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <p>
         &nbsp;
     </p>
+
+    <hr />
+
+    <!--  * * * * * * * * * * * * *  Disable Formatting   * * * * * * * * * * * * *  -->
+
+    <h3 id="_Disable_Formatting">
+        Disable Formatting
+    </h3>
+
+    <p>
+        Formatting and indenting can be disabled with comment tags inserted in the source code.
+    </p>
+
+    <h4>
+        Disable Block
+    </h4>
+
+    <p>
+        Blocks of code can be disabled using &quot;off&quot; and &quot;on&quot; tags. The tags are included in the source
+        file as comments. The comment may be a C comment (/* ... */) or a C++ line comment (//). The tag must be included
+        in a single line comment. If the comment exceeds one line the indent tag will be ignored. Additional information
+        can be included with the tag.
+    </p>
+    <p>
+        The beginning tag is &quot;*INDENT-OFF*&quot; and the ending tag is &quot;*INDENT-ON*&quot;.
+        They may be used anywhere in the program with the following condition; parsing is partially disabled between the
+        tags. Disabling partial statements may result in incorrect formatting after the ending tag. If this happens expand
+        the tags to include additional code.
+    </p>
+    <div class="code">
+        <p class="code">
+            The following retains the format of a preprocessor define:
+        </p>
+        <pre>// *INDENT-OFF*
+#define FOO_DECLARE_int32_(name) \
+        FOO_API_ extern ::Int32 FOO_FLAG(name)
+// *INDENT-ON*</pre>
+    </div>
+
+    <h4>
+        Disable Line
+    </h4>
+
+    <p>
+        Artistic Style cannot always determine the usage of symbols with more than one meaning. For example an asterisk
+        (*) can be multiplication, a pointer, or a pointer dereference. The &quot;&amp;&quot; and &quot;&amp;&amp;&quot;
+        symbols are a similar
+        problem. 
+    </p>
+    <p>
+        If the symbol is not being padded, padding it manually will sometimes fix the problem. If it is being padded incorrectly,
+        then disabling the formatting may be necessary. To avoid having to use the &quot;disable block&quot; tags above,
+        a single line disable is available.
+    </p>
+    <p>
+        A line-end comment tag &quot;*NOPAD* will disable the &quot;pad-oper&quot;, &quot;align-pointer&quot;, and &quot;align-reference&quot;
+        options. Parsing does NOT stop and all other formatting will be applied to the line. The tag applies to the
+        one line only.
+    </p>
+    <div class="code">
+        <p class="code">
+            The following prevents the operator padding from being changed:
+        </p>
+        <pre>size_t foo = (unsigned int) -1;  // *NOPAD*</pre>
+    </div>
+    <p>
+        &nbsp;
+    </p>
     <hr />
 
     <!--  * * * * * * * * * * * *   Bracket Style Options    * * * * * * * * * * * *  -->
@@ -451,11 +526,13 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     <h3 id="_Bracket_Style_Options">Bracket Style Options</h3>
 
     <p>
-        Bracket Style options define the bracket style to use. All options default to 4 spaces per indent, indented with spaces.
+        Bracket Style options define the bracket style to use. All options default to 4 spaces per indent, indented with
+        spaces.
         By default, none of the styles indent namespaces. Other indentations are indicated in the individual style 
-        description. All options will break the brackets for one line blocks and will break one line statements. To change this
+        description. All options will break the brackets for one line blocks and will break one line statements. To change
+        this
         use the option <a href="#_keep-one-line-blocks">keep-one-line-blocks</a> and/or <a href="#_keep-one-line-statements">
-        keep-one-line-statements</a> described in the <a href="#_Formatting_Options">Formatting Options</a> section 
+            keep-one-line-statements</a> described in the <a href="#_Formatting_Options">Formatting Options</a> section
     </p>
     <p>
         &nbsp;
@@ -507,9 +584,9 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     </p>
     <p id="_style=kr">
         <code class="title">--style=kr / --style=k&amp;r / --style=k/r / -A3</code><br />
-        Kernighan &amp; Ritchie style uses linux brackets. Opening brackets are broken from namespaces,
-        classes, and function definitions. Brackets are attached to everything else including statements within a function,
-        arrays, structs, and enums.
+        Kernighan &amp; Ritchie style uses linux brackets. Opening brackets are broken from namespaces, classes, and function
+        definitions. Brackets are attached to everything else including statements within a function, arrays, structs,
+        and enums.
     </p>
     <p>
         Using the k&amp;r option may cause problems because of the &amp;. This can be resolved by enclosing the k&amp;r
@@ -531,9 +608,9 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     </p>
     <p id="_style=stroustrup">
         <code class="title">--style=stroustrup / -A4</code><br />
-        Stroustrup style uses stroustrup brackets. Brackets are broken from function definitions
-        only. Brackets are attached to everything else including namespaces, classes, and statements within a function, arrays,
-        structs, and enums. This style frequently is used with an indent of 5 spaces.
+        Stroustrup style uses stroustrup brackets. Brackets are broken from function definitions only. Brackets are attached
+        to everything else including namespaces, classes, and statements within a function, arrays, structs, and enums.
+        This style frequently is used with an indent of 5 spaces.
     </p>
     <div class="code">
         <pre>int Foo(bool isBar) 
@@ -551,9 +628,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     </p>
     <p id="_style=whitesmith">
         <code class="title">--style=whitesmith / -A5</code><br />
-        Whitesmith style uses broken, indented brackets. 
-        Switch blocks and class blocks are indented
-        to prevent a 'hanging indent' with following case statements and C++ class modifiers (public, private, protected).&nbsp;
+        Whitesmith style uses broken, indented brackets. Switch blocks and class blocks are indented to prevent a 'hanging
+        indent' with following case statements and C++ class modifiers (public, private, protected).&nbsp;
     </p>
     <div class="code">
         <pre>int Foo(bool isBar) 
@@ -573,9 +649,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
     </p>
     <p id="_style=vtk">
         <code class="title">--style=vtk / -A15</code><br />
-        VTK (Visualization Toolkit) style uses broken, indented brackets, except for the opening bracket. Switch blocks are indented
-        to prevent a 'hanging
-        indent' with following case statements.&nbsp;
+        VTK (Visualization Toolkit) style uses broken, indented brackets, except for the opening bracket. Switch blocks
+        are indented to prevent a 'hanging indent' with following case statements.&nbsp;
     </p>
     <div class="code">
         <pre>int Foo(bool isBar) 
@@ -865,7 +940,8 @@ indent-switches     <span class="comment"># cannot do this on the command line</
         &nbsp;
     </p>
     <p id="_indent=force-tab-x">
-        <code class="title">--indent=force-tab-x / --indent=force-tab-x=<span class="option">#</span> / -xT / -xT<span class="option">#</span></code><br />
+        <code class="title">--indent=force-tab-x / --indent=force-tab-x=<span class="option">#</span> / -xT / -xT<span
+            class="option">#</span></code><br />
         This force-tab option allows the tab length to be set to a length that is different than the indent length. This
         may cause the indentation to be <strong>a mix of both tabs and spaces.</strong> Tabs will be used to indent, if
         possible. If a tab indent cannot be used, spaces will be used instead.
@@ -1013,8 +1089,8 @@ public:
     <p id="_indent-modifiers">
         <code class="title">--indent-modifiers / -xG</code><br />
         Indent '<code>class</code>' and '<code>struct</code>' access modifiers, '<code>public:</code>', '<code>protected:</code>'
-        and '<code>private:</code>', one half indent. The rest of the class is not indented. This option is effective for
-        C++ files only. If used with indent&#8209;classes this option will be ignored.
+        and '<code>private:</code>', one half indent. The rest of the class is not indented. This option is effective
+        for C++ files only. If used with indent&#8209;classes this option will be ignored.
     </p>
     <div class="code">
         <pre>class Foo
@@ -1184,9 +1260,9 @@ error:
 
     <p id="_indent-preproc-block">
         <code class="title">--indent-preproc-block / -xW</code><br />
-        Indent preprocessor blocks at bracket level zero, and immediately within a namespace. There are restrictions on what
-        will be indented. Blocks within methods, classes, arrays, etc, will not be indented. Blocks containing brackets or multi-line
-        define statements will not be indented. Without this option the preprocessor block is not indented.
+        Indent preprocessor blocks at bracket level zero, and immediately within a namespace. There are restrictions on
+        what will be indented. Blocks within methods, classes, arrays, etc, will not be indented. Blocks containing brackets
+        or multi-line define statements will not be indented. Without this option the preprocessor block is not indented.
     </p>
     <div class="code">
         <pre>#ifdef _WIN32
@@ -1210,10 +1286,9 @@ error:
     <p>
         &nbsp;
     </p>
-
-        <p id="_indent-preproc-define">
-            <code class="title">--indent-preproc-define / -w</code><br />
-            Indent multi-line preprocessor definitions ending with a backslash. Should be used with --convert-tabs for proper
+    <p id="_indent-preproc-define">
+        <code class="title">--indent-preproc-define / -w</code><br />
+        Indent multi-line preprocessor definitions ending with a backslash. Should be used with --convert-tabs for proper
         results. Does a pretty good job, but cannot perform miracles in obfuscated preprocessor definitions. Without this
         option the preprocessor statements remain unchanged.
     </p>
@@ -2101,8 +2176,8 @@ else
     </p>
     <p id="_dry-run">
         <code class="title">--dry-run</code><br />
-        Perform a trial run with no changes made to the files.
-        The report will be output as usual.</p>
+        Perform a trial run with no changes made to the files. The report will be output as usual.
+    </p>
     <p id="_exclude">
         <code class="title">--exclude=<span class="option">####</span></code><br />
         Specify a file or sub directory #### to be excluded from processing.&nbsp;
@@ -2118,8 +2193,8 @@ else
         in a "python" subdirectory. You may proceed backwards in the directory tree to exclude only the required files.
     </p>
     <p>
-        Wildcards are NOT allowed. There may be more than one exclude statement. The file path and name may be placed in
-        double quotes (e.g. &#8209;&#8209;exclude="foo&nbsp;bar.cpp").
+        Wildcards are NOT allowed. There may be more than one exclude statement. The file path and name may be placed
+        in double quotes (e.g. &#8209;&#8209;exclude="foo&nbsp;bar.cpp").
     </p>
     <p id="_ignore-exclude-errors">
         <code class="title">--ignore-exclude-errors / -i</code><br />
@@ -2138,7 +2213,8 @@ else
     <p id="_errors-to-stdout">
         <code class="title">--errors-to-stdout / -X</code><br />
         Print errors to standard-output rather than to standard-error.<br />
-        This option should be helpful for systems/shells that do not have a separate output to standard-error, such as in Windows95.
+        This option should be helpful for systems/shells that do not have a separate output to standard-error, such as
+        in Windows95.
     </p>
     <p id="_preserve-date">
         <code class="title">--preserve-date / -Z</code><br />
@@ -2212,13 +2288,14 @@ else
     <p id="_html=">
         <code class="title">--html=<span class="option">####</span></code><br />
         Open a HTML help file in the default browser using the file path #### and quit. A HTML file other than "astyle.help"
-        may be specified. The path may include a directory path and a file name, or a file name only (e.g. html=install.html). If
-        only a file name is used it is assumed to be in the standard install path (/usr/share/doc/astyle/html
-        for Linux or %PROGRAMFILES%\AStyle\doc for Windows). In both cases the file name must include the html extension. File paths
-        containing spaces must be enclosed in quotes.
+        may be specified. The path may include a directory path and a file name, or a file name only (e.g. html=install.html).
+        If only a file name is used it is assumed to be in the standard install path (/usr/share/doc/astyle/html
+        for Linux or %PROGRAMFILES%\AStyle\doc for Windows). In both cases the file name must include the html extension.
+        File paths containing spaces must be enclosed in quotes.
     </p>
     <p>
-        On Linux the HTML file is opened using the script "xdg-open" from the install package "xdg-utils". This should be installed
+        On Linux the HTML file is opened using the script "xdg-open" from the install package "xdg-utils". This should
+        be installed
         by default on most distributions.
     </p>
     <p>

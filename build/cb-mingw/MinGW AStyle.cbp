@@ -54,7 +54,6 @@
 					<Add option="-Wmissing-declarations" />
 					<Add option="-Wmissing-include-dirs" />
 					<Add option="-Wswitch-enum" />
-					<Add option="-Wswitch-default" />
 					<Add option="-Wmain" />
 					<Add option="-pedantic" />
 					<Add option="-std=c++0x" />

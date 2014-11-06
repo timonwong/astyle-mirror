@@ -441,6 +441,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isPreprocessorConditionalCplusplus(const string &line) const;
 		bool isInPreprocessorUnterminatedComment(const string &line);
 		bool statementEndsWithComma(const string &line, int index) const;
+		string &getIndentedLineReturn(string &newLine, const string &originalLine) const;
 		string preLineWS(int lineIndentCount, int lineSpaceIndentCount) const;
 		template<typename T> void deleteContainer(T &container);
 		template<typename T> void initContainer(T &container, T value);
@@ -496,6 +497,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool isInDefine;
 		bool isInDefineDefinition;
 		bool classIndent;
+		bool isIndentModeOff;
 		bool isInClassHeader;			// is in a class before the opening bracket
 		bool isInClassHeaderTab;		// is in an indentable class header line
 		bool isInClassInitializer;		// is in a class after the ':' initializer
@@ -530,6 +532,8 @@ class ASBeautifier : protected ASResource, protected ASBase
 		bool lineBeginsWithOpenBracket;
 		bool lineBeginsWithCloseBracket;
 		bool lineBeginsWithComma;
+		bool lineIsCommentOnly;
+		bool lineIsLineCommentOnly;
 		bool shouldIndentBrackettedLine;
 		bool isInSwitch;
 		bool foundPreCommandHeader;
@@ -737,6 +741,7 @@ class ASFormatter : public ASBeautifier
 		bool isInSwitchStatement() const;
 		bool isNextCharOpeningBracket(int startChar) const;
 		bool isOkToBreakBlock(BracketType bracketType) const;
+		bool isOperatorPaddingDisabled() const;
 		bool pointerSymbolFollows() const;
 		int  getCurrentLineCommentAdjustment();
 		int  getNextLineCommentAdjustment();
@@ -816,9 +821,9 @@ class ASFormatter : public ASBeautifier
 		vector<bool>* structStack;
 		vector<bool>* questionMarkStack;
 
-		string readyFormattedLine;
 		string currentLine;
 		string formattedLine;
+		string readyFormattedLine;
 		string verbatimDelimiter;
 		const string* currentHeader;
 		const string* previousOperator;    // used ONLY by pad-oper
@@ -888,6 +893,7 @@ class ASFormatter : public ASBeautifier
 		bool isInTemplate;
 		bool doesLineStartComment;
 		bool lineEndsInCommentOnly;
+		bool lineIsCommentOnly;
 		bool lineIsLineCommentOnly;
 		bool lineIsEmpty;
 		bool isImmediatelyPostCommentOnly;
@@ -913,6 +919,7 @@ class ASFormatter : public ASBeautifier
 		bool endOfAsmReached;
 		bool endOfCodeReached;
 		bool lineCommentNoIndent;
+		bool isFormattingModeOff;
 		bool isInEnum;
 		bool isInExecSQL;
 		bool isInAsm;

@@ -195,6 +195,7 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	isInDefine = other.isInDefine;
 	isInDefineDefinition = other.isInDefineDefinition;
 	classIndent = other.classIndent;
+	isIndentModeOff = other.isIndentModeOff;
 	isInClassHeader = other.isInClassHeader;
 	isInClassHeaderTab = other.isInClassHeaderTab;
 	isInClassInitializer = other.isInClassInitializer;
@@ -228,6 +229,8 @@ ASBeautifier::ASBeautifier(const ASBeautifier &other) : ASBase(other)
 	lineBeginsWithOpenBracket = other.lineBeginsWithOpenBracket;
 	lineBeginsWithCloseBracket = other.lineBeginsWithCloseBracket;
 	lineBeginsWithComma = other.lineBeginsWithComma;
+	lineIsCommentOnly = other.lineIsCommentOnly;
+	lineIsLineCommentOnly = other.lineIsLineCommentOnly;
 	shouldIndentBrackettedLine = other.shouldIndentBrackettedLine;
 	isInSwitch = other.isInSwitch;
 	foundPreCommandHeader = other.foundPreCommandHeader;
@@ -338,6 +341,7 @@ void ASBeautifier::init(ASSourceIterator* iter)
 	isInStatement = false;
 	isInCase = false;
 	isInQuestion = false;
+	isIndentModeOff = false;
 	isInClassHeader = false;
 	isInClassHeaderTab = false;
 	isInClassInitializer = false;
@@ -389,6 +393,8 @@ void ASBeautifier::init(ASSourceIterator* iter)
 	lineBeginsWithOpenBracket = false;
 	lineBeginsWithCloseBracket = false;
 	lineBeginsWithComma = false;
+	lineIsCommentOnly = false;
+	lineIsLineCommentOnly = false;
 	shouldIndentBrackettedLine = true;
 	isInSwitch = false;
 	foundPreCommandHeader = false;
@@ -862,6 +868,8 @@ string ASBeautifier::beautify(const string &originalLine)
 	lineBeginsWithOpenBracket = false;
 	lineBeginsWithCloseBracket = false;
 	lineBeginsWithComma = false;
+	lineIsCommentOnly = false;
+	lineIsLineCommentOnly = false;
 	shouldIndentBrackettedLine = true;
 	isInAsmOneLine = false;
 	lineOpensWithLineComment = false;
@@ -918,6 +926,13 @@ string ASBeautifier::beautify(const string &originalLine)
 				lineBeginsWithCloseBracket = true;
 			else if (line[0] == ',')
 				lineBeginsWithComma = true;
+			else if (line.compare(0, 2, "//") == 0)
+				lineIsLineCommentOnly = true;
+			else if (line.compare(0, 2, "/*") == 0)
+			{
+				if (line.find("*/", 2) != string::npos)
+					lineIsCommentOnly = true;
+			}
 		}
 
 		isInHorstmannComment = false;
@@ -933,9 +948,15 @@ string ASBeautifier::beautify(const string &originalLine)
 		}
 	}
 
+	// When indent is OFF the lines must still be processed by ASBeautifier.
+	// Otherwise the lines immediately following may not be indented correctly.
+	if ((lineIsLineCommentOnly || lineIsCommentOnly)
+	        && line.find("*INDENT-OFF*", 0) != string::npos)
+		isIndentModeOff = true;
+
 	if (line.length() == 0)
 	{
-		if (backslashEndsPrevLine)  // must continue to clear variables
+		if (backslashEndsPrevLine)
 		{
 			backslashEndsPrevLine = false;
 			isInDefine = false;
@@ -958,10 +979,19 @@ string ASBeautifier::beautify(const string &originalLine)
 	        && line.length() > 0
 	        && line[0] != '#')
 	{
+		string indentedLine;
 		if (isInClassHeaderTab || isInClassInitializer)
-			return preLineWS(prevFinalLineIndentCount, prevFinalLineSpaceIndentCount) + line;
+		{
+			// parsing is turned off in ASFormatter by indent-off
+			// the originalLine will probably never be returned here
+			indentedLine = preLineWS(prevFinalLineIndentCount, prevFinalLineSpaceIndentCount) + line;
+			return getIndentedLineReturn(indentedLine, originalLine);
+		}
 		else
-			return preLineWS(preprocBlockIndent, 0) + line;
+		{
+			indentedLine = preLineWS(preprocBlockIndent, 0) + line;
+			return getIndentedLineReturn(indentedLine, originalLine);
+		}
 	}
 	if (!isInComment
 	        && !isInQuoteContinuation
@@ -995,10 +1025,11 @@ string ASBeautifier::beautify(const string &originalLine)
 				}
 				else
 					indentedLine = preLineWS(preprocBlockIndent, 0) + line;
-				return indentedLine;
+				return getIndentedLineReturn(indentedLine, originalLine);
 			}
 			if (shouldIndentPreprocConditional && preproc.length() > 0)
 			{
+				string indentedLine;
 				if (preproc.length() >= 2 && preproc.substr(0, 2) == "if") // #if, #ifdef, #ifndef
 				{
 					pair<int, int> entry;	// indentCount, spaceIndentCount
@@ -1007,23 +1038,27 @@ string ASBeautifier::beautify(const string &originalLine)
 					else
 						entry = computePreprocessorIndent();
 					preprocIndentStack->push_back(entry);
-					return preLineWS(preprocIndentStack->back().first,
-					                 preprocIndentStack->back().second) + line;
+					indentedLine = preLineWS(preprocIndentStack->back().first,
+					                         preprocIndentStack->back().second) + line;
+					return getIndentedLineReturn(indentedLine, originalLine);
 				}
 				else if (preproc == "else" || preproc == "elif")
 				{
 					if (preprocIndentStack->size() > 0)	// if no entry don't indent
-						return preLineWS(preprocIndentStack->back().first,
-						                 preprocIndentStack->back().second) + line;
+					{
+						indentedLine = preLineWS(preprocIndentStack->back().first,
+						                         preprocIndentStack->back().second) + line;
+						return getIndentedLineReturn(indentedLine, originalLine);
+					}
 				}
 				else if (preproc == "endif")
 				{
 					if (preprocIndentStack->size() > 0)	// if no entry don't indent
 					{
-						string indentedLine = preLineWS(preprocIndentStack->back().first,
-						                                preprocIndentStack->back().second) + line;
+						indentedLine = preLineWS(preprocIndentStack->back().first,
+						                         preprocIndentStack->back().second) + line;
 						preprocIndentStack->pop_back();
-						return indentedLine;
+						return getIndentedLineReturn(indentedLine, originalLine);
 					}
 				}
 			}
@@ -1041,16 +1076,15 @@ string ASBeautifier::beautify(const string &originalLine)
 		// and then remove it from the active beautifier stack and delete it.
 		if (!backslashEndsPrevLine && isInDefineDefinition && !isInDefine)
 		{
-			string beautifiedLine;
 			ASBeautifier* defineBeautifier;
 
 			isInDefineDefinition = false;
 			defineBeautifier = activeBeautifierStack->back();
 			activeBeautifierStack->pop_back();
 
-			beautifiedLine = defineBeautifier->beautify(line);
+			string indentedLine = defineBeautifier->beautify(line);
 			delete defineBeautifier;
-			return beautifiedLine;
+			return getIndentedLineReturn(indentedLine, originalLine);
 		}
 
 		// unless this is a multi-line #define, return this precompiler line as is.
@@ -1160,7 +1194,8 @@ string ASBeautifier::beautify(const string &originalLine)
 
 	// finally, insert indentations into beginning of line
 
-	string outBuffer = preLineWS(indentCount, spaceIndentCount) + line;
+	string indentedLine = preLineWS(indentCount, spaceIndentCount) + line;
+	indentedLine = getIndentedLineReturn(indentedLine, originalLine);
 
 	prevFinalLineSpaceIndentCount = spaceIndentCount;
 	prevFinalLineIndentCount = indentCount;
@@ -1168,7 +1203,18 @@ string ASBeautifier::beautify(const string &originalLine)
 	if (lastLineHeader != NULL)
 		previousLastLineHeader = lastLineHeader;
 
-	return outBuffer;
+	if ((lineIsLineCommentOnly || lineIsCommentOnly)
+	        && line.find("*INDENT-ON*", 0) != string::npos)
+		isIndentModeOff = false;
+
+	return indentedLine;
+}
+
+string &ASBeautifier::getIndentedLineReturn(string &newLine, const string &originalLine) const
+{
+	if (isIndentModeOff)
+		return const_cast<string &>(originalLine);
+	return newLine;
 }
 
 string ASBeautifier::preLineWS(int lineIndentCount, int lineSpaceIndentCount) const
