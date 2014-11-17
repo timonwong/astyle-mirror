@@ -1,8 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   astyle_main.cpp
  *
- *   Copyright (C) 2006-2013 by Jim Pattee <jimp03@email.com>
- *   Copyright (C) 1998-2002 by Tal Davidson
+ *   Copyright (C) 2014 by Jim Pattee
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
  *   This file is a part of Artistic Style - an indentation and
@@ -111,7 +110,7 @@ namespace astyle {
 	jmethodID g_mid;
 #endif
 
-const char* g_version = "2.05 beta";
+const char* g_version = "2.05";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -344,7 +343,7 @@ void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
 {
 	assert(lineEnd == LINEEND_WINDOWS || lineEnd == LINEEND_LINUX || lineEnd == LINEEND_MACOLD);
 	const string &inStr = out.str();	// avoids strange looking syntax
-	string outStr;						// the converted ouput
+	string outStr;						// the converted output
 	int inLength = inStr.length();
 	for (int pos = 0; pos < inLength; pos++)
 	{
@@ -1695,12 +1694,12 @@ void ASConsole::printHelp() const
 	cout << "    Indent preprocessor blocks at bracket level 0.\n";
 	cout << "    Without this option the preprocessor block is not indented.\n";
 	cout << endl;
-	cout << "    --indent-preproc-define  OR  -w\n";
-	cout << "    Indent multi-line preprocessor #define statements.\n";
-	cout << endl;
 	cout << "    --indent-preproc-cond  OR  -xw\n";
 	cout << "    Indent preprocessor conditional statements #if/#else/#endif\n";
 	cout << "    to the same level as the source code.\n";
+	cout << endl;
+	cout << "    --indent-preproc-define  OR  -w\n";
+	cout << "    Indent multi-line preprocessor #define statements.\n";
 	cout << endl;
 	cout << "    --indent-col1-comments  OR  -Y\n";
 	cout << "    Indent line comments that start in column one.\n";

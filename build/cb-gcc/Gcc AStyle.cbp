@@ -65,6 +65,7 @@
 					<Add option="-Wint-to-pointer-cast" />
 					<Add option="-Woverloaded-virtual" />
 					<Add option="-Wwrite-strings" />
+					<Add option="-Wno-switch-default" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 				</Compiler>

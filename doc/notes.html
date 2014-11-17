@@ -17,20 +17,20 @@
         &nbsp;
     </p>
 
-    <h3>Artistic Style 2.05&nbsp; (pending)</h3>
+    <h3>Artistic Style 2.05&nbsp; (November 2014)</h3>
 
     <ul>
-        <li>Add new bracket style option "style=vtk" (-A15) (#155).</li>
+        <li>Add new bracket style option "style=vtk" (#155).</li>
         <li>Add new option &quot;indent-preproc-block&quot; to indent blocks of preprocessor directives (#21, #114, #229,
             #242, #294).</li>
         <li>Add new option, "dry-run", to run AStyle without updating the files (#184, #285).</li>
         <li>Add new options, "html" (-!") and "html=###", to display the HTML help documentation in the default browser.
         </li>
-        <li>Add tags &quot;*INDENT-OFF*&quot; and &quot;*INDENT_ON*&quot; to disable formatting of source code blocks(2, 47,55,
-            78, 110, 176).</li>
+        <li>Add tags &quot;*INDENT-OFF*&quot; and &quot;*INDENT_ON*&quot; to disable formatting of source code blocks (#2, 
+            #47, #55,
+            #78, #110, #176).</li>
         <li>Add tag *NOPAD* to disable selected formatting on a single line.</li>
         <li>Add &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; to Linux exported functions.</li>
-        <li>Add ENUM_TYPE to BracketType as an addition to array bracket types.</li>
         <li>Remove option &quot;style=ansi&quot; and make it depreciated (#146).</li>
         <li>Remove fix for broken &#39;case&#39; statements from release 2.02.1, Nov 21, 2011.</li>
         <li>Improve Korean translation (#256).</li>
@@ -42,41 +42,43 @@
         <li>Change shared library error handler argument from &quot;char*&quot; to &quot;const char*&quot;.</li>
         <li>Fix not recognizing noexcept, interrupt, and autoreleasepool as pre-command headers (#225, #259).</li>
         <li>Fix formatting of C++11 uniform initializer brackets (#253, #257, #260, #284).</li>
+        <li>Fix to not automatically space pad C++11 uniform initializer brackets (#275).</li>
         <li>Fix formatting of enums with leading commas (#159, #179, #270).</li>
         <li>Fix formatting of logical &amp;&amp; operator in class initializers (#290).</li>
-        <li>Fix to not space pad C++11 uniform initializer brackets (#275).</li>
         <li>Fix flagging a &#39;const&#39; variable as a &#39;const&#39; method (#275).</li>
         <li>Fix piping and redirection adding an extra character to the output (#245, #252, #305). </li>
         <li>Fix "indent-modifiers" to attach class access modifiers to Horstmann style brackets. </li>
-        <li>Fix ASFormatter to correctly recognize the end of a raw string literal (#261).</li>
+        <li>Fix ASFormatter to correctly recognize the end of a C++ raw string literal (#261).</li>
         <li>Fix to recognize C++11 &quot;enum class&quot; as an enum (#303).</li>
         <li>Fix indent of C++11 &quot;noexecpt&quot; statements within a class (#260, #304).</li>
         <li>Fix not resetting templateDepth when a template was not found (#295).</li>
         <li>Fix formatting of multiplication in a block paren (#144).</li>
         <li>Fix whitespace padding when formatting an rvalue references (#297).</li>
-        <li>Fix to recognize an rvalue reference withhout a name (#265).</li>
+        <li>Fix to recognize an rvalue reference without a name (#265).</li>
         <li>Fix to not identify an operator overload method as a calculation (#296).</li>
-        <li>Fix concateneing multiplication with a pointer dereference (#291).</li>
+        <li>Fix 
+            <span style="font-size:12.0pt;line-height:115%;
+font-family:&quot;Times New Roman&quot;,&quot;serif&quot;;mso-fareast-font-family:&quot;Times New Roman&quot;;
+mso-ansi-language:EN-US;mso-fareast-language:EN-US;mso-bidi-language:AR-SA">concatenating</span> multiplication with a pointer dereference (#291).</li>
         <li>Fix recognition of a pointer dereference following a question mark (#213).</li>
         <li>Fix extra space after a trailing reference type (#300).</li>
         <li>Fix _asm blocks not being identified as a block opener and the variable not cleared on exit (#163).</li>
         <li>Fix indentation of line comments before a &quot;class&quot; opening bracket.</li>
         <li>Fix indentation of line comments before a &quot;namespace&quot; opening bracket.</li>
         <li>Fix isBracketType() method to correctly process a NULL_TYPE.</li>
-        <li>Fix unpad-paren to recognize additional variables(#43, #132, #143). </li>
+        <li>Fix unpad-paren to recognize additional variables (#43, #132, #143). </li>
         <li>Fix indentation of C# &quot;let&quot; statements.</li>
         <li>Fix a few omissions with &quot;fill-empty-lines&quot;.</li>
         <li>Fix file read to read 64K blocks of data.</li>
         <li>Refactor to un-obfuscate (clarify) the code, and improve design and decomposition::
             <ul>
                 <li>Extract class Utf8_16 from ASConsole. </li>
-                <li>Replace&nbsp; Linux dependency on iconv with a Utf8_16 class for ASLibrary.</li>
+                <li>Replace Linux dependency on iconv with a Utf8_16 class for ASLibrary.</li>
                 <li>Move global "using" statements to the astyle namespace in astyle.h and ASLocalizer.h. </li>
                 <li>Move shared library declarations from astyle.h to astyle_main.h.</li>
                 <li>Move indentable macros from ASEnhancer to ASResource and create static pairs.</li>
                 <li>Simplify ASBeautifier procedure to identify the colon (:) type.</li>
-                <li>Major refactoring in ASBeautifier to create separate variables for an enum, a class statement and a class initializer.<br />
-                    This was needed to fix the processing of C++11 uniform initializers in a class initializer.
+                <li>Major refactoring in ASBeautifier to create separate variables for an enum, a class statement and a class initializer.<br />This was needed to fix the processing of C++11 uniform initializers in a class initializer.
                 </li>
                 <li>Minor changes to ASFormatter and ASBeautifier based on results of the Clang analyzer. </li>
                 <li>Change several methods in astyle_main to &quot;const&quot;.</li>

@@ -1,8 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   astyle.h
- *
- *   Copyright (C) 2006-2013 by Jim Pattee <jimp03@email.com>
- *   Copyright (C) 1998-2002 by Tal Davidson
+
+ *   Copyright (C) 2014 by Jim Pattee
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
  *   This file is a part of Artistic Style - an indentation and
@@ -175,7 +174,7 @@ enum LineEndFormat
 //-----------------------------------------------------------------------------
 // Class ASSourceIterator
 // A pure virtual class is used by ASFormatter and ASBeautifier instead of
-// ASStreamIterator. This allows programs using AStyle as a plugin to define
+// ASStreamIterator. This allows programs using AStyle as a plug-in to define
 // their own ASStreamIterator. The ASStreamIterator class must inherit
 // this class.
 //-----------------------------------------------------------------------------

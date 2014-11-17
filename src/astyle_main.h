@@ -1,8 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   astyle_main.h
  *
- *   Copyright (C) 2006-2013 by Jim Pattee <jimp03@email.com>
- *   Copyright (C) 1998-2002 by Tal Davidson
+ *   Copyright (C) 2014 by Jim Pattee
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
  *   This file is a part of Artistic Style - an indentation and
@@ -418,14 +417,16 @@ class ASLibrary
 // they are called externally and are NOT part of the namespace
 //----------------------------------------------------------------------------
 #ifdef ASTYLE_JNI
-	void  STDCALL javaErrorHandler(int errorNumber, const char* errorMessage);
-	char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded);
-	// the following function names are constructed from method names in the calling java program
-	extern "C"  EXPORT
-	jstring STDCALL Java_AStyleInterface_AStyleGetVersion(JNIEnv* env, jclass);
-	extern "C"  EXPORT
-	jstring STDCALL Java_AStyleInterface_AStyleMain
-	(JNIEnv* env, jobject obj, jstring textInJava, jstring optionsJava);
+void  STDCALL javaErrorHandler(int errorNumber, const char* errorMessage);
+char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded);
+// the following function names are constructed from method names in the calling java program
+extern "C" EXPORT
+jstring STDCALL Java_AStyleInterface_AStyleGetVersion(JNIEnv* env, jclass);
+extern "C" EXPORT
+jstring STDCALL Java_AStyleInterface_AStyleMain(JNIEnv* env,
+                                                jobject obj,
+                                                jstring textInJava,
+                                                jstring optionsJava);
 #endif //  ASTYLE_JNI
 
 //----------------------------------------------------------------------------
@@ -433,9 +434,11 @@ class ASLibrary
 // they are called externally and are NOT part of the namespace
 //----------------------------------------------------------------------------
 #ifdef ASTYLE_LIB
-	extern "C"
-	EXPORT utf16_t* STDCALL AStyleMainUtf16
-	(const utf16_t* pSourceIn, const utf16_t* pOptions, fpError fpErrorHandler, fpAlloc fpMemoryAlloc);
+extern "C" EXPORT
+utf16_t* STDCALL AStyleMainUtf16(const utf16_t* pSourceIn,
+                                 const utf16_t* pOptions,
+                                 fpError fpErrorHandler,
+                                 fpAlloc fpMemoryAlloc);
 #endif	// ASTYLE_LIB
 
 //-----------------------------------------------------------------------------
@@ -443,11 +446,11 @@ class ASLibrary
 // they are called externally and are NOT part of the namespace
 //-----------------------------------------------------------------------------
 #ifdef ASTYLE_LIB
-	extern "C" EXPORT char* STDCALL AStyleMain(const char* sourceIn,
-	const char* optionsIn,
-	fpError errorHandler,
-	fpAlloc memoryAlloc);
-	extern "C" EXPORT const char* STDCALL AStyleGetVersion(void);
+extern "C" EXPORT char* STDCALL AStyleMain(const char* sourceIn,
+                                           const char* optionsIn,
+                                           fpError errorHandler,
+                                           fpAlloc memoryAlloc);
+extern "C" EXPORT const char* STDCALL AStyleGetVersion(void);
 #endif	// ASTYLE_LIB
 
 //-----------------------------------------------------------------------------

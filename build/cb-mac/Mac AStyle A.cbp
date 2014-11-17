@@ -25,6 +25,7 @@
 					<Add option="-Wno-exit-time-destructors" />
 					<Add option="-Wno-global-constructors" />
 					<Add option="-Wno-missing-variable-declarations" />
+					<Add option="-Wno-old-style-cast" />
 					<Add option="-Wno-padded" />
 					<Add option="-Wno-shorten-64-to-32" />
 					<Add option="-Wno-sign-conversion" />
@@ -51,6 +52,7 @@
 					<Add option="-Wno-exit-time-destructors" />
 					<Add option="-Wno-global-constructors" />
 					<Add option="-Wno-missing-variable-declarations" />
+					<Add option="-Wno-old-style-cast" />
 					<Add option="-Wno-padded" />
 					<Add option="-Wno-shorten-64-to-32" />
 					<Add option="-Wno-sign-conversion" />

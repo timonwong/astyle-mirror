@@ -75,7 +75,8 @@
     </p>
     <p>
         astyle_x.x_macosx.tar.gz is the <b>Mac OS X </b>version of Artistic Style. It contains the source code, documentation,
-        and a makefile. The Mac OS X Version compile instructions below give information for compiling the source code.
+        Xcode project files, and a makefile. The Mac OS X Version compile instructions below give information for compiling
+        the source code.
     </p>
     <p>
         astyle_x.x_windows.zip is the <b>Windows </b>version of Artistic Style. It contains the source code, documentation,
@@ -279,21 +280,20 @@
     <h4 id="_Xcode">Xcode</h4>
 
     <p>
-        AStyle workspace and project files for the Xcode development environment are available in the &quot;build/xcode&quot;
-        directory. They can be used to build a single project or all the projects. The project files have Debug
+        Artistic Style workspace and project files for the Xcode development environment are available in the &quot;build/xcode&quot;
+        directory. A workspace can be used to build a single project or all the projects. The project files have Debug
         and Release configurations. The following projects are available.
     </p>
     <ul>
         <li><b>AStyle</b> builds the Artistic Style command line program (astyle). </li>
         <li><b>AStyleA</b> builds the Artistic Style program as a Static Library (libastyle.a). This can be statically
             linked with an executable.</li>
-        <li><b>AStyleDylib</b> builds the Artistic Style program as a Dynamic Library (libastyle.dylib). The library is a
-            &quot;universal&quot; build. It will work with 32 and/or 64 bit executables and can be used with C/C++, Objective
-            C, C# and Python programs.</li>
-        <li><b>AStyleJava</b> builds the Artistic Style program as a Dynamic Library (libastylej.dylib) that can be called
-            from a Java program. The Java Development (JDK) is required for the project to compile. The Project Properties
-            must have an include path to the JDK include directory. The output dylib can also
-            be called from a C++ or C# program. This dynamic library is also a &quot;universal&quot; build.</li>
+        <li><b>AStyleDylib</b> builds the Artistic Style program as a Dynamic Library (libastyle.dylib). It can be used with C/C++, Objective
+            C, C#, and Python programs.</li>
+        <li><b>AStyleJava</b> builds the Artistic Style program as a Dynamic Library (libastylej.dylib) that can be called 
+            from a Java program. The Java Development (JDK) is required for the project to compile. The Project Properties 
+            must have an include path to the JDK include directory. The output dylib can also be called from a C++ or C# 
+            program.</li>
     </ul>
 
     <h5>install</h5>
@@ -305,7 +305,7 @@
         If sudo is not used for the install an error will occur during the build.
     </p>
     <p>
-        To install the astyle to the default directory:
+        To install the astyle executable to the default directory:
     </p>
     <pre>cd astyle/build/xcode
 sudo xcodebuild install -project AStyle.xcodeproj
@@ -419,9 +419,10 @@ sudo xcodebuild install -project AStyle.xcodeproj
 
     <p>
         No macro definitions are required to compile the executable. To compile as a static or shared (dynamic) library
-        define the macro ASTYLE_LIB. To compile a Java shared (dynamic) library define the macro ASTYLE_JNI. Then use
-        the appropriate compiler and linker options to compile the static or shared library. Add debug options to compile
-        the debug versions.
+        define the macro ASTYLE_LIB. To compile a Java shared (dynamic) library define the macro ASTYLE_JNI. The 
+        option ASTYLE_NO_EXPORTS is sometimes needed for static libraries to prevent compiler error and warning 
+        messages. Use the appropriate compiler and linker options to compile the static or shared library. Add debug
+        options to compile the debug versions.
     </p>
     <p>
         Artistic Style is a small program and it is best to optimize for speed. The debug configurations are not usually

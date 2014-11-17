@@ -1,8 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   ASBeautifier.cpp
  *
- *   Copyright (C) 2006-2013 by Jim Pattee <jimp03@email.com>
- *   Copyright (C) 1998-2002 by Tal Davidson
+ *   Copyright (C) 2014 by Jim Pattee
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
  *   This file is a part of Artistic Style - an indentation and
@@ -659,7 +658,7 @@ void ASBeautifier::setLabelIndent(bool state)
 
 /**
  * set the state of the preprocessor indentation option.
- * If true, multiline #define statements will be indented.
+ * If true, multi-line #define statements will be indented.
  *
  * @param   state             state of option.
  */
@@ -3192,7 +3191,7 @@ void ASBeautifier::parseCurrentLine(const string &line)
 					}
 				}
 
-				ch = ' '; // needed due to cases such as '}else{', so that headers ('else' tn tih case) will be identified...
+				ch = ' '; // needed due to cases such as '}else{', so that headers ('else' in this case) will be identified...
 			}	// ch == '}'
 
 			/*

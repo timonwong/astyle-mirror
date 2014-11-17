@@ -18,7 +18,7 @@
         &nbsp;
     </p>
 
-    <h3>Artistic Style 2.05&nbsp; (pending)</h3>
+    <h3>Artistic Style 2.05&nbsp; (November 2014)</h3>
 
     <p>
         A new bracket style option, &quot;style=vtk&quot;, has been added. It uses indented brackets, like Whitesmith,
@@ -27,8 +27,9 @@
     </p>
     <p>
         A new preprocessor indent option "indent-preproc-block" will indent preprocessor block statements one additional
-        indent. The block must be top-level (including within a namespace) and there are restrictions on what can be indented.
-        It is described in the "Indentation Options" section of the documentation.
+        indent. The block must be top-level, or included within a namespace, and there are restrictions on what can be
+        indented.
+        The option is described in the "Indentation Options" section of the documentation.
     </p>
     <p>
         A new option, "dry-run", will run Artistic Style without updating the files. The report will be output as usual.
@@ -36,7 +37,7 @@
     <p>
         Formatting of source code may now be disabled for portions of a program by embedding special comment tags in the
         program. These are described in a new &quot;Disable Formatting&quot; section of the documentation. They work the
-        same as in other formatters. There are tags to disable formatting for a block of code and a tag to disable formatting
+        same as in other formatters. There are tags to disable formatting for a block of code, and a tag to disable formatting
         of a single line. This should allow any custom formatting to be retained.
     </p>
     <p>
@@ -44,17 +45,17 @@
         versions of a shared library on the same system without conflicts.
     </p>
     <p>
-        An attribute &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; has been added to Linux exported functions.
-        This allows the option &quot;-fvisibility=hidden&quot; to be used on dynamic library compiles. According to the
-        GNU documentation, &quot;Using this feature can very substantially improve linking and load times of shared object
-        libraries, produce more optimized code, provide near-perfect API export and prevent symbol clashes. It is <strong>
-            strongly</strong> recommended that you use this in any shared objects you distribute.&quot;
+        An attribute &#39;__attribute__ ((visibility (&quot;default&quot;)))&#39; has been added to exported functions
+        on Linux shared libraries. This allows the option &quot;-fvisibility=hidden&quot; to be used on dynamic library
+        compiles. According to the GNU documentation, &quot;Using this feature can very substantially improve linking
+        and load times of shared object libraries, produce more optimized code, provide near-perfect API export and prevent
+        symbol clashes. It is strongly recommended that you use this in any shared objects you distribute.&quot;
     </p>
     <p>
         Improvements have been made in the formatting of C++11 uniform initializers (enclosed by brackets). The opening
         bracket will not be space padded unless it is padded initially. The closing bracket will not be broken from the
-        final line unless it is broken initially. And the known problems with uniform initializers in class constructor
-        initializers have been fixed.
+        final line unless it is broken initially. And the known problems with uniform initializers in class constructors
+        have been fixed.
     </p>
     <p>
         The Windows compiler definition ASTYLE_NO_VCX (no Visual Studio exports) has been changed to ASTYLE_NO_EXPORTS.
@@ -81,7 +82,7 @@
         browser. This should be available on most systems. &nbsp;If it is not available on your system you can file a
         bug report requesting a change. It would be helpful if you could determine how it is done before filing the report.
         You can also file a bug report if the documentation is not installed to the above "default" directories. The HTML
-        documentation takes quite a bit of time to maintain and I would like to make it easily available.
+        documentation takes quite a bit of effort to maintain and I would like to make it easily available.
     </p>
     <p>
         The "help" option has been changed to send the output to stdout instead of stderr. This will allow piping and
@@ -90,34 +91,47 @@
     </p>
     <p>
         A shared library error handler argument has been changed from &quot;char*&quot; to &quot;const char*&quot;. In
-        some cases this may cause compile errors in a user program until all references have been changed.
+        some cases this may cause compile errors in a user program until the references have been changed.
     </p>
     <p>
-        The "Indent Style" topic on Wikipedia states that the "ANSI" style correctly refers to K&amp;R style brackets
+        The "Indent Style" topic on Wikipedia states that the "ANSI" style refers to K&amp;R style brackets
         and not Allman style as used by Artistic Style. The option "style=ansi" is therefore being depreciated and will
         be removed in a future release. Use one of the other long options instead (style=allman, style=bsd, or style=break).
     </p>
     <p>
+        Some of the documentation has been removed from the distribution package. It still contains all files needed to
+        install and run Artistic Style. The included files can be used without an Internet connection.
+    </p>
+    <p>
         There are now build files available for Xcode on Mac. The makefile is still available for those who want it. Both
-        now use the LLVM Clang compiler and create 32-bit and 64-bit code for the dynamic libraries. There has been a
+        now use the LLVM Clang compiler. There has been a
         change to the makefile debug locations to make them similar to Xcode. The &quot;Install Instructions&quot; have
         been updated for both.
     </p>
     <p>
-        The Python Example in the Developer Information now supports Iron Python. The procedures are sometimes different
-        since the ctypes module works differently. The example script documents the differences. If you use Python Tools
-        for Visual Studio, it now installs in the Express editions (beginning with release 2.1 Beta). Node.js can now
-        also be installed on Visual Studio Express..
+        The Python Example in the Developer Information now supports Iron Python. The 
+        programming instructions are sometimes different since the ctypes module works differently. The example script
+        documents the differences. If you use Python Tools for Visual Studio, it now installs in the Express editions
+        (beginning with release 2.1). Node.js can also be installed in Visual Studio Express.
     </p>
     <p>
         The executable in the Windows distribution package is now compiled with Visual Studio 2013 and will no longer
         work on XP. If you are using XP, Artistic Style will need to be recompiled on the XP machine.
     </p>
     <p>
+        A new <a href="http://www.visualstudio.com/news/vs2013-community-vs" target="astyle" title="open new window">Visual
+            Studio Community Edition</a> has been released. It is free, combines all of the Express editions into a single
+        development environment, and allows the addition of Visual Studio extensions. There is an 
+        <a href="https://visualstudiogallery.msdn.microsoft.com/2f3f04cd-2866-4e47-a671-d1cc9cc3fb02" target="astyle" title="open new window">
+            AStyle Extension</a> available for installation. It has a graphic interface, adds menu entries, and can be
+        used from within Visual Studio. To install it search the &quot;Extensions and Updates&quot;, &quot;Online&quot;
+        entry for &quot;astyle&quot;.
+    </p>
+    <p>
         Thanks to Peter A. Bigot, HyungKi Jeong, David Faure, and Carl Moore for their contributions.
     </p>
 
-    <h3>Artistic Style 2.04&nbsp; (November 2013)mber 2013)</h3>
+    <h3>Artistic Style 2.04&nbsp; (November 2013)</h3>
 
     <p>
         With a new Artistic Style release some unchanged source files will be formatted because of changes to Artistic
@@ -136,10 +150,9 @@
     </p>
     <p>
         A new bracket style option, "style=google", has been added. It uses attached brackets and indents the class access
-        modifiers one-half indent.&nbsp; A complete description of the Google style is available at the <a href="https://code.google.com/p/google-styleguide/"
-            target="_blank" title="open new window">google&#8209;styleguide</a> website (https://code.google.com/p/google-styleguide/).
-        The website has standards for several programming languages along with a python program to verify the style and
-        an emacs script for using the style.
+        modifiers one-half indent.&nbsp; A complete description of the Google style is available at the google&#8209;styleguide
+        website (https://code.google.com/p/google-styleguide/). The website has standards for several programming languages
+        along with a python program to verify the style and an emacs script for using the style.
     </p>
     <p>
         A new indent option "indent-modifiers" will indent class access modifiers (public, protected, or 'private) one-half

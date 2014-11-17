@@ -1,8 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *   ASFormatter.cpp
  *
- *   Copyright (C) 2006-2013 by Jim Pattee <jimp03@email.com>
- *   Copyright (C) 1998-2002 by Tal Davidson
+ *   Copyright (C) 2014 by Jim Pattee
  *   <http://www.gnu.org/licenses/lgpl-3.0.html>
  *
  *   This file is a part of Artistic Style - an indentation and
@@ -821,7 +820,7 @@ string ASFormatter::nextLine()
 			checkIfTemplateOpener();
 		}
 
-		// handle parenthesies
+		// handle parens
 		if (currentChar == '(' || currentChar == '[' || (isInTemplate && currentChar == '<'))
 		{
 			questionMarkStack->push_back(foundQuestionMark);
@@ -4607,7 +4606,7 @@ void ASFormatter::formatRunIn()
 }
 
 /**
- * remove whitepace and add indentation for an array run-in.
+ * remove whitespace and add indentation for an array run-in.
  */
 void ASFormatter::formatArrayRunIn()
 {
@@ -4738,7 +4737,7 @@ bool ASFormatter::isOkToBreakBlock(BracketType bracketType) const
 }
 
 /**
-* check if a sharp header is a paren or nonparen header
+* check if a sharp header is a paren or non-paren header
 */
 bool ASFormatter::isSharpStyleWithParen(const string* header) const
 {
@@ -5231,7 +5230,7 @@ void ASFormatter::formatLineCommentOpener()
 		}
 	}
 
-	// explicitely break a line when a line comment's end is found.
+	// explicitly break a line when a line comment's end is found.
 	if (charNum + 1 == (int) currentLine.length())
 	{
 		isInLineBreak = true;
@@ -5827,6 +5826,7 @@ bool ASFormatter::isIndentablePreprocessorBlock(string  &firstLine, size_t index
 	bool blockContainsDefineContinuation = false;
 	bool isInClassConstructor = false;
 	int  numBlockIndents = 0;
+	int  lineParenCount = 0;
 	string nextLine_ = firstLine.substr(index);
 
 	// find end of the block, bypassing all comments and quotes.
@@ -5900,7 +5900,7 @@ bool ASFormatter::isIndentablePreprocessorBlock(string  &firstLine, size_t index
 				{
 					if (numBlockIndents > 0)
 						numBlockIndents -= 1;
-					// must exit BOTH loops here
+					// must exit BOTH loops
 					if (numBlockIndents == 0)
 						goto EndOfWhileLoop;
 				}
@@ -5914,7 +5914,11 @@ bool ASFormatter::isIndentablePreprocessorBlock(string  &firstLine, size_t index
 			// handle exceptions
 			if (nextLine_[i] == '{' || nextLine_[i] == '}')
 				blockContainsBrackets = true;
-			if (nextLine_[i] == ':')
+			else if (nextLine_[i] == '(')
+				++lineParenCount;
+			else if (nextLine_[i] == ')')
+				--lineParenCount;
+			else if (nextLine_[i] == ':')
 			{
 				// check for '::'
 				if (nextLine_.length() > i && nextLine_[i + 1] == ':')
@@ -5922,17 +5926,22 @@ bool ASFormatter::isIndentablePreprocessorBlock(string  &firstLine, size_t index
 				else
 					isInClassConstructor = true;
 			}
-			// bypass unnecessary parsing
+			// bypass unnecessary parsing - must exit BOTH loops
 			if (blockContainsBrackets || isInClassConstructor || blockContainsDefineContinuation)
-				i = nextLine_.length();
+				goto EndOfWhileLoop;
 		}	// end of for loop, end of line
+		if (lineParenCount != 0)
+			break;
 	}	// end of while loop
 EndOfWhileLoop:
 	preprocBlockEnd = sourceIterator->tellg();
 	if (preprocBlockEnd < 0)
 		preprocBlockEnd = sourceIterator->getStreamLength();
-	if (blockContainsBrackets || isInClassConstructor
-	        || blockContainsDefineContinuation || numBlockIndents != 0)
+	if (blockContainsBrackets
+	        || isInClassConstructor
+	        || blockContainsDefineContinuation
+	        || lineParenCount != 0
+	        || numBlockIndents != 0)
 		isInIndentableBlock = false;
 	// find next executable instruction
 	// this WILL RESET the get pointer
