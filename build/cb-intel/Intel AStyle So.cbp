@@ -2,20 +2,21 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Intel Astyle So" />
+		<Option title="Intel AStyle So" />
 		<Option pch_mode="2" />
 		<Option compiler="icc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/libastyle-2.05d.so" prefix_auto="0" extension_auto="0" />
+				<Option output="bin/libastyle-2.06d.so" prefix_auto="0" extension_auto="0" />
 				<Option object_output="objSo/Debug/" />
 				<Option type="3" />
 				<Option compiler="icc" />
 				<Compiler>
 					<Add option="-fno-rtti" />
 					<Add option="-Wall" />
-					<Add option="-w3" />
 					<Add option="-g" />
+					<Add option="-w3" />
+					<Add option="-Wextra" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fPIC" />
 					<Add option="-fvisibility=hidden" />
@@ -23,10 +24,11 @@
 				</Compiler>
 				<Linker>
 					<Add option="-static-intel" />
+					<Add option="-wd10237" />
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/libastyle-2.05.so" prefix_auto="0" extension_auto="0" />
+				<Option output="bin/libastyle-2.06.so" prefix_auto="0" extension_auto="0" />
 				<Option object_output="objSo/Release/" />
 				<Option type="3" />
 				<Option compiler="icc" />
@@ -35,6 +37,7 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-w3" />
+					<Add option="-Wextra" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fPIC" />
 					<Add option="-fvisibility=hidden" />
@@ -44,6 +47,7 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="-static-intel" />
+					<Add option="-wd10237" />
 				</Linker>
 			</Target>
 		</Build>

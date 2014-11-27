@@ -1310,7 +1310,8 @@ string ASFormatter::nextLine()
 			if (findKeyword(currentLine, charNum, AS_OPERATOR))
 				isImmediatelyPostOperator = true;
 
-			if (findKeyword(currentLine, charNum, AS_ENUM))
+			if (findKeyword(currentLine, charNum, AS_ENUM)
+			        && currentLine.find('(') == string::npos)
 				isInEnum = true;
 
 			if (isCStyle()
@@ -3867,9 +3868,9 @@ void ASFormatter::formatPointerOrReferenceCast(void)
 	}
 	else
 		appendSequence(sequenceToInsert, false);
-	// remove trailing whitespace if paren or comma follow
+	// remove trailing whitespace if comma follows
 	char nextChar = peekNextChar();
-	if (nextChar == ')' || nextChar == ',')
+	if (nextChar == ',')
 	{
 		while (isWhiteSpace(currentLine[charNum + 1]))
 		{

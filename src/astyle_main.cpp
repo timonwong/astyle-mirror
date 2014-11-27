@@ -110,7 +110,7 @@ namespace astyle {
 	jmethodID g_mid;
 #endif
 
-const char* g_version = "2.05";
+const char* g_version = "2.06 beta";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -2179,10 +2179,6 @@ void ASConsole::standardizePath(string &path, bool removeBeginningSeparator /*fa
 			break;
 		path[i] = g_fileSeparator;
 	}
-//  The following was removed in release 2.02 - jimp
-//	// remove separator from the end
-//	if (path[path.length()-1] == g_fileSeparator)
-//		path.erase(path.length()-1, 1);
 	// remove beginning separator if requested
 	if (removeBeginningSeparator && (path[0] == g_fileSeparator))
 		path.erase(0, 1);
@@ -3182,9 +3178,12 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 #endif
 }	// End of parseOption function
 
+// Parse options from the options file.
 void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
 {
 	char ch;
+	bool isInQuote = false;
+	char quoteChar = ' ';
 	string currentToken;
 
 	while (in)
@@ -3204,17 +3203,27 @@ void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
 						break;
 				}
 
-			// break options on spaces, tabs, commas, or new-lines
-			if (in.eof() || ch == ' ' || ch == '\t' || ch == ',' || ch == '\n' || ch == '\r')
+			// break options on new-lines, tabs, commas, or spaces
+			// remove quotes from output
+			if (in.eof() || ch == '\n' || ch == '\r' || ch == '\t' || ch == ',')
 				break;
-			else
-				currentToken.append(1, ch);
-
+			if (ch == ' ' && !isInQuote)
+				break;
+			if (ch == quoteChar && isInQuote)
+				break;
+			if (ch == '"' || ch == '\'')
+			{
+				isInQuote = true;
+				quoteChar = ch;
+				continue;
+			}
+			currentToken.append(1, ch);
 		}
 		while (in);
 
 		if (currentToken.length() != 0)
 			optionsVector.push_back(currentToken);
+		isInQuote = false;
 	}
 }
 

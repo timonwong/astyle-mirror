@@ -122,8 +122,8 @@ astyle:  $(OBJ)
 	strip $(bindir)/$@
 	@ echo
 
-shared:  libastyle-2.05.$(dylib)
-libastyle-2.05.$(dylib):  $(OBJs)
+shared:  libastyle-2.06.$(dylib)
+libastyle-2.06.$(dylib):  $(OBJs)
 	@ mkdir -p $(bindir)
 	$(CXX) $(dynamiclib) $(LDFLAGSr) $(UNIVFLAGS) -o $(bindir)/$@ $^
 	@ echo
@@ -134,8 +134,8 @@ libastyle.a:  $(OBJa)
 	ar crs $(bindir)/$@ $^
 	@ echo
 
-java:  libastyle-2.05j.$(dylib)
-libastyle-2.05j.$(dylib):  $(OBJsj)
+java:  libastyle-2.06j.$(dylib)
+libastyle-2.06j.$(dylib):  $(OBJsj)
 	@ mkdir -p $(bindir)
 	$(CXX) $(dynamiclib) $(LDFLAGSr) $(UNIVFLAGS) -o $(bindir)/$@ $^
 	@ echo

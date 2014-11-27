@@ -18,9 +18,11 @@
 					<Add option="-g" />
 					<Add option="-fno-exceptions" />
 					<Add option="-w3" />
+					<Add option="-Wextra" />
 				</Compiler>
 				<Linker>
 					<Add option="-static-intel" />
+					<Add option="-wd10237" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -33,13 +35,15 @@
 					<Add option="-fno-rtti" />
 					<Add option="-O3" />
 					<Add option="-Wall" />
-					<Add option="-w3" />
 					<Add option="-fno-exceptions" />
+					<Add option="-w3" />
+					<Add option="-Wextra" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
 					<Add option="-static-intel" />
+					<Add option="-wd10237" />
 				</Linker>
 			</Target>
 		</Build>
