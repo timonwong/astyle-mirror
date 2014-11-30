@@ -2720,7 +2720,8 @@ bool ASFormatter::isPointerOrReference() const
 	        && nextChar == '*')
 		return false;
 
-	if (isPointerOrReferenceVariable(lastWord))
+	if ((foundCastOperator && nextChar == '>')
+	        || isPointerOrReferenceVariable(lastWord))
 		return true;
 
 	if (isInClassInitializer
@@ -3416,8 +3417,9 @@ void ASFormatter::padOperators(const string* newOperator)
 	                           || previousNonWSChar == ','))
 	                  && !(newOperator == &AS_PLUS && isInExponent())
 	                  && !isCharImmediatelyPostOperator
-	                  && !((newOperator == &AS_MULT || newOperator == &AS_BIT_AND || newOperator == &AS_AND)
-	                       && isPointerOrReference())
+//?                   // commented out in release 2.06 - doesn't seem to do anything???
+//x                   && !((newOperator == &AS_MULT || newOperator == &AS_BIT_AND || newOperator == &AS_AND)
+//x                        && isPointerOrReference())
 	                  && !(newOperator == &AS_MULT
 	                       && (previousNonWSChar == '.'
 	                           || previousNonWSChar == '>'))    // check for ->
