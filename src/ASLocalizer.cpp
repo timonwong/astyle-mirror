@@ -170,7 +170,7 @@ void ASLocalizer::setLanguageFromLCID(size_t lcid)
 	size_t sublang = SUBLANGID(LANGIDFROMLCID(m_lcid));
 	// find language in the wlc table
 	size_t count = sizeof(wlc) / sizeof(wlc[0]);
-	for (size_t i = 0; i < count; i++ )
+	for (size_t i = 0; i < count; i++)
 	{
 		if (wlc[i].winLang == lang)
 		{
@@ -307,7 +307,7 @@ void ASLocalizer::setTranslationClass()
 void Translation::addPair(const string &english, const wstring &translated)
 // Add a string pair to the translation vector.
 {
-	pair<string, wstring> entry (english, translated);
+	pair<string, wstring> entry(english, translated);
 	m_translation.push_back(entry);
 }
 

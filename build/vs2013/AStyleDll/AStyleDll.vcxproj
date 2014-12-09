@@ -94,42 +94,42 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)debug\</OutDir>
-    <TargetName>AStyle-2.06d</TargetName>
+    <TargetName>AStyle-2.05.1d</TargetName>
     <TargetExt>.dll</TargetExt>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)\debug\</OutDir>
-    <TargetName>AStyle-2.06d</TargetName>
+    <TargetName>AStyle-2.05.1d</TargetName>
     <TargetExt>.dll</TargetExt>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <TargetName>AStyle-2.06</TargetName>
+    <TargetName>AStyle-2.05.1</TargetName>
     <TargetExt>.dll</TargetExt>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Platform)\bin\</OutDir>
-    <TargetName>AStyle-2.06</TargetName>
+    <TargetName>AStyle-2.05.1</TargetName>
     <TargetExt>.dll</TargetExt>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">
     <OutDir>$(SolutionDir)binstatic\</OutDir>
-    <TargetName>AStyle-2.06</TargetName>
+    <TargetName>AStyle-2.05.1</TargetName>
     <TargetExt>.dll</TargetExt>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Static|x64'">
     <OutDir>$(SolutionDir)$(Platform)\binstatic\</OutDir>
-    <TargetName>AStyle-2.06</TargetName>
+    <TargetName>AStyle-2.05.1</TargetName>
     <TargetExt>.dll</TargetExt>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>

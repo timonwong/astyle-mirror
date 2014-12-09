@@ -462,7 +462,7 @@ class ASBeautifier : protected ASResource, protected ASBase
 		vector<int>* waitingBeautifierStackLengthStack;
 		vector<int>* activeBeautifierStackLengthStack;
 		vector<const string*>* headerStack;
-		vector< vector<const string*>* >* tempStacks;
+		vector<vector<const string*>* >* tempStacks;
 		vector<int>* blockParenDepthStack;
 		vector<bool>* blockStatementStack;
 		vector<bool>* parenStatementStack;
@@ -721,7 +721,7 @@ class ASFormatter : public ASBeautifier
 		bool isClosingHeader(const string* header) const;
 		bool isCurrentBracketBroken() const;
 		bool isDereferenceOrAddressOf() const;
-		bool isExecSQL(string  &line, size_t index) const;
+		bool isExecSQL(string &line, size_t index) const;
 		bool isEmptyLine(const string &line) const;
 		bool isExternC() const;
 		bool isNextWordSharpNonParenHeader(int startChar) const;
@@ -731,8 +731,8 @@ class ASFormatter : public ASBeautifier
 		bool isPointerOrReferenceCentered() const;
 		bool isPointerOrReferenceVariable(string &word) const;
 		bool isSharpStyleWithParen(const string* header) const;
-		bool isStructAccessModified(string  &firstLine, size_t index) const;
-		bool isIndentablePreprocessorBlock(string  &firstLine, size_t index);
+		bool isStructAccessModified(string &firstLine, size_t index) const;
+		bool isIndentablePreprocessorBlock(string &firstLine, size_t index);
 		bool isUnaryOperator() const;
 		bool isUniformInitializerBracket() const;
 		bool isImmediatelyPostCast() const;

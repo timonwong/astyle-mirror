@@ -99,12 +99,12 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Static|x64'">false</LinkIncremental>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AStyle-2.06jd</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AStyle-2.06jd</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AStyle-2.06j</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">AStyle-2.06j</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AStyle-2.06j</TargetName>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Static|x64'">AStyle-2.06j</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AStyle-2.05.1jd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AStyle-2.05.1jd</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AStyle-2.05.1j</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Static|Win32'">AStyle-2.05.1j</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AStyle-2.05.1j</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Static|x64'">AStyle-2.05.1j</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

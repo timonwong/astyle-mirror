@@ -7,7 +7,7 @@
 		<Option compiler="embarcadero_compiler_680" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/AStyle-2.06d.dll" prefix_auto="0" extension_auto="0" />
+				<Option output="bin/AStyle-2.05.1d.dll" prefix_auto="0" extension_auto="0" />
 				<Option object_output="objDll/Debug/" />
 				<Option type="3" />
 				<Option compiler="embarcadero_compiler_680" />
@@ -26,7 +26,7 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/AStyle-2.06.dll" prefix_auto="0" extension_auto="0" />
+				<Option output="bin/AStyle-2.05.1.dll" prefix_auto="0" extension_auto="0" />
 				<Option object_output="objDll/Release/" />
 				<Option type="3" />
 				<Option compiler="embarcadero_compiler_680" />

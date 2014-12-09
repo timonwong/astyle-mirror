@@ -110,7 +110,7 @@ namespace astyle {
 	jmethodID g_mid;
 #endif
 
-const char* g_version = "2.06 beta";
+const char* g_version = "2.05.1";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -162,7 +162,7 @@ template<typename T>
 string ASStreamIterator<T>::nextLine(bool emptyLineWasDeleted)
 {
 	// verify that the current position is correct
-	assert (peekStart == 0);
+	assert(peekStart == 0);
 
 	// a deleted line may be replaced if break-blocks is requested
 	// this sets up the compare to check for a replaced empty line
@@ -246,7 +246,7 @@ string ASStreamIterator<T>::nextLine(bool emptyLineWasDeleted)
 template<typename T>
 string ASStreamIterator<T>::peekNextLine()
 {
-	assert (hasMoreLines());
+	assert(hasMoreLines());
 	string nextLine_;
 	char ch;
 
@@ -654,6 +654,10 @@ vector<string> ASConsole::getFileOptionsVector() const
 { return fileOptionsVector; }
 
 // for unit testing
+bool ASConsole::getFilesAreIdentical() const
+{ return filesAreIdentical; }
+
+// for unit testing
 int ASConsole::getFilesFormatted() const
 { return filesFormatted; }
 
@@ -774,7 +778,7 @@ FileEncoding ASConsole::readFile(const string &fileName_, stringstream &in) cons
 			size_t utf8Len = utf8_16.Utf16ToUtf8(data, dataSize, isBigEndian, firstBlock, utf8Out);
 			assert(utf8Len == utf8Size);
 			in << string(utf8Out, utf8Len);
-			delete []utf8Out;
+			delete [] utf8Out;
 		}
 		else
 			in << string(data, dataSize);
@@ -854,15 +858,14 @@ void ASConsole::displayLastError()
 {
 	LPSTR msgBuf;
 	DWORD lastError = GetLastError();
-	FormatMessage(
-	    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-	    NULL,
-	    lastError,
-	    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  // Default language
-	    (LPSTR) &msgBuf,
-	    0,
-	    NULL
-	);
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+	              NULL,
+	              lastError,
+	              MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  // Default language
+	              (LPSTR) &msgBuf,
+	              0,
+	              NULL
+	             );
 	// Display the string.
 	(*_err) << "Error (" << lastError << ") " << msgBuf << endl;
 	// Free the buffer.
@@ -1354,7 +1357,7 @@ void ASConsole::getFilePaths(string &filePath)
 
 	// check filename for wildcards
 	hasWildcard = false;
-	if (targetFilename.find_first_of( "*?") != string::npos)
+	if (targetFilename.find_first_of("*?") != string::npos)
 		hasWildcard = true;
 
 	// clear exclude hits vector
@@ -2139,15 +2142,15 @@ void ASConsole::standardizePath(string &path, bool removeBeginningSeparator /*fa
 	fab.fab$b_fns = 0;
 	fab.fab$l_naml = &naml;
 	naml = cc$rms_naml;
-	strcpy (sess, path.c_str());
+	strcpy(sess, path.c_str());
 	naml.naml$l_long_filename = (char*)sess;
 	naml.naml$l_long_filename_size = path.length();
 	naml.naml$l_long_expand = less;
-	naml.naml$l_long_expand_alloc = sizeof (less);
+	naml.naml$l_long_expand_alloc = sizeof(less);
 	naml.naml$l_esa = sess;
-	naml.naml$b_ess = sizeof (sess);
+	naml.naml$b_ess = sizeof(sess);
 	naml.naml$v_no_short_upcase = 1;
-	r0_status = sys$parse (&fab);
+	r0_status = sys$parse(&fab);
 	if (r0_status == RMS$_SYN)
 	{
 		error("File syntax error", path.c_str());
@@ -2167,7 +2170,7 @@ void ASConsole::standardizePath(string &path, bool removeBeginningSeparator /*fa
 	}
 	else
 	{
-		path = decc$translate_vms (sess);
+		path = decc$translate_vms(sess);
 	}
 #endif /* __VMS */
 
@@ -2394,7 +2397,7 @@ void ASConsole::writeFile(const string &fileName_, FileEncoding encoding, ostrin
 		                                      out.str().length(), isBigEndian, utf16Out);
 		assert(utf16Len == utf16Size);
 		fout << string(utf16Out, utf16Len);
-		delete []utf16Out;
+		delete [] utf16Out;
 	}
 	else
 		fout << out.str();
@@ -2478,7 +2481,7 @@ utf16_t* ASLibrary::formatUtf16(const utf16_t* pSourceIn,		// the source to be f
 // The data will be converted before being returned to the calling program.
 char* STDCALL ASLibrary::tempMemoryAllocation(unsigned long memoryNeeded)
 {
-	char* buffer = new(nothrow) char [memoryNeeded];
+	char* buffer = new(nothrow) char[memoryNeeded];
 	return buffer;
 }
 
@@ -3604,7 +3607,7 @@ void STDCALL javaErrorHandler(int errorNumber, const char* errorMessage)
 char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded)
 {
 	// error condition is checked after return from AStyleMain
-	char* buffer = new(nothrow) char [memoryNeeded];
+	char* buffer = new(nothrow) char[memoryNeeded];
 	return buffer;
 }
 #endif	// ASTYLE_JNI
