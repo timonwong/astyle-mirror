@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="DMars AStyle Lib" />
+		<Option pch_mode="2" />
+		<Option compiler="dmc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/AStyled.lib" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="objLib/Debug/" />
+				<Option type="2" />
+				<Option compiler="dmc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DASTYLE_LIB" />
+				</Compiler>
+				<Linker>
+					<Add option="-p64" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/AStyle.lib" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="objLib/Release/" />
+				<Option type="2" />
+				<Option compiler="dmc" />
+				<Compiler>
+					<Add option="-o" />
+					<Add option="-DNDEBUG" />
+					<Add option="-DASTYLE_LIB" />
+				</Compiler>
+				<Linker>
+					<Add option="-p64" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-w-" />
+		</Compiler>
+		<Unit filename="../../src/ASBeautifier.cpp" />
+		<Unit filename="../../src/ASEnhancer.cpp" />
+		<Unit filename="../../src/ASFormatter.cpp" />
+		<Unit filename="../../src/ASResource.cpp" />
+		<Unit filename="../../src/astyle.h" />
+		<Unit filename="../../src/astyle_main.cpp" />
+		<Unit filename="../../src/astyle_main.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

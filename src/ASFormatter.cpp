@@ -3428,7 +3428,7 @@ void ASFormatter::padOperators(const string* newOperator)
 	                           || previousNonWSChar == ','))
 	                  && !(newOperator == &AS_PLUS && isInExponent())
 	                  && !isCharImmediatelyPostOperator
-//?                   // commented out in release 2.06 - doesn't seem to do anything???
+//?                   // commented out in release 2.05.1 - doesn't seem to do anything???
 //x                   && !((newOperator == &AS_MULT || newOperator == &AS_BIT_AND || newOperator == &AS_AND)
 //x                        && isPointerOrReference())
 	                  && !(newOperator == &AS_MULT
